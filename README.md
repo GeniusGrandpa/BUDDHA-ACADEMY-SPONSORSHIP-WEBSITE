@@ -57,7 +57,7 @@ Every page is lazy-loaded via `React.lazy()` + `Suspense` with a spinner fallbac
 ### Supabase Layer
 
 - **Client**: Singleton `getSupabaseClient()` with PKCE auth, auto-refresh, and typed queries via generated `Database` types
-- **Services**: One file per domain (`src/services/payments.ts`, `design.ts`, `content.ts`, `students.ts`, etc.) — each imports `getSupabaseClient()` locally
+- **Services**: One file per domain (`src/services/payments.ts`, `design.ts`, `content.ts`, `students.ts`, etc.) each imports `getSupabaseClient()` locally
 - **Auth**: Users stored in `auth.users` (Supabase managed); profiles in `public.profiles` table linked by UUID; role assigned via `admin_toggle_role` RPC
 - **Storage**: Buckets for `media` (CMS uploads), `payment-screenshots`, `payment-qr-codes`
 - **Row Level Security**: All tables have RLS policies; self-role-escalation is prevented at the DB level
@@ -82,7 +82,7 @@ Permissions are defined as a static map (`DEFAULT_ROLE_PERMISSIONS: Role -> Perm
 
 ### Payment System (Khalti / eSewa / Mobile Banking)
 
-No external SDKs — uses a manual confirmation + admin verification workflow:
+No external SDKs , it uses a manual confirmation + admin verification workflow:
 
 1. **DonationForm** lets the user select amount, frequency, and optional student sponsorship.
 2. **PaymentModal** displays active gateways (QR codes, account details) from the `payment_settings` table.
@@ -135,7 +135,7 @@ Each dashboard is a self-contained feature directory under `src/features/`:
 ### Supabase Integration
 
 - **Singleton client** with PKCE auth flow, auto-refresh, and type-safe queries via generated `Database` types.
-- **Service layer** — each domain (payments, content, design) has its own service file that calls `getSupabaseClient()` locally.
+- **Service layer** each domain (payments, content, design) has its own service file that calls `getSupabaseClient()` locally.
 - **Row Level Security** on all tables with self-role-escalation prevention.
 - Audit logging on all admin actions via `logAuditEvent()`.
 
