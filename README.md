@@ -102,17 +102,17 @@ Design tokens are stored as JSONB in the `design_settings` Supabase table with a
 
 Two approaches for content management:
 
-- **Dynamic page builder** — `DynamicPage` component fetches a `pages` row by slug, renders each `PageBlock` through `BlockRenderer` (16 block types: hero, text, image, gallery, cta, donation, student_cards, testimonials, faq, stats, timeline, video, partners, announcements, custom_section). Blocks are reorderable, have visibility toggles, and store content as JSONB.
-- **Structured static pages** — `AdminPageEditor` provides form-based editing for predefined pages (about, contact, volunteer, privacy, terms) using a `PAGE_META` config per page.
-- **Homepage editor** — section-based editor for homepage sections (hero, stats, features, cta) from the `homepage_sections` table.
-- **Dedicated managers** for news, gallery, video, testimonials, student stories, FAQs, partners, announcements, navigation, media library, and transparency content — all following the same pattern: query Supabase table → render form → persist with audit logging.
+- **Dynamic page builder**`DynamicPage` component fetches a `pages` row by slug, renders each `PageBlock` through `BlockRenderer` (16 block types: hero, text, image, gallery, cta, donation, student_cards, testimonials, faq, stats, timeline, video, partners, announcements, custom_section). Blocks are reorderable, have visibility toggles, and store content as JSONB.
+- **Structured static pages** `AdminPageEditor` provides form-based editing for predefined pages (about, contact, volunteer, privacy, terms) using a `PAGE_META` config per page.
+- **Homepage editor** section-based editor for homepage sections (hero, stats, features, cta) from the `homepage_sections` table.
+- **Dedicated managers** for news, gallery, video, testimonials, student stories, FAQs, partners, announcements, navigation, media library, and transparency content all following the same pattern: query Supabase table → render form → persist with audit logging.
 
 ### Internationalization
 
 Hybrid approach:
 
-- **Manual dictionary** — `LanguageContext` provides a `t(key)` function that looks up ~50 UI string keys from hardcoded dictionaries for English, Nepali, and Hindi. Falls back to English, then the raw key.
-- **Google Translate** — for all other languages, the app dynamically loads Google Translate's widget, sets the `googtrans` cookie, and programmatically triggers translation.
+- **Manual dictionary** `LanguageContext` provides a `t(key)` function that looks up ~50 UI string keys from hardcoded dictionaries for English, Nepali, and Hindi. Falls back to English, then the raw key.
+- **Google Translate** for all other languages, the app dynamically loads Google Translate's widget, sets the `googtrans` cookie, and programmatically triggers translation.
 - RTL support for Arabic, Persian, Hebrew, and Urdu.
 - Language preference persisted to `localStorage`.
 
