@@ -15,7 +15,7 @@ Browser ──▶ React SPA ──▶ Services Layer ──▶ Supabase (Postgre
                 └── Hooks (usePayment, useRole...)
 ```
 
-The app is a single-page application (Vite + React) that communicates directly with Supabase — no custom backend server. Every service file (`src/services/*.ts`) calls `getSupabaseClient()` to make authenticated requests. Supabase enforces Row Level Security on all tables and provides Auth (PKCE flow), PostgreSQL, and file storage.
+The app is a single-page application (Vite + React) that communicates directly with Supabase no custom backend server. Every service file (`src/services/*.ts`) calls `getSupabaseClient()` to make authenticated requests. Supabase enforces Row Level Security on all tables and provides Auth (PKCE flow), PostgreSQL, and file storage.
 
 ### Component Hierarchy
 
