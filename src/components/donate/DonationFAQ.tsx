@@ -40,11 +40,63 @@ const faqs = [
   },
 ]
 
+function FaqItem({
+  faq,
+  isOpen,
+  onToggle,
+  index,
+}: {
+  faq: { question: string; answer: string }
+  isOpen: boolean
+  onToggle: () => void
+  index: number
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: index * 0.04 }}
+      className="rounded-xl border border-amber-200 bg-warm-50 overflow-hidden"
+    >
+      <button
+        type="button"
+        onClick={onToggle}
+        className="w-full flex items-center justify-between px-5 py-4 text-left"
+      >
+        <span className="text-sm font-medium text-slate-900 pr-4">
+          {faq.question}
+        </span>
+        <ChevronDown
+          className={`w-4 h-4 text-gray-600 shrink-0 transition-transform duration-200 ${
+            isOpen ? 'rotate-180' : ''
+          }`}
+        />
+      </button>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <p className="px-5 pb-4 text-sm text-gray-600 leading-relaxed">
+              {faq.answer}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  )
+}
+
 export function DonationFAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
   return (
-    <section className="py-16 sm:py-20 bg-[#fffaf5]">
+    <section className="py-16 sm:py-20 bg-warm-50">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -53,7 +105,7 @@ export function DonationFAQ() {
           transition={{ duration: 0.5 }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl sm:text-4xl font-light text-[#0f172a] mb-4">
+          <h2 className="text-3xl sm:text-4xl font-light text-slate-900 mb-4">
             Frequently Asked{' '}
             <span className="font-medium text-amber-600">Questions</span>
           </h2>
@@ -63,49 +115,15 @@ export function DonationFAQ() {
         </motion.div>
 
         <div className="space-y-3">
-          {faqs.map((faq, index) => {
-            const isOpen = openIndex === index
-            return (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.04 }}
-                className="rounded-xl border border-amber-200 bg-warm-50 overflow-hidden"
-              >
-                <button
-                  onClick={() => setOpenIndex(isOpen ? null : index)}
-                  className="w-full flex items-center justify-between px-5 py-4 text-left"
-                  aria-expanded={isOpen}
-                >
-                  <span className="text-sm font-medium text-[#0f172a] pr-4">
-                    {faq.question}
-                  </span>
-                  <ChevronDown
-                    className={`w-4 h-4 text-gray-600 flex-shrink-0 transition-transform duration-200 ${
-                      isOpen ? 'rotate-180' : ''
-                    }`}
-                  />
-                </button>
-                <AnimatePresence>
-                  {isOpen && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="overflow-hidden"
-                    >
-                      <p className="px-5 pb-4 text-sm text-gray-600 leading-relaxed">
-                        {faq.answer}
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            )
-          })}
+          {faqs.map((faq, index) => (
+            <FaqItem
+              key={index}
+              faq={faq}
+              index={index}
+              isOpen={openIndex === index}
+              onToggle={() => setOpenIndex(openIndex === index ? null : index)}
+            />
+          ))}
         </div>
       </div>
     </section>

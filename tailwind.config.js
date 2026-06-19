@@ -18,7 +18,7 @@ export default {
           950: '#3e1308',
         },
         warm: {
-          50: '#fdfbf7',
+          50: '#fffaf5',
           100: '#faf6ee',
           200: '#f5edd9',
           300: '#eddfb8',
