@@ -1,0 +1,147 @@
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { Button } from '../components/ui/Button'
+import { getHomepageSection } from '../services/content'
+
+interface StepItem { num: string; title: string; desc: string }
+
+export function SponsorshipPage() {
+  const [sponsorshipData, setSponsorshipData] = useState<{ title?: string; description?: string; steps?: StepItem[] }>({})
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    loadContent()
+  }, [])
+
+  const loadContent = async () => {
+    try {
+      const section = await getHomepageSection('sponsorship_steps')
+      if (section?.content) {
+        setSponsorshipData(section.content as { title?: string; description?: string; steps?: StepItem[] })
+      }
+    } catch {
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const heroTitle = 'Sponsor a Child'
+  const heroDesc = 'Your sponsorship provides education, meals, healthcare, and hope to a child in need. Change a life today.'
+  const steps = sponsorshipData?.steps || [
+    { num: '01', title: 'Browse Student Profiles', desc: 'Explore profiles of children waiting for sponsorship. Each profile includes their background, needs, and dreams for the future.' },
+    { num: '02', title: 'Choose a Child to Sponsor', desc: 'Select a student whose story resonates with you. Consider their age, grade, and personal circumstances.' },
+    { num: '03', title: 'Select Your Sponsorship Level', desc: "Choose a monthly contribution amount that works for you. Every amount makes a difference in a child's life." },
+    { num: '04', title: 'Complete the Sponsorship Form', desc: "Fill out our secure form with your information. We'll link your sponsorship to your chosen child." },
+    { num: '05', title: 'Receive Welcome Package', desc: "Get a welcome kit with your sponsored child's photo, profile, and information about their community." },
+    { num: '06', title: 'Build a Connection', desc: 'Exchange letters and messages with your sponsored child. Watch them grow and thrive with your support.' },
+    { num: '07', title: 'Get Progress Updates', desc: "Receive regular updates on your child's academic progress, health, and personal development." },
+    { num: '08', title: 'See Your Impact', desc: "Track how your contribution is making a real difference in your sponsored child's life." },
+    { num: '09', title: 'Transform a Life', desc: 'Your ongoing support helps break the cycle of poverty and creates lasting change for generations.' },
+  ]
+  const sectionTitle = sponsorshipData?.title || 'How Sponsorship Works'
+  const sectionDesc = sponsorshipData?.description || "Follow these simple steps to start your sponsorship journey and change a child's life."
+  const benefits = [
+    'Provide quality education',
+    'Ensure nutritious meals',
+    'Access to healthcare',
+    'Safe learning environment',
+    'Educational materials',
+    'Character development',
+  ]
+
+  if (loading) return <div className="text-center py-12 text-gray-400">Loading...</div>
+
+  return (
+    <div>
+      <section className="relative py-24 bg-gradient-to-br from-amber-500 to-orange-600 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+              {heroTitle}
+            </h1>
+            <p className="text-xl text-amber-100 leading-relaxed">
+              {heroDesc}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+                Make a Lasting Impact
+              </h2>
+              <p className="text-gray-600 mb-6 leading-relaxed">
+                When you sponsor a child, you're not just providing financial support – you're giving them the opportunity to learn, grow, and build a better future for themselves and their community.
+              </p>
+              <p className="text-gray-600 mb-6 leading-relaxed">
+                Your monthly contribution covers school fees, books, uniforms, meals, and healthcare. You'll receive regular updates and can even exchange letters with your sponsored child.
+              </p>
+              <div className="bg-amber-50 rounded-lg p-6">
+                <h3 className="font-semibold text-gray-900 mb-4">Your Sponsorship Provides:</h3>
+                <ul className="space-y-2">
+                  {benefits.map((benefit, idx) => (
+                    <li key={idx} className="flex items-center gap-2 text-gray-700">
+                      <span>{benefit}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            <div>
+              <img
+                src="https://images.pexels.com/photos/8471831/pexels-photo-8471831.jpeg?auto=compress&cs=tinysrgb&w=800"
+                alt="Happy students"
+                className="rounded-lg shadow-xl"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-24 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              {sectionTitle}
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              {sectionDesc}
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {steps.map((step, idx) => (
+                <div key={idx} className="relative bg-warm-50 rounded-lg shadow-md p-8 hover:shadow-lg transition-shadow">
+                  <div className="absolute top-0 right-0 w-16 h-16 bg-amber-50 rounded-bl-full" />
+                  <div className="text-5xl font-bold text-amber-100 mb-3">{step.num}</div>
+                  <div className="mb-2">
+                    <h3 className="font-semibold text-gray-900">{step.title}</h3>
+                  </div>
+                  <p className="text-gray-600 text-sm">{step.desc}</p>
+                </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-24 bg-[#1E2A38] text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">
+            Ready to Change a Life?
+          </h2>
+          <p className="text-gray-300 max-w-2xl mx-auto mb-8">
+            Browse our student profiles and find a child to sponsor. Your sponsorship can transform their future.
+          </p>
+          <Link to="/students">
+            <Button size="lg">
+              Browse Student Profiles
+            </Button>
+          </Link>
+        </div>
+      </section>
+    </div>
+  )
+}

@@ -1,0 +1,47 @@
+CREATE OR REPLACE FUNCTION public.admin_toggle_role(target_user_id uuid, new_role text)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  calling_user_role text;
+BEGIN
+
+  SELECT role INTO calling_user_role
+  FROM public.profiles
+  WHERE id = auth.uid();
+
+  IF calling_user_role IS DISTINCT FROM 'admin' THEN
+    RAISE EXCEPTION 'Only admins can change user roles';
+  END IF;
+
+  
+  IF new_role NOT IN ('donor', 'admin') THEN
+    RAISE EXCEPTION 'Invalid role: %', new_role;
+  END IF;
+
+
+  UPDATE auth.users
+  SET raw_user_meta_data =
+    raw_user_meta_data || jsonb_build_object('role', new_role)
+  WHERE id = target_user_id;
+
+  
+  UPDATE public.profiles
+  SET role = new_role, updated_at = now()
+  WHERE id = target_user_id;
+END;
+$$;
+
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
+
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
+CREATE POLICY "Users can update own profile"
+  ON public.profiles FOR UPDATE
+  TO authenticated
+  USING (auth.uid() = id)
+  WITH CHECK (
+    auth.uid() = id AND
+    role = (SELECT role FROM public.profiles WHERE id = auth.uid())
+  );

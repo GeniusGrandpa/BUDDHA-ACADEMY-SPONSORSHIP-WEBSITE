@@ -1,0 +1,284 @@
+/* eslint-disable react-refresh/only-export-components */
+import { lazy, Suspense } from 'react'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
+import { ProtectedRoute } from './components/ProtectedRoute'
+import { Layout } from './layout/Layout'
+import { useAuth } from './context/AuthContext'
+
+
+function LazyPage({ Component }: { Component: React.LazyExoticComponent<React.ComponentType> }) {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600" /></div>}>
+      <Component />
+    </Suspense>
+  )
+}
+
+
+const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })))
+
+const AboutPage = lazy(() => import('./pages/AboutPage').then(m => ({ default: m.AboutPage })))
+
+const SponsorshipPage = lazy(() => import('./pages/SponsorshipPage').then(m => ({ default: m.SponsorshipPage })))
+
+const StudentsPage = lazy(() => import('./pages/StudentsPage').then(m => ({ default: m.StudentsPage })))
+
+const StudentDetailPage = lazy(() => import('./pages/StudentDetailPage').then(m => ({ default: m.StudentDetailPage })))
+
+const GalleryPage = lazy(() => import('./pages/GalleryPage').then(m => ({ default: m.GalleryPage })))
+
+const NewsPage = lazy(() => import('./pages/NewsPage').then(m => ({ default: m.NewsPage })))
+
+const ContactPage = lazy(() => import('./pages/ContactPage').then(m => ({ default: m.ContactPage })))
+
+const DonatePage = lazy(() => import('./pages/DonatePage').then(m => ({ default: m.DonatePage })))
+
+const TransparencyPage = lazy(() => import('./pages/TransparencyPage').then(m => ({ default: m.TransparencyPage })))
+
+const FAQPage = lazy(() => import('./pages/FAQPage').then(m => ({ default: m.FAQPage })))
+
+const VolunteerPage = lazy(() => import('./pages/VolunteerPage').then(m => ({ default: m.VolunteerPage })))
+
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage').then(m => ({ default: m.PrivacyPage })))
+
+const TermsPage = lazy(() => import('./pages/TermsPage').then(m => ({ default: m.TermsPage })))
+
+const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })))
+
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage').then(m => ({ default: m.ForgotPasswordPage })))
+
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage').then(m => ({ default: m.ResetPasswordPage })))
+
+const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage').then(m => ({ default: m.AuthCallbackPage })))
+
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })))
+
+const DashboardPage = lazy(() => import('./features/donor-dashboard/pages/DashboardPage').then(m => ({ default: m.DashboardPage })))
+
+const CampaignsPage = lazy(() => import('./pages/CampaignsPage').then(m => ({ default: m.CampaignsPage })))
+
+const SuccessStoriesPage = lazy(() => import('./pages/SuccessStoriesPage').then(m => ({ default: m.SuccessStoriesPage })))
+
+const ActivityPage = lazy(() => import('./pages/ActivityPage').then(m => ({ default: m.ActivityPage })))
+
+const DonationHistoryPage = lazy(() => import('./pages/DonationHistoryPage').then(m => ({ default: m.DonationHistoryPage })))
+
+const AdminLayout = lazy(() => import('./pages/admin/AdminLayout').then(m => ({ default: m.AdminLayout })))
+
+const AdminStudentsPage = lazy(() => import('./pages/admin/AdminStudentsPage').then(m => ({ default: m.AdminStudentsPage })))
+
+const AdminDonationsPage = lazy(() => import('./pages/admin/AdminDonationsPage').then(m => ({ default: m.AdminDonationsPage })))
+
+const AdminNewsPage = lazy(() => import('./pages/admin/AdminNewsPage').then(m => ({ default: m.AdminNewsPage })))
+
+const AdminGalleryPage = lazy(() => import('./pages/admin/AdminGalleryPage').then(m => ({ default: m.AdminGalleryPage })))
+
+const AdminContactsPage = lazy(() => import('./pages/admin/AdminContactsPage').then(m => ({ default: m.AdminContactsPage })))
+
+const AdminDonorsPage = lazy(() => import('./pages/admin/AdminDonorsPage').then(m => ({ default: m.AdminDonorsPage })))
+
+const AdminPaymentVerificationPage = lazy(() => import('./pages/admin/AdminPaymentVerificationPage').then(m => ({ default: m.AdminPaymentVerificationPage })))
+
+const AdminPaymentSettingsPage = lazy(() => import('./pages/admin/AdminPaymentSettingsPage').then(m => ({ default: m.AdminPaymentSettingsPage })))
+
+const AdminEventsPage = lazy(() => import('./pages/admin/AdminEventsPage').then(m => ({ default: m.AdminEventsPage })))
+
+const AdminNotificationsPage = lazy(() => import('./pages/admin/AdminNotificationsPage').then(m => ({ default: m.AdminNotificationsPage })))
+
+const AdminReportsPage = lazy(() => import('./pages/admin/AdminReportsPage').then(m => ({ default: m.AdminReportsPage })))
+
+const SuperAdminLayout = lazy(() => import('./pages/super-admin/SuperAdminLayout').then(m => ({ default: m.SuperAdminLayout })))
+
+const SuperAdminUsersPage = lazy(() => import('./pages/super-admin/SuperAdminUsersPage').then(m => ({ default: m.SuperAdminUsersPage })))
+
+const SuperAdminRolesPage = lazy(() => import('./pages/super-admin/SuperAdminRolesPage').then(m => ({ default: m.SuperAdminRolesPage })))
+
+const SuperAdminAuditLogsPage = lazy(() => import('./pages/super-admin/SuperAdminAuditLogsPage').then(m => ({ default: m.SuperAdminAuditLogsPage })))
+
+const SuperAdminNotificationsPage = lazy(() => import('./pages/super-admin/SuperAdminNotificationsPage').then(m => ({ default: m.SuperAdminNotificationsPage })))
+
+const SuperAdminDashboard = lazy(() => import('./pages/admin/dashboards/SuperAdminDashboard').then(m => ({ default: m.SuperAdminDashboard })))
+
+const FinanceDashboard = lazy(() => import('./pages/admin/dashboards/FinanceDashboard').then(m => ({ default: m.FinanceDashboard })))
+
+const SponsorshipDashboard = lazy(() => import('./pages/admin/dashboards/SponsorshipDashboard').then(m => ({ default: m.SponsorshipDashboard })))
+
+const VolunteerDashboard = lazy(() => import('./pages/admin/dashboards/VolunteerDashboard').then(m => ({ default: m.VolunteerDashboard })))
+
+const TeacherDashboard = lazy(() => import('./pages/teacher/TeacherDashboard').then(m => ({ default: m.TeacherDashboard })))
+
+const AdminContentDashboard = lazy(() => import('./pages/admin/cms/AdminContentDashboard').then(m => ({ default: m.AdminContentDashboard })))
+
+const AdminHomepageEditor = lazy(() => import('./pages/admin/cms/AdminHomepageEditor').then(m => ({ default: m.AdminHomepageEditor })))
+
+const AdminContentGallery = lazy(() => import('./pages/admin/cms/AdminContentGallery').then(m => ({ default: m.AdminContentGallery })))
+
+const AdminVideoManager = lazy(() => import('./pages/admin/cms/AdminVideoManager').then(m => ({ default: m.AdminVideoManager })))
+
+const AdminContentTestimonials = lazy(() => import('./pages/admin/cms/AdminContentTestimonials').then(m => ({ default: m.AdminContentTestimonials })))
+
+const AdminContentNews = lazy(() => import('./pages/admin/cms/AdminContentNews').then(m => ({ default: m.AdminContentNews })))
+
+const AdminStudentStories = lazy(() => import('./pages/admin/cms/AdminStudentStories').then(m => ({ default: m.AdminStudentStories })))
+
+const AdminTransparencyContent = lazy(() => import('./pages/admin/cms/AdminTransparencyContent').then(m => ({ default: m.AdminTransparencyContent })))
+
+const AdminFaqManager = lazy(() => import('./pages/admin/cms/AdminFaqManager').then(m => ({ default: m.AdminFaqManager })))
+
+const AdminMediaLibrary = lazy(() => import('./pages/admin/cms/AdminMediaLibrary').then(m => ({ default: m.AdminMediaLibrary })))
+
+const AdminPageEditor = lazy(() => import('./pages/admin/cms/AdminPageEditor').then(m => ({ default: m.AdminPageEditor })))
+
+const AdminVersionHistory = lazy(() => import('./pages/admin/cms/AdminVersionHistory').then(m => ({ default: m.AdminVersionHistory })))
+
+const AdminContentAnalytics = lazy(() => import('./pages/admin/cms/AdminContentAnalytics').then(m => ({ default: m.AdminContentAnalytics })))
+
+const AdminSiteSettings = lazy(() => import('./pages/admin/cms/AdminSiteSettings').then(m => ({ default: m.AdminSiteSettings })))
+
+const AdminNavigationManager = lazy(() => import('./pages/admin/cms/AdminNavigationManager').then(m => ({ default: m.AdminNavigationManager })))
+
+const AdminAnnouncements = lazy(() => import('./pages/admin/cms/AdminAnnouncements').then(m => ({ default: m.AdminAnnouncements })))
+
+const AdminPartners = lazy(() => import('./pages/admin/cms/AdminPartners').then(m => ({ default: m.AdminPartners })))
+
+const AdminDesignDashboard = lazy(() => import('./pages/admin/design/AdminDesignDashboard').then(m => ({ default: m.AdminDesignDashboard })))
+const AdminBrandingPage = lazy(() => import('./pages/admin/design/AdminBrandingPage').then(m => ({ default: m.AdminBrandingPage })))
+const AdminColorsPage = lazy(() => import('./pages/admin/design/AdminColorsPage').then(m => ({ default: m.AdminColorsPage })))
+const AdminTypographyPage = lazy(() => import('./pages/admin/design/AdminTypographyPage').then(m => ({ default: m.AdminTypographyPage })))
+const AdminLayoutPage = lazy(() => import('./pages/admin/design/AdminLayoutPage').then(m => ({ default: m.AdminLayoutPage })))
+const AdminComponentsPage = lazy(() => import('./pages/admin/design/AdminComponentsPage').then(m => ({ default: m.AdminComponentsPage })))
+const AdminConfigPage = lazy(() => import('./pages/admin/design/AdminConfigPage').then(m => ({ default: m.AdminConfigPage })))
+const AdminThemePresetsPage = lazy(() => import('./pages/admin/design/AdminThemePresetsPage').then(m => ({ default: m.AdminThemePresetsPage })))
+
+
+function AdminIndexRedirect() {
+  const { profile } = useAuth()
+  if (!profile) return <LazyPage Component={SuperAdminDashboard} />
+  if (profile.role === 'finance_manager') {
+    return <Navigate to="/admin/finance" replace />
+  }
+  return <LazyPage Component={SuperAdminDashboard} />
+}
+
+export const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Layout />,
+    errorElement: <LazyPage Component={NotFoundPage} />,
+    children: [
+      { index: true, element: <LazyPage Component={HomePage} /> },
+      { path: 'about', element: <LazyPage Component={AboutPage} /> },
+      { path: 'sponsor', element: <LazyPage Component={SponsorshipPage} /> },
+      { path: 'students', element: <LazyPage Component={StudentsPage} /> },
+      { path: 'students/:id', element: <LazyPage Component={StudentDetailPage} /> },
+      { path: 'gallery', element: <LazyPage Component={GalleryPage} /> },
+      { path: 'news', element: <LazyPage Component={NewsPage} /> },
+      { path: 'contact', element: <LazyPage Component={ContactPage} /> },
+      { path: 'donate', element: <LazyPage Component={DonatePage} /> },
+      { path: 'donations', element: <LazyPage Component={DonationHistoryPage} /> },
+      { path: 'transparency', element: <LazyPage Component={TransparencyPage} /> },
+      { path: 'faq', element: <LazyPage Component={FAQPage} /> },
+      { path: 'volunteer', element: <LazyPage Component={VolunteerPage} /> },
+      { path: 'campaigns', element: <LazyPage Component={CampaignsPage} /> },
+      { path: 'success-stories', element: <LazyPage Component={SuccessStoriesPage} /> },
+      { path: 'activity', element: <LazyPage Component={ActivityPage} /> },
+      { path: 'privacy', element: <LazyPage Component={PrivacyPage} /> },
+      { path: 'terms', element: <LazyPage Component={TermsPage} /> },
+      { path: 'login', element: <LazyPage Component={LoginPage} /> },
+      { path: 'register', element: <Navigate to="/login" replace /> },
+      { path: 'forgot-password', element: <LazyPage Component={ForgotPasswordPage} /> },
+      { path: 'reset-password', element: <LazyPage Component={ResetPasswordPage} /> },
+      { path: 'auth/callback', element: <LazyPage Component={AuthCallbackPage} /> },
+      { path: '*', element: <LazyPage Component={NotFoundPage} /> },
+    ],
+  },
+  {
+    path: '/dashboard',
+    element: (
+      <ProtectedRoute requiredRoles={['super_admin', 'admin', 'donor', 'volunteer', 'teacher', 'finance_manager']}>
+        <LazyPage Component={DashboardPage} />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/donations',
+    element: (
+      <ProtectedRoute requiredRoles={['donor', 'super_admin', 'admin']}>
+        <LazyPage Component={DonationHistoryPage} />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/admin',
+    element: (
+      <ProtectedRoute requiredRoles={['super_admin', 'admin', 'finance_manager']}>
+        <LazyPage Component={AdminLayout} />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <AdminIndexRedirect /> },
+      { path: 'students', element: <LazyPage Component={AdminStudentsPage} /> },
+      { path: 'donations', element: <LazyPage Component={AdminDonationsPage} /> },
+      { path: 'news', element: <LazyPage Component={AdminNewsPage} /> },
+      { path: 'gallery', element: <LazyPage Component={AdminGalleryPage} /> },
+      { path: 'contacts', element: <LazyPage Component={AdminContactsPage} /> },
+      { path: 'donors', element: <LazyPage Component={AdminDonorsPage} /> },
+      { path: 'finance', element: <LazyPage Component={FinanceDashboard} /> },
+      { path: 'payments/verify', element: <LazyPage Component={AdminPaymentVerificationPage} /> },
+      { path: 'payments/settings', element: <LazyPage Component={AdminPaymentSettingsPage} /> },
+      { path: 'sponsorships', element: <LazyPage Component={SponsorshipDashboard} /> },
+      { path: 'volunteers', element: <LazyPage Component={VolunteerDashboard} /> },
+      { path: 'events', element: <LazyPage Component={AdminEventsPage} /> },
+      { path: 'notifications', element: <LazyPage Component={AdminNotificationsPage} /> },
+      { path: 'reports', element: <LazyPage Component={AdminReportsPage} /> },
+      { path: 'content', element: <LazyPage Component={AdminContentDashboard} /> },
+      { path: 'content/homepage', element: <LazyPage Component={AdminHomepageEditor} /> },
+      { path: 'content/gallery', element: <LazyPage Component={AdminContentGallery} /> },
+      { path: 'content/videos', element: <LazyPage Component={AdminVideoManager} /> },
+      { path: 'content/testimonials', element: <LazyPage Component={AdminContentTestimonials} /> },
+      { path: 'content/news', element: <LazyPage Component={AdminContentNews} /> },
+      { path: 'content/stories', element: <LazyPage Component={AdminStudentStories} /> },
+      { path: 'content/transparency', element: <LazyPage Component={AdminTransparencyContent} /> },
+      { path: 'content/faqs', element: <LazyPage Component={AdminFaqManager} /> },
+      { path: 'content/media', element: <LazyPage Component={AdminMediaLibrary} /> },
+      { path: 'content/pages/:slug', element: <LazyPage Component={AdminPageEditor} /> },
+      { path: 'content/versions', element: <LazyPage Component={AdminVersionHistory} /> },
+      { path: 'content/analytics', element: <LazyPage Component={AdminContentAnalytics} /> },
+      { path: 'content/settings', element: <LazyPage Component={AdminSiteSettings} /> },
+      { path: 'content/navigation', element: <LazyPage Component={AdminNavigationManager} /> },
+      { path: 'content/announcements', element: <LazyPage Component={AdminAnnouncements} /> },
+      { path: 'content/partners', element: <LazyPage Component={AdminPartners} /> },
+      { path: 'design', element: <LazyPage Component={AdminDesignDashboard} /> },
+      { path: 'design/branding', element: <LazyPage Component={AdminBrandingPage} /> },
+      { path: 'design/colors', element: <LazyPage Component={AdminColorsPage} /> },
+      { path: 'design/typography', element: <LazyPage Component={AdminTypographyPage} /> },
+      { path: 'design/layout', element: <LazyPage Component={AdminLayoutPage} /> },
+      { path: 'design/components', element: <LazyPage Component={AdminComponentsPage} /> },
+      { path: 'design/config', element: <LazyPage Component={AdminConfigPage} /> },
+      { path: 'design/presets', element: <LazyPage Component={AdminThemePresetsPage} /> },
+    ],
+  },
+  {
+    path: '/super-admin',
+    element: (
+      <ProtectedRoute requiredRoles={['super_admin']}>
+        <LazyPage Component={SuperAdminLayout} />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <LazyPage Component={SuperAdminUsersPage} /> },
+      { path: 'users', element: <LazyPage Component={SuperAdminUsersPage} /> },
+      { path: 'roles', element: <LazyPage Component={SuperAdminRolesPage} /> },
+      { path: 'audit', element: <LazyPage Component={SuperAdminAuditLogsPage} /> },
+      { path: 'notifications', element: <LazyPage Component={SuperAdminNotificationsPage} /> },
+    ],
+  },
+  {
+    path: '/teacher',
+    element: (
+      <ProtectedRoute requiredRoles={['teacher']}>
+        <LazyPage Component={TeacherDashboard} />
+      </ProtectedRoute>
+    ),
+  },
+])

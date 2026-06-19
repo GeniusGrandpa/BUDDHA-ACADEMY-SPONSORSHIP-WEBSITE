@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Buddha Academy - Free Education for Underprivileged Children in Nepal</title>
+    <meta name="description" content="Buddha Academy is a nonprofit boarding school in Kathmandu, Nepal, providing free education to underprivileged children since 1977. Sponsor a child or make a donation today." />
+    <meta property="og:title" content="Buddha Academy - Empowering Nepal's Future" />
+    <meta property="og:description" content="Sponsor a child or make a donation to provide free education, meals, and healthcare to underprivileged children in Nepal." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      // Suppress harmless PKCE fallback warning (plain method works fine for dev)
+      const _warn = console.warn;
+      console.warn = function(m) { if (typeof m === 'string' && m.includes('WebCrypto API')) return; _warn.apply(console, arguments); };
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
