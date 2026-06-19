@@ -8,16 +8,74 @@ NGO management platform for student sponsorships, donations, and community engag
 
 ## Features
 
-- **Public pages:** Home, About, Sponsorship, Students, Gallery, News, Contact, Donate, Transparency, FAQ, Volunteer, Login, Register
-- **7-role RBAC:** Super Admin, Admin, Finance Manager, Teacher/Staff, Donor, Volunteer, Public User
-- **Dashboards:** Super Admin, Finance, Sponsorship, Volunteer, Teacher, Donor, Admin CMS
-- **Payment system:** Khalti/eSewa/banking gateways, manual verification workflow, receipts, audit trail
-- **Security:** Row Level Security on all tables, self-role-escalation prevention, audit logging
-- **CMS:** Dynamic pages, media library, gallery, news, testimonials, FAQs, navigation manager, homepage editor
-- **Theme designer:** Custom colors, typography, layout, branding with presets
-- **Internationalization:** Google Translate widget (100+ languages) + manual EN/NP/HI translations
-- **Finance tools:** Reporting, expense tracking, donation analytics
-- **Drag-and-drop page builder** for homepage sections
+### RBAC (7 roles)
+
+Role-based access enforced at three layers:
+
+- **Route level** — `ProtectedRoute` checks the user's role from Supabase `profiles` table on every navigation; redirects denied users to their role-appropriate dashboard. Handles suspended/banned users.
+- **Component level** — `PermissionGuard` conditionally renders children based on `permission`, `anyPermission`, `allPermissions`, or `roles` props.
+- **Function level** — `useProtectedAction` wraps callbacks and silently denies execution without the required permission.
+
+Permissions are defined as a static map (`DEFAULT_ROLE_PERMISSIONS: Role -> PermissionCode[]`) with optional server-side overrides via `supabase.rpc('get_user_permissions')`. Super admin bypasses all checks. Navigation sidebar is filtered per role via `getNavigationForRole()`.
+
+### Payment System (Khalti / eSewa / Mobile Banking)
+
+No external SDKs — uses a manual confirmation + admin verification workflow:
+
+1. **DonationForm** lets the user select amount, frequency, and optional student sponsorship.
+2. **PaymentModal** displays active gateways (QR codes, account details) from the `payment_settings` table.
+3. **usePayment** hook drives the state machine: `initiate_payment_checkout` (RPC) creates a `payment_session`, user pays externally, then submits a transaction reference ID + screenshot.
+4. **AdminPaymentVerificationPage** lets admins review and verify/reject pending sessions via `verify_payment` (RPC), which creates a `donations` record and `payment_receipt` server-side.
+5. All steps are audit-logged.
+
+### Theme Designer (CSS Variables)
+
+Design tokens are stored as JSONB in the `design_settings` Supabase table with a draft/publish workflow:
+
+- **ThemeContext** fetches published settings, generates `:root { --color-primary: ...; --font-heading: ... }` CSS, and injects it into `<head>`. Google Fonts are loaded dynamically.
+- **8 admin pages** (Branding, Colors, Typography, Layout, Components, Config, Presets) allow granular control over 40+ color variables, font settings, spacing, radii, shadows, and animation toggles.
+- `theme_presets` table stores named presets; `applyThemePreset()` copies values into `design_settings`.
+
+### CMS & Page Builder
+
+Two approaches for content management:
+
+- **Dynamic page builder** — `DynamicPage` component fetches a `pages` row by slug, renders each `PageBlock` through `BlockRenderer` (16 block types: hero, text, image, gallery, cta, donation, student_cards, testimonials, faq, stats, timeline, video, partners, announcements, custom_section). Blocks are reorderable, have visibility toggles, and store content as JSONB.
+- **Structured static pages** — `AdminPageEditor` provides form-based editing for predefined pages (about, contact, volunteer, privacy, terms) using a `PAGE_META` config per page.
+- **Homepage editor** — section-based editor for homepage sections (hero, stats, features, cta) from the `homepage_sections` table.
+- **Dedicated managers** for news, gallery, video, testimonials, student stories, FAQs, partners, announcements, navigation, media library, and transparency content — all following the same pattern: query Supabase table → render form → persist with audit logging.
+
+### Internationalization
+
+Hybrid approach:
+
+- **Manual dictionary** — `LanguageContext` provides a `t(key)` function that looks up ~50 UI string keys from hardcoded dictionaries for English, Nepali, and Hindi. Falls back to English, then the raw key.
+- **Google Translate** — for all other languages, the app dynamically loads Google Translate's widget, sets the `googtrans` cookie, and programmatically triggers translation.
+- RTL support for Arabic, Persian, Hebrew, and Urdu.
+- Language preference persisted to `localStorage`.
+
+### Dashboards
+
+Each dashboard is a self-contained feature directory under `src/features/`:
+
+```
+{role}-dashboard/
+  components/   view-specific components
+  hooks/        custom data-fetching hooks (Supabase queries with loading/error states)
+  pages/        main DashboardPage
+  layouts/      responsive sidebar + topbar layout
+  charts/       Recharts components
+  types/        feature-specific types
+```
+
+**Donor dashboard** is the most built-out: ~10 hooks coordinate donations, sponsorships, impact metrics, notifications, activity feed, sponsorship timeline, teacher reports, and allocation breakdowns. Other dashboards (sponsorship, staff, volunteer) follow the same pattern.
+
+### Supabase Integration
+
+- **Singleton client** with PKCE auth flow, auto-refresh, and type-safe queries via generated `Database` types.
+- **Service layer** — each domain (payments, content, design) has its own service file that calls `getSupabaseClient()` locally.
+- **Row Level Security** on all tables with self-role-escalation prevention.
+- Audit logging on all admin actions via `logAuditEvent()`.
 
 ## Setup
 
@@ -38,25 +96,17 @@ npm run lint       # ESLint
 npm run typecheck  # tsc --noEmit
 ```
 
-## Supabase
-
-Apply migrations from `supabase/migrations/` in order. Configure Auth → Email with Site URL and redirect URLs. Create the first admin:
-
-```sql
-SELECT public.admin_toggle_role(target_user_id := 'uuid', new_role := 'super_admin');
-```
-
 ## Project Structure
 
 ```
 src/
 ├── components/     # UI primitives (ui/), auth guards, blocks, donate, payments
-├── features/       # Dashboards: donor, finance, sponsorship, volunteer, staff
+├── features/       # Auth, dashboards (donor, finance, sponsorship, volunteer, staff)
 ├── pages/          # Route pages (admin/, super-admin/, teacher/, 20+ public routes)
 ├── context/        # Auth, Language (Google Translate), Theme providers
 ├── hooks/          # useRole, usePermissions, useProtectedAction, useToast, usePayment
 ├── lib/            # cn() utility, Supabase client, audit logger
-├── services/       # API layers (donations, payments, design, students, etc.)
+├── services/       # API layers (donations, payments, design, students, content, etc.)
 ├── types/          # Database, permissions, feature types
 ├── config/         # Navigation, layout definitions
 ├── routes.tsx      # Role-gated route definitions
