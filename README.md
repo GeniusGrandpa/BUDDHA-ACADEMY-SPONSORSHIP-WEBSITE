@@ -1,22 +1,23 @@
 # Buddha Academy Sponsorship Platform
 
-Enterprise-grade NGO management system for student sponsorships, donations, and community engagement. Built with React 18, TypeScript, Vite, Tailwind CSS, and Supabase.
+NGO management platform for student sponsorships, donations, and community engagement. Built with React 18, TypeScript, Vite, Tailwind CSS, and Supabase.
 
 ## Tech Stack
 
-React 18, TypeScript, Vite 8, Tailwind CSS, shadcn/ui (Nova preset), React Router v7, Framer Motion, Supabase (PostgreSQL, Auth, RLS, Storage), Lucide React, Recharts, jsPDF, react-hot-toast
+**React 18** · **TypeScript** · **Vite 8** · **Tailwind CSS** · **Supabase** (PostgreSQL, Auth, RLS, Storage) · **React Router** · **Framer Motion** · **Lucide React** · **Recharts** · **jsPDF** · **react-hot-toast** · **Tiptap** (rich text) · **@hello-pangea/dnd** (drag-and-drop)
 
 ## Features
 
-- **Public:** Home, About, Sponsorship, Students, Gallery, News, Contact, Donate, Transparency, FAQ, Volunteer, Login, Register
-- **RBAC (7 roles):** Super Admin, Admin, Finance Manager, Teacher/Staff, Donor, Volunteer, Public User
-- **Dashboards:** Super Admin, Finance, Sponsorship, Volunteer, Teacher, Donor, Admin Panel
-- **Payments:** Khalti/eSewa/banking gateways, payment sessions, verification workflow, receipts, audit trail
-- **Security:** Row Level Security on all tables, self-role-escalation prevention, audit logging, error sanitization
+- **Public pages:** Home, About, Sponsorship, Students, Gallery, News, Contact, Donate, Transparency, FAQ, Volunteer, Login, Register
+- **7-role RBAC:** Super Admin, Admin, Finance Manager, Teacher/Staff, Donor, Volunteer, Public User
+- **Dashboards:** Super Admin, Finance, Sponsorship, Volunteer, Teacher, Donor, Admin CMS
+- **Payment system:** Khalti/eSewa/banking gateways, manual verification workflow, receipts, audit trail
+- **Security:** Row Level Security on all tables, self-role-escalation prevention, audit logging
 - **CMS:** Dynamic pages, media library, gallery, news, testimonials, FAQs, navigation manager, homepage editor
-- **Design:** Full theme customization (colors, typography, layout, branding), theme presets
-- **Internationalization:** 100+ languages via Google Translate; English/Nepali/Hindi fully translated
-- **Multilingual:** 100+ languages via Google Translate with English/Nepali/Hindi fully translated
+- **Theme designer:** Custom colors, typography, layout, branding with presets
+- **Internationalization:** Google Translate widget (100+ languages) + manual EN/NP/HI translations
+- **Finance tools:** Reporting, expense tracking, donation analytics
+- **Drag-and-drop page builder** for homepage sections
 
 ## Setup
 
@@ -31,16 +32,16 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
 ```bash
-npm run dev        # http://localhost:5174
-npm run build      # production build → dist/
-npm run preview    # preview production build
+npm run dev        # → http://localhost:5174
+npm run build      # → dist/
 npm run lint       # ESLint
-npm run typecheck  # TypeScript checks
+npm run typecheck  # tsc --noEmit
 ```
 
 ## Supabase
 
-Apply migrations from `supabase/migrations/` in order via Dashboard SQL Editor. Configure Auth → Email with Site URL and redirect URLs. Create first admin:
+Apply migrations from `supabase/migrations/` in order. Configure Auth → Email with Site URL and redirect URLs. Create the first admin:
+
 ```sql
 SELECT public.admin_toggle_role(target_user_id := 'uuid', new_role := 'super_admin');
 ```
@@ -49,28 +50,27 @@ SELECT public.admin_toggle_role(target_user_id := 'uuid', new_role := 'super_adm
 
 ```
 src/
-├── components/   # UI primitives (shadcn), auth components, guards
-├── features/     # Auth, dashboards (donor, finance, sponsorship, volunteer, staff), RBAC
-├── pages/        # Route pages (admin, teacher, super-admin, 30+ public routes)
-├── context/      # Auth, Language, Theme providers
-├── hooks/        # useRole, usePermissions, useProtectedAction, useToast, usePayment
-├── lib/          # utils (cn), supabase client, audit logging
-├── services/     # API service layers
-├── types/        # Database, permissions, feature types
-├── config/       # Navigation definitions
-├── routes.tsx    # All routes with role-gated protection
-├── App.tsx       # Provider hierarchy + Toaster
-└── main.tsx      # Entry point with ErrorBoundary
+├── components/     # UI primitives (ui/), auth guards, blocks, donate, payments
+├── features/       # Dashboards: donor, finance, sponsorship, volunteer, staff
+├── pages/          # Route pages (admin/, super-admin/, teacher/, 20+ public routes)
+├── context/        # Auth, Language (Google Translate), Theme providers
+├── hooks/          # useRole, usePermissions, useProtectedAction, useToast, usePayment
+├── lib/            # cn() utility, Supabase client, audit logger
+├── services/       # API layers (donations, payments, design, students, etc.)
+├── types/          # Database, permissions, feature types
+├── config/         # Navigation, layout definitions
+├── routes.tsx      # Role-gated route definitions
+├── App.tsx         # Provider hierarchy + Toaster
+└── main.tsx        # Entry point with ErrorBoundary
 ```
 
 ## Deployment
 
-Deploy `dist/` to Vercel, Netlify, or Cloudflare Pages. Set environment variables. Ensure Supabase Auth Site URL and Redirect URLs point to production domain, and SMTP is configured for email verification.
+Deploy `dist/` to Vercel, Netlify, or Cloudflare Pages. Set environment variables. Update Supabase Auth Site URL and redirect URLs to point to production. Configure SMTP for email verification.
 
-## Code Conventions
+## Conventions
 
-- Function components with named exports, no default exports, no inline component definitions
+- Named function exports, no default exports, no inline component definitions
 - Functional updaters for state (`setState(prev => ...)`)
-- Tailwind CSS with `cn()` utility for conditional classes
-- Light/admin theme: white cards, orange accents, icon-free, typography-focused
+- Tailwind CSS with `cn()` for conditional classes
 - `useCallback` for stable handlers, `useMemo` for derived data
