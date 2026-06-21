@@ -1,11 +1,13 @@
 import { getSupabaseClient } from '../lib/supabase'
 import { logAuditEvent } from '../lib/audit'
-import type {
-  DesignSettings,
-  ThemePreset,
-  WebsiteConfigEntry,
-  SectionVisibilityEntry,
-  DesignSettingsCategory,
+import {
+  DEFAULT_BRANDING, DEFAULT_COLORS, DEFAULT_TYPOGRAPHY,
+  DEFAULT_LAYOUT, DEFAULT_COMPONENT_STYLES, DEFAULT_TOKENS,
+  type DesignSettings,
+  type ThemePreset,
+  type WebsiteConfigEntry,
+  type SectionVisibilityEntry,
+  type DesignSettingsCategory,
 } from '../types/design'
 import type { Database, Json } from '../types/database'
 
@@ -269,10 +271,6 @@ export async function updateSectionVisibility(id: string, isVisible: boolean): P
 }
 
 export async function resetDesignSettingsToDefaults(): Promise<void> {
-  const {
-    DEFAULT_BRANDING, DEFAULT_COLORS, DEFAULT_TYPOGRAPHY,
-    DEFAULT_LAYOUT, DEFAULT_COMPONENT_STYLES, DEFAULT_TOKENS,
-  } = await import('../types/design')
   await upsertDesignSettings({
     branding: DEFAULT_BRANDING,
     colors: DEFAULT_COLORS,
