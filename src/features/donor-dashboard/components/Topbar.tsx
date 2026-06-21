@@ -36,6 +36,7 @@ export function Topbar({ userName, onMenuClick, userId, onSectionChange }: Topba
           <button
             onClick={onMenuClick}
             className="lg:hidden p-2 -ml-2 rounded-xl hover:bg-orange-100 text-gray-500 transition-colors"
+            aria-label="Open menu"
           >
             <Menu className="w-5 h-5" />
           </button>

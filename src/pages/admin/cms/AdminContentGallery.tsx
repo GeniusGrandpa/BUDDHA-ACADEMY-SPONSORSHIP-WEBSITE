@@ -17,8 +17,11 @@ export function AdminContentGallery() {
   const [filterFeatured, setFilterFeatured] = useState(false)
   const [brokenImages, setBrokenImages] = useState<Set<string>>(new Set())
 
-const [form, setForm] = useState({
-      title: '', url: '', thumbnail_url: '', type: 'photo' as string,
+    const [form, setForm] = useState<{
+      title: string; url: string; thumbnail_url: string; type: 'photo' | 'video' | 'testimonial';
+      caption: string; category: string; is_featured: boolean;
+    }>({
+      title: '', url: '', thumbnail_url: '', type: 'photo',
       caption: '', category: 'General', is_featured: false,
     })
 
@@ -59,10 +62,10 @@ const [form, setForm] = useState({
     }
     try {
       if (editing) {
-        await updateGalleryItem(editing.id, form)
+        await updateGalleryItem(editing.id, form as unknown as Partial<GalleryItem>)
         toast.success('Gallery item updated')
       } else {
-        await createGalleryItem(form)
+        await createGalleryItem(form as unknown as Omit<GalleryItem, 'id' | 'created_at' | 'updated_at'>)
         toast.success('Gallery item added')
       }
       setShowModal(false)
@@ -219,7 +222,7 @@ const [form, setForm] = useState({
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1">Title *</label>
                   <input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
+                    placeholder="Enter title" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1">URL *</label>
@@ -230,20 +233,20 @@ const [form, setForm] = useState({
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1">Thumbnail URL</label>
                   <input value={form.thumbnail_url} onChange={e => setForm({ ...form, thumbnail_url: e.target.value })}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
+                    placeholder="https://..." className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-600 mb-1">Type</label>
-                    <select value={form.type} onChange={e => setForm({ ...form, type: e.target.value })}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50">
+                    <select value={form.type} onChange={e => setForm({ ...form, type: e.target.value as 'photo' | 'video' | 'testimonial' })}
+                      title="Gallery type" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50">
                       {GALLERY_TYPES.map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
                     </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-600 mb-1">Category</label>
                     <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50">
+                      title="Category" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50">
                       {GALLERY_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                   </div>
@@ -251,7 +254,7 @@ const [form, setForm] = useState({
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1">Caption</label>
                   <textarea value={form.caption} onChange={e => setForm({ ...form, caption: e.target.value })}
-                    rows={3}
+                    rows={3} placeholder="Enter caption..."
                     className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50 resize-none" />
                 </div>
               </div>

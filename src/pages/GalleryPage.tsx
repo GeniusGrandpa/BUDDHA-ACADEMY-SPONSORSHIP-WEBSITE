@@ -201,6 +201,7 @@ export function GalleryPage() {
         >
           <button
             onClick={() => setSelectedImage(null)}
+            aria-label="Close image"
             className="absolute top-4 right-4 text-white text-2xl hover:text-amber-400 transition-colors"
           >
             &times;
@@ -220,6 +221,7 @@ export function GalleryPage() {
         >
           <button
             onClick={() => setSelectedVideo(null)}
+            aria-label="Close video"
             className="absolute top-4 right-4 z-10 text-white hover:text-amber-400 transition-colors"
           >
             <X className="w-8 h-8" />

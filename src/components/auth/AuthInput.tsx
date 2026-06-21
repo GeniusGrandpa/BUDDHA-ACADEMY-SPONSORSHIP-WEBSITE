@@ -48,7 +48,7 @@ export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(
               ${isPassword ? 'pr-12' : ''}
               ${className}
             `}
-            aria-invalid={error ? 'true' : 'false'}
+            aria-invalid={!!error}
             aria-describedby={error ? `${inputId}-error` : undefined}
             {...props}
           />

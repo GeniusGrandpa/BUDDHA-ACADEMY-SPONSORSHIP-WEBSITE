@@ -82,6 +82,7 @@ export function AdminContactsPage() {
                     value={submission.status}
                     onChange={(e) => handleStatusChange(submission.id, e.target.value as ContactSubmission['status'])}
                     className="text-xs border rounded px-2 py-1"
+                    aria-label="Change status"
                   >
                     <option value="unread">Unread</option>
                     <option value="read">Read</option>

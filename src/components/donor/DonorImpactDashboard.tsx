@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
+import { FileText } from 'lucide-react'
 
 import { supabase } from '../../lib/supabase'
 import { downloadDonationReceipt, downloadYearlySummary } from '../../services/pdfExport'
@@ -154,7 +155,7 @@ export function DonorImpactDashboard({ userId, donorName }: DonorImpactProps) {
           className="bg-warm-50 rounded-xl p-6 border border-amber-200"
         >
           <div className="flex items-center gap-2 mb-2">
-            <Download className="w-4 h-4 text-blue-500" />
+            <FileText className="w-4 h-4 text-blue-500" />
             <span className="text-sm text-gray-500">Documents</span>
           </div>
           <button

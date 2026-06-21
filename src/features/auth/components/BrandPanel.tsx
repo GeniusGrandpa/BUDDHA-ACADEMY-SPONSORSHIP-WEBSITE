@@ -56,6 +56,7 @@ export function BrandPanel({ mode, onSwitchMode }: BrandPanelProps) {
           backgroundSize: '32px 32px',
         }}
       />
+      {/* radial-gradient background pattern cannot be expressed as a Tailwind arbitrary value */}
 
       {}
       <motion.div

@@ -10,7 +10,7 @@ export async function getNews(category?: string): Promise<News[]> {
     .order('published_at', { ascending: false })
 
   if (category && category !== 'all') {
-    query = query.eq('category', category)
+    query = query.eq('category', category as News['category'])
   }
 
   const { data, error } = await query

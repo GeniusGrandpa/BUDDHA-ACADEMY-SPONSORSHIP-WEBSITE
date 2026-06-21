@@ -10,13 +10,13 @@ export async function getPartners(type?: PartnerType, visibleOnly?: boolean): Pr
   if (visibleOnly) query = query.eq('is_visible', true)
   const { data, error } = await query
   if (error) throw error
-  return data || []
+  return (data || []) as Partner[]
 }
 
 export async function getPartnerById(id: string): Promise<Partner | null> {
   const { data, error } = await supabase.from('partners').select('*').eq('id', id).maybeSingle()
   if (error) throw error
-  return data
+  return data as Partner | null
 }
 
 export async function createPartner(item: Omit<Partner, 'id' | 'created_at' | 'updated_at'>): Promise<Partner> {
@@ -24,14 +24,14 @@ export async function createPartner(item: Omit<Partner, 'id' | 'created_at' | 'u
   const { data, error } = await supabase.from('partners').insert({ ...item, created_by: userId }).select().single()
   if (error) throw error
   await logAuditEvent({ action: `Created partner: ${data.name}`, entityType: 'partners', entityId: data.id })
-  return data
+  return data as Partner
 }
 
 export async function updatePartner(id: string, updates: Partial<Partner>): Promise<Partner> {
   const { data, error } = await supabase.from('partners').update(updates).eq('id', id).select().single()
   if (error) throw error
   await logAuditEvent({ action: `Updated partner: ${data.name}`, entityType: 'partners', entityId: id })
-  return data
+  return data as Partner
 }
 
 export async function deletePartner(id: string): Promise<void> {

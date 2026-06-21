@@ -397,7 +397,7 @@ export function AuthPage() {
 
         <motion.div variants={staggerItem}>
           <div className="overflow-hidden rounded-2xl border border-amber-100/60 bg-warm-50 shadow-xl shadow-amber-200/30">
-            <div className="relative" style={{ minHeight: 'min(480px, 80vh)' }}>
+            <div className="relative min-h-[min(480px,80vh)]">
               {formContent}
             </div>
           </div>
@@ -444,7 +444,7 @@ export function AuthPage() {
           )}
 
           <div className="overflow-hidden rounded-2xl border border-amber-100/60 bg-warm-50 shadow-xl shadow-amber-200/30">
-            <div className="relative" style={{ minHeight: 'min(480px, 80vh)' }}>
+            <div className="relative min-h-[min(480px,80vh)]">
               {formContent}
             </div>
           </div>

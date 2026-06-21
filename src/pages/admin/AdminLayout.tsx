@@ -75,7 +75,7 @@ export function AdminLayout() {
                 <img src={branding.logo_url || fallbackLogo} alt={branding.organization_name} className="h-8 w-8 rounded-lg object-cover shrink-0 shadow-lg" />
                 <span style={{ color: 'var(--color-text-primary)' }} className="font-semibold text-sm">Admin Portal</span>
               </Link>
-              <button onClick={() => setSidebarOpen(false)} className="p-1.5 rounded-lg hover:opacity-80">
+              <button onClick={() => setSidebarOpen(false)} className="p-1.5 rounded-lg hover:opacity-80" aria-label="Close sidebar">
                 <X className="w-5 h-5" style={{ color: 'var(--color-text-muted)' }} />
               </button>
             </div>
@@ -107,7 +107,7 @@ export function AdminLayout() {
         <header className="sticky top-0 z-30" style={{ backgroundColor: 'var(--color-surface)', borderBottom: '1px solid var(--color-border-accent, #fcd34d)', backdropFilter: 'blur(12px)' }}>
           <div className="flex items-center justify-between h-16 px-4 lg:px-6">
             <div className="flex items-center gap-3">
-              <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 rounded-lg hover:opacity-80" style={{ color: 'var(--color-text-muted)' }}>
+              <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 rounded-lg hover:opacity-80" style={{ color: 'var(--color-text-muted)' }} aria-label="Open sidebar">
                 <Menu className="w-5 h-5" />
               </button>
             </div>

@@ -54,6 +54,7 @@ export function SignupForm({
               <div className="flex items-center gap-2">
                 <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
                   <div className={`h-full rounded-full transition-all ${passwordStrength.color}`} style={{ width: passwordStrength.width }} />
+                  {/* width is dynamic percentage string, needs inline style */}
                 </div>
                 <span className="text-xs font-medium text-gray-500">{passwordStrength.label}</span>
               </div>

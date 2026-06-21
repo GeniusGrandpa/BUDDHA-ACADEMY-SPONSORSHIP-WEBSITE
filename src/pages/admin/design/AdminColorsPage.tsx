@@ -112,6 +112,7 @@ function ColorPreview({ colors }: { colors: DesignColors }) {
   return (
     <div className="rounded-xl border border-[var(--color-border)] overflow-hidden">
       <div className="p-6" style={{ backgroundColor: colors.background }}>
+        {/* dynamic preview colors from user selection cannot be expressed as Tailwind classes */}
         <div className="max-w-md mx-auto space-y-4">
           <div className="p-4 rounded-lg" style={{ backgroundColor: colors.surface, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
             <h4 style={{ fontFamily: 'var(--font-heading)', color: colors.text_primary }} className="text-lg font-bold">Sample Card</h4>

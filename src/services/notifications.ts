@@ -1,5 +1,5 @@
 import { getSupabaseClient } from '../lib/supabase'
-import type { Notification } from '../types/database'
+import type { Notification, Role, ProfileStatus } from '../types/database'
 const supabase = getSupabaseClient()
 
 export async function getNotifications(userId: string, limit = 20): Promise<Notification[]> {
@@ -103,10 +103,10 @@ export async function getAllUserIds(options?: { roles?: string[]; status?: strin
   let query = supabase.from('profiles').select('id')
 
   if (options?.roles && options.roles.length > 0) {
-    query = query.in('role', options.roles)
+    query = query.in('role', options.roles as Role[])
   }
   if (options?.status) {
-    query = query.eq('status', options.status)
+    query = query.eq('status', options.status as ProfileStatus)
   }
 
   const { data, error } = await query

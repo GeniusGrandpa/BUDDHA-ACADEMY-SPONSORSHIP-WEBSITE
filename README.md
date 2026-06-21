@@ -6,20 +6,20 @@ NGO management platform for student sponsorships, donations, and community engag
 
 ### Data Flow
 
-```
+```text
 Browser ──▶ React SPA ──▶ Services Layer ──▶ Supabase (PostgreSQL + Auth + Storage)
                 │                                   │
                 ├── Pages (lazy-loaded routes)       ├── Row Level Security
                 ├── Features (role dashboards)       ├── Database triggers
-                ├── Context (auth, theme, i18n)      └── RPC functions
+                ├── Context (auth, theme)            └── RPC functions
                 └── Hooks (usePayment, useRole...)
 ```
 
-The app is a single-page application (Vite + React) that communicates directly with Supabase no custom backend server. Every service file (`src/services/*.ts`) calls `getSupabaseClient()` to make authenticated requests. Supabase enforces Row Level Security on all tables and provides Auth (PKCE flow), PostgreSQL, and file storage.
+The app is a single-page application (Vite + React) that communicates directly with Supabase — no custom backend server. Auth emails (password reset, email verification) are handled by Supabase Auth via SMTP. Donation/sponsorship notifications appear in the dashboard notification center.
 
 ### Component Hierarchy
 
-```
+```text
 <ErrorBoundary>                          ── catches runtime errors
   <App>
     <Toaster />                          ── toast notifications (react-hot-toast)
@@ -120,7 +120,7 @@ Hybrid approach:
 
 Each dashboard is a self-contained feature directory under `src/features/`:
 
-```
+```text
 {role}-dashboard/
   components/   view-specific components
   hooks/        custom data-fetching hooks (Supabase queries with loading/error states)
@@ -141,39 +141,49 @@ Each dashboard is a self-contained feature directory under `src/features/`:
 
 ## Setup
 
-```bash
+### Frontend
+
+```sh
 npm install
 ```
 
 Create `.env`:
-```env
+
+```sh
 VITE_SUPABASE_URL=your_supabase_project_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_PUBLIC_BASE_URL=http://localhost:5174
 ```
 
-```bash
+```sh
 npm run dev        # → http://localhost:5174
 npm run build      # → dist/
 npm run lint       # ESLint
 npm run typecheck  # tsc --noEmit
 ```
 
+
+
 ## Project Structure
 
-```
+```text
 src/
-├── components/     # UI primitives (ui/), auth guards, blocks, donate, payments
-├── features/       # Auth, dashboards (donor, finance, sponsorship, volunteer, staff)
-├── pages/          # Route pages (admin/, super-admin/, teacher/, 20+ public routes)
-├── context/        # Auth, Language (Google Translate), Theme providers
-├── hooks/          # useRole, usePermissions, useProtectedAction, useToast, usePayment
-├── lib/            # cn() utility, Supabase client, audit logger
-├── services/       # API layers (donations, payments, design, students, content, etc.)
-├── types/          # Database, permissions, feature types
-├── config/         # Navigation, layout definitions
-├── routes.tsx      # Role-gated route definitions
-├── App.tsx         # Provider hierarchy + Toaster
-└── main.tsx        # Entry point with ErrorBoundary
+  ├── components/     # UI primitives (ui/), auth guards, blocks, donate, payments
+  ├── features/       # Auth, dashboards (donor, finance, sponsorship, volunteer, staff)
+  ├── pages/          # Route pages (admin/, super-admin/, teacher/, 20+ public routes)
+  ├── context/        # Auth, Language (Google Translate), Theme providers
+  ├── hooks/          # useRole, usePermissions, useProtectedAction, useToast, usePayment
+  ├── lib/            # cn() utility, Supabase client, audit logger
+  ├── services/       # API layers (donations, payments, design, students, content, etc.)
+  ├── types/          # Database, permissions, feature types
+  ├── config/         # Navigation, layout definitions
+  ├── routes.tsx      # Role-gated route definitions
+  ├── App.tsx         # Provider hierarchy + Toaster
+  └── main.tsx        # Entry point with ErrorBoundary
+
+supabase/
+  ├── migrations/     # Database migrations
+  └── config.toml     # Supabase project config
 ```
 
 ## Deployment

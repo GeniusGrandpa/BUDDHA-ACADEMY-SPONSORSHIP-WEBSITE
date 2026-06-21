@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Download, FileText, FileDown } from 'lucide-react'
+import { Download, FileText, FileDown, Calendar, Award } from 'lucide-react'
 import { fadeInUp, stagger } from '../animations'
 import { generateReceiptPDF, generateDonationHistoryPDF } from '../utils/pdfGenerator'
 import type { TransactionWithDetails } from '../../../types/features'

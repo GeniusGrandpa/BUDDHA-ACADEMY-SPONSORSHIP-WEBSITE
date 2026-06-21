@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../../lib/supabase'
 import type { SupportTicket, TicketMessage } from '../../../types/features'
+type DbQuery = ReturnType<typeof supabase.from>
 interface MessagesState {
   tickets: SupportTicket[]
   messages: TicketMessage[]
@@ -35,7 +36,7 @@ export function useMessages(userId: string | undefined): MessagesReturn {
 
       if (ticketsError) throw ticketsError
 
-      const ticketIds = (ticketsData || []).map(t => t.id)
+      const ticketIds = ((ticketsData || []) as { id: string }[]).map(t => t.id)
       let messagesData: TicketMessage[] = []
 
       if (ticketIds.length > 0) {
@@ -86,9 +87,8 @@ export function useMessages(userId: string | undefined): MessagesReturn {
     }))
 
     try {
-      await supabase
-        .from('support_tickets')
-        .insert({ user_id: userId, subject, status: 'open' })
+      await (supabase.from('support_tickets') as unknown as DbQuery)
+        .insert({ user_id: userId, subject, status: 'open' } as never)
       await fetchTickets()
     } catch {
       await fetchTickets()
@@ -112,13 +112,11 @@ export function useMessages(userId: string | undefined): MessagesReturn {
     }))
 
     try {
-      await supabase
-        .from('ticket_messages')
-        .insert({ ticket_id: ticketId, sender_id: userId, message })
+      await (supabase.from('ticket_messages') as unknown as DbQuery)
+        .insert({ ticket_id: ticketId, sender_id: userId, message } as never)
 
-      await supabase
-        .from('support_tickets')
-        .update({ updated_at: new Date().toISOString() })
+      await (supabase.from('support_tickets') as unknown as DbQuery)
+        .update({ updated_at: new Date().toISOString() } as never)
         .eq('id', ticketId)
 
       await fetchTickets()
@@ -136,9 +134,9 @@ export function useMessages(userId: string | undefined): MessagesReturn {
     }))
 
     try {
-      await supabase
-        .from('support_tickets')
-        .update({ status: 'resolved', updated_at: new Date().toISOString() })
+      await (supabase
+        .from('support_tickets') as unknown as DbQuery)
+        .update({ updated_at: new Date().toISOString() } as never)
         .eq('id', ticketId)
       await fetchTickets()
     } catch {

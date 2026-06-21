@@ -1,7 +1,7 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { Database } from '../types/database'
 
-let _client: ReturnType<typeof createClient<Database>> | null = null
+let _client: SupabaseClient<Database> | null = null
 
 function getEnvVar(name: string): string {
   const value = import.meta.env[name] as string | undefined

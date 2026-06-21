@@ -13,6 +13,8 @@ const STATUS_CONFIG: Record<DonationStatus, { label: string; bg: string; text: s
   failed: { label: 'Failed', bg: 'bg-red-50', text: 'text-red-700' },
   rejected: { label: 'Rejected', bg: 'bg-red-50', text: 'text-red-700' },
   cancelled: { label: 'Cancelled', bg: 'bg-gray-50', text: 'text-gray-600' },
+  received: { label: 'Received', bg: 'bg-green-50', text: 'text-green-700' },
+  pledged: { label: 'Pledged', bg: 'bg-blue-50', text: 'text-blue-700' },
 }
 
 export function StatusBadge({ status, size = 'md' }: StatusBadgeProps) {

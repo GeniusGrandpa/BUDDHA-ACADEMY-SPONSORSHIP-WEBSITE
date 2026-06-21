@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Calendar, MapPin, Clock, CheckCircle, Loader2 } from 'lucide-react'
+import { Calendar, MapPin, Clock, CheckCircle, Loader2, Users } from 'lucide-react'
 import { getUpcomingEvents, signUpForEvent, cancelSignup, getVolunteerSignups } from '../../services/volunteerEvents'
 import { supabase } from '../../lib/supabase'
 import toast from 'react-hot-toast'

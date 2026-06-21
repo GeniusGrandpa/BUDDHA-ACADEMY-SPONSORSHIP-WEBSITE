@@ -247,6 +247,7 @@ const userRole = profile?.role as Role | undefined
                 value={sendRole}
                 onChange={e => setSendRole(e.target.value as Role | 'all')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                aria-label="Filter recipients"
               >
                 {ROLE_OPTIONS.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -259,6 +260,7 @@ const userRole = profile?.role as Role | undefined
                 value={sendType}
                 onChange={e => setSendType(e.target.value as typeof NOTIFICATION_TYPES[keyof typeof NOTIFICATION_TYPES])}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                aria-label="Filter type"
               >
                 {NOTIFICATION_TYPE_OPTIONS.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -337,6 +339,7 @@ const userRole = profile?.role as Role | undefined
                   className={`w-full text-left px-6 py-4 hover:bg-gray-50 transition-colors ${
                     !notification.read ? 'bg-emerald-50/50' : ''
                   }`}
+                  aria-label="Mark as read"
                 >
                   <div className="flex items-start gap-3">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
@@ -375,6 +378,7 @@ const userRole = profile?.role as Role | undefined
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page <= 1}
                 className="p-1.5 rounded hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                aria-label="Previous page"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
@@ -382,6 +386,7 @@ const userRole = profile?.role as Role | undefined
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                 disabled={page >= totalPages}
                 className="p-1.5 rounded hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                aria-label="Next page"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>

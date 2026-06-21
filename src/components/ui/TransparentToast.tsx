@@ -41,6 +41,7 @@ export function showTransparentToast(message: string, type: ToastType = 'info') 
               <button
                 onClick={() => toast.dismiss(t.id)}
                 className="inline-flex text-gray-400 hover:text-gray-500 focus:outline-none"
+                aria-label="Dismiss notification"
               >
                 <X className="h-5 w-5" />
               </button>

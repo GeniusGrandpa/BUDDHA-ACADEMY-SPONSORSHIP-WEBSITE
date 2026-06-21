@@ -76,7 +76,7 @@ export function StudentDetailPage() {
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h1 className="text-2xl font-bold text-gray-900">{student.name}</h1>
-                  <Badge variant={student.sponsorship_status} />
+                  <Badge variant={student.sponsorship_status as 'success' | 'warning' | 'default'}>{student.sponsorship_status}</Badge>
                 </div>
 
                 <div className="space-y-2 text-gray-600">
@@ -98,6 +98,7 @@ export function StudentDetailPage() {
                       className="bg-amber-500 rounded-full h-2 transition-all"
                       style={{ width: `${sponsorshipProgress}%` }}
                     />
+
                   </div>
                   <div className="text-sm text-gray-500 text-right">
                     {formatNPR(student.current_sponsorship)} of {formatNPR(student.sponsorship_amount)} raised

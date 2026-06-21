@@ -175,30 +175,30 @@ export function AdminStudentStories() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Story Title *</label>
                     <input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:border-amber-500/50" />
+                      placeholder="e.g. A Journey of Hope" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:border-amber-500/50" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Student Name *</label>
                     <input value={form.student_name} onChange={e => setForm({ ...form, student_name: e.target.value })}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:border-amber-500/50" />
+                      placeholder="Full name" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:border-amber-500/50" />
                   </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Story Content *</label>
                   <textarea value={form.content} onChange={e => setForm({ ...form, content: e.target.value })}
-                    rows={6}
+                    rows={6} placeholder="Write the student's story..."
                     className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:border-amber-500/50 resize-vertical" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
                     <input value={form.image_url} onChange={e => setForm({ ...form, image_url: e.target.value })}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:border-amber-500/50" />
+                      placeholder="https://..." className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:border-amber-500/50" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Inspirational Quote</label>
                     <input value={form.quote} onChange={e => setForm({ ...form, quote: e.target.value })}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:border-amber-500/50" />
+                      placeholder="An inspiring quote..." className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:border-amber-500/50" />
                   </div>
                 </div>
                 <div>

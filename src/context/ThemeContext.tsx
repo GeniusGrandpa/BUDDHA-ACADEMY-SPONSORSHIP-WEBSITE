@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from 'react'
-import type { DesignSettings, DesignColors, DesignTypography, DesignLayout, DesignTokens } from '../types/design'
-import { DEFAULT_COLORS, DEFAULT_TYPOGRAPHY, DEFAULT_LAYOUT, DEFAULT_TOKENS } from '../types/design'
+import type { DesignSettings, DesignColors, DesignBranding, DesignTypography, DesignLayout, DesignTokens, DesignComponentStyles } from '../types/design'
+import { DEFAULT_COLORS, DEFAULT_BRANDING, DEFAULT_TYPOGRAPHY, DEFAULT_LAYOUT, DEFAULT_TOKENS, DEFAULT_COMPONENT_STYLES } from '../types/design'
 import { getPublishedDesignSettings } from '../services/design'
 
 interface ThemeContextValue {
@@ -56,7 +56,6 @@ function generateCSSVariables(settings: DesignSettings | null): string {
 
   const vars: string[] = []
 
-  // Colors
   Object.entries(colors).forEach(([key, value]) => {
     const cssKey = key.replace(/_/g, '-')
     vars.push(`  --color-${cssKey}: ${value};`)
@@ -65,20 +64,14 @@ function generateCSSVariables(settings: DesignSettings | null): string {
       vars.push(`  --color-${cssKey}-rgb: ${rgb.r}, ${rgb.g}, ${rgb.b};`)
     }
   })
-
-  // Auto-generate primary shades
   const primaryShades = generateColorShades(colors.primary)
   primaryShades.forEach((shade, i) => {
     const level = (i + 1) * 100
     vars.push(`  --color-primary-${level}: ${shade};`)
   })
-
-  // Contrast colors
   vars.push(`  --color-text-on-primary: ${getContrastColor(colors.primary)};`)
   vars.push(`  --color-text-on-secondary: ${getContrastColor(colors.secondary)};`)
   vars.push(`  --color-text-on-accent: ${getContrastColor(colors.accent)};`)
-
-  // Typography
   vars.push(`  --font-heading: '${typography.heading_font}', sans-serif;`)
   vars.push(`  --font-body: '${typography.body_font}', sans-serif;`)
   vars.push(`  --font-size-base: ${typography.base_size}px;`)
@@ -98,8 +91,6 @@ function generateCSSVariables(settings: DesignSettings | null): string {
   vars.push(`  --line-height-body: ${typography.body_line_height};`)
   vars.push(`  --text-transform-heading: ${typography.text_transform_heading};`)
   vars.push(`  --text-transform-body: ${typography.text_transform_body};`)
-
-  // Layout
   vars.push(`  --layout-container-width: ${layout.container_width}px;`)
   vars.push(`  --layout-container-padding: ${layout.container_padding_x}px;`)
   vars.push(`  --layout-section-spacing-y: ${layout.section_spacing_y}px;`)
@@ -118,8 +109,6 @@ function generateCSSVariables(settings: DesignSettings | null): string {
   vars.push(`  --animation-duration: ${layout.animation_duration}s;`)
   vars.push(`  --hover-effects: ${layout.hover_effects ? '1' : '0'};`)
   vars.push(`  --website-max-width: ${layout.website_max_width}%;`)
-
-  // Design tokens
   vars.push(`  --spacing-unit: ${tokens.spacing_unit}px;`)
   vars.push(`  --transition-duration: ${tokens.transition_duration}ms;`)
   vars.push(`  --transition-timing: ${tokens.transition_timing};`)

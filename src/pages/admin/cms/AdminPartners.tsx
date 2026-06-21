@@ -159,8 +159,8 @@ export function AdminPartners() {
               {item.website_url && <a href={item.website_url} className="text-xs text-amber-600 hover:underline" target="_blank" rel="noopener noreferrer">{item.website_url}</a>}
             </div>
             <div className="flex items-center gap-2">
-              <button onClick={() => openEdit(item)} className="p-2 text-gray-400 hover:text-amber-600 transition-colors"><Pencil className="w-4 h-4" /></button>
-              <button onClick={() => handleDelete(item)} className="p-2 text-gray-400 hover:text-red-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
+              <button onClick={() => openEdit(item)} aria-label="Edit partner" className="p-2 text-gray-400 hover:text-amber-600 transition-colors"><Pencil className="w-4 h-4" /></button>
+              <button onClick={() => handleDelete(item)} aria-label="Delete partner" className="p-2 text-gray-400 hover:text-red-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
             </div>
           </Reorder.Item>
         ))}
@@ -186,13 +186,13 @@ export function AdminPartners() {
               <Input label="Website URL" value={form.website_url} onChange={e => setForm(prev => ({ ...prev, website_url: e.target.value }))} placeholder="https://..." />
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                <select value={form.partner_type} onChange={e => setForm(prev => ({ ...prev, partner_type: e.target.value as PartnerType }))} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                <select value={form.partner_type} onChange={e => setForm(prev => ({ ...prev, partner_type: e.target.value as PartnerType }))} title="Partner type" className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:border-transparent">
                   {PARTNER_TYPES.map(pt => <option key={pt.value} value={pt.value}>{pt.label}</option>)}
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <textarea value={form.description} onChange={e => setForm(prev => ({ ...prev, description: e.target.value }))} rows={2} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:border-transparent" />
+                <textarea value={form.description} onChange={e => setForm(prev => ({ ...prev, description: e.target.value }))} rows={2} placeholder="Enter description" className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:border-transparent" />
               </div>
               <div className="flex items-center gap-6">
                 <label className="flex items-center gap-2">

@@ -168,8 +168,8 @@ export function AdminNavigationManager() {
               <div className="text-sm text-gray-500 truncate">{item.route || item.url || 'No link'}</div>
             </div>
             <div className="flex items-center gap-2">
-              <button onClick={() => openEdit(item)} className="p-2 text-gray-400 hover:text-amber-600 transition-colors"><Pencil className="w-4 h-4" /></button>
-              <button onClick={() => handleDelete(item)} className="p-2 text-gray-400 hover:text-red-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
+              <button onClick={() => openEdit(item)} aria-label="Edit navigation item" className="p-2 text-gray-400 hover:text-amber-600 transition-colors"><Pencil className="w-4 h-4" /></button>
+              <button onClick={() => handleDelete(item)} aria-label="Delete navigation item" className="p-2 text-gray-400 hover:text-red-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
             </div>
           </Reorder.Item>
         ))}
@@ -192,7 +192,7 @@ export function AdminNavigationManager() {
               {form.is_cta && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">CTA Style</label>
-                  <select value={form.cta_style} onChange={e => setForm(prev => ({ ...prev, cta_style: e.target.value }))} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                  <select value={form.cta_style} onChange={e => setForm(prev => ({ ...prev, cta_style: e.target.value }))} title="CTA style" className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:border-transparent">
                     <option value="">Default</option>
                     <option value="primary">Primary</option>
                     <option value="secondary">Secondary</option>
@@ -208,14 +208,14 @@ export function AdminNavigationManager() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Open in</label>
-                  <select value={form.target} onChange={e => setForm(prev => ({ ...prev, target: e.target.value as '_self' | '_blank' }))} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                  <select value={form.target} onChange={e => setForm(prev => ({ ...prev, target: e.target.value as '_self' | '_blank' }))} title="Link target" className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:border-transparent">
                     <option value="_self">Same Tab</option>
                     <option value="_blank">New Tab</option>
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-                  <select value={form.location} onChange={e => setForm(prev => ({ ...prev, location: e.target.value as NavigationLocation }))} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                  <select value={form.location} onChange={e => setForm(prev => ({ ...prev, location: e.target.value as NavigationLocation }))} title="Navigation location" className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:border-transparent">
                     {LOCATIONS.map(loc => <option key={loc.value} value={loc.value}>{loc.label}</option>)}
                   </select>
                 </div>

@@ -164,17 +164,18 @@ export function AdminStudentsPage() {
                     <td className="px-6 py-4 text-sm text-gray-600">{student.age}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{student.grade}</td>
                     <td className="px-6 py-4">
-                      <Badge variant={student.sponsorship_status} />
+                      <Badge variant={student.sponsorship_status as 'success' | 'warning' | 'default'}>{student.sponsorship_status}</Badge>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">{formatNPR(student.sponsorship_amount)}/mo</td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => openEdit(student)} className="text-gray-400 hover:text-amber-600 transition-colors">
+                        <button onClick={() => openEdit(student)} className="text-gray-400 hover:text-amber-600 transition-colors" aria-label="Edit student">
                           <Edit className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(student.id)}
                           className="text-gray-400 hover:text-red-600 transition-colors"
+                          aria-label="Delete student"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -193,7 +194,7 @@ export function AdminStudentsPage() {
           <div className="bg-white border border-gray-200 rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-4 border-b border-gray-100">
               <h2 className="text-lg font-semibold text-gray-900">{editing ? 'Edit' : 'Add'} Student</h2>
-              <button onClick={() => setShowModal(false)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500">
+              <button onClick={() => setShowModal(false)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500" aria-label="Close">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -202,24 +203,24 @@ export function AdminStudentsPage() {
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1">Name *</label>
                   <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" placeholder="Student name" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1">Age</label>
                   <input type="number" value={form.age || ''} onChange={e => setForm({ ...form, age: parseInt(e.target.value) || 0 })}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" placeholder="Age" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1">Grade *</label>
                   <input value={form.grade} onChange={e => setForm({ ...form, grade: e.target.value })}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" placeholder="Grade" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1">Status</label>
                   <select value={form.sponsorship_status} onChange={e => setForm({ ...form, sponsorship_status: e.target.value as Student['sponsorship_status'] })}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50">
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" title="Sponsorship status">
                     <option value="available">Available</option>
                     <option value="partially_sponsored">Partially Sponsored</option>
                     <option value="fully_sponsored">Fully Sponsored</option>
@@ -229,18 +230,18 @@ export function AdminStudentsPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-600 mb-1">Sponsorship Amount (NPR/mo)</label>
                 <input type="number" value={form.sponsorship_amount || ''} onChange={e => setForm({ ...form, sponsorship_amount: parseInt(e.target.value) || 0 })}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
+                  className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" placeholder="Sponsorship amount" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-600 mb-1">Photo URL</label>
                 <input value={form.photo_url} onChange={e => setForm({ ...form, photo_url: e.target.value })}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
+                  className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" placeholder="https://..." />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-600 mb-1">Bio</label>
                 <textarea value={form.bio} onChange={e => setForm({ ...form, bio: e.target.value })}
                   rows={3}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50 resize-none" />
+                  className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50 resize-none" placeholder="Student biography" />
               </div>
             </div>
             <div className="flex justify-end gap-3 p-4 border-t border-gray-100">

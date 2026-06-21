@@ -89,7 +89,7 @@ export function SuperAdminLayout() {
                   <p className="text-xs text-gray-500">Admin Portal</p>
                 </div>
               </div>
-              <button onClick={() => setSidebarOpen(false)} className="p-1.5 rounded-lg hover:bg-orange-50">
+              <button onClick={() => setSidebarOpen(false)} aria-label="Close sidebar" className="p-1.5 rounded-lg hover:bg-orange-50">
                 <X className="w-5 h-5 text-gray-400" />
               </button>
             </div>
@@ -141,6 +141,7 @@ export function SuperAdminLayout() {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setSidebarOpen(true)}
+                aria-label="Open sidebar"
                 className="lg:hidden p-2 rounded-lg hover:bg-orange-50 text-gray-400"
               >
                 <Menu className="w-5 h-5" />
@@ -155,6 +156,7 @@ export function SuperAdminLayout() {
 
               <button
                 onClick={() => navigate('/admin/notifications')}
+                aria-label="Notifications"
                 className="relative p-2 rounded-lg hover:bg-orange-50 text-gray-400"
               >
                 <Bell className="w-5 h-5" />

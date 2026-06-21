@@ -97,12 +97,12 @@ export function AdminHomepageEditor() {
                 <div className="flex gap-3">
                   <input
                     type="text"
-                    value={value || ''}
+                    value={typeof value === 'string' ? value : ''}
                     onChange={(e) => updateField(key, e.target.value)}
                     className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/30"
                     placeholder="Image URL"
                   />
-                  {value && (
+                  {typeof value === 'string' && value && (
                     <div className="w-16 h-16 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0">
                       <img src={value} alt="" className="w-full h-full object-cover" />
                     </div>
@@ -136,6 +136,7 @@ export function AdminHomepageEditor() {
                 </label>
                 <button
                   onClick={() => updateField(key, !value)}
+                  aria-label={`Toggle ${key.replace(/_/g, ' ')}`}
                   className={`relative w-10 h-5 rounded-full transition-colors ${value ? 'bg-amber-500' : 'bg-gray-200'}`}
                 >
                   <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${value ? 'translate-x-5' : ''}`} />
@@ -163,6 +164,7 @@ export function AdminHomepageEditor() {
                             newVal[idx] = { ...newVal[idx], [subKey]: e.target.value }
                             updateField(key, newVal)
                           }}
+                          placeholder={`Enter ${subKey.replace(/_/g, ' ')}`}
                           className="w-full bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 focus:border-amber-500/50"
                         />
                       </div>
@@ -182,6 +184,7 @@ export function AdminHomepageEditor() {
                 type="text"
                 value={value || ''}
                 onChange={(e) => updateField(key, e.target.value)}
+                placeholder={`Enter ${key.replace(/_/g, ' ')}`}
                 className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/30"
               />
             </div>

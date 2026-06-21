@@ -171,17 +171,17 @@ export function AdminTransparencyContent() {
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1">Title</label>
               <input value={content.title} onChange={e => setContent({ ...content, title: e.target.value })}
-                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
+                placeholder="Page title" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1">Subtitle Badge</label>
               <input value={content.subtitle} onChange={e => setContent({ ...content, subtitle: e.target.value })}
-                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
+                placeholder="e.g. Built on Trust" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1">Description</label>
               <textarea value={content.description} onChange={e => setContent({ ...content, description: e.target.value })}
-                rows={3}
+                rows={3} placeholder="Enter description"
                 className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50 resize-none" />
             </div>
           </div>
@@ -207,7 +207,7 @@ export function AdminTransparencyContent() {
                     className="w-20 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50 text-center" />
                   <span className="text-gray-500 text-sm">%</span>
                 </div>
-                <button onClick={() => removeAllocation(idx)}
+                <button onClick={() => removeAllocation(idx)} aria-label="Remove allocation"
                   className="p-1.5 rounded-lg hover:bg-red-500/10 text-gray-400 hover:text-red-400">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
@@ -233,7 +233,7 @@ export function AdminTransparencyContent() {
                 <input value={stat.value} onChange={e => updateStat(idx, 'value', e.target.value)}
                   placeholder="Value (e.g. 250+)"
                   className="w-32 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50 text-center" />
-                <button onClick={() => removeStat(idx)}
+                <button onClick={() => removeStat(idx)} aria-label="Remove stat"
                   className="p-1.5 rounded-lg hover:bg-red-500/10 text-gray-400 hover:text-red-400">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>

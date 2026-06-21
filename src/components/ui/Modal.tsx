@@ -93,6 +93,7 @@ export function Modal({
                   <button
                     onClick={onClose}
                     className="ml-4 rounded-full p-1 text-white/80 hover:bg-white/20 hover:text-white transition-colors"
+                    aria-label="Close modal"
                   >
                     <X size={18} />
                   </button>
@@ -107,6 +108,7 @@ export function Modal({
                 <button
                   onClick={onClose}
                   className="ml-4 rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+                  aria-label="Close modal"
                 >
                   <X size={18} />
                 </button>

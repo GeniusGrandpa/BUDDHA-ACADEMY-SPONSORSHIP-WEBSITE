@@ -41,6 +41,7 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) =
       exit={{ opacity: 0, y: -20, scale: 0.95 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
       className={`flex items-start gap-3 px-4 py-3 rounded-lg shadow-lg border-l-4 text-white min-w-[320px] max-w-[420px] ${colorMap[toast.type]}`}
+      style={{ '--progress-width': `${progress}%` } as React.CSSProperties}
     >
       <Icon className="w-5 h-5 mt-0.5 shrink-0" />
       <div className="flex-1 min-w-0">
@@ -49,15 +50,13 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) =
       <button
         onClick={() => onRemove(toast.id)}
         className="shrink-0 p-0.5 rounded hover:bg-white/10 transition-colors"
+        aria-label="Close toast"
       >
         <X className="w-4 h-4" />
       </button>
       {toast.duration > 0 && (
         <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white/20 rounded-b-lg overflow-hidden">
-          <div
-            className="h-full bg-white/40 transition-all duration-100 ease-linear"
-            style={{ width: `${progress}%` }}
-          />
+          <div className="h-full bg-white/40 transition-all duration-100 ease-linear w-[var(--progress-width)]" />
         </div>
       )}
     </motion.div>

@@ -8,6 +8,7 @@ import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { LoadingSpinner } from '../components/ui/LoadingSpinner'
 import { formatNPR } from '../utils/currency'
+import type { Donation } from '../types/database'
 import type { DonationWithPayment } from '../types/payments'
 
 const STATUS_STYLES: Record<string, string> = {
@@ -67,17 +68,7 @@ export function DonationHistoryPage() {
   const handleDownloadHistory = () => {
     if (!profile) return
     generateDonationHistoryPDF(
-      donations.map(d => ({
-        id: d.id,
-        donor_id: d.donor_id,
-        student_id: d.student_id,
-        amount: d.amount,
-        frequency: d.frequency,
-        status: d.status === 'completed' ? 'received' : d.status === 'pending' ? 'pledged' : d.status,
-        message: d.message,
-        created_at: d.created_at,
-        updated_at: d.updated_at,
-      })),
+      donations as unknown as Donation[],
       { name: profile.full_name },
     )
   }
@@ -151,6 +142,7 @@ export function DonationHistoryPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
+                title="Filter by status"
                 className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
               >
                 <option value="all">All Status</option>

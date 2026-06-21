@@ -22,14 +22,15 @@ const sectionOptions = [
 ]
 
 export function AdminConfigPage() {
-  const { config: themeConfig, refreshTheme } = useTheme()
+  const { settings, refreshTheme } = useTheme()
+  const themeConfig = settings?.config
   const [sections, setSections] = useState<string[]>([])
   const [visibility, setVisibility] = useState<Record<string, boolean>>({})
   const [sectionVisibilityData, setSectionVisibilityData] = useState<SectionVisibilityEntry[]>([])
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    const featured = themeConfig?.featured_sections as string[] | undefined
+    const featured = (themeConfig as Record<string, unknown>)?.featured_sections as string[] | undefined
     setSections(featured || ['hero', 'stats', 'about', 'students', 'testimonials', 'news', 'cta', 'footer'])
     loadData()
   }, [themeConfig])

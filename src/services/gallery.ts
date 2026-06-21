@@ -9,7 +9,7 @@ export async function getGalleryItems(options?: { type?: string; publishedOnly?:
     .order('created_at', { ascending: false })
 
   if (options?.type && options.type !== 'all') {
-    query = query.eq('type', options.type)
+    query = query.eq('type', options.type as GalleryItem['type'])
   }
 
   if (options?.publishedOnly) {

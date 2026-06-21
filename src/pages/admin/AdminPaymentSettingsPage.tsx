@@ -142,6 +142,7 @@ export function AdminPaymentSettingsPage() {
                   value={newGateway.gateway_name}
                   onChange={(e) => setNewGateway({ ...newGateway, gateway_name: e.target.value as PaymentGateway })}
                   className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500/50"
+                  aria-label="Select gateway"
                 >
                   <option value="">Select gateway...</option>
                   <option value="khalti">khalti</option>
@@ -283,6 +284,7 @@ export function AdminPaymentSettingsPage() {
                     type="text"
                     defaultValue={setting.account_name}
                     className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500/50"
+                    placeholder="Account name"
                     onBlur={(e) => {
                       if (e.target.value !== setting.account_name) {
                         handleUpdate(setting.id, { account_name: e.target.value })
@@ -296,6 +298,7 @@ export function AdminPaymentSettingsPage() {
                     type="text"
                     defaultValue={setting.account_number}
                     className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500/50"
+                    placeholder="Account number"
                     onBlur={(e) => {
                       if (e.target.value !== setting.account_number) {
                         handleUpdate(setting.id, { account_number: e.target.value })
@@ -354,6 +357,7 @@ export function AdminPaymentSettingsPage() {
                     defaultValue={setting.instructions || ''}
                     rows={2}
                     className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-amber-500/50"
+                    placeholder="Payment instructions"
                     onBlur={(e) => {
                       if (e.target.value !== (setting.instructions || '')) {
                         handleUpdate(setting.id, { instructions: e.target.value || null })

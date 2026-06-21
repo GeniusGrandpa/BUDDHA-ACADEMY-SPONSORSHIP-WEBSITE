@@ -30,6 +30,7 @@ export function StudentDetailModal({ student, sponsorship, onClose }: StudentDet
             <button
               onClick={onClose}
               className="absolute top-4 right-4 p-1.5 bg-white/20 rounded-full text-white hover:bg-white/30 transition-colors"
+              aria-label="Close"
             >
               <X className="w-5 h-5" />
             </button>

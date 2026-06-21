@@ -78,7 +78,7 @@ export function StudentsPage() {
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="text-xl font-semibold text-gray-900">{student.name}</h3>
-                      <Badge variant={student.sponsorship_status} />
+                      <Badge variant={student.sponsorship_status as 'success' | 'warning' | 'default'}>{student.sponsorship_status}</Badge>
                     </div>
                     <div className="flex gap-4 text-sm text-gray-600 mb-3">
                       <span>Age: {student.age}</span>

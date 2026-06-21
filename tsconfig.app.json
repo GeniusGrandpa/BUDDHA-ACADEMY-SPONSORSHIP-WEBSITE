@@ -13,10 +13,6 @@
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "moduleDetection": "force",
-    "composite": true,
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "declarationDir": "dist/types",
     "resolveJsonModule": true,
     "jsx": "react-jsx",
     "paths": {
@@ -27,7 +23,8 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true
   },
   "include": [
     "src"

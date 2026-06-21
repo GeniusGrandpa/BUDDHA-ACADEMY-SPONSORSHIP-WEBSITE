@@ -61,10 +61,10 @@ const [form, setForm] = useState({
     }
     try {
       if (editing) {
-        await updateVideo(editing.id, form)
+        await updateVideo(editing.id, form as unknown as Partial<Video>)
         toast.success('Video updated')
       } else {
-        await createVideo(form)
+        await createVideo(form as unknown as Omit<Video, 'id' | 'created_at' | 'updated_at'>)
         toast.success('Video added')
       }
       setShowModal(false)
@@ -197,7 +197,7 @@ const [form, setForm] = useState({
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1">Title *</label>
                   <input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
+                    placeholder="Video title" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1">Video URL *</label>
@@ -208,19 +208,19 @@ const [form, setForm] = useState({
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1">Thumbnail URL</label>
                   <input value={form.thumbnail_url} onChange={e => setForm({ ...form, thumbnail_url: e.target.value })}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
+                    placeholder="https://..." className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1">Description</label>
                   <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}
-                    rows={3}
+                    rows={3} placeholder="Enter description"
                     className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50 resize-none" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-600 mb-1">Type</label>
                     <select value={form.video_type} onChange={e => setForm({ ...form, video_type: e.target.value as VideoType })}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50">
+                      title="Video type" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50">
                       <option value="youtube">YouTube</option>
                       <option value="vimeo">Vimeo</option>
                       <option value="upload">Upload</option>
@@ -229,7 +229,7 @@ const [form, setForm] = useState({
                   <div>
                     <label className="block text-sm font-medium text-gray-600 mb-1">Category</label>
                     <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50">
+                      title="Category" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50">
                       {VIDEO_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                   </div>

@@ -131,12 +131,13 @@ export function AdminThemePresetsPage() {
                   <h3 className="font-semibold text-[var(--color-text-primary)]">{preset.name}</h3>
                   {preset.description && <p className="text-sm text-[var(--color-text-secondary)] mt-0.5">{preset.description}</p>}
                 </div>
-                <button onClick={() => handleDeletePreset(preset.id, preset.name)} className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:bg-red-50 hover:text-red-500">
+                <button onClick={() => handleDeletePreset(preset.id, preset.name)} aria-label={`Delete preset ${preset.name}`} className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:bg-red-50 hover:text-red-500">
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
               <div className="flex gap-1.5">
                 <div className="w-5 h-5 rounded" style={{ backgroundColor: preset.colors.primary }} />
+                {/* dynamic preset colors cannot be expressed as Tailwind classes */}
                 <div className="w-5 h-5 rounded" style={{ backgroundColor: preset.colors.secondary }} />
                 <div className="w-5 h-5 rounded" style={{ backgroundColor: preset.colors.accent }} />
                 <div className="w-5 h-5 rounded" style={{ backgroundColor: preset.colors.background }} />

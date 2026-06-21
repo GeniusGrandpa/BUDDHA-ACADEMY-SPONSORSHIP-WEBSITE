@@ -111,6 +111,7 @@ export function AdminDonationsPage() {
                         value={donation.status}
                         onChange={(e) => handleStatusChange(donation.id, e.target.value as Donation['status'])}
                         className="text-sm border rounded px-2 py-1"
+                        aria-label="Change donation status"
                       >
                         {statusOptions.map(opt => (
                           <option key={opt.value} value={opt.value}>{opt.label}</option>

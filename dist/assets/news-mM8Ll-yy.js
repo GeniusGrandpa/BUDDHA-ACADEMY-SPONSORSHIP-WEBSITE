@@ -1,1 +1,0 @@
-import{t as e}from"./supabase-Cb6slmgw.js";var t=e();async function n(e){let n=t.from(`news`).select(`*`).eq(`published`,!0).order(`published_at`,{ascending:!1});e&&e!==`all`&&(n=n.eq(`category`,e));let{data:r,error:i}=await n;if(i)throw i;return r||[]}async function r(e){let{error:n}=await t.from(`news`).delete().eq(`id`,e);if(n)throw n}export{n,r as t};

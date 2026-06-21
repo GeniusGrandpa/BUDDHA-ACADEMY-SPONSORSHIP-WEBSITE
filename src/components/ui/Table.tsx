@@ -158,6 +158,7 @@ export function Table<T extends Record<string, unknown>>({
                     checked={allSelected}
                     onChange={toggleAll}
                     className="h-4 w-4 rounded border-gray-300 text-amber-500 focus:ring-amber-400"
+                    aria-label="Select all rows"
                   />
                 </th>
               )}
@@ -207,6 +208,7 @@ export function Table<T extends Record<string, unknown>>({
                         checked={selected}
                         onChange={() => toggleRow(id)}
                         className="h-4 w-4 rounded border-gray-300 text-amber-500 focus:ring-amber-400"
+                        aria-label="Select row"
                       />
                     </td>
                   )}
@@ -233,6 +235,7 @@ export function Table<T extends Record<string, unknown>>({
               onClick={() => setPage((p) => Math.max(0, p - 1))}
               disabled={safePage === 0}
               className="rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+              aria-label="Previous page"
             >
               <ChevronLeft size={16} />
             </button>
@@ -245,6 +248,7 @@ export function Table<T extends Record<string, unknown>>({
                     ? 'bg-amber-500 text-white'
                     : 'text-gray-500 hover:bg-gray-100'
                 }`}
+                aria-label={`Page ${i + 1}`}
               >
                 {i + 1}
               </button>
@@ -253,6 +257,7 @@ export function Table<T extends Record<string, unknown>>({
               onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
               disabled={safePage === totalPages - 1}
               className="rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+              aria-label="Next page"
             >
               <ChevronRight size={16} />
             </button>

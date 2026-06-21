@@ -12,13 +12,13 @@ export async function getAnnouncements(activeOnly?: boolean): Promise<Announceme
   }
   const { data, error } = await query
   if (error) throw error
-  return data || []
+  return (data || []) as Announcement[]
 }
 
 export async function getAnnouncementById(id: string): Promise<Announcement | null> {
   const { data, error } = await supabase.from('announcements').select('*').eq('id', id).maybeSingle()
   if (error) throw error
-  return data
+  return data as Announcement | null
 }
 
 export async function createAnnouncement(item: Omit<Announcement, 'id' | 'created_at' | 'updated_at'>): Promise<Announcement> {
@@ -26,14 +26,14 @@ export async function createAnnouncement(item: Omit<Announcement, 'id' | 'create
   const { data, error } = await supabase.from('announcements').insert({ ...item, created_by: userId }).select().single()
   if (error) throw error
   await logAuditEvent({ action: `Created announcement: ${data.title}`, entityType: 'announcements', entityId: data.id })
-  return data
+  return data as Announcement
 }
 
 export async function updateAnnouncement(id: string, updates: Partial<Announcement>): Promise<Announcement> {
   const { data, error } = await supabase.from('announcements').update(updates).eq('id', id).select().single()
   if (error) throw error
   await logAuditEvent({ action: `Updated announcement: ${data.title}`, entityType: 'announcements', entityId: id })
-  return data
+  return data as Announcement
 }
 
 export async function deleteAnnouncement(id: string): Promise<void> {

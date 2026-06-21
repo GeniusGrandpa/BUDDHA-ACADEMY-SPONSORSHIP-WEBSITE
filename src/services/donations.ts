@@ -20,6 +20,7 @@ export async function getDonationsByDonor(donorId: string): Promise<Donation[]> 
 export async function getAllDonations(): Promise<Donation[]> {
   const { data, error } = await supabase
     .from('donations')
+    .select('*')
     .order('created_at', { ascending: false })
 
   if (error) throw error

@@ -156,19 +156,19 @@ const [form, setForm] = useState({ question: '', answer: '', category: 'General'
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1">Question *</label>
                   <textarea value={form.question} onChange={e => setForm({ ...form, question: e.target.value })}
-                    rows={2}
+                    rows={2} placeholder="Enter question"
                     className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50 resize-none" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1">Answer *</label>
                   <textarea value={form.answer} onChange={e => setForm({ ...form, answer: e.target.value })}
-                    rows={5}
+                    rows={5} placeholder="Enter answer"
                     className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50 resize-vertical" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1">Category</label>
                   <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50">
+                    title="Category" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50">
                     {FAQ_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>

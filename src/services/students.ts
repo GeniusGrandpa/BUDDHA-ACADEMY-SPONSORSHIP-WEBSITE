@@ -11,7 +11,7 @@ export async function getStudents(status?: string): Promise<Student[]> {
     .order('created_at', { ascending: false })
 
   if (status && status !== 'all') {
-    query = query.eq('sponsorship_status', status)
+    query = query.eq('sponsorship_status', status as Student['sponsorship_status'])
   }
 
   const { data, error } = await query

@@ -107,12 +107,13 @@ export function AdminGalleryPage() {
                     >
                       {item.is_published ? 'Unpublish' : 'Publish'}
                     </button>
-                    <button className="hover:text-amber-600">
+                    <button className="hover:text-amber-600" aria-label="Edit">
                       <Edit className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(item.id)}
                       className="hover:text-red-600"
+                      aria-label="Delete"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>

@@ -163,6 +163,7 @@ export function HomePage() {
             opacity: heroBgReady ? 1 : 0,
           }}
         />
+
         <div className="absolute inset-0 bg-gradient-to-r from-stone-950/80 via-stone-950/60 to-transparent" />
         {!heroBgReady && <div className="absolute inset-0 bg-stone-800" />}
 

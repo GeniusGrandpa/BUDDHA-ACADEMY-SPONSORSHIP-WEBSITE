@@ -5718,4 +5718,22 @@ CREATE POLICY "users_view_own_activities"
   TO authenticated
   USING (user_id = auth.uid());
 CREATE INDEX IF NOT EXISTS idx_security_events_severity ON security_events(severity);
-CREATE INDEX IF NOT EXISTS idx_security_events_type ON security_events(event_type);
+CREATE INDEX IF NOT EXISTS idx_security_events_type ON security_events(event_type);CREATE TABLE IF NOT EXISTS public.webhook_logs (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  gateway text NOT NULL,
+  payload jsonb NOT NULL DEFAULT '{}',
+  headers jsonb NOT NULL DEFAULT '{}',
+  processed boolean NOT NULL DEFAULT false,
+  received_at timestamptz NOT NULL DEFAULT now(),
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.webhook_logs ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "super_admin_only_webhook_logs"
+  ON public.webhook_logs
+  FOR ALL
+  TO authenticated
+  USING (
+    (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'super_admin'
+  );

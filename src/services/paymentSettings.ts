@@ -11,7 +11,7 @@ export async function getActivePaymentSettings(): Promise<PaymentSetting[]> {
     .order('sort_order', { ascending: true })
 
   if (error) throw error
-  return data || []
+  return (data || []) as unknown as PaymentSetting[]
 }
 
 export async function getAllPaymentSettings(): Promise<PaymentSetting[]> {
@@ -21,7 +21,7 @@ export async function getAllPaymentSettings(): Promise<PaymentSetting[]> {
     .order('sort_order', { ascending: true })
 
   if (error) throw error
-  return data || []
+  return (data || []) as unknown as PaymentSetting[]
 }
 
 export async function updatePaymentSetting(
@@ -44,7 +44,7 @@ export async function updatePaymentSetting(
     changes: updates,
   })
 
-  return data
+  return data as unknown as PaymentSetting
 }
 
 export async function createPaymentSetting(
@@ -65,7 +65,7 @@ export async function createPaymentSetting(
     metadata: setting,
   })
 
-  return data
+  return data as unknown as PaymentSetting
 }
 
 export async function togglePaymentGateway(
@@ -114,5 +114,5 @@ export async function getPaymentSettingByGateway(
     .single()
 
   if (error) return null
-  return data
+  return data as unknown as PaymentSetting | null
 }

@@ -7,10 +7,10 @@ import type {
   SectionVisibilityEntry,
   DesignSettingsCategory,
 } from '../types/design'
+import type { Database, Json } from '../types/database'
 
 const supabase = getSupabaseClient()
 
-// ==================== DESIGN SETTINGS ====================
 
 export async function getPublishedDesignSettings(): Promise<DesignSettings | null> {
   const { data, error } = await supabase
@@ -40,51 +40,46 @@ export async function upsertDesignSettings(
   const existing = await getDesignSettings()
 
   if (existing) {
-    const updates: Record<string, unknown> = { updated_by: userId }
-    if (settings.branding !== undefined) updates.branding = settings.branding
-    if (settings.colors !== undefined) updates.colors = settings.colors
-    if (settings.typography !== undefined) updates.typography = settings.typography
-    if (settings.layout !== undefined) updates.layout = settings.layout
-    if (settings.component_styles !== undefined) updates.component_styles = settings.component_styles
-    if (settings.tokens !== undefined) updates.tokens = settings.tokens
-    if (settings.config !== undefined) updates.config = settings.config
-    if (settings.publish) {
-      updates.is_published = true
-      updates.published_at = new Date().toISOString()
-    }
-
     const { data, error } = await supabase
       .from('design_settings')
-      .update(updates)
+      .update({
+        updated_by: userId,
+        ...(settings.branding !== undefined ? { branding: settings.branding as unknown as Json } : {}),
+        ...(settings.colors !== undefined ? { colors: settings.colors as unknown as Json } : {}),
+        ...(settings.typography !== undefined ? { typography: settings.typography as unknown as Json } : {}),
+        ...(settings.layout !== undefined ? { layout: settings.layout as unknown as Json } : {}),
+        ...(settings.component_styles !== undefined ? { component_styles: settings.component_styles as unknown as Json } : {}),
+        ...(settings.tokens !== undefined ? { tokens: settings.tokens as unknown as Json } : {}),
+        ...(settings.config !== undefined ? { config: settings.config as unknown as Json } : {}),
+        ...(settings.publish ? { is_published: true, published_at: new Date().toISOString() } : {}),
+      })
       .eq('id', existing.id)
       .select()
       .single()
     if (error) throw error
     await logAuditEvent({ action: 'Updated design settings', entityType: 'design_settings', entityId: existing.id })
-    return data as DesignSettings
+    return data as unknown as DesignSettings
   }
-
-  const insertData: Record<string, unknown> = {
-    branding: settings.branding || {},
-    colors: settings.colors || {},
-    typography: settings.typography || {},
-    layout: settings.layout || {},
-    component_styles: settings.component_styles || {},
-    tokens: settings.tokens || {},
-    config: settings.config || {},
-    is_published: settings.publish || false,
-    updated_by: userId,
-  }
-  if (settings.publish) insertData.published_at = new Date().toISOString()
 
   const { data, error } = await supabase
     .from('design_settings')
-    .insert(insertData)
+    .insert({
+      branding: (settings.branding || {}) as unknown as Json,
+      colors: (settings.colors || {}) as unknown as Json,
+      typography: (settings.typography || {}) as unknown as Json,
+      layout: (settings.layout || {}) as unknown as Json,
+      component_styles: (settings.component_styles || {}) as unknown as Json,
+      tokens: (settings.tokens || {}) as unknown as Json,
+      config: (settings.config || {}) as unknown as Json,
+      is_published: settings.publish || false,
+      updated_by: userId,
+      ...(settings.publish ? { published_at: new Date().toISOString() } : {}),
+    })
     .select()
     .single()
   if (error) throw error
   await logAuditEvent({ action: 'Created design settings', entityType: 'design_settings', entityId: data.id })
-  return data as DesignSettings
+  return data as unknown as DesignSettings
 }
 
 export async function saveDraft(
@@ -93,27 +88,29 @@ export async function saveDraft(
 ): Promise<void> {
   const existing = await getDesignSettings()
   if (!existing) {
-    const insertData: Record<string, unknown> = {
-      branding: {},
-      colors: {},
-      typography: {},
-      layout: {},
-      component_styles: {},
-      tokens: {},
-      config: {},
-      draft: { [category]: values },
-    }
-    insertData[category] = values
-    await supabase.from('design_settings').insert(insertData)
+    await supabase.from('design_settings').insert({
+      branding: {} as Json,
+      colors: {} as Json,
+      typography: {} as Json,
+      layout: {} as Json,
+      component_styles: {} as Json,
+      tokens: {} as Json,
+      config: {} as Json,
+      draft: { [category]: values } as unknown as Json,
+      [category]: values as unknown as Json,
+    } as unknown as Database['public']['Tables']['design_settings']['Insert'])
     return
   }
 
   const draft = { ...((existing.draft as Record<string, unknown>) || {}), [category]: values }
-  const categoryUpdate = { [category]: values }
 
   await supabase
     .from('design_settings')
-    .update({ ...categoryUpdate, draft, updated_by: (await supabase.auth.getSession()).data.session?.user?.id })
+    .update({
+      [category]: values as unknown as Json,
+      draft: draft as unknown as Json,
+      updated_by: (await supabase.auth.getSession()).data.session?.user?.id,
+    } as unknown as Database['public']['Tables']['design_settings']['Update'])
     .eq('id', existing.id)
 }
 
@@ -134,12 +131,12 @@ export async function publishDesignSettings(): Promise<DesignSettings> {
     .single()
   if (error) throw error
   await logAuditEvent({ action: 'Published design settings', entityType: 'design_settings', entityId: existing.id })
-  return data as DesignSettings
+  return data as unknown as DesignSettings
 }
 
 export async function resetToDefaultDesignSettings(): Promise<DesignSettings> {
-  const { data, error } = await supabase
-    .rpc('reset_design_settings')
+  const { data, error } = await (supabase
+    .rpc('reset_design_settings') as unknown as Promise<{ data: DesignSettings; error: unknown }>)
   if (error) {
     const existing = await getDesignSettings()
     if (existing) {
@@ -149,10 +146,9 @@ export async function resetToDefaultDesignSettings(): Promise<DesignSettings> {
     }
     throw error
   }
-  return data as DesignSettings
+  return data as unknown as DesignSettings
 }
 
-// ==================== THEME PRESETS ====================
 
 export async function getThemePresets(): Promise<ThemePreset[]> {
   const { data, error } = await supabase
@@ -161,7 +157,7 @@ export async function getThemePresets(): Promise<ThemePreset[]> {
     .order('sort_order', { ascending: true })
     .order('name', { ascending: true })
   if (error) throw error
-  return (data || []) as ThemePreset[]
+  return (data || []) as unknown as ThemePreset[]
 }
 
 export async function saveThemePreset(
@@ -170,12 +166,12 @@ export async function saveThemePreset(
   const userId = (await supabase.auth.getSession()).data.session?.user?.id
   const { data, error } = await supabase
     .from('theme_presets')
-    .insert({ ...preset, created_by: userId })
+    .insert({ ...preset, created_by: userId } as unknown as Database['public']['Tables']['theme_presets']['Insert'])
     .select()
     .single()
   if (error) throw error
   await logAuditEvent({ action: `Saved theme preset: ${preset.name}`, entityType: 'theme_presets', entityId: data.id })
-  return data as ThemePreset
+  return data as unknown as ThemePreset
 }
 
 export async function deleteThemePreset(id: string): Promise<void> {
@@ -192,7 +188,7 @@ export async function applyThemePreset(id: string): Promise<DesignSettings> {
     .single()
   if (fetchError) throw fetchError
 
-  const p = preset as ThemePreset
+  const p = preset as unknown as ThemePreset
   return upsertDesignSettings({
     branding: p.branding,
     colors: p.colors,
@@ -205,7 +201,6 @@ export async function applyThemePreset(id: string): Promise<DesignSettings> {
   })
 }
 
-// ==================== WEBSITE CONFIG ====================
 
 export async function getWebsiteConfigs(): Promise<WebsiteConfigEntry[]> {
   const { data, error } = await supabase
@@ -213,7 +208,7 @@ export async function getWebsiteConfigs(): Promise<WebsiteConfigEntry[]> {
     .select('*')
     .order('label', { ascending: true })
   if (error) throw error
-  return (data || []) as WebsiteConfigEntry[]
+  return (data || []) as unknown as WebsiteConfigEntry[]
 }
 
 export async function getWebsiteConfig(key: string): Promise<WebsiteConfigEntry | null> {
@@ -223,7 +218,7 @@ export async function getWebsiteConfig(key: string): Promise<WebsiteConfigEntry 
     .eq('key', key)
     .maybeSingle()
   if (error) throw error
-  return data as WebsiteConfigEntry | null
+  return data as unknown as WebsiteConfigEntry | null
 }
 
 export async function upsertWebsiteConfig(key: string, label: string, value: Record<string, unknown>, isActive = true): Promise<WebsiteConfigEntry> {
@@ -233,25 +228,24 @@ export async function upsertWebsiteConfig(key: string, label: string, value: Rec
   if (existing) {
     const { data, error } = await supabase
       .from('website_config')
-      .update({ value, is_active: isActive, updated_by: userId })
+      .update({ value: value as unknown as Json, is_active: isActive, updated_by: userId })
       .eq('id', existing.id)
       .select()
       .single()
     if (error) throw error
-    return data as WebsiteConfigEntry
+    return data as unknown as WebsiteConfigEntry
   }
 
   const { data, error } = await supabase
     .from('website_config')
-    .insert({ key, label, value, is_active: isActive, updated_by: userId })
+    .insert({ key, label, value: value as unknown as Json, is_active: isActive, updated_by: userId })
     .select()
     .single()
   if (error) throw error
   await logAuditEvent({ action: `Created website config: ${key}`, entityType: 'website_config', entityId: data.id })
-  return data as WebsiteConfigEntry
+  return data as unknown as WebsiteConfigEntry
 }
 
-// ==================== SECTION VISIBILITY ====================
 
 export async function getSectionVisibility(): Promise<SectionVisibilityEntry[]> {
   const { data, error } = await supabase
@@ -259,7 +253,7 @@ export async function getSectionVisibility(): Promise<SectionVisibilityEntry[]> 
     .select('*')
     .order('section_key', { ascending: true })
   if (error) throw error
-  return (data || []) as SectionVisibilityEntry[]
+  return (data || []) as unknown as SectionVisibilityEntry[]
 }
 
 export async function updateSectionVisibility(id: string, isVisible: boolean): Promise<SectionVisibilityEntry> {
@@ -271,18 +265,21 @@ export async function updateSectionVisibility(id: string, isVisible: boolean): P
     .select()
     .single()
   if (error) throw error
-  return data as SectionVisibilityEntry
+  return data as unknown as SectionVisibilityEntry
 }
 
 export async function resetDesignSettingsToDefaults(): Promise<void> {
-  const { default: defaults } = await import('../types/design')
+  const {
+    DEFAULT_BRANDING, DEFAULT_COLORS, DEFAULT_TYPOGRAPHY,
+    DEFAULT_LAYOUT, DEFAULT_COMPONENT_STYLES, DEFAULT_TOKENS,
+  } = await import('../types/design')
   await upsertDesignSettings({
-    branding: defaults.DEFAULT_BRANDING,
-    colors: defaults.DEFAULT_COLORS,
-    typography: defaults.DEFAULT_TYPOGRAPHY,
-    layout: defaults.DEFAULT_LAYOUT,
-    component_styles: defaults.DEFAULT_COMPONENT_STYLES,
-    tokens: defaults.DEFAULT_TOKENS,
+    branding: DEFAULT_BRANDING,
+    colors: DEFAULT_COLORS,
+    typography: DEFAULT_TYPOGRAPHY,
+    layout: DEFAULT_LAYOUT,
+    component_styles: DEFAULT_COMPONENT_STYLES,
+    tokens: DEFAULT_TOKENS,
     publish: true,
   })
 }

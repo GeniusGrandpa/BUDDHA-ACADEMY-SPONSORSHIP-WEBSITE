@@ -4,6 +4,32 @@ import { Button } from '../ui/Button'
 import { Card } from '../ui/Card'
 import type { PageBlock } from '../../types/cms'
 
+interface BlockContent {
+  preTitle?: string
+  title?: string
+  highlight?: string
+  description?: string
+  primaryText?: string
+  secondaryText?: string
+  primaryLink?: string
+  secondaryLink?: string
+  html_tag?: string
+  subtitle?: string
+  body?: string
+  image_url?: string
+  alt_text?: string
+  caption?: string
+  max_height?: number
+  video_url?: string
+  thumbnail_url?: string
+  html?: string
+  donate_link?: string
+  button_text?: string
+  items?: Array<Record<string, unknown>>
+  images?: Array<Record<string, unknown>>
+  [key: string]: unknown
+}
+
 interface BlockRendererProps {
   block: PageBlock
 }
@@ -16,11 +42,12 @@ export function BlockRenderer({ block }: BlockRendererProps) {
     paddingTop: settings?.padding_top || '4rem',
     paddingBottom: settings?.padding_bottom || '4rem',
   }
+  // Inline styles for sectionStyle use dynamic CMS values that cannot be expressed as Tailwind classes
 
   const textAlign = (settings?.text_alignment as 'left' | 'center' | 'right') || 'left'
   const maxWidth = settings?.max_width || 'max-w-7xl'
 
-  const content = block.content || {}
+  const content = (block.content || {}) as BlockContent
 
   switch (block.type) {
     case 'hero':

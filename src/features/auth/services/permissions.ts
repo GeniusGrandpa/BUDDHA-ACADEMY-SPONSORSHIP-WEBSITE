@@ -131,17 +131,17 @@ export function canAccessSection(userRole: Role | undefined | null, section: str
     case 'roles':
     case 'audit':
     case 'super_admin':
-      return userRole === 'super_admin'
+      return (userRole as string) === 'super_admin'
     default:
       return false
   }
 }
 
 export async function fetchUserPermissions(userId: string): Promise<PermissionCode[]> {
-  const { data, error } = await supabase.rpc('get_user_permissions', { user_id: userId })
+  const { data, error } = await (supabase.rpc('get_user_permissions' as never, { user_id: userId } as never) as unknown as { data: PermissionCode[]; error: unknown })
   if (error) {
     console.error('Error fetching permissions:', error)
     return []
   }
-  return data as PermissionCode[]
+  return data as unknown as PermissionCode[]
 }

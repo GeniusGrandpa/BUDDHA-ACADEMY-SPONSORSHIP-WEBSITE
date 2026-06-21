@@ -10,7 +10,8 @@ import type {
   ActivityItem,
 } from '../../../types/features'
 
-export interface EnhancedDashboardData extends DashboardData {
+export interface EnhancedDashboardData extends Omit<DashboardData, 'donorStats'> {
+  donorStats: DonorStats | null
   donorImpact: DonorImpact | null
   impactMetrics: ImpactMetric[]
   studentProgress: StudentProgress[]
@@ -64,7 +65,7 @@ export function useDashboardData(userId: string | undefined) {
   const [data, setData] = useState<EnhancedDashboardData>({
     donations: [],
     sponsorships: [],
-    donorStats: null,
+    donorStats: null as DonorStats | null,
     loading: true,
     error: null,
     donorImpact: null,
@@ -155,7 +156,7 @@ export function useDashboardData(userId: string | undefined) {
         notifCountResult,
         activitiesResult,
       ] = await Promise.all([
-        supabase.rpc('get_donor_dashboard_stats' as never, { p_donor_id: userId }).catch(() => ({ data: null, error: null })),
+        supabase.rpc('get_donor_dashboard_stats', { p_donor_id: userId }).then(r => r, () => ({ data: null, error: null })),
         supabase
           .from('impact_metrics')
           .select('*')
@@ -208,7 +209,7 @@ export function useDashboardData(userId: string | undefined) {
       setData({
         donations: [],
         sponsorships: [],
-        donorStats: null,
+        donorStats: null as DonorStats | null,
         loading: false,
         error: 'Failed to load dashboard data.',
         donorImpact: null,

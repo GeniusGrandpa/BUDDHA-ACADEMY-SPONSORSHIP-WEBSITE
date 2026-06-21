@@ -21,6 +21,7 @@ export function AuthLayout({ children, heroContent }: AuthLayoutProps) {
             backgroundSize: '32px 32px',
           }}
         />
+        {/* style="backgroundImage" with radial-gradient cannot be expressed as arbitrary value */}
         <div className="relative z-10 flex flex-col justify-between h-full p-12 lg:p-16 xl:p-20">
           {heroContent}
         </div>

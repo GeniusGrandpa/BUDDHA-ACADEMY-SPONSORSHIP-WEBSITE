@@ -99,12 +99,13 @@ export function AdminNewsPage() {
                     <td className="px-6 py-4 text-sm text-gray-600">{formatDate(article.published_at)}</td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button className="text-gray-400 hover:text-amber-600 transition-colors">
+                        <button className="text-gray-400 hover:text-amber-600 transition-colors" aria-label="Edit article">
                           <Edit className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(article.id)}
                           className="text-gray-400 hover:text-red-600 transition-colors"
+                          aria-label="Delete article"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

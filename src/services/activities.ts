@@ -1,5 +1,5 @@
 import { getSupabaseClient } from '../lib/supabase'
-import type { ActivityRow } from '../types/database'
+import type { ActivityRow, Json } from '../types/database'
 const supabase = getSupabaseClient()
 
 export async function getPublicActivities(limit = 20): Promise<ActivityRow[]> {
@@ -49,7 +49,7 @@ export async function createActivity(params: {
     activity_type: params.activityType,
     title: params.title,
     description: params.description || null,
-    metadata: params.metadata || null,
+    metadata: (params.metadata || null) as Json,
     entity_type: params.entityType || null,
     entity_id: params.entityId || null,
     is_public: params.isPublic || false,

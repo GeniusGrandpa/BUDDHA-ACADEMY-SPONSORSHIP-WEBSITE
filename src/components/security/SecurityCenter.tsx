@@ -3,17 +3,19 @@ import { Shield, LogOut, AlertTriangle, CheckCircle, XCircle } from 'lucide-reac
 import { motion } from 'framer-motion'
 import { supabase } from '../../lib/supabase'
 import toast from 'react-hot-toast'
+import type { Json } from '../../types/database'
 
 interface Session {
   id: string
   user_id: string
   ip_address: string | null
   user_agent: string | null
-  device_info: Record<string, unknown> | null
+  device_info: Json
   location: string | null
   is_active: boolean
   last_activity: string
   created_at: string
+  expired_at: string | null
 }
 
 interface LoginRecord {
@@ -134,7 +136,7 @@ export function SecurityCenter() {
                   <div className="flex items-center gap-3">
                     <div>
                     <p className="text-sm font-medium text-gray-900">
-                      {session.device_info?.browser || session.user_agent?.split('/')[0] || 'Unknown Device'}
+                      {String((session.device_info as Record<string, string>)?.browser || session.user_agent?.split('/')[0] || 'Unknown Device')}
                     </p>
                     <p className="text-xs text-gray-500">
                       {session.location || 'Unknown location'} &middot; {session.ip_address || 'No IP'}

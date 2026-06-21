@@ -56,14 +56,14 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50" style={{ backgroundColor: 'var(--color-navbar-bg)', borderBottom: '1px solid var(--color-border)' }}>
+    <header className="sticky top-0 z-50 bg-[var(--color-navbar-bg)] border-b border-[var(--color-border)]">
       <div className="w-full px-6 sm:px-10 lg:px-16 xl:px-24">
         <div className="flex justify-between items-center h-24">
           <Link to="/" className="flex items-center space-x-4">
-            <img src={logoUrl || branding.logo_url || fallbackLogo} alt={siteName || branding.organization_name} className="h-14 w-auto drop-shadow-sm" loading="eager" fetchpriority="high" />
+            <img src={logoUrl || branding.logo_url || fallbackLogo} alt={siteName || branding.organization_name} className="h-14 w-auto drop-shadow-sm" loading="eager" fetchPriority="high" />
             <div className="hidden sm:block">
-              <div className="font-semibold" style={{ color: 'var(--color-navbar-text)' }}>{siteName || branding.organization_name}</div>
-              <div className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{branding.tagline}</div>
+              <div className="font-semibold text-[var(--color-navbar-text)]">{siteName || branding.organization_name}</div>
+              <div className="text-xs text-[var(--color-text-muted)]">{branding.tagline}</div>
             </div>
           </Link>
 
@@ -72,8 +72,7 @@ export function Header() {
               if (item.isCta) {
                 return (
                   <Link key={item.href} to={item.href} target={item.target}
-                    style={{ backgroundColor: 'var(--color-button-primary-bg)', color: 'var(--color-button-primary-text)' }}
-                    className="px-5 py-2.5 rounded-full font-medium text-sm transition-colors hover:opacity-90">
+                    className="px-5 py-2.5 rounded-full font-medium text-sm transition-colors hover:opacity-90 bg-[var(--color-button-primary-bg)] text-[var(--color-button-primary-text)]">
                     {item.name}
                   </Link>
                 )
@@ -83,10 +82,7 @@ export function Header() {
                   key={item.href}
                   to={item.href}
                   target={item.target}
-                  className="text-sm font-medium transition-colors hover:opacity-80"
-                  style={{
-                    color: isActive(item.href) ? 'var(--color-navbar-active)' : 'var(--color-navbar-text)',
-                  }}
+                  className={`text-sm font-medium transition-colors hover:opacity-80 ${isActive(item.href) ? 'text-[var(--color-navbar-active)]' : 'text-[var(--color-navbar-text)]'}`}
                 >
                   {item.name}
                 </Link>
@@ -101,62 +97,54 @@ export function Header() {
               <div className="flex items-center gap-5">
                 {(profile?.role === 'admin' || profile?.role === 'super_admin') && (
                   <Link to={profile?.role === 'super_admin' ? '/super-admin' : '/admin'}
-                    className="text-sm font-medium transition-colors hover:opacity-80"
-                    style={{ color: 'var(--color-navbar-text)' }}>
+                    className="text-sm font-medium transition-colors hover:opacity-80 text-[var(--color-navbar-text)]">
                     {t('nav.admin')}
                   </Link>
                 )}
                 <Link to="/dashboard"
-                  className="text-sm font-medium transition-colors hover:opacity-80"
-                  style={{ color: 'var(--color-navbar-text)' }}>
+                  className="text-sm font-medium transition-colors hover:opacity-80 text-[var(--color-navbar-text)]">
                   {t('nav.dashboard')}
                 </Link>
                 <button onClick={handleSignOut}
-                  className="text-sm font-medium transition-colors hover:opacity-80"
-                  style={{ color: 'var(--color-navbar-text)' }}>
+                  className="text-sm font-medium transition-colors hover:opacity-80 text-[var(--color-navbar-text)]">
                   {t('auth.signOut')}
                 </button>
               </div>
             ) : (
               <Link to="/login"
-                className="text-sm font-medium transition-colors hover:opacity-80"
-                style={{ color: 'var(--color-navbar-text)' }}>
+                className="text-sm font-medium transition-colors hover:opacity-80 text-[var(--color-navbar-text)]">
                 {t('auth.signIn')}
               </Link>
             )}
 
             <Link to="/donate"
-              style={{ backgroundColor: 'var(--color-button-primary-bg)', color: 'var(--color-button-primary-text)' }}
-              className="px-5 py-2.5 rounded-full font-medium text-sm transition-colors hover:opacity-90">
+              className="px-5 py-2.5 rounded-full font-medium text-sm transition-colors hover:opacity-90 bg-[var(--color-button-primary-bg)] text-[var(--color-button-primary-text)]">
               {t('footer.makeDonation')}
             </Link>
           </div>
 
-          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="lg:hidden p-2" style={{ color: 'var(--color-navbar-text)' }}>
+          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="lg:hidden p-2 text-[var(--color-navbar-text)]">
             {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
 
         {isMenuOpen && (
-          <div className="lg:hidden py-4" style={{ borderTop: '1px solid var(--color-border)' }}>
+          <div className="lg:hidden py-4 border-t border-[var(--color-border)]">
             <nav className="space-y-2">
               {navigation.map((item) => (
                 <Link
                   key={item.href}
                   to={item.href}
                   onClick={() => setIsMenuOpen(false)}
-                  className="block px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-                  style={{
-                    backgroundColor: isActive(item.href) ? 'var(--color-navbar-hover)' : 'transparent',
-                    color: isActive(item.href) ? 'var(--color-navbar-active)' : 'var(--color-navbar-text)',
-                  }}
+                  className={`block px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    isActive(item.href) ? 'bg-[var(--color-navbar-hover)] text-[var(--color-navbar-active)]' : 'bg-transparent text-[var(--color-navbar-text)]'
+                  }`}
                 >
                   {item.name}
                 </Link>
               ))}
               <Link to="/donate" onClick={() => setIsMenuOpen(false)}
-                style={{ backgroundColor: 'var(--color-button-primary-bg)', color: 'var(--color-button-primary-text)' }}
-                className="block px-4 py-2 rounded-lg text-sm font-medium text-center">
+                className="block px-4 py-2 rounded-lg text-sm font-medium text-center bg-[var(--color-button-primary-bg)] text-[var(--color-button-primary-text)]">
                 {t('footer.makeDonation')}
               </Link>
               <LanguageSwitcher mobile />
@@ -165,26 +153,22 @@ export function Header() {
                   {(profile?.role === 'admin' || profile?.role === 'super_admin') && (
                     <Link to={profile?.role === 'super_admin' ? '/super-admin' : '/admin'}
                       onClick={() => setIsMenuOpen(false)}
-                      className="block px-4 py-2 rounded-lg text-sm font-medium"
-                      style={{ color: 'var(--color-navbar-text)' }}>
+                      className="block px-4 py-2 rounded-lg text-sm font-medium text-[var(--color-navbar-text)]">
                       {t('nav.admin')}
                     </Link>
                   )}
                   <Link to="/dashboard" onClick={() => setIsMenuOpen(false)}
-                    className="block px-4 py-2 rounded-lg text-sm font-medium"
-                    style={{ color: 'var(--color-navbar-text)' }}>
+                    className="block px-4 py-2 rounded-lg text-sm font-medium text-[var(--color-navbar-text)]">
                     {t('nav.dashboard')}
                   </Link>
                   <button onClick={() => { handleSignOut(); setIsMenuOpen(false) }}
-                    className="block w-full text-left px-4 py-2 rounded-lg text-sm font-medium"
-                    style={{ color: 'var(--color-navbar-text)' }}>
+                    className="block w-full text-left px-4 py-2 rounded-lg text-sm font-medium text-[var(--color-navbar-text)]">
                     {t('auth.signOut')}
                   </button>
                 </>
               ) : (
                 <Link to="/login" onClick={() => setIsMenuOpen(false)}
-                  className="block px-4 py-2 rounded-lg text-sm font-medium"
-                  style={{ color: 'var(--color-navbar-text)' }}>
+                  className="block px-4 py-2 rounded-lg text-sm font-medium text-[var(--color-navbar-text)]">
                   {t('auth.signIn')}
                 </Link>
               )}

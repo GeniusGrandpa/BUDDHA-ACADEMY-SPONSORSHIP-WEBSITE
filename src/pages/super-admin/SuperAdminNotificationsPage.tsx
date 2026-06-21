@@ -121,6 +121,7 @@ export function SuperAdminNotificationsPage() {
                 <select
                   value={type}
                   onChange={(e) => setType(e.target.value)}
+                  title="Notification type"
                   className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-orange-500/50"
                 >
                   {typeOptions.map((opt) => (
@@ -205,6 +206,7 @@ export function SuperAdminNotificationsPage() {
                 <select
                   value={targetRole}
                   onChange={(e) => setTargetRole(e.target.value)}
+                  title="Select target role"
                   className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-orange-500/50"
                 >
                   {roleOptions.map((opt) => (

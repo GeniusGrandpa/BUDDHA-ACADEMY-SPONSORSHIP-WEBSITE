@@ -88,9 +88,9 @@ export function ResetPasswordPage() {
             <span className="text-white font-bold text-xl">B</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: '0s' }} />
-            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: '0.15s' }} />
-            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: '0.3s' }} />
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce-delay-1" />
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce-delay-2" />
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce-delay-3" />
           </div>
           <p className="text-gray-500 text-sm">Verifying your reset link...</p>
         </div>
@@ -120,9 +120,9 @@ export function ResetPasswordPage() {
                 Redirecting you to sign in...
               </p>
               <div className="flex justify-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: '0s' }} />
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: '0.15s' }} />
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: '0.3s' }} />
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce-delay-1" />
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce-delay-2" />
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce-delay-3" />
               </div>
             </div>
           </Card>

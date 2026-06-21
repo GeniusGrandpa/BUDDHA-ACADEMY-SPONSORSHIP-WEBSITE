@@ -66,6 +66,46 @@ export interface AchievementMilestone {
   icon?: string
 }
 
+export interface Achievement {
+  id: string
+  user_id: string
+  unlocked_at: string | null
+  progress?: number
+  max_progress?: number
+  created_at?: string
+}
+
+export interface SupportTicket {
+  id: string
+  user_id: string
+  subject: string
+  status: 'open' | 'resolved'
+  created_at: string
+  updated_at: string
+}
+
+export interface TicketMessage {
+  id: string
+  ticket_id: string
+  sender_id: string
+  message: string
+  created_at: string
+}
+
+export interface RecurringSubscription {
+  id: string
+  donor_id: string
+  student_id: string
+  amount: number
+  frequency: string
+  status: string
+  paused_at: string | null
+  cancelled_at: string | null
+  next_payment_date: string
+  created_at: string
+  updated_at: string
+}
+
 export type AllocationCategory = 'Educational Materials' | 'Student Meals' | 'School Supplies' | 'Uniform Support' | 'Events & Activities' | 'Operations'
 
 export interface TransactionWithDetails extends Donation {

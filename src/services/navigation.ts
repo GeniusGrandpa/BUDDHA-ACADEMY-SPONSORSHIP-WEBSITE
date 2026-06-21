@@ -12,27 +12,27 @@ export async function getNavigationItems(location?: NavigationLocation): Promise
   if (location) query = query.eq('location', location)
   const { data, error } = await query
   if (error) throw error
-  return data || []
+  return (data || []) as NavigationItem[]
 }
 
 export async function getNavigationItemById(id: string): Promise<NavigationItem | null> {
   const { data, error } = await supabase.from('navigation_items').select('*').eq('id', id).maybeSingle()
   if (error) throw error
-  return data
+  return data as NavigationItem | null
 }
 
 export async function createNavigationItem(item: Omit<NavigationItem, 'id' | 'created_at' | 'updated_at'>): Promise<NavigationItem> {
   const { data, error } = await supabase.from('navigation_items').insert(item).select().single()
   if (error) throw error
   await logAuditEvent({ action: `Created navigation item: ${data.label}`, entityType: 'navigation_items', entityId: data.id })
-  return data
+  return data as NavigationItem
 }
 
 export async function updateNavigationItem(id: string, updates: Partial<NavigationItem>): Promise<NavigationItem> {
   const { data, error } = await supabase.from('navigation_items').update(updates).eq('id', id).select().single()
   if (error) throw error
   await logAuditEvent({ action: `Updated navigation item: ${data.label}`, entityType: 'navigation_items', entityId: id })
-  return data
+  return data as NavigationItem
 }
 
 export async function deleteNavigationItem(id: string): Promise<void> {

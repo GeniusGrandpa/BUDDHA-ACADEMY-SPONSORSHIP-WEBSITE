@@ -87,7 +87,7 @@ async function generateDonationReport(): Promise<void> {
 
   const tableData = donations.slice(0, 100).map(d => [
     new Date(d.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
-    (d.profiles as { full_name: string } | null)?.full_name || 'Unknown',
+    (d.profiles as unknown as { full_name: string } | null)?.full_name || 'Unknown',
     formatNPR(d.amount),
     d.frequency,
     d.status,
@@ -355,7 +355,7 @@ async function generateVolunteerReport(): Promise<void> {
   doc.text(`Total Hours Logged: ${totalHours}`, pageWidth - 20, 68, { align: 'right' })
 
   const tableData = assignments.map(a => [
-    (a.profiles as { full_name: string } | null)?.full_name || 'Unknown',
+    (a.profiles as unknown as { full_name: string } | null)?.full_name || 'Unknown',
     a.event_name,
     a.role || '-',
     a.status,

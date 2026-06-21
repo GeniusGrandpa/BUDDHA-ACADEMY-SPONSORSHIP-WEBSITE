@@ -136,7 +136,7 @@ export async function getDonorPaymentSessions(donorId: string): Promise<PaymentS
     .order('created_at', { ascending: false })
 
   if (error) throw error
-  return data || []
+  return (data || []) as unknown as PaymentSession[]
 }
 
 export async function getPaymentSession(sessionId: string): Promise<PaymentSession | null> {
@@ -147,7 +147,7 @@ export async function getPaymentSession(sessionId: string): Promise<PaymentSessi
     .single()
 
   if (error) return null
-  return data
+  return data as unknown as PaymentSession | null
 }
 
 export async function getPaymentVerifications(sessionId: string): Promise<PaymentVerification[]> {
@@ -158,7 +158,7 @@ export async function getPaymentVerifications(sessionId: string): Promise<Paymen
     .order('created_at', { ascending: true })
 
   if (error) throw error
-  return data || []
+  return (data || []) as unknown as PaymentVerification[]
 }
 
 export async function getPaymentReceipt(donationId: string): Promise<PaymentReceipt | null> {
@@ -169,7 +169,7 @@ export async function getPaymentReceipt(donationId: string): Promise<PaymentRece
     .single()
 
   if (error) return null
-  return data
+  return data as unknown as PaymentReceipt | null
 }
 
 export async function getAllPaymentSessions(status?: PaymentSessionStatus): Promise<PaymentSession[]> {
@@ -185,10 +185,9 @@ export async function getAllPaymentSessions(status?: PaymentSessionStatus): Prom
   const { data, error } = await query
 
   if (error) throw error
-  return data || []
+  return (data || []) as unknown as PaymentSession[]
 }
 
-/** Only sessions where donor submitted payment confirmation — not abandoned checkouts */
 export async function getPendingVerifications(): Promise<PaymentSession[]> {
   const { data, error } = await supabase
     .from('payment_sessions')
@@ -198,7 +197,7 @@ export async function getPendingVerifications(): Promise<PaymentSession[]> {
     .order('created_at', { ascending: false })
 
   if (error) throw error
-  return data || []
+  return (data || []) as unknown as PaymentSession[]
 }
 
 export async function uploadPaymentScreenshot(

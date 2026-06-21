@@ -178,7 +178,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) {
         const classified = classifyAuthError(error)
         if (data?.user) {
-          await logLoginHistory(data.user.id, 'failed', classified.userMessage)
+          await logLoginHistory((data.user as { id: string }).id, 'failed', classified.userMessage)
         }
         return { error: { message: classified.userMessage, category: classified.category } }
       }

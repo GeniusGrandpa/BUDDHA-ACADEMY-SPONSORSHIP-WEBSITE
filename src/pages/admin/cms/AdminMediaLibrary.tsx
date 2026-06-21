@@ -176,6 +176,7 @@ export function AdminMediaLibrary() {
         <select
           value={filterPublished}
           onChange={(e) => setFilterPublished(e.target.value as typeof filterPublished)}
+          title="Filter by publish status"
           className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-orange-200 outline-none"
         >
           <option value="all">All Status</option>
@@ -185,6 +186,7 @@ export function AdminMediaLibrary() {
         <select
           value={filterType}
           onChange={(e) => setFilterType(e.target.value)}
+          title="Filter by file type"
           className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-orange-200 outline-none"
         >
           <option value="all">All Types</option>

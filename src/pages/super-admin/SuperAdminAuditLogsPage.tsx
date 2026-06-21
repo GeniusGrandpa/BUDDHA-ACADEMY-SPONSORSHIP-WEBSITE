@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { Card } from '../../components/ui/Card'
+import type { Json } from '../../types/database'
 
 interface AuditLog {
   id: string
@@ -8,8 +9,8 @@ interface AuditLog {
   action: string
   entity_type: string
   entity_id: string | null
-  changes: Record<string, unknown> | null
-  metadata: Record<string, unknown> | null
+  changes: Json
+  metadata: Json
   ip_address: string | null
   user_agent: string | null
   created_at: string
@@ -104,6 +105,7 @@ export function SuperAdminAuditLogsPage() {
         <select
           value={actionFilter}
           onChange={(e) => setActionFilter(e.target.value)}
+          title="Filter by action"
           className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-red-500/50"
         >
           <option value="all">All Actions</option>

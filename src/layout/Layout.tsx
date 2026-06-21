@@ -4,7 +4,7 @@ import { Footer } from './Footer'
 
 export function Layout() {
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--color-background)', color: 'var(--color-text-primary)' }}>
+    <div className="min-h-screen flex flex-col bg-[var(--color-background)] text-[var(--color-text-primary)]">
       <Header />
       <main className="flex-grow">
         <Outlet />

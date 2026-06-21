@@ -211,7 +211,7 @@ export function AdminPageEditor() {
           setSeo(page.seo as SeoMetadata)
         }
         if (page.blocks && Array.isArray(page.blocks)) {
-          setBlocks(page.blocks as PageBlock[])
+          setBlocks(page.blocks as unknown as PageBlock[])
         }
       } else {
         setPageExists(false)
@@ -284,18 +284,18 @@ export function AdminPageEditor() {
   }
 
   const updateField = (key: string, value: string) => {
-    setFormData((prev: PageContentRecord) => ({ ...prev, [key]: value }))
+    setFormData((prev: PageContentRecord) => ({ ...prev, [key]: value }) as PageContentRecord)
   }
 
   const addArrayItem = (key: string, template: PageContentItem | string = '') => {
     setFormData((prev: PageContentRecord) => {
       const current = prev[key]
       if (typeof template === 'string') {
-        const next: PageContentValue[] = Array.isArray(current) ? [...current] : []
-        return { ...prev, [key]: [...next, template] }
+        const next = Array.isArray(current) ? [...current] : []
+        return { ...prev, [key]: [...next, template] } as PageContentRecord
       }
-      const next: PageContentValue[] = Array.isArray(current) ? [...current] : []
-      return { ...prev, [key]: [...next, { ...template }] }
+      const next = Array.isArray(current) ? [...current] : []
+      return { ...prev, [key]: [...next, { ...template }] } as PageContentRecord
     })
   }
 
@@ -303,9 +303,9 @@ export function AdminPageEditor() {
     setFormData((prev: PageContentRecord) => {
       const arr = prev[key]
       if (!Array.isArray(arr)) return prev
-      const next: PageContentValue[] = [...arr]
-      next[idx] = value
-      return { ...prev, [key]: next }
+      const next = [...arr] as PageContentValue[]
+      next[idx] = value as PageContentValue
+      return { ...prev, [key]: next } as PageContentRecord
     })
   }
 
@@ -313,7 +313,7 @@ export function AdminPageEditor() {
     setFormData((prev: PageContentRecord) => {
       const value = prev[key]
       if (!Array.isArray(value)) return prev
-      return { ...prev, [key]: value.filter((_, i) => i !== idx) }
+      return { ...prev, [key]: value.filter((_, i) => i !== idx) as PageContentValue[] } as PageContentRecord
     })
   }
 
@@ -519,7 +519,7 @@ export function AdminPageEditor() {
                       <p className="text-gray-400 text-sm">No items. Click "Add Item" to add one.</p>
                     ) : isStringArray ? (
                       <div className="space-y-2">
-                        {value.map((item: string, idx: number) => (
+                        {(value as string[]).map((item: string, idx: number) => (
                           <div key={idx} className="flex items-center gap-2">
                             <span className="text-xs text-gray-500 w-6">{idx + 1}.</span>
                             <input
@@ -542,7 +542,7 @@ export function AdminPageEditor() {
                       </div>
                     ) : (
                       <div className="space-y-4">
-                        {value.map((item, idx) => {
+                        {(value as PageContentItem[]).map((item, idx) => {
                           if (typeof item === 'string') return null
 
                           return (
@@ -741,6 +741,7 @@ export function AdminPageEditor() {
                     </label>
                     <button
                       onClick={() => removeBlock(block.id)}
+                      aria-label="Delete block"
                       className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -752,6 +753,7 @@ export function AdminPageEditor() {
                         const el = document.getElementById(`block-content-${block.id}`)
                         if (el) el.classList.toggle('hidden')
                       }}
+                      aria-label="Edit block content"
                       className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -766,6 +768,7 @@ export function AdminPageEditor() {
                         type="text"
                         value={block.title || ''}
                         onChange={(e) => updateBlock(block.id, { title: e.target.value })}
+                        placeholder="Block title"
                         className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 focus:border-amber-500/50"
                       />
                     </div>
@@ -815,6 +818,7 @@ export function AdminPageEditor() {
                         <select
                           value={block.settings?.text_alignment || 'left'}
                           onChange={(e) => updateBlock(block.id, { settings: { ...block.settings, text_alignment: e.target.value as 'left' | 'center' | 'right' } })}
+                          title="Text alignment"
                           className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 focus:border-amber-500/50"
                         >
                           <option value="left">Left</option>

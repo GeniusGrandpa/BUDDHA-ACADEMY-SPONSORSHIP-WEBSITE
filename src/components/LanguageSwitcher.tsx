@@ -46,7 +46,7 @@ export function LanguageSwitcher({ mobile = false }: { mobile?: boolean }) {
         key={lang.code}
         onClick={() => select(lang.code)}
         role="option"
-        aria-selected={active}
+        aria-selected={active ? "true" : "false"}
         className={`w-full flex items-center gap-3 px-3 py-2 text-sm transition-colors ${
           active
             ? 'bg-amber-50 text-amber-700 font-medium'
@@ -68,7 +68,7 @@ export function LanguageSwitcher({ mobile = false }: { mobile?: boolean }) {
     <div ref={ref} className={`relative ${mobile ? 'w-full' : ''}`}>
       <button
         onClick={() => setOpen(!open)}
-        aria-expanded={open}
+        aria-expanded={open ? "true" : "false"}
         aria-haspopup="listbox"
         aria-label="Select language"
         className={`flex items-center gap-2 transition-colors ${
@@ -92,19 +92,17 @@ export function LanguageSwitcher({ mobile = false }: { mobile?: boolean }) {
             onClick={() => setOpen(false)}
           />
           <div
-            role="listbox"
             className={`z-50 bg-warm-50 rounded-xl shadow-lg border border-amber-200 overflow-hidden ${
               mobile
                 ? 'relative mt-1 w-full'
                 : 'absolute right-0 mt-2 w-56 origin-top-right'
-            }`}
-            style={
-              mobile
-                ? undefined
-                : { animation: 'dropdown-fade 0.15s ease-out' }
-            }
+            } ${mobile ? '' : 'animate-dropdown-fade'}`}
           >
-            <div className="max-h-72 overflow-y-auto">
+            <div
+              role="listbox"
+              aria-label="Select language"
+              className="max-h-72 overflow-y-auto"
+            >
               {sortedLanguages.map(renderItem)}
             </div>
           </div>
@@ -112,6 +110,9 @@ export function LanguageSwitcher({ mobile = false }: { mobile?: boolean }) {
             @keyframes dropdown-fade {
               from { opacity: 0; transform: translateY(-4px); }
               to { opacity: 1; transform: translateY(0); }
+            }
+            .animate-dropdown-fade {
+              animation: dropdown-fade 0.15s ease-out;
             }
           `}</style>
         </>

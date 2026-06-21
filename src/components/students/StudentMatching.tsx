@@ -32,7 +32,7 @@ export function StudentMatching() {
       query = query.eq('grade', filters.grade)
     }
     if (filters.sponsorshipStatus) {
-      query = query.eq('sponsorship_status', filters.sponsorshipStatus)
+      query = query.eq('sponsorship_status', filters.sponsorshipStatus as Student['sponsorship_status'])
     }
     if (filters.searchQuery) {
       query = query.or(
@@ -133,6 +133,7 @@ export function StudentMatching() {
                 value={filters.grade}
                 onChange={(e) => setFilters(prev => ({ ...prev, grade: e.target.value }))}
                 className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                aria-label="Grade filter"
               >
                 <option value="">All Grades</option>
                 {grades.map(g => (
@@ -149,6 +150,7 @@ export function StudentMatching() {
                 value={filters.sponsorshipStatus}
                 onChange={(e) => setFilters(prev => ({ ...prev, sponsorshipStatus: e.target.value }))}
                 className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                aria-label="Sponsorship status filter"
               >
                 <option value="">All Statuses</option>
                 <option value="available">Available for Sponsorship</option>

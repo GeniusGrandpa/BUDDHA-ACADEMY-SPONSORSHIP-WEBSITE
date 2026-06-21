@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../../lib/supabase'
 import type { RecurringSubscription } from '../../../types/features'
+type DbQuery = ReturnType<typeof supabase.from>
 interface RecurringDonationsReturn {
   subscriptions: RecurringSubscription[]
   loading: boolean
@@ -48,15 +49,14 @@ export function useRecurringDonations(userId: string | undefined): RecurringDona
     if (!userId) return
 
     try {
-      await supabase
-        .from('recurring_subscriptions')
+      await (supabase.from('recurring_subscriptions') as unknown as DbQuery)
         .insert({
           donor_id: userId,
           student_id: data.student_id,
           amount: data.amount,
           frequency: data.frequency,
           status: 'active',
-        })
+        } as never)
       await fetchSubscriptions()
     } catch {
       await fetchSubscriptions()
@@ -72,9 +72,9 @@ export function useRecurringDonations(userId: string | undefined): RecurringDona
     )
 
     try {
-      await supabase
-        .from('recurring_subscriptions')
-        .update({ status: 'paused', paused_at: now })
+      await (supabase
+        .from('recurring_subscriptions') as unknown as DbQuery)
+        .update({ status: 'paused', paused_at: now } as never)
         .eq('id', id)
       await fetchSubscriptions()
     } catch {
@@ -90,9 +90,9 @@ export function useRecurringDonations(userId: string | undefined): RecurringDona
     )
 
     try {
-      await supabase
-        .from('recurring_subscriptions')
-        .update({ status: 'active', paused_at: null })
+      await (supabase
+        .from('recurring_subscriptions') as unknown as DbQuery)
+        .update({ status: 'active', paused_at: null } as never)
         .eq('id', id)
       await fetchSubscriptions()
     } catch {
@@ -109,9 +109,9 @@ export function useRecurringDonations(userId: string | undefined): RecurringDona
     )
 
     try {
-      await supabase
-        .from('recurring_subscriptions')
-        .update({ status: 'cancelled', cancelled_at: now })
+      await (supabase
+        .from('recurring_subscriptions') as unknown as DbQuery)
+        .update({ status: 'cancelled', cancelled_at: now } as never)
         .eq('id', id)
       await fetchSubscriptions()
     } catch {

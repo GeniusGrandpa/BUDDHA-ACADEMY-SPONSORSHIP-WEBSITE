@@ -22,6 +22,7 @@ export function AuthLoadingScreen({ message = 'Loading...' }: AuthLoadingScreenP
           <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: '0s' }} />
           <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: '0.15s' }} />
           <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: '0.3s' }} />
+          {/* animationDelay cannot be done with tailwind arbitrary values */}
         </div>
         <p className="text-gray-500 text-sm">{message}</p>
       </motion.div>

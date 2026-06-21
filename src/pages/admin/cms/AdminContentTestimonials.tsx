@@ -192,43 +192,43 @@ const [form, setForm] = useState<TestimonialForm>({
                   <div>
                     <label className="block text-sm font-medium text-gray-600 mb-1">Name *</label>
                     <input value={form.author_name} onChange={e => setForm({ ...form, author_name: e.target.value })}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
+                      placeholder="Author name" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-600 mb-1">Role</label>
                     <input value={form.author_role} onChange={e => setForm({ ...form, author_role: e.target.value })}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
+                      placeholder="e.g. Teacher, Donor" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
                   </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1">Testimonial *</label>
                   <textarea value={form.content} onChange={e => setForm({ ...form, content: e.target.value })}
-                    rows={4}
+                    rows={4} placeholder="Enter testimonial content"
                     className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50 resize-none" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-600 mb-1">Type</label>
                     <select value={form.testimonial_type} onChange={e => setForm({ ...form, testimonial_type: e.target.value as TestimonialType })}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50">
+                      title="Testimonial type" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50">
                       {TESTIMONIAL_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                     </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-600 mb-1">Sort Order</label>
                     <input type="number" value={form.sort_order} onChange={e => setForm({ ...form, sort_order: parseInt(e.target.value) || 0 })}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
+                      placeholder="0" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
                   </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1">Avatar URL</label>
-                  <input value={form.avatar_url} onChange={e => setForm({ ...form, avatar_url: e.target.value })}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
+                  <input value={form.avatar_url || ''} onChange={e => setForm({ ...form, avatar_url: e.target.value })}
+                    placeholder="https://..." className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1">Quote (optional)</label>
-                  <input value={form.quote} onChange={e => setForm({ ...form, quote: e.target.value })}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
+                  <input value={form.quote || ''} onChange={e => setForm({ ...form, quote: e.target.value })}
+                    placeholder="Optional quote" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
                 </div>
               </div>
               <div className="flex justify-end gap-3 p-4 border-t border-gray-100">

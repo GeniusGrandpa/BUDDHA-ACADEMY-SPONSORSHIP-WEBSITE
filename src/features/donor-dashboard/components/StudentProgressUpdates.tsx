@@ -98,6 +98,7 @@ export function StudentProgressUpdates({ reports, students }: StudentProgressUpd
                           className={`p-1 rounded-lg transition-colors ${
                             isExpanded ? 'bg-orange-50 text-orange-500' : 'text-gray-300 hover:text-gray-500'
                           }`}
+                          aria-label={isExpanded ? 'Collapse' : 'Expand'}
                         >
                           <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                         </button>

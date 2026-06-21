@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Helmet } from 'react-helmet'
 import { BlockRenderer } from './BlockRenderer'
 import { getPageBySlugWithBlocks } from '../../services/pageBlocks'
 import type { PageBlock, SeoMetadata } from '../../types/cms'
@@ -37,6 +36,25 @@ export function DynamicPage({ slug, fallbackTitle }: DynamicPageProps) {
     load()
   }, [load])
 
+  useEffect(() => {
+    if (seo.title) document.title = seo.title
+    const setMeta = (name: string, content: string, property?: string) => {
+      let el = document.querySelector(`meta[${property ? 'property' : 'name'}="${property || name}"]`)
+      if (!el) {
+        el = document.createElement('meta')
+        if (property) el.setAttribute('property', property)
+        else el.setAttribute('name', name)
+        document.head.appendChild(el)
+      }
+      el.setAttribute('content', content)
+    }
+    if (seo.description) setMeta('description', seo.description)
+    if (seo.og_title) setMeta('og:title', seo.og_title, 'property')
+    if (seo.og_description) setMeta('og:description', seo.og_description, 'property')
+    if (seo.og_image) setMeta('og:image', seo.og_image, 'property')
+    if (seo.no_index) setMeta('robots', 'noindex')
+  }, [seo])
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -65,15 +83,6 @@ export function DynamicPage({ slug, fallbackTitle }: DynamicPageProps) {
 
   return (
     <>
-      <Helmet>
-        {seo.title && <title>{seo.title}</title>}
-        {seo.description && <meta name="description" content={seo.description} />}
-        {seo.og_title && <meta property="og:title" content={seo.og_title} />}
-        {seo.og_description && <meta property="og:description" content={seo.og_description} />}
-        {seo.og_image && <meta property="og:image" content={seo.og_image} />}
-        {seo.canonical_url && <link rel="canonical" href={seo.canonical_url} />}
-        {seo.no_index && <meta name="robots" content="noindex" />}
-      </Helmet>
       {blocks.filter(b => b.is_visible).map(block => (
         <BlockRenderer key={block.id} block={block} />
       ))}

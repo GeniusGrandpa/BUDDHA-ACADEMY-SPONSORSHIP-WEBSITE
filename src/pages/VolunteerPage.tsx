@@ -7,20 +7,7 @@ import { Textarea } from '../components/ui/Textarea'
 import { Select } from '../components/ui/Select'
 import { VolunteerEventsList } from '../components/volunteer/VolunteerEventsList'
 import { getPageBySlug } from '../services/content'
-
-const COUNTRY_CODES = [
-  { code: '+977', label: 'Nepal (+977)' },
-  { code: '+91', label: 'India (+91)' },
-  { code: '+1', label: 'US/Canada (+1)' },
-  { code: '+44', label: 'UK (+44)' },
-  { code: '+61', label: 'Australia (+61)' },
-  { code: '+971', label: 'UAE (+971)' },
-  { code: '+86', label: 'China (+86)' },
-  { code: '+49', label: 'Germany (+49)' },
-  { code: '+33', label: 'France (+33)' },
-  { code: '+81', label: 'Japan (+81)' },
-  { code: '+7', label: 'Russia (+7)' },
-]
+import { COUNTRY_CODES } from '../data/countryCodes'
 
 interface OpportunityItem { title: string; desc: string }
 
@@ -196,6 +183,7 @@ export function VolunteerPage() {
                     <select
                       value={formData.countryCode}
                       onChange={(e) => setFormData({ ...formData, countryCode: e.target.value })}
+                      title="Country Code"
                       className="px-3 py-2.5 rounded-lg border border-gray-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 focus:outline-none bg-white text-gray-900 text-sm flex-shrink-0 w-[140px]"
                     >
                       {COUNTRY_CODES.map((c) => (

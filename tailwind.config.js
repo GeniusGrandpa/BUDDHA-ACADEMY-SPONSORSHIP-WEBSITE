@@ -37,6 +37,9 @@ export default {
       animation: {
         'float': 'float 6s ease-in-out infinite',
         'drift': 'drift 8s ease-in-out infinite',
+        'bounce-delay-1': 'bounce 1s infinite 0s',
+        'bounce-delay-2': 'bounce 1s infinite 0.15s',
+        'bounce-delay-3': 'bounce 1s infinite 0.3s',
       },
       keyframes: {
         float: {

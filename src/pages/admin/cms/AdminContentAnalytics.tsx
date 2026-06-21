@@ -60,6 +60,7 @@ export function AdminContentAnalytics() {
             className="h-2 rounded-full bg-amber-500"
             style={{ width: `${value > 0 ? (published / value) * 100 : 0}%` }}
           />
+          {/* dynamic percentage width from analytics data */}
         </div>
       </div>
     </motion.div>

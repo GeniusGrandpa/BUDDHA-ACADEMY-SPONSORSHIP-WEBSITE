@@ -60,10 +60,10 @@ export function AdminContentNews() {
     }
     try {
       if (editing) {
-        await updateNewsWithAuthor(editing.id, form)
+        await updateNewsWithAuthor(editing.id, { ...form, updated_by: null })
         toast.success('Article updated')
       } else {
-        await createNewsWithAuthor(form)
+        await createNewsWithAuthor({ ...form, updated_by: null })
         toast.success('Article created')
       }
       setShowModal(false)
@@ -76,7 +76,7 @@ export function AdminContentNews() {
   const toggleTag = (tag: string) => {
     setForm(prev => ({
       ...prev,
-      tags: prev.tags.includes(tag) ? prev.tags.filter(t => t !== tag) : [...prev.tags, tag],
+      tags: (prev.tags || []).includes(tag) ? (prev.tags || []).filter(t => t !== tag) : [...(prev.tags || []), tag],
     }))
   }
 
@@ -194,7 +194,7 @@ export function AdminContentNews() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Featured Image URL</label>
-                  <input value={form.image_url} onChange={e => setForm({ ...form, image_url: e.target.value })}
+                  <input value={form.image_url || ''} onChange={e => setForm({ ...form, image_url: e.target.value })}
                     className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:border-amber-500/50" />
                   {form.image_url && (
                     <img src={form.image_url} alt="" className="mt-2 h-32 w-full object-cover rounded-lg" />
@@ -205,7 +205,7 @@ export function AdminContentNews() {
                   <div className="flex flex-wrap gap-2">
                     {NEWS_TAGS.map(tag => (
                       <button key={tag} onClick={() => toggleTag(tag)}
-                        className={`px-3 py-1 rounded-lg text-xs transition-colors ${form.tags.includes(tag) ? 'bg-amber-100 text-amber-700 border border-amber-300' : 'bg-gray-50 text-gray-600 border border-gray-200 hover:border-gray-300'}`}>
+                        className={`px-3 py-1 rounded-lg text-xs transition-colors ${(form.tags || []).includes(tag) ? 'bg-amber-100 text-amber-700 border border-amber-300' : 'bg-gray-50 text-gray-600 border border-gray-200 hover:border-gray-300'}`}>
                         {tag}
                       </button>
                     ))}

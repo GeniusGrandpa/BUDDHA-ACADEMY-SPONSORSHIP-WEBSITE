@@ -34,7 +34,7 @@ const countryOptions = [
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 24 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] } },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] as const } },
 })
 
 const stats = [
@@ -242,6 +242,7 @@ export function LoginPage() {
             backgroundSize: '32px 32px',
           }}
         />
+
 
         <motion.div
           className="absolute -top-32 -right-32 w-[400px] h-[400px] rounded-full bg-[#fde68a]/20 blur-3xl"

@@ -14,7 +14,6 @@
   <body>
     <div id="root"></div>
     <script>
-      // Suppress harmless PKCE fallback warning (plain method works fine for dev)
       const _warn = console.warn;
       console.warn = function(m) { if (typeof m === 'string' && m.includes('WebCrypto API')) return; _warn.apply(console, arguments); };
     </script>

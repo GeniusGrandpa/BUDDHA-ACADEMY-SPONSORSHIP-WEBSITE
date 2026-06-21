@@ -113,6 +113,7 @@ export function TransactionSection({
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as DonationStatus | 'all')}
                 className="px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-200 focus:border-orange-300 outline-none transition-shadow"
+                aria-label="Filter by status"
               >
                 <option value="all">All Status</option>
                 <option value="pending">Pending</option>

@@ -28,7 +28,8 @@ export function FloatingInput({
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         required={required}
-        autoComplete={autoComplete}
+        autoComplete={autoComplete || undefined}
+        title={label}
         className="w-full px-4 pt-6 pb-2 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm
           transition-all duration-200
           focus:border-blue-400 focus:ring-[3px] focus:ring-blue-100 focus:outline-none

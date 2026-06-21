@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import type { SponsorshipWithStudent } from '../hooks/useDashboardData'
+import type { SponsorshipWithStudent } from '../../../types/features'
 import { fadeInUp, stagger } from '../animations'
 import { StudentDetailModal } from './StudentDetailModal'
 import { formatNPR } from '../../../utils/currency'

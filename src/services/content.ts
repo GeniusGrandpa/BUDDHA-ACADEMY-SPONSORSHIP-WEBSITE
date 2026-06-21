@@ -2,8 +2,9 @@ import { getSupabaseClient } from '../lib/supabase'
 import { logAuditEvent } from '../lib/audit'
 import type {
   Page, HomepageSection, Video, Faq, StudentStory, MediaItem,
-  GalleryItem, Testimonial, News,
+  GalleryItem, Testimonial, News, Json,
 } from '../types/database'
+import type { ContentVersion } from '../types/database'
 import type { PageBlock, SeoMetadata } from '../types/cms'
 const supabase = getSupabaseClient()
 
@@ -30,19 +31,17 @@ export async function upsertPage(page: {
   const userId = (await supabase.auth.getSession()).data.session?.user?.id
   const existing = await getPageBySlug(page.slug)
 
-  const updateData: Record<string, unknown> = {
-    title: page.title,
-    content: page.content,
-    published: page.published ?? existing?.published ?? false,
-    updated_by: userId,
-  }
-  if (page.blocks) updateData.blocks = page.blocks as unknown as Record<string, unknown>
-  if (page.seo) updateData.seo = page.seo as unknown as Record<string, unknown>
-
   if (existing) {
     const { data, error } = await supabase
       .from('pages')
-      .update(updateData)
+      .update({
+        title: page.title,
+        content: page.content as Json,
+        published: page.published ?? existing?.published ?? false,
+        updated_by: userId,
+        ...(page.blocks ? { blocks: page.blocks as unknown as Json } : {}),
+        ...(page.seo ? { seo: page.seo as unknown as Json } : {}),
+      })
       .eq('id', existing.id)
       .select()
       .single()
@@ -51,19 +50,17 @@ export async function upsertPage(page: {
     return data
   }
 
-  const insertData: Record<string, unknown> = {
-    slug: page.slug,
-    title: page.title,
-    content: page.content,
-    published: page.published ?? false,
-    updated_by: userId,
-  }
-  if (page.blocks) insertData.blocks = page.blocks as unknown as Record<string, unknown>
-  if (page.seo) insertData.seo = page.seo as unknown as Record<string, unknown>
-
   const { data, error } = await supabase
     .from('pages')
-    .insert(insertData)
+    .insert({
+      slug: page.slug,
+      title: page.title,
+      content: page.content as Json,
+      published: page.published ?? false,
+      updated_by: userId,
+      ...(page.blocks ? { blocks: page.blocks as unknown as Json } : {}),
+      ...(page.seo ? { seo: page.seo as unknown as Json } : {}),
+    })
     .select()
     .single()
   if (error) throw error
@@ -369,7 +366,7 @@ export async function updateNewsWithAuthor(id: string, updates: Partial<News>): 
 
 export async function getTestimonialsWithType(type?: string): Promise<Testimonial[]> {
   let query = supabase.from('testimonials').select('*').order('sort_order', { ascending: true })
-  if (type && type !== 'all') query = query.eq('testimonial_type', type)
+  if (type && type !== 'all') query = query.eq('testimonial_type', type as Testimonial['testimonial_type'])
   const { data, error } = await query
   if (error) throw error
   return data || []
@@ -440,7 +437,7 @@ export async function restoreContentVersion(
 
     const { error: updateError } = await supabase
       .from('pages')
-      .update({ content: version.content as Record<string, unknown>, updated_by: (await supabase.auth.getSession()).data.session?.user?.id })
+      .update({ content: version.content as Json, updated_by: (await supabase.auth.getSession()).data.session?.user?.id })
       .eq('id', version.entity_id)
     if (updateError) throw updateError
   }

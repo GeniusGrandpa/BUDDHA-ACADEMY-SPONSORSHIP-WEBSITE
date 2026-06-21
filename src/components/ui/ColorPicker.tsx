@@ -56,6 +56,7 @@ export function ColorPicker({ value, onChange, label, presetColors }: ColorPicke
           onClick={() => setIsOpen(!isOpen)}
           className="w-9 h-9 rounded-lg border-2 border-[var(--color-border)] shadow-sm shrink-0"
           style={{ backgroundColor: value }}
+          aria-label="Pick color"
         />
         <input
           type="text"
@@ -63,12 +64,14 @@ export function ColorPicker({ value, onChange, label, presetColors }: ColorPicke
           onChange={handleInputChange}
           className="w-24 px-2 py-1.5 rounded-lg border border-[var(--color-border)] text-xs font-mono text-[var(--color-text-primary)] bg-[var(--color-surface)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
           placeholder="#hex"
+          aria-label="Color hex value"
         />
         <input
           type="color"
           value={value}
           onChange={handleNativePicker}
           className="w-9 h-9 rounded-lg border border-[var(--color-border)] cursor-pointer p-0.5"
+          aria-label="Native color picker"
         />
       </div>
 

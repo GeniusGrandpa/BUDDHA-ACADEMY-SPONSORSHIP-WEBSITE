@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../../lib/supabase'
 import type { Achievement } from '../../../types/features'
+type DbQuery = ReturnType<typeof supabase.from>
 interface DonorAchievementsReturn {
   achievements: Achievement[]
   unlockedAchievements: Achievement[]
@@ -24,7 +25,7 @@ export function useDonorAchievements(userId: string | undefined): DonorAchieveme
         .from('achievements')
         .select('*')
         .eq('user_id', userId)
-        .order('unlocked_at', { ascending: false, nulls: 'last' })
+        .order('unlocked_at', { ascending: false })
         .order('progress', { ascending: false })
 
       if (error) throw error
@@ -100,13 +101,12 @@ export function useDonorAchievements(userId: string | undefined): DonorAchieveme
 
       if (newlyUnlocked.length > 0) {
         for (const achievementId of newlyUnlocked) {
-          await supabase
-            .from('achievements')
+          await (supabase.from('achievements') as unknown as DbQuery)
             .upsert({
               user_id: userId,
               id: achievementId,
               unlocked_at: new Date().toISOString(),
-            }, { onConflict: 'id' })
+            } as never, { onConflict: 'id' })
         }
 
         await fetchAchievements()

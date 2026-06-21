@@ -132,6 +132,7 @@ export function AdminPaymentVerificationPage() {
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500/50"
+              aria-label="Filter by status"
             >
               <option value="processing">Awaiting Verification</option>
             </select>

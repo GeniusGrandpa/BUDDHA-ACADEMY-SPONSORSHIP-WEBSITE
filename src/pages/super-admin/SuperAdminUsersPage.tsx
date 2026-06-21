@@ -147,10 +147,10 @@ export function SuperAdminUsersPage() {
   const updateStatus = async (userId: string, status: UserStatus) => {
     setUpdating(userId)
     try {
-      const { error } = await supabase.rpc('admin_update_user_status', {
+      const { error } = await (supabase.rpc('admin_update_user_status', {
         target_user_id: userId,
         new_status: status,
-      } as never)
+      }) as unknown as Promise<{ error: unknown }>)
       if (error) throw error
       toast.success(`User ${status === 'active' ? 'restored' : 'suspended'} successfully`)
       await loadUsers()
@@ -346,6 +346,7 @@ export function SuperAdminUsersPage() {
                               value={user.role}
                               onChange={(e) => updateRole(user, e.target.value)}
                               disabled={updating === user.id}
+                              title="Change user role"
                               className="text-xs bg-gray-50 border border-gray-200 rounded px-2 py-1 text-gray-600 focus:outline-none focus:border-red-500/50"
                             >
                               {roleOptions.map((opt) => (

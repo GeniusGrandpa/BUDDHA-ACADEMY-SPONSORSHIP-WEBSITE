@@ -125,7 +125,7 @@ export function DashboardPage() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Status</span>
-                        <Badge variant={sponsorship.status === 'active' ? 'available' : 'default'}>
+                        <Badge variant={(sponsorship.status === 'active' ? 'success' : 'default') as 'success' | 'default'}>
                           {sponsorship.status}
                         </Badge>
                       </div>
@@ -178,7 +178,7 @@ export function DashboardPage() {
                           {donation.frequency}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          <Badge variant={donation.status === 'received' ? 'available' : 'partially_sponsored'}>
+                          <Badge variant={(donation.status === 'received' ? 'success' : 'default') as 'success' | 'default'}>
                             {donation.status}
                           </Badge>
                         </td>

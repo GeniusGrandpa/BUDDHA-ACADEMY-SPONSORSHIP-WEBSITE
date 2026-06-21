@@ -7,7 +7,7 @@ const supabase = getSupabaseClient()
 export async function getSiteSettings(): Promise<SiteSettings | null> {
   const { data, error } = await supabase.from('site_settings').select('*').limit(1).maybeSingle()
   if (error) throw error
-  return data
+  return data as SiteSettings | null
 }
 
 export async function updateSiteSettings(updates: Partial<SiteSettings>): Promise<SiteSettings> {
@@ -24,5 +24,5 @@ export async function updateSiteSettings(updates: Partial<SiteSettings>): Promis
   if (error) throw error
 
   await logAuditEvent({ action: 'Updated site settings', entityType: 'site_settings', entityId: data.id })
-  return data
+  return data as SiteSettings
 }
