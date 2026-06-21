@@ -1,5 +1,4 @@
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
-
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
@@ -24,17 +23,14 @@ BEGIN
     role = EXCLUDED.role,
     status = 'active',
     updated_at = now();
-
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
-
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_new_user();
-
 DELETE FROM auth.identities WHERE user_id IN (
   '00000000-0000-4000-8000-000000000001',
   '00000000-0000-4000-8000-000000000002'

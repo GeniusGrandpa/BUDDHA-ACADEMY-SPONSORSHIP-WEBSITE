@@ -1,18 +1,3 @@
--- =============================================================
--- Fix remaining dashboard linter warnings:
---   1. function_search_path_mutable: 2-param submit_payment_confirmation
---   2. anon_security_definer_function_executable: REVOKE PUBLIC
---   3. authenticated_security_definer_function_executable:
---      switch safe read-only functions to SECURITY INVOKER
--- =============================================================
-
--- =============================================================
--- SECTION 1: Fix function_search_path_mutable
--- The 2-param overload of submit_payment_confirmation from
--- 20260610000001 was never recreated with SET search_path.
--- The 3-param overload (20260701000001) already has it.
--- =============================================================
-
 CREATE OR REPLACE FUNCTION submit_payment_confirmation(
   p_session_id UUID,
   p_screenshots TEXT[] DEFAULT '{}'
@@ -45,62 +30,41 @@ BEGIN
   RETURN true;
 END;
 $$;
-
--- =============================================================
--- SECTION 2: Fix anon_security_definer_function_executable
--- Revoke the default PUBLIC EXECUTE privilege on all functions
--- and grant EXECUTE to authenticated only (not anon).
--- =============================================================
-
 REVOKE ALL ON ALL FUNCTIONS IN SCHEMA public FROM PUBLIC;
-
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO authenticated;
-
 GRANT EXECUTE ON FUNCTION public.get_user_role_level TO anon;
 GRANT EXECUTE ON FUNCTION public.get_user_permissions TO anon;
 GRANT EXECUTE ON FUNCTION public.get_my_role TO anon;
-
--- =============================================================
--- SECTION 3: Switch safe read-only functions to SECURITY INVOKER
--- These only read the current user's own profile via auth.uid(),
--- and RLS policies already permit that access.
--- =============================================================
-
 CREATE OR REPLACE FUNCTION public.get_my_role()
 RETURNS text
 LANGUAGE sql STABLE SECURITY INVOKER SET search_path = public
 AS $$
   SELECT role FROM public.profiles WHERE id = auth.uid();
 $$;
-
 CREATE OR REPLACE FUNCTION public.get_user_role()
 RETURNS text
 LANGUAGE sql STABLE SECURITY INVOKER SET search_path = public
 AS $$
   SELECT role FROM public.profiles WHERE id = auth.uid();
 $$;
-
 CREATE OR REPLACE FUNCTION public.get_user_status()
 RETURNS text
 LANGUAGE sql STABLE SECURITY INVOKER SET search_path = public
 AS $$
   SELECT status FROM public.profiles WHERE id = auth.uid();
 $$;
-
 CREATE OR REPLACE FUNCTION public.is_active_user()
 RETURNS boolean
 LANGUAGE sql STABLE SECURITY INVOKER SET search_path = public
 AS $$
   SELECT EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND status = 'active');
 $$;
-
 CREATE OR REPLACE FUNCTION public.current_user_has_role(role_name text)
 RETURNS boolean
 LANGUAGE sql STABLE SECURITY INVOKER SET search_path = public
 AS $$
   SELECT EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = role_name AND status = 'active');
 $$;
-
 CREATE OR REPLACE FUNCTION public.is_admin_or_super_admin()
 RETURNS boolean
 LANGUAGE plpgsql SECURITY INVOKER SET search_path = public
@@ -114,9 +78,6 @@ BEGIN
   );
 END;
 $$;
-
--- get_donor_allocations and get_donor_dashboard_stats check
--- p_donor_id == auth.uid() and rely on RLS for data access
 CREATE OR REPLACE FUNCTION get_donor_allocations(p_donor_id UUID)
 RETURNS TABLE (
   donation_id UUID,
@@ -139,7 +100,6 @@ BEGIN
   ORDER BY da.created_at DESC;
 END;
 $$;
-
 CREATE OR REPLACE FUNCTION get_donor_dashboard_stats(p_donor_id UUID)
 RETURNS JSONB
 LANGUAGE plpgsql SECURITY INVOKER SET search_path = public

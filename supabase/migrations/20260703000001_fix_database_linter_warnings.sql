@@ -1,19 +1,3 @@
--- =============================================================
--- Fix all Supabase database linter warnings
--- Categories:
---   1. function_search_path_mutable     (11 functions)
---   2. rls_policy_always_true           (3 policies)
---   3. public_bucket_allows_listing     (1 bucket policy)
---   4. anon_security_definer_function_executable
---   5. authenticated_security_definer_function_executable
--- =============================================================
-
--- =============================================================
--- SECTION 1: Fix function_search_path_mutable
--- Add SET search_path = public to all functions missing it
--- =============================================================
-
--- generate_transaction_id() - from 20260610000001
 CREATE OR REPLACE FUNCTION generate_transaction_id()
 RETURNS TEXT
 LANGUAGE plpgsql
@@ -39,8 +23,6 @@ BEGIN
   END LOOP;
 END;
 $$;
-
--- generate_receipt_number() - from 20260610000001
 CREATE OR REPLACE FUNCTION generate_receipt_number()
 RETURNS TEXT
 LANGUAGE plpgsql
@@ -66,8 +48,6 @@ BEGIN
   END LOOP;
 END;
 $$;
-
--- assign_donation_allocations() - from 20260611000001
 CREATE OR REPLACE FUNCTION assign_donation_allocations(
   p_donation_id UUID,
   p_allocations JSONB
@@ -112,8 +92,6 @@ BEGIN
   RETURN true;
 END;
 $$;
-
--- get_donor_allocations() - from 20260611000001
 CREATE OR REPLACE FUNCTION get_donor_allocations(p_donor_id UUID)
 RETURNS TABLE (
   donation_id UUID,
@@ -137,8 +115,6 @@ BEGIN
   ORDER BY da.created_at DESC;
 END;
 $$;
-
--- get_donor_dashboard_stats() - from 20260612000001
 CREATE OR REPLACE FUNCTION get_donor_dashboard_stats(p_donor_id UUID)
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -175,8 +151,6 @@ BEGIN
   RETURN result;
 END;
 $$;
-
--- log_activity() (regular function, not trigger) - from 20260612000001
 CREATE OR REPLACE FUNCTION log_activity(
   p_activity_type TEXT,
   p_title TEXT,
@@ -203,8 +177,6 @@ BEGIN
   RETURN v_activity_id;
 END;
 $$;
-
--- update_updated_at_column() - from 20260620000001 (overwrites 20260607000003 version)
 CREATE OR REPLACE FUNCTION public.update_updated_at_column()
 RETURNS TRIGGER
 LANGUAGE plpgsql SET search_path = public
@@ -214,8 +186,6 @@ BEGIN
   RETURN NEW;
 END;
 $$;
-
--- set_published_at() - from 20260620000001
 CREATE OR REPLACE FUNCTION public.set_published_at()
 RETURNS TRIGGER
 LANGUAGE plpgsql SET search_path = public
@@ -227,8 +197,6 @@ BEGIN
   RETURN NEW;
 END;
 $$;
-
--- generate_slug() - from 20260620000001
 CREATE OR REPLACE FUNCTION public.generate_slug(title TEXT, table_name TEXT)
 RETURNS TEXT
 LANGUAGE plpgsql SET search_path = public
@@ -254,8 +222,6 @@ BEGIN
   RETURN final_slug;
 END;
 $$;
-
--- is_admin_or_super_admin() - from 20260620000001
 CREATE OR REPLACE FUNCTION public.is_admin_or_super_admin()
 RETURNS BOOLEAN
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
@@ -269,8 +235,6 @@ BEGIN
   );
 END;
 $$;
-
--- log_content_change() - from 20260620000001
 CREATE OR REPLACE FUNCTION public.log_content_change()
 RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
@@ -306,8 +270,6 @@ BEGIN
   RETURN COALESCE(NEW, OLD);
 END;
 $$;
-
--- create_content_version() - from 20260701000003
 CREATE OR REPLACE FUNCTION public.create_content_version()
 RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
@@ -348,13 +310,6 @@ BEGIN
   RETURN COALESCE(NEW, OLD);
 END;
 $$;
-
--- =============================================================
--- SECTION 2: Fix rls_policy_always_true
--- Tighten policies that use USING(true) or WITH CHECK(true)
--- =============================================================
-
--- contact_submissions_insert_public: require non-empty required fields
 DROP POLICY IF EXISTS "contact_submissions_insert_public" ON contact_submissions;
 CREATE POLICY "contact_submissions_insert_public"
   ON contact_submissions FOR INSERT
@@ -363,51 +318,23 @@ CREATE POLICY "contact_submissions_insert_public"
     email IS NOT NULL AND email != '' AND
     message IS NOT NULL AND message != ''
   );
-
--- system_insert_email_logs: restrict to admin/super_admin users
 DROP POLICY IF EXISTS "system_insert_email_logs" ON email_logs;
 CREATE POLICY "system_insert_email_logs"
   ON email_logs FOR INSERT
   TO authenticated
   WITH CHECK (get_user_role_level() >= 80);
-
--- payment_audit_logs_insert: restrict to finance roles
 DROP POLICY IF EXISTS "payment_audit_logs_insert" ON payment_audit_logs;
 CREATE POLICY "payment_audit_logs_insert"
   ON payment_audit_logs FOR INSERT
   WITH CHECK (get_user_role_level() >= 80);
-
--- =============================================================
--- SECTION 3: Fix public_bucket_allows_listing
--- Restrict media bucket SELECT to authenticated users only
--- (bucket is public so direct URL access still works)
--- =============================================================
-
 DROP POLICY IF EXISTS "media_select_public" ON storage.objects;
 CREATE POLICY "media_select_public"
   ON storage.objects FOR SELECT
   USING (bucket_id = 'media' AND auth.role() = 'authenticated');
-
--- =============================================================
--- SECTION 4: Fix anon_security_definer_function_executable
--- Revoke EXECUTE from anon for all functions, re-grant only
--- safe read-only functions needed by the frontend
--- =============================================================
-
 REVOKE ALL ON ALL FUNCTIONS IN SCHEMA public FROM anon;
-
--- Re-grant only safe read-only functions that the frontend may
--- call before authentication
 GRANT EXECUTE ON FUNCTION public.get_user_role_level TO anon;
 GRANT EXECUTE ON FUNCTION public.get_user_permissions TO anon;
 GRANT EXECUTE ON FUNCTION public.get_my_role TO anon;
-
--- =============================================================
--- SECTION 5: Fix authenticated_security_definer_function_executable
--- Add authorization checks to functions that lack them
--- =============================================================
-
--- assign_role_permissions() - added auth check (was unprotected)
 CREATE OR REPLACE FUNCTION public.assign_role_permissions(p_role_name text, p_permission_codes text[])
 RETURNS void
 LANGUAGE plpgsql
@@ -435,8 +362,6 @@ BEGIN
   END LOOP;
 END;
 $$;
-
--- expire_abandoned_payment_sessions() - add admin check
 CREATE OR REPLACE FUNCTION expire_abandoned_payment_sessions()
 RETURNS INTEGER
 LANGUAGE plpgsql

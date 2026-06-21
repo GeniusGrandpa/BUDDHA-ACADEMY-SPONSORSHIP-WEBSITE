@@ -12,13 +12,10 @@ CREATE TABLE IF NOT EXISTS public.content_versions (
   restored_at TIMESTAMPTZ,
   restore_notes TEXT
 );
-
 CREATE INDEX IF NOT EXISTS idx_content_versions_entity ON public.content_versions(entity_type, entity_id);
 CREATE INDEX IF NOT EXISTS idx_content_versions_slug ON public.content_versions(entity_slug);
 CREATE INDEX IF NOT EXISTS idx_content_versions_created ON public.content_versions(created_at DESC);
-
 ALTER TABLE IF EXISTS public.content_versions ENABLE ROW LEVEL SECURITY;
-
 CREATE POLICY "Admins can view versions"
   ON public.content_versions FOR SELECT
   USING (EXISTS (
@@ -27,7 +24,6 @@ CREATE POLICY "Admins can view versions"
     AND role IN ('admin', 'super_admin')
     AND status = 'active'
   ));
-
 CREATE POLICY "Admins can manage versions"
   ON public.content_versions FOR ALL
   USING (EXISTS (
@@ -42,18 +38,15 @@ CREATE POLICY "Admins can manage versions"
     AND role IN ('admin', 'super_admin')
     AND status = 'active'
   ));
-
 CREATE OR REPLACE FUNCTION public.create_content_version()
 RETURNS TRIGGER AS $$
 DECLARE
   current_version INTEGER;
 BEGIN
-
   SELECT COALESCE(MAX(version_number), 0) + 1 INTO current_version
   FROM public.content_versions
   WHERE entity_type = TG_TABLE_NAME
   AND entity_id = COALESCE(NEW.id, OLD.id);
-
   INSERT INTO public.content_versions (
     entity_type,
     entity_id,
@@ -87,11 +80,9 @@ BEGIN
     COALESCE(NEW.published, OLD.published, false),
     auth.uid()
   );
-
   RETURN COALESCE(NEW, OLD);
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-
 DO $$
 DECLARE
   tbl TEXT;

@@ -7,7 +7,6 @@ BEGIN
     ALTER TABLE public.gallery_items ADD COLUMN is_published BOOLEAN DEFAULT true;
   END IF;
 END $$;
-
 DO $$
 BEGIN
   IF NOT EXISTS (

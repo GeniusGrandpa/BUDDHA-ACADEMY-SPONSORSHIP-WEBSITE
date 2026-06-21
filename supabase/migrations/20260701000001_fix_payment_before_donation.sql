@@ -5,23 +5,17 @@ ALTER TABLE payment_sessions
   ADD COLUMN IF NOT EXISTS message TEXT,
   ADD COLUMN IF NOT EXISTS idempotency_key TEXT,
   ADD COLUMN IF NOT EXISTS payment_reference TEXT;
-
 ALTER TABLE payment_sessions ALTER COLUMN donation_id DROP NOT NULL;
-
 UPDATE payment_sessions SET status = 'completed' WHERE status = 'verified';
 UPDATE payment_sessions SET status = 'failed' WHERE status = 'rejected';
-
 ALTER TABLE payment_sessions DROP CONSTRAINT IF EXISTS payment_sessions_status_check;
 ALTER TABLE payment_sessions ADD CONSTRAINT payment_sessions_status_check
   CHECK (status IN ('pending', 'processing', 'completed', 'failed', 'cancelled'));
-
 CREATE UNIQUE INDEX IF NOT EXISTS idx_payment_sessions_idempotency_key
   ON payment_sessions(idempotency_key)
   WHERE idempotency_key IS NOT NULL;
-
 CREATE INDEX IF NOT EXISTS idx_payment_sessions_donor_id ON payment_sessions(donor_id);
 CREATE INDEX IF NOT EXISTS idx_payment_sessions_status_donor ON payment_sessions(donor_id, status);
-
 UPDATE payment_sessions ps
 SET
   donor_id = d.donor_id,
@@ -31,19 +25,16 @@ SET
 FROM donations d
 WHERE ps.donation_id = d.id
   AND ps.donor_id IS NULL;
-
 UPDATE payment_sessions
 SET donation_id = NULL
 WHERE status IN ('pending', 'processing', 'cancelled', 'failed')
   AND donation_id IS NOT NULL;
-
 DELETE FROM donations d
 WHERE d.status IN ('pending', 'processing')
   AND NOT EXISTS (
     SELECT 1 FROM payment_sessions ps
     WHERE ps.donation_id = d.id AND ps.status = 'completed'
   );
-
 DROP POLICY IF EXISTS "payment_sessions_donor_select" ON payment_sessions;
 CREATE POLICY "payment_sessions_donor_select"
   ON payment_sessions FOR SELECT
@@ -54,27 +45,21 @@ CREATE POLICY "payment_sessions_donor_select"
       WHERE d.id = payment_sessions.donation_id AND d.donor_id = auth.uid()
     )
   );
-
 DROP POLICY IF EXISTS "payment_sessions_donor_insert" ON payment_sessions;
-
-
 DROP POLICY IF EXISTS "payment_sessions_finance_select" ON payment_sessions;
 CREATE POLICY "payment_sessions_finance_select"
   ON payment_sessions FOR SELECT
   USING (EXISTS (
     SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('super_admin', 'admin', 'finance_manager')
   ));
-
 DROP POLICY IF EXISTS "donations_insert_own" ON donations;
 DROP POLICY IF EXISTS donations_insert ON donations;
 DROP POLICY IF EXISTS donations_insert ON public.donations;
 DROP POLICY IF EXISTS "donations_insert_staff" ON donations;
-
 CREATE POLICY "donations_insert_staff"
   ON donations FOR INSERT
   TO authenticated
   WITH CHECK (public.get_user_role_level() >= 80);
-
 DROP POLICY IF EXISTS "donations_select_staff" ON donations;
 CREATE POLICY "donations_select_staff"
   ON donations FOR SELECT
@@ -89,7 +74,6 @@ CREATE POLICY "donations_select_staff"
       )
     )
   );
-
 CREATE OR REPLACE FUNCTION initiate_payment_checkout(
   p_gateway TEXT,
   p_amount NUMERIC,
@@ -111,26 +95,21 @@ BEGIN
   IF auth.uid() IS NULL THEN
     RAISE EXCEPTION 'Authentication required';
   END IF;
-
   IF p_amount IS NULL OR p_amount <= 0 THEN
     RAISE EXCEPTION 'Invalid donation amount';
   END IF;
-
   IF p_gateway NOT IN ('khalti', 'esewa', 'mobile_banking') THEN
     RAISE EXCEPTION 'Invalid payment gateway';
   END IF;
-
   IF p_frequency NOT IN ('one-time', 'monthly', 'annual') THEN
     RAISE EXCEPTION 'Invalid donation frequency';
   END IF;
-
   IF p_idempotency_key IS NOT NULL THEN
     SELECT * INTO v_existing_session
     FROM payment_sessions
     WHERE idempotency_key = p_idempotency_key
       AND donor_id = auth.uid()
     LIMIT 1;
-
     IF FOUND THEN
       IF v_existing_session.status IN ('pending', 'processing') THEN
         session_id := v_existing_session.id;
@@ -138,13 +117,10 @@ BEGIN
         RETURN NEXT;
         RETURN;
       END IF;
-
       RAISE EXCEPTION 'Payment session with this idempotency key already finalized';
     END IF;
   END IF;
-
   v_transaction_id := generate_transaction_id();
-
   INSERT INTO payment_sessions (
     donor_id,
     gateway,
@@ -168,10 +144,8 @@ BEGIN
     p_idempotency_key
   )
   RETURNING id INTO v_session_id;
-
   INSERT INTO payment_verifications (payment_session_id, action, notes)
   VALUES (v_session_id, 'submitted', 'Payment checkout initiated');
-
   INSERT INTO payment_audit_logs (payment_session_id, action, actor_id, details)
   VALUES (
     v_session_id,
@@ -179,13 +153,11 @@ BEGIN
     auth.uid(),
     jsonb_build_object('gateway', p_gateway, 'amount', p_amount, 'frequency', p_frequency)
   );
-
   session_id := v_session_id;
   transaction_id := v_transaction_id;
   RETURN NEXT;
 END;
 $$;
-
 CREATE OR REPLACE FUNCTION cancel_payment_session(p_session_id UUID)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -199,33 +171,25 @@ BEGIN
   SELECT donor_id, status INTO v_donor_id, v_status
   FROM payment_sessions
   WHERE id = p_session_id;
-
   IF v_donor_id IS NULL THEN
     RAISE EXCEPTION 'Payment session not found';
   END IF;
-
   IF v_donor_id != auth.uid() THEN
     RAISE EXCEPTION 'Unauthorized: you do not own this payment session';
   END IF;
-
   IF v_status != 'pending' THEN
     RAISE EXCEPTION 'Only pending payment sessions can be cancelled';
   END IF;
-
   UPDATE payment_sessions
   SET status = 'cancelled', updated_at = now()
   WHERE id = p_session_id;
-
   INSERT INTO payment_verifications (payment_session_id, action, notes)
   VALUES (p_session_id, 'cancelled', 'Donor cancelled or abandoned checkout');
-
   INSERT INTO payment_audit_logs (payment_session_id, action, actor_id, details)
   VALUES (p_session_id, 'checkout_cancelled', auth.uid(), '{}'::jsonb);
-
   RETURN true;
 END;
 $$;
-
 CREATE OR REPLACE FUNCTION create_payment_session(
   p_donation_id UUID,
   p_gateway TEXT,
@@ -240,7 +204,6 @@ BEGIN
   RAISE EXCEPTION 'Donations cannot be created before payment verification. Use initiate_payment_checkout instead.';
 END;
 $$;
-
 CREATE OR REPLACE FUNCTION submit_payment_confirmation(
   p_session_id UUID,
   p_screenshots TEXT[] DEFAULT '{}',
@@ -258,34 +221,26 @@ BEGIN
   SELECT donor_id, status INTO v_donor_id, v_status
   FROM payment_sessions
   WHERE id = p_session_id;
-
   IF v_donor_id IS NULL THEN
     RAISE EXCEPTION 'Payment session not found';
   END IF;
-
   IF v_donor_id != auth.uid() THEN
     RAISE EXCEPTION 'Unauthorized: you do not own this payment session';
   END IF;
-
   IF v_status = 'processing' THEN
-
     RETURN true;
   END IF;
-
   IF v_status != 'pending' THEN
     RAISE EXCEPTION 'Payment session is not in pending state';
   END IF;
-
   UPDATE payment_sessions
   SET status = 'processing',
       screenshots = array_cat(COALESCE(screenshots, '{}'), COALESCE(p_screenshots, '{}')),
       payment_reference = COALESCE(p_payment_reference, payment_reference),
       updated_at = now()
   WHERE id = p_session_id;
-
   INSERT INTO payment_verifications (payment_session_id, action, notes)
   VALUES (p_session_id, 'processing', 'Donor submitted payment confirmation');
-
   INSERT INTO payment_audit_logs (payment_session_id, action, actor_id, details)
   VALUES (
     p_session_id,
@@ -293,11 +248,9 @@ BEGIN
     auth.uid(),
     jsonb_build_object('screenshots_count', COALESCE(array_length(p_screenshots, 1), 0))
   );
-
   RETURN true;
 END;
 $$;
-
 CREATE OR REPLACE FUNCTION verify_payment(
   p_session_id UUID,
   p_status TEXT,
@@ -326,11 +279,9 @@ BEGIN
   IF v_actor_role NOT IN ('super_admin', 'admin', 'finance_manager') THEN
     RAISE EXCEPTION 'Unauthorized: only finance managers can verify payments';
   END IF;
-
   IF p_status NOT IN ('verified', 'rejected', 'failed') THEN
     RAISE EXCEPTION 'Invalid status. Must be verified, rejected, or failed';
   END IF;
-
   SELECT
     donation_id,
     amount,
@@ -355,26 +306,20 @@ BEGIN
     v_payment_reference
   FROM payment_sessions
   WHERE id = p_session_id;
-
   IF v_donor_id IS NULL THEN
     RAISE EXCEPTION 'Payment session not found';
   END IF;
-
   IF v_session_status = 'completed' AND v_donation_id IS NOT NULL AND p_status = 'verified' THEN
     RETURN true;
   END IF;
-
   IF v_session_status NOT IN ('processing') THEN
     RAISE EXCEPTION 'Only submitted payments awaiting verification can be reviewed';
   END IF;
-
   IF p_status = 'verified' THEN
     IF v_transaction_id IS NULL OR length(trim(v_transaction_id)) = 0 THEN
       RAISE EXCEPTION 'Payment reference / transaction_id is required before verification';
     END IF;
-
     v_receipt_number := generate_receipt_number();
-
     INSERT INTO donations (
       donor_id,
       amount,
@@ -402,7 +347,6 @@ BEGIN
       auth.uid()
     )
     RETURNING id INTO v_donation_id;
-
     UPDATE payment_sessions
     SET status = 'completed',
         donation_id = v_donation_id,
@@ -411,7 +355,6 @@ BEGIN
         verification_notes = p_notes,
         updated_at = now()
     WHERE id = p_session_id;
-
     INSERT INTO payment_receipts (payment_session_id, donation_id, receipt_number, receipt_data)
     VALUES (p_session_id, v_donation_id, v_receipt_number, jsonb_build_object(
       'generated_at', now(),
@@ -420,7 +363,6 @@ BEGIN
       'transaction_id', COALESCE(v_payment_reference, v_transaction_id),
       'currency', 'NPR'
     ));
-
     INSERT INTO donation_allocations (donation_id, category, allocation_percentage, amount)
     VALUES
       (v_donation_id, 'Educational Materials', 30.00, v_amount * 0.30),
@@ -438,7 +380,6 @@ BEGIN
         updated_at = now()
     WHERE id = p_session_id;
   END IF;
-
   INSERT INTO payment_verifications (payment_session_id, verified_by, action, notes)
   VALUES (
     p_session_id,
@@ -446,7 +387,6 @@ BEGIN
     CASE WHEN p_status = 'verified' THEN 'verified' ELSE p_status END,
     p_notes
   );
-
   INSERT INTO payment_audit_logs (payment_session_id, action, actor_id, actor_role, details)
   VALUES (
     p_session_id,
@@ -455,11 +395,9 @@ BEGIN
     v_actor_role,
     jsonb_build_object('donation_id', v_donation_id, 'notes', p_notes)
   );
-
   RETURN true;
 END;
 $$;
-
 CREATE OR REPLACE FUNCTION expire_abandoned_payment_sessions()
 RETURNS INTEGER
 LANGUAGE plpgsql
@@ -474,19 +412,15 @@ BEGIN
   WHERE status = 'pending'
     AND expires_at IS NOT NULL
     AND expires_at < now();
-
   GET DIAGNOSTICS v_count = ROW_COUNT;
-
   INSERT INTO payment_audit_logs (payment_session_id, action, details)
   SELECT id, 'checkout_expired', jsonb_build_object('expired_at', now())
   FROM payment_sessions
   WHERE status = 'cancelled'
     AND updated_at >= now() - interval '1 second';
-
   RETURN v_count;
 END;
 $$;
-
 GRANT EXECUTE ON FUNCTION initiate_payment_checkout(TEXT, NUMERIC, TEXT, UUID, TEXT, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION cancel_payment_session(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION submit_payment_confirmation(UUID, TEXT[], TEXT) TO authenticated;

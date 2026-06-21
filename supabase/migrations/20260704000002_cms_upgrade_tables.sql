@@ -1,6 +1,3 @@
--- CMS Upgrade: Site Settings, Navigation, Announcements, Partners, Page Blocks
-
--- 1. SITE SETTINGS (singleton row for global configuration)
 CREATE TABLE IF NOT EXISTS public.site_settings (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   site_name TEXT DEFAULT 'Buddha Academy',
@@ -35,11 +32,7 @@ CREATE TABLE IF NOT EXISTS public.site_settings (
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
-
--- Ensure only one row via constraint
 CREATE UNIQUE INDEX IF NOT EXISTS idx_site_settings_singleton ON public.site_settings((true));
-
--- 2. NAVIGATION ITEMS (dynamic menus)
 CREATE TABLE IF NOT EXISTS public.navigation_items (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   parent_id UUID REFERENCES public.navigation_items(id) ON DELETE CASCADE,
@@ -58,12 +51,9 @@ CREATE TABLE IF NOT EXISTS public.navigation_items (
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
-
 CREATE INDEX IF NOT EXISTS idx_navigation_items_location ON public.navigation_items(location);
 CREATE INDEX IF NOT EXISTS idx_navigation_items_parent ON public.navigation_items(parent_id);
 CREATE INDEX IF NOT EXISTS idx_navigation_items_sort ON public.navigation_items(location, sort_order);
-
--- 3. ANNOUNCEMENTS (banner system)
 CREATE TABLE IF NOT EXISTS public.announcements (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   title TEXT NOT NULL,
@@ -80,12 +70,9 @@ CREATE TABLE IF NOT EXISTS public.announcements (
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
-
 CREATE INDEX IF NOT EXISTS idx_announcements_active ON public.announcements(is_active);
 CREATE INDEX IF NOT EXISTS idx_announcements_dates ON public.announcements(starts_at, ends_at);
 CREATE INDEX IF NOT EXISTS idx_announcements_sort ON public.announcements(sort_order);
-
--- 4. PARTNERS (sponsor/donor logos)
 CREATE TABLE IF NOT EXISTS public.partners (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   name TEXT NOT NULL,
@@ -100,32 +87,24 @@ CREATE TABLE IF NOT EXISTS public.partners (
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
-
 CREATE INDEX IF NOT EXISTS idx_partners_type ON public.partners(partner_type);
 CREATE INDEX IF NOT EXISTS idx_partners_sort ON public.partners(sort_order);
 CREATE INDEX IF NOT EXISTS idx_partners_visible ON public.partners(is_visible);
-
--- 5. EXTEND pages TABLE with blocks and seo
 ALTER TABLE IF EXISTS public.pages
   ADD COLUMN IF NOT EXISTS blocks JSONB DEFAULT '[]'::jsonb,
   ADD COLUMN IF NOT EXISTS seo JSONB DEFAULT '{}'::jsonb;
-
--- 6. EXTEND media_library with folder support
 ALTER TABLE IF EXISTS public.media_library
   ADD COLUMN IF NOT EXISTS folder TEXT DEFAULT '/',
   ADD COLUMN IF NOT EXISTS width INTEGER,
   ADD COLUMN IF NOT EXISTS height INTEGER,
   ADD COLUMN IF NOT EXISTS file_hash TEXT,
   ADD COLUMN IF NOT EXISTS usage_count INTEGER DEFAULT 0;
-
 CREATE INDEX IF NOT EXISTS idx_media_library_folder ON public.media_library(folder);
 CREATE INDEX IF NOT EXISTS idx_media_library_mime ON public.media_library(mime_type);
-
--- 7. AUDIT TRIGGER for new tables
 CREATE OR REPLACE FUNCTION public.cms_audit_trigger()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.audit_logs (action, entity_type, entity_id, actor_id, changes, ip_address)
+  INSERT INTO public.audit_logs (action, entity_type, entity_id, user_id, changes, ip_address)
   VALUES (
     TG_OP,
     TG_TABLE_NAME,
@@ -136,12 +115,11 @@ BEGIN
       WHEN TG_OP = 'UPDATE' THEN jsonb_build_object('old', row_to_json(OLD), 'new', row_to_json(NEW))
       ELSE row_to_json(NEW)::jsonb
     END,
-    current_setting('request.headers')::jsonb ->> 'x-forwarded-for'
+    current_setting('request.headers', true)::jsonb ->> 'x-forwarded-for'
   );
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'audit_site_settings') THEN
@@ -161,92 +139,64 @@ BEGIN
       FOR EACH ROW EXECUTE FUNCTION public.cms_audit_trigger();
   END IF;
 END $$;
-
--- 8. VERSION TRACKING for pages (extend existing content_versions to track blocks)
--- Already handled by existing triggers on pages table
-
--- 9. RLS POLICIES
 ALTER TABLE IF EXISTS public.site_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS public.navigation_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS public.announcements ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS public.partners ENABLE ROW LEVEL SECURITY;
-
--- site_settings: public can read, only admin/super_admin can update
 CREATE POLICY "site_settings_select_public"
   ON site_settings FOR SELECT USING (true);
-
 CREATE POLICY "site_settings_update_admin"
   ON site_settings FOR UPDATE
   USING (public.get_user_role_level() >= 90)
   WITH CHECK (public.get_user_role_level() >= 90);
-
--- navigation_items: public sees visible, staff sees all, admin CRUD
 CREATE POLICY "navigation_items_select_public"
   ON navigation_items FOR SELECT
   USING (is_visible = true);
-
 CREATE POLICY "navigation_items_select_staff"
   ON navigation_items FOR SELECT
   USING (public.get_user_role_level() >= 60);
-
 CREATE POLICY "navigation_items_insert_admin"
   ON navigation_items FOR INSERT
   WITH CHECK (public.get_user_role_level() >= 90);
-
 CREATE POLICY "navigation_items_update_admin"
   ON navigation_items FOR UPDATE
   USING (public.get_user_role_level() >= 90)
   WITH CHECK (public.get_user_role_level() >= 90);
-
 CREATE POLICY "navigation_items_delete_admin"
   ON navigation_items FOR DELETE
   USING (public.get_user_role_level() >= 90);
-
--- announcements: public sees active, staff sees all, admin CRUD
 CREATE POLICY "announcements_select_public"
   ON announcements FOR SELECT
   USING (is_active = true);
-
 CREATE POLICY "announcements_select_staff"
   ON announcements FOR SELECT
   USING (public.get_user_role_level() >= 60);
-
 CREATE POLICY "announcements_insert_admin"
   ON announcements FOR INSERT
   WITH CHECK (public.get_user_role_level() >= 90);
-
 CREATE POLICY "announcements_update_admin"
   ON announcements FOR UPDATE
   USING (public.get_user_role_level() >= 90)
   WITH CHECK (public.get_user_role_level() >= 90);
-
 CREATE POLICY "announcements_delete_admin"
   ON announcements FOR DELETE
   USING (public.get_user_role_level() >= 90);
-
--- partners: public sees visible, staff sees all, admin CRUD
 CREATE POLICY "partners_select_public"
   ON partners FOR SELECT
   USING (is_visible = true);
-
 CREATE POLICY "partners_select_staff"
   ON partners FOR SELECT
   USING (public.get_user_role_level() >= 60);
-
 CREATE POLICY "partners_insert_admin"
   ON partners FOR INSERT
   WITH CHECK (public.get_user_role_level() >= 90);
-
 CREATE POLICY "partners_update_admin"
   ON partners FOR UPDATE
   USING (public.get_user_role_level() >= 90)
   WITH CHECK (public.get_user_role_level() >= 90);
-
 CREATE POLICY "partners_delete_admin"
   ON partners FOR DELETE
   USING (public.get_user_role_level() >= 90);
-
--- 10. GRANTS
 GRANT SELECT ON public.site_settings TO anon, authenticated;
 GRANT UPDATE ON public.site_settings TO authenticated;
 GRANT SELECT ON public.navigation_items TO anon, authenticated;
@@ -255,8 +205,6 @@ GRANT SELECT ON public.announcements TO anon, authenticated;
 GRANT INSERT, UPDATE, DELETE ON public.announcements TO authenticated;
 GRANT SELECT ON public.partners TO anon, authenticated;
 GRANT INSERT, UPDATE, DELETE ON public.partners TO authenticated;
-
--- 11. SEED DATA for site_settings (one row)
 INSERT INTO public.site_settings (site_name, tagline, footer_description)
 VALUES (
   'Buddha Academy',
@@ -264,8 +212,6 @@ VALUES (
   'Buddha Academy is a nonprofit boarding school in Kathmandu, Nepal, providing free education to underprivileged children since 1977.'
 )
 ON CONFLICT DO NOTHING;
-
--- 12. SEED DATA for navigation_items (default header nav + footer links)
 INSERT INTO public.navigation_items (location, label, url, route, sort_order, is_visible) VALUES
   ('header', 'Home', NULL, '/', 1, true),
   ('header', 'About', NULL, '/about', 2, true),

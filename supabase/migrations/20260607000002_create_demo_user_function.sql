@@ -1,5 +1,4 @@
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
-
 CREATE OR REPLACE FUNCTION public.create_demo_user(
   p_email text,
   p_password text,
@@ -19,9 +18,7 @@ BEGIN
   IF v_user_id IS NOT NULL THEN
     RETURN v_user_id;
   END IF;
-
   v_user_id := gen_random_uuid();
-
   INSERT INTO auth.users (
     instance_id, id, aud, role,
     email, encrypted_password,
@@ -43,7 +40,6 @@ BEGIN
     now(), now(),
     '', ''
   );
-
   INSERT INTO auth.identities (
     id, user_id, provider_id, identity_data, provider,
     last_sign_in_at, created_at, updated_at
@@ -54,7 +50,6 @@ BEGIN
     'email',
     now(), now(), now()
   );
-
   INSERT INTO public.profiles (id, email, full_name, country, role, status)
   VALUES (v_user_id, p_email, p_full_name, p_country, p_role, 'active')
   ON CONFLICT (id) DO UPDATE SET
@@ -64,7 +59,6 @@ BEGIN
     role = EXCLUDED.role,
     status = 'active',
     updated_at = now();
-
   RETURN v_user_id;
 END;
 $$;

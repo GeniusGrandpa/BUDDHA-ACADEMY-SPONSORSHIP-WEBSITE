@@ -1,14 +1,12 @@
 ALTER TABLE public.profiles DROP CONSTRAINT IF EXISTS profiles_role_check;
 ALTER TABLE public.profiles ADD CONSTRAINT profiles_role_check
   CHECK (role IN ('super_admin', 'admin', 'finance_manager', 'teacher', 'donor', 'volunteer', 'public_user'));
-
 DROP TABLE IF EXISTS public.approvals CASCADE;
 DROP TABLE IF EXISTS public.invitations CASCADE;
 DROP TABLE IF EXISTS public.user_teams CASCADE;
 DROP TABLE IF EXISTS public.user_departments CASCADE;
 DROP TABLE IF EXISTS public.teams CASCADE;
 DROP TABLE IF EXISTS public.departments CASCADE;
-
 DELETE FROM public.role_permissions WHERE role_id IN (
   SELECT id FROM public.roles WHERE name IN ('sponsorship_manager', 'content_manager', 'volunteer_coordinator', 'teacher_staff')
 );
@@ -16,16 +14,13 @@ DELETE FROM public.user_roles WHERE role_id IN (
   SELECT id FROM public.roles WHERE name IN ('sponsorship_manager', 'content_manager', 'volunteer_coordinator', 'teacher_staff')
 );
 DELETE FROM public.roles WHERE name IN ('sponsorship_manager', 'content_manager', 'volunteer_coordinator', 'teacher_staff');
-
 UPDATE public.profiles SET role = 'teacher' WHERE role = 'teacher_staff';
-
 UPDATE public.roles SET
   display_name = 'Teacher',
   description = 'Manage assigned students, upload grades, attendance, progress updates',
   level = 60
 WHERE name = 'teacher'
   AND display_name = 'Teacher/Staff';
-
 INSERT INTO public.roles (name, display_name, description, level, is_system) VALUES
   ('super_admin', 'Super Admin', 'Full platform access with system configuration', 100, true),
   ('admin', 'Admin', 'Manage donors, students, content, and moderate system', 90, true),
@@ -38,15 +33,12 @@ ON CONFLICT (name) DO UPDATE SET
   display_name = EXCLUDED.display_name,
   description = EXCLUDED.description,
   level = EXCLUDED.level;
-
 ALTER TABLE public.profiles DROP COLUMN IF EXISTS department_id CASCADE;
 ALTER TABLE public.profiles DROP COLUMN IF EXISTS phone_verified;
 ALTER TABLE public.profiles DROP COLUMN IF EXISTS two_factor_enabled;
 ALTER TABLE public.profiles DROP COLUMN IF EXISTS locked_until;
-
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS bio text;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS avatar_updated_at timestamptz;
-
 ALTER TABLE public.students ADD COLUMN IF NOT EXISTS hobbies text[];
 ALTER TABLE public.students ADD COLUMN IF NOT EXISTS dream_career text;
 ALTER TABLE public.students ADD COLUMN IF NOT EXISTS education_goals text;
@@ -63,7 +55,6 @@ ALTER TABLE public.students ADD COLUMN IF NOT EXISTS gallery_urls text[];
 ALTER TABLE public.students ADD COLUMN IF NOT EXISTS date_of_birth date;
 ALTER TABLE public.students ADD COLUMN IF NOT EXISTS enrolled_date date;
 ALTER TABLE public.students ADD COLUMN IF NOT EXISTS class_section text;
-
 CREATE TABLE IF NOT EXISTS public.donation_goals (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   title text NOT NULL,
@@ -80,9 +71,7 @@ CREATE TABLE IF NOT EXISTS public.donation_goals (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-
 ALTER TABLE public.donation_goals ENABLE ROW LEVEL SECURITY;
-
 CREATE TABLE IF NOT EXISTS public.testimonials (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   author_name text NOT NULL,
@@ -95,9 +84,7 @@ CREATE TABLE IF NOT EXISTS public.testimonials (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-
 ALTER TABLE public.testimonials ENABLE ROW LEVEL SECURITY;
-
 CREATE TABLE IF NOT EXISTS public.events (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   title text NOT NULL,
@@ -113,9 +100,7 @@ CREATE TABLE IF NOT EXISTS public.events (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-
 ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
-
 CREATE TABLE IF NOT EXISTS public.sponsorship_timeline (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   sponsorship_id uuid NOT NULL REFERENCES public.sponsorships(id) ON DELETE CASCADE,
@@ -128,9 +113,7 @@ CREATE TABLE IF NOT EXISTS public.sponsorship_timeline (
   metadata jsonb,
   created_at timestamptz NOT NULL DEFAULT now()
 );
-
 ALTER TABLE public.sponsorship_timeline ENABLE ROW LEVEL SECURITY;
-
 CREATE TABLE IF NOT EXISTS public.certificates (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -145,9 +128,7 @@ CREATE TABLE IF NOT EXISTS public.certificates (
   metadata jsonb,
   created_at timestamptz NOT NULL DEFAULT now()
 );
-
 ALTER TABLE public.certificates ENABLE ROW LEVEL SECURITY;
-
 CREATE TABLE IF NOT EXISTS public.login_history (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -160,9 +141,7 @@ CREATE TABLE IF NOT EXISTS public.login_history (
   failure_reason text,
   created_at timestamptz NOT NULL DEFAULT now()
 );
-
 ALTER TABLE public.login_history ENABLE ROW LEVEL SECURITY;
-
 CREATE TABLE IF NOT EXISTS public.impact_metrics (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   month date NOT NULL,
@@ -174,9 +153,7 @@ CREATE TABLE IF NOT EXISTS public.impact_metrics (
   created_at timestamptz NOT NULL DEFAULT now(),
   UNIQUE(month)
 );
-
 ALTER TABLE public.impact_metrics ENABLE ROW LEVEL SECURITY;
-
 CREATE TABLE IF NOT EXISTS public.teacher_assignments (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   teacher_id uuid NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
@@ -185,9 +162,7 @@ CREATE TABLE IF NOT EXISTS public.teacher_assignments (
   assigned_at timestamptz NOT NULL DEFAULT now(),
   UNIQUE(teacher_id, student_id)
 );
-
 ALTER TABLE public.teacher_assignments ENABLE ROW LEVEL SECURITY;
-
 CREATE TABLE IF NOT EXISTS public.student_progress (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   student_id uuid NOT NULL REFERENCES public.students(id) ON DELETE CASCADE,
@@ -201,9 +176,7 @@ CREATE TABLE IF NOT EXISTS public.student_progress (
   recorded_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-
 ALTER TABLE public.student_progress ENABLE ROW LEVEL SECURITY;
-
 CREATE TABLE IF NOT EXISTS public.attendance_records (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   student_id uuid NOT NULL REFERENCES public.students(id) ON DELETE CASCADE,
@@ -214,9 +187,7 @@ CREATE TABLE IF NOT EXISTS public.attendance_records (
   created_at timestamptz NOT NULL DEFAULT now(),
   UNIQUE(student_id, date)
 );
-
 ALTER TABLE public.attendance_records ENABLE ROW LEVEL SECURITY;
-
 CREATE OR REPLACE FUNCTION public.get_my_role()
 RETURNS text
 LANGUAGE sql
@@ -226,23 +197,19 @@ SET search_path = public
 AS $$
   SELECT role FROM public.profiles WHERE id = auth.uid();
 $$;
-
 DROP POLICY IF EXISTS profiles_read_own ON public.profiles;
 DROP POLICY IF EXISTS profiles_read_all ON public.profiles;
 DROP POLICY IF EXISTS profiles_update_own ON public.profiles;
 DROP POLICY IF EXISTS profiles_update_all ON public.profiles;
 DROP POLICY IF EXISTS profiles_delete ON public.profiles;
-
 DROP POLICY IF EXISTS profiles_read_own ON profiles;
 CREATE POLICY profiles_read_own ON public.profiles FOR SELECT
   TO authenticated USING (id = auth.uid());
-
 DROP POLICY IF EXISTS profiles_read_admin ON profiles;
 CREATE POLICY profiles_read_admin ON public.profiles FOR SELECT
   TO authenticated USING (
     public.get_my_role() IN ('super_admin', 'admin')
   );
-
 DROP POLICY IF EXISTS profiles_update_own ON profiles;
 CREATE POLICY profiles_update_own ON public.profiles FOR UPDATE
   TO authenticated USING (id = auth.uid())
@@ -250,19 +217,16 @@ CREATE POLICY profiles_update_own ON public.profiles FOR UPDATE
     id = auth.uid()
     AND role = (SELECT role FROM public.profiles WHERE id = auth.uid())
   );
-
 DROP POLICY IF EXISTS profiles_update_admin ON profiles;
 CREATE POLICY profiles_update_admin ON public.profiles FOR UPDATE
   TO authenticated USING (
     public.get_my_role() IN ('super_admin', 'admin')
   );
-
 DROP POLICY IF EXISTS students_read_all ON public.students;
 DROP POLICY IF EXISTS students_read_anon ON public.students;
 DROP POLICY IF EXISTS students_insert ON public.students;
 DROP POLICY IF EXISTS students_update ON public.students;
 DROP POLICY IF EXISTS students_delete ON public.students;
-
 DROP POLICY IF EXISTS students_read_all ON students;
 CREATE POLICY students_read_all ON public.students FOR SELECT
   TO authenticated USING (true);
@@ -284,12 +248,10 @@ CREATE POLICY students_delete ON public.students FOR DELETE
   TO authenticated USING (
     public.get_my_role() IN ('super_admin', 'admin')
   );
-
 DROP POLICY IF EXISTS donations_read_own ON public.donations;
 DROP POLICY IF EXISTS donations_read_all ON public.donations;
 DROP POLICY IF EXISTS donations_insert ON public.donations;
 DROP POLICY IF EXISTS donations_update ON public.donations;
-
 DROP POLICY IF EXISTS donations_read_own ON donations;
 CREATE POLICY donations_read_own ON public.donations FOR SELECT
   TO authenticated USING (donor_id = auth.uid());
@@ -308,13 +270,11 @@ CREATE POLICY donations_update ON public.donations FOR UPDATE
   TO authenticated USING (
     public.get_my_role() IN ('super_admin', 'admin', 'finance_manager')
   );
-
 DROP POLICY IF EXISTS sponsorships_read_own ON public.sponsorships;
 DROP POLICY IF EXISTS sponsorships_read_all ON public.sponsorships;
 DROP POLICY IF EXISTS sponsorships_insert ON public.sponsorships;
 DROP POLICY IF EXISTS sponsorships_update ON public.sponsorships;
 DROP POLICY IF EXISTS sponsorships_delete ON public.sponsorships;
-
 DROP POLICY IF EXISTS sponsorships_read_own ON sponsorships;
 CREATE POLICY sponsorships_read_own ON public.sponsorships FOR SELECT
   TO authenticated USING (donor_id = auth.uid());
@@ -333,13 +293,11 @@ CREATE POLICY sponsorships_update ON public.sponsorships FOR UPDATE
   TO authenticated USING (
     public.get_my_role() IN ('super_admin', 'admin')
   );
-
 DROP POLICY IF EXISTS news_read_public ON public.news;
 DROP POLICY IF EXISTS news_read_anon ON public.news;
 DROP POLICY IF EXISTS news_insert ON public.news;
 DROP POLICY IF EXISTS news_update ON public.news;
 DROP POLICY IF EXISTS news_delete ON public.news;
-
 DROP POLICY IF EXISTS news_read_public ON news;
 CREATE POLICY news_read_public ON public.news FOR SELECT
   TO authenticated USING (published = true OR public.get_my_role() IN ('super_admin', 'admin'));
@@ -361,13 +319,11 @@ CREATE POLICY news_delete ON public.news FOR DELETE
   TO authenticated USING (
     public.get_my_role() IN ('super_admin', 'admin')
   );
-
 DROP POLICY IF EXISTS gallery_read_all ON public.gallery_items;
 DROP POLICY IF EXISTS gallery_read_anon ON public.gallery_items;
 DROP POLICY IF EXISTS gallery_insert ON public.gallery_items;
 DROP POLICY IF EXISTS gallery_update ON public.gallery_items;
 DROP POLICY IF EXISTS gallery_delete ON public.gallery_items;
-
 DROP POLICY IF EXISTS gallery_read_all ON gallery_items;
 CREATE POLICY gallery_read_all ON public.gallery_items FOR SELECT
   TO authenticated USING (true);
@@ -389,12 +345,10 @@ CREATE POLICY gallery_delete ON public.gallery_items FOR DELETE
   TO authenticated USING (
     public.get_my_role() IN ('super_admin', 'admin')
   );
-
 DROP POLICY IF EXISTS contacts_read ON public.contact_submissions;
 DROP POLICY IF EXISTS contacts_insert ON public.contact_submissions;
 DROP POLICY IF EXISTS contacts_insert_anon ON public.contact_submissions;
 DROP POLICY IF EXISTS contacts_update ON public.contact_submissions;
-
 DROP POLICY IF EXISTS contacts_read ON contact_submissions;
 CREATE POLICY contacts_read ON public.contact_submissions FOR SELECT
   TO authenticated USING (
@@ -411,7 +365,6 @@ CREATE POLICY contacts_update ON public.contact_submissions FOR UPDATE
   TO authenticated USING (
     public.get_my_role() IN ('super_admin', 'admin')
   );
-
 DROP POLICY IF EXISTS donation_goals_read ON donation_goals;
 CREATE POLICY donation_goals_read ON public.donation_goals FOR SELECT
   TO authenticated USING (true);
@@ -428,7 +381,6 @@ CREATE POLICY donation_goals_update ON public.donation_goals FOR UPDATE
   TO authenticated USING (
     public.get_my_role() IN ('super_admin', 'admin')
   );
-
 DROP POLICY IF EXISTS testimonials_read ON testimonials;
 CREATE POLICY testimonials_read ON public.testimonials FOR SELECT
   TO authenticated USING (is_published = true);
@@ -445,7 +397,6 @@ CREATE POLICY testimonials_update ON public.testimonials FOR UPDATE
   TO authenticated USING (
     public.get_my_role() IN ('super_admin', 'admin')
   );
-
 DROP POLICY IF EXISTS events_read ON events;
 CREATE POLICY events_read ON public.events FOR SELECT
   TO authenticated USING (is_published = true);
@@ -462,7 +413,6 @@ CREATE POLICY events_update ON public.events FOR UPDATE
   TO authenticated USING (
     public.get_my_role() IN ('super_admin', 'admin')
   );
-
 DROP POLICY IF EXISTS timeline_read_own ON sponsorship_timeline;
 CREATE POLICY timeline_read_own ON public.sponsorship_timeline FOR SELECT
   TO authenticated USING (
@@ -480,7 +430,6 @@ CREATE POLICY timeline_insert ON public.sponsorship_timeline FOR INSERT
   TO authenticated WITH CHECK (
     public.get_my_role() IN ('super_admin', 'admin', 'teacher')
   );
-
 DROP POLICY IF EXISTS certificates_read_own ON certificates;
 CREATE POLICY certificates_read_own ON public.certificates FOR SELECT
   TO authenticated USING (user_id = auth.uid());
@@ -494,7 +443,6 @@ CREATE POLICY certificates_insert ON public.certificates FOR INSERT
   TO authenticated WITH CHECK (
     public.get_my_role() IN ('super_admin', 'admin')
   );
-
 DROP POLICY IF EXISTS login_history_read_own ON login_history;
 CREATE POLICY login_history_read_own ON public.login_history FOR SELECT
   TO authenticated USING (user_id = auth.uid());
@@ -506,7 +454,6 @@ CREATE POLICY login_history_read_admin ON public.login_history FOR SELECT
 DROP POLICY IF EXISTS login_history_insert ON login_history;
 CREATE POLICY login_history_insert ON public.login_history FOR INSERT
   TO authenticated WITH CHECK (user_id = auth.uid());
-
 DROP POLICY IF EXISTS impact_metrics_read ON impact_metrics;
 CREATE POLICY impact_metrics_read ON public.impact_metrics FOR SELECT
   TO authenticated USING (true);
@@ -523,7 +470,6 @@ CREATE POLICY impact_metrics_update ON public.impact_metrics FOR UPDATE
   TO authenticated USING (
     public.get_my_role() IN ('super_admin', 'admin')
   );
-
 DROP POLICY IF EXISTS ta_read_teacher ON teacher_assignments;
 CREATE POLICY ta_read_teacher ON public.teacher_assignments FOR SELECT
   TO authenticated USING (teacher_id = auth.uid());
@@ -537,7 +483,6 @@ CREATE POLICY ta_insert ON public.teacher_assignments FOR INSERT
   TO authenticated WITH CHECK (
     public.get_my_role() IN ('super_admin', 'admin')
   );
-
 DROP POLICY IF EXISTS sp_read_teacher ON student_progress;
 CREATE POLICY sp_read_teacher ON public.student_progress FOR SELECT
   TO authenticated USING (
@@ -565,7 +510,6 @@ CREATE POLICY sp_update_teacher ON public.student_progress FOR UPDATE
   TO authenticated USING (
     teacher_id = auth.uid() OR public.get_my_role() IN ('super_admin', 'admin')
   );
-
 DROP POLICY IF EXISTS ar_read_teacher ON attendance_records;
 CREATE POLICY ar_read_teacher ON public.attendance_records FOR SELECT
   TO authenticated USING (
@@ -588,7 +532,6 @@ CREATE POLICY ar_insert_teacher ON public.attendance_records FOR INSERT
   TO authenticated WITH CHECK (
     teacher_id = auth.uid() OR public.get_my_role() IN ('super_admin', 'admin')
   );
-
 DROP POLICY IF EXISTS notifications_read_own ON notifications;
 CREATE POLICY notifications_read_own ON public.notifications FOR SELECT
   TO authenticated USING (user_id = auth.uid());
@@ -600,13 +543,11 @@ CREATE POLICY notifications_insert_system ON public.notifications FOR INSERT
   TO authenticated WITH CHECK (
     public.get_my_role() IN ('super_admin', 'admin', 'teacher')
   );
-
 DROP POLICY IF EXISTS security_events_read ON security_events;
 CREATE POLICY security_events_read ON public.security_events FOR SELECT
   TO authenticated USING (
     public.get_my_role() IN ('super_admin', 'admin')
   );
-
 DROP POLICY IF EXISTS va_read_own ON volunteer_assignments;
 CREATE POLICY va_read_own ON public.volunteer_assignments FOR SELECT
   TO authenticated USING (volunteer_id = auth.uid());
@@ -625,7 +566,6 @@ CREATE POLICY va_update ON public.volunteer_assignments FOR UPDATE
   TO authenticated USING (
     public.get_my_role() IN ('super_admin', 'admin')
   );
-
 CREATE OR REPLACE FUNCTION public.admin_toggle_role(
   target_user_id uuid,
   new_role text
@@ -641,42 +581,33 @@ DECLARE
   target_level integer;
   new_role_level integer;
 BEGIN
-
   IF target_user_id = auth.uid() THEN
     RAISE EXCEPTION 'You cannot change your own role';
   END IF;
-
   SELECT role INTO caller_role FROM public.profiles WHERE id = auth.uid();
   SELECT level INTO caller_level FROM public.roles WHERE name = caller_role;
-
   IF caller_role NOT IN ('super_admin', 'admin') THEN
     RAISE EXCEPTION 'Permission denied';
   END IF;
-
   SELECT level INTO new_role_level FROM public.roles WHERE name = new_role;
   IF new_role_level IS NULL THEN
     RAISE EXCEPTION 'Invalid role: %', new_role;
   END IF;
-
   SELECT COALESCE(r.level, 0) INTO target_level
   FROM public.profiles p
   LEFT JOIN public.roles r ON r.name = p.role
   WHERE p.id = target_user_id;
-
   IF target_level >= 100 THEN
     RAISE EXCEPTION 'Cannot modify super admin accounts';
   END IF;
-
   IF new_role_level >= caller_level THEN
     RAISE EXCEPTION 'Cannot assign role at or above your own level';
   END IF;
-
   UPDATE public.profiles
   SET role = new_role, updated_at = now()
   WHERE id = target_user_id;
 END;
 $$;
-
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -696,13 +627,11 @@ BEGIN
   RETURN NEW;
 END;
 $$;
-
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
-
 CREATE INDEX IF NOT EXISTS idx_donation_goals_active ON public.donation_goals(is_active);
 CREATE INDEX IF NOT EXISTS idx_testimonials_published ON public.testimonials(is_published);
 CREATE INDEX IF NOT EXISTS idx_events_date ON public.events(date);
@@ -714,7 +643,6 @@ CREATE INDEX IF NOT EXISTS idx_teacher_assignments_teacher ON public.teacher_ass
 CREATE INDEX IF NOT EXISTS idx_teacher_assignments_student ON public.teacher_assignments(student_id);
 CREATE INDEX IF NOT EXISTS idx_student_progress_student ON public.student_progress(student_id);
 CREATE INDEX IF NOT EXISTS idx_attendance_student_date ON public.attendance_records(student_id, date);
-
 INSERT INTO public.testimonials (author_name, author_role, content, quote, is_published, sort_order) VALUES
   (
     'Sarah Johnson',
@@ -745,7 +673,6 @@ INSERT INTO public.testimonials (author_name, author_role, content, quote, is_pu
     true, 4
   )
 ON CONFLICT DO NOTHING;
-
 INSERT INTO public.donation_goals (title, description, target_amount, raised_amount, donor_count, icon, color, category, is_active) VALUES
   (
     'Library Fund',
@@ -778,7 +705,6 @@ INSERT INTO public.donation_goals (title, description, target_amount, raised_amo
     25000, 7200, 15, 'Music', 'pink', 'education', true
   )
 ON CONFLICT DO NOTHING;
-
 INSERT INTO public.impact_metrics (month, meals_funded, books_distributed, uniforms_provided, students_supported, attendance_rate) VALUES
   ('2026-01-01', 2850, 320, 45, 187, 94.5),
   ('2026-02-01', 3100, 280, 38, 192, 95.2),
@@ -787,7 +713,6 @@ INSERT INTO public.impact_metrics (month, meals_funded, books_distributed, unifo
   ('2026-05-01', 3400, 380, 55, 203, 95.7),
   ('2026-06-01', 3300, 340, 48, 200, 94.9)
 ON CONFLICT (month) DO NOTHING;
-
 INSERT INTO public.events (title, description, event_type, date, location, is_published) VALUES
   ('Annual Sports Day 2026', 'A day of athletic competitions, team games, and celebrations of physical education.', 'sports', '2026-03-15', 'School Ground', true),
   ('Nepali New Year Celebration', 'Cultural program featuring traditional music, dance, and food from all regions of Nepal.', 'celebration', '2026-04-13', 'School Hall', true),
@@ -796,7 +721,6 @@ INSERT INTO public.events (title, description, event_type, date, location, is_pu
   ('Volunteer Teaching Week', 'International volunteers join our classrooms for a week of collaborative learning.', 'volunteer', '2026-07-01', 'Buddha Academy', true),
   ('Annual Day Function', 'Year-end celebration with cultural performances, awards, and recognition ceremony.', 'function', '2026-12-20', 'School Ground', true)
 ON CONFLICT DO NOTHING;
-
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -808,7 +732,6 @@ BEGIN
       FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
   END IF;
 END $$;
-
 GRANT USAGE ON SCHEMA public TO anon, authenticated;
 GRANT ALL ON ALL TABLES IN SCHEMA public TO anon, authenticated;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated;

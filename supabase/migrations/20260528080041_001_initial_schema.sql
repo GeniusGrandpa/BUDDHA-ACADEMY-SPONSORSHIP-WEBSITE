@@ -8,8 +8,6 @@ CREATE TABLE IF NOT EXISTS profiles (
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
-
-
 CREATE TABLE IF NOT EXISTS students (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL,
@@ -24,8 +22,6 @@ CREATE TABLE IF NOT EXISTS students (
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
-
-
 CREATE TABLE IF NOT EXISTS donations (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   donor_id uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
@@ -37,8 +33,6 @@ CREATE TABLE IF NOT EXISTS donations (
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
-
-
 CREATE TABLE IF NOT EXISTS sponsorships (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   donor_id uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
@@ -51,8 +45,6 @@ CREATE TABLE IF NOT EXISTS sponsorships (
   updated_at timestamptz DEFAULT now(),
   UNIQUE (donor_id, student_id)
 );
-
-
 CREATE TABLE IF NOT EXISTS news (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   title text NOT NULL,
@@ -65,8 +57,6 @@ CREATE TABLE IF NOT EXISTS news (
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
-
-
 CREATE TABLE IF NOT EXISTS gallery_items (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   type text NOT NULL CHECK (type IN ('photo', 'video', 'testimonial')),
@@ -78,8 +68,6 @@ CREATE TABLE IF NOT EXISTS gallery_items (
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
-
-
 CREATE TABLE IF NOT EXISTS contact_submissions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL,
@@ -90,8 +78,6 @@ CREATE TABLE IF NOT EXISTS contact_submissions (
   status text NOT NULL DEFAULT 'unread' CHECK (status IN ('unread', 'read', 'replied')),
   created_at timestamptz DEFAULT now()
 );
-
-
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE students ENABLE ROW LEVEL SECURITY;
 ALTER TABLE donations ENABLE ROW LEVEL SECURITY;
@@ -99,21 +85,17 @@ ALTER TABLE sponsorships ENABLE ROW LEVEL SECURITY;
 ALTER TABLE news ENABLE ROW LEVEL SECURITY;
 ALTER TABLE gallery_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE contact_submissions ENABLE ROW LEVEL SECURITY;
-
-
 DROP POLICY IF EXISTS "Users can read own profile" ON profiles;
 CREATE POLICY "Users can read own profile"
   ON profiles FOR SELECT
   TO authenticated
   USING (auth.uid() = id);
-
 DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
 CREATE POLICY "Users can update own profile"
   ON profiles FOR UPDATE
   TO authenticated
   USING (auth.uid() = id)
   WITH CHECK (auth.uid() = id);
-
 DROP POLICY IF EXISTS "Admins can read all profiles" ON profiles;
 CREATE POLICY "Admins can read all profiles"
   ON profiles FOR SELECT
@@ -124,7 +106,6 @@ CREATE POLICY "Admins can read all profiles"
       WHERE profiles.id = auth.uid() AND profiles.role = 'admin'
     )
   );
-
 DROP POLICY IF EXISTS "Admins can update all profiles" ON profiles;
 CREATE POLICY "Admins can update all profiles"
   ON profiles FOR UPDATE
@@ -141,20 +122,16 @@ CREATE POLICY "Admins can update all profiles"
       WHERE profiles.id = auth.uid() AND profiles.role = 'admin'
     )
   );
-
-
 DROP POLICY IF EXISTS "Anyone can view students" ON students;
 CREATE POLICY "Anyone can view students"
   ON students FOR SELECT
   TO authenticated
   USING (true);
-
 DROP POLICY IF EXISTS "Anyone can view students anon" ON students;
 CREATE POLICY "Anyone can view students anon"
   ON students FOR SELECT
   TO anon
   USING (true);
-
 DROP POLICY IF EXISTS "Admins can insert students" ON students;
 CREATE POLICY "Admins can insert students"
   ON students FOR INSERT
@@ -165,7 +142,6 @@ CREATE POLICY "Admins can insert students"
       WHERE profiles.id = auth.uid() AND profiles.role = 'admin'
     )
   );
-
 DROP POLICY IF EXISTS "Admins can update students" ON students;
 CREATE POLICY "Admins can update students"
   ON students FOR UPDATE
@@ -182,7 +158,6 @@ CREATE POLICY "Admins can update students"
       WHERE profiles.id = auth.uid() AND profiles.role = 'admin'
     )
   );
-
 DROP POLICY IF EXISTS "Admins can delete students" ON students;
 CREATE POLICY "Admins can delete students"
   ON students FOR DELETE
@@ -193,14 +168,11 @@ CREATE POLICY "Admins can delete students"
       WHERE profiles.id = auth.uid() AND profiles.role = 'admin'
     )
   );
-
-
 DROP POLICY IF EXISTS "Donors can read own donations" ON donations;
 CREATE POLICY "Donors can read own donations"
   ON donations FOR SELECT
   TO authenticated
   USING (donor_id = auth.uid());
-
 DROP POLICY IF EXISTS "Admins can read all donations" ON donations;
 CREATE POLICY "Admins can read all donations"
   ON donations FOR SELECT
@@ -211,13 +183,11 @@ CREATE POLICY "Admins can read all donations"
       WHERE profiles.id = auth.uid() AND profiles.role = 'admin'
     )
   );
-
 DROP POLICY IF EXISTS "Donors can insert donations" ON donations;
 CREATE POLICY "Donors can insert donations"
   ON donations FOR INSERT
   TO authenticated
   WITH CHECK (donor_id = auth.uid());
-
 DROP POLICY IF EXISTS "Admins can update donations" ON donations;
 CREATE POLICY "Admins can update donations"
   ON donations FOR UPDATE
@@ -234,13 +204,11 @@ CREATE POLICY "Admins can update donations"
       WHERE profiles.id = auth.uid() AND profiles.role = 'admin'
     )
   );
-
 DROP POLICY IF EXISTS "Donors can read own sponsorships" ON sponsorships;
 CREATE POLICY "Donors can read own sponsorships"
   ON sponsorships FOR SELECT
   TO authenticated
   USING (donor_id = auth.uid());
-
 DROP POLICY IF EXISTS "Admins can read all sponsorships" ON sponsorships;
 CREATE POLICY "Admins can read all sponsorships"
   ON sponsorships FOR SELECT
@@ -251,7 +219,6 @@ CREATE POLICY "Admins can read all sponsorships"
       WHERE profiles.id = auth.uid() AND profiles.role = 'admin'
     )
   );
-
 DROP POLICY IF EXISTS "Admins can insert sponsorships" ON sponsorships;
 CREATE POLICY "Admins can insert sponsorships"
   ON sponsorships FOR INSERT
@@ -262,7 +229,6 @@ CREATE POLICY "Admins can insert sponsorships"
       WHERE profiles.id = auth.uid() AND profiles.role = 'admin'
     )
   );
-
 DROP POLICY IF EXISTS "Admins can update sponsorships" ON sponsorships;
 CREATE POLICY "Admins can update sponsorships"
   ON sponsorships FOR UPDATE
@@ -279,19 +245,16 @@ CREATE POLICY "Admins can update sponsorships"
       WHERE profiles.id = auth.uid() AND profiles.role = 'admin'
     )
   );
-
 DROP POLICY IF EXISTS "Anyone can view published news" ON news;
 CREATE POLICY "Anyone can view published news"
   ON news FOR SELECT
   TO authenticated
   USING (published = true);
-
 DROP POLICY IF EXISTS "Anyone can view published news anon" ON news;
 CREATE POLICY "Anyone can view published news anon"
   ON news FOR SELECT
   TO anon
   USING (published = true);
-
 DROP POLICY IF EXISTS "Admins can insert news" ON news;
 CREATE POLICY "Admins can insert news"
   ON news FOR INSERT
@@ -302,7 +265,6 @@ CREATE POLICY "Admins can insert news"
       WHERE profiles.id = auth.uid() AND profiles.role = 'admin'
     )
   );
-
 DROP POLICY IF EXISTS "Admins can update news" ON news;
 CREATE POLICY "Admins can update news"
   ON news FOR UPDATE
@@ -319,7 +281,6 @@ CREATE POLICY "Admins can update news"
       WHERE profiles.id = auth.uid() AND profiles.role = 'admin'
     )
   );
-
 DROP POLICY IF EXISTS "Admins can delete news" ON news;
 CREATE POLICY "Admins can delete news"
   ON news FOR DELETE
@@ -330,19 +291,16 @@ CREATE POLICY "Admins can delete news"
       WHERE profiles.id = auth.uid() AND profiles.role = 'admin'
     )
   );
-
 DROP POLICY IF EXISTS "Anyone can view gallery" ON gallery_items;
 CREATE POLICY "Anyone can view gallery"
   ON gallery_items FOR SELECT
   TO authenticated
   USING (true);
-
 DROP POLICY IF EXISTS "Anyone can view gallery anon" ON gallery_items;
 CREATE POLICY "Anyone can view gallery anon"
   ON gallery_items FOR SELECT
   TO anon
   USING (true);
-
 DROP POLICY IF EXISTS "Admins can insert gallery items" ON gallery_items;
 CREATE POLICY "Admins can insert gallery items"
   ON gallery_items FOR INSERT
@@ -353,7 +311,6 @@ CREATE POLICY "Admins can insert gallery items"
       WHERE profiles.id = auth.uid() AND profiles.role = 'admin'
     )
   );
-
 DROP POLICY IF EXISTS "Admins can update gallery items" ON gallery_items;
 CREATE POLICY "Admins can update gallery items"
   ON gallery_items FOR UPDATE
@@ -370,7 +327,6 @@ CREATE POLICY "Admins can update gallery items"
       WHERE profiles.id = auth.uid() AND profiles.role = 'admin'
     )
   );
-
 DROP POLICY IF EXISTS "Admins can delete gallery items" ON gallery_items;
 CREATE POLICY "Admins can delete gallery items"
   ON gallery_items FOR DELETE
@@ -381,7 +337,6 @@ CREATE POLICY "Admins can delete gallery items"
       WHERE profiles.id = auth.uid() AND profiles.role = 'admin'
     )
   );
-
 DROP POLICY IF EXISTS "Admins can read contact submissions" ON contact_submissions;
 CREATE POLICY "Admins can read contact submissions"
   ON contact_submissions FOR SELECT
@@ -392,19 +347,16 @@ CREATE POLICY "Admins can read contact submissions"
       WHERE profiles.id = auth.uid() AND profiles.role = 'admin'
     )
   );
-
 DROP POLICY IF EXISTS "Anyone can submit contact form" ON contact_submissions;
 CREATE POLICY "Anyone can submit contact form"
   ON contact_submissions FOR INSERT
   TO authenticated
   WITH CHECK (true);
-
 DROP POLICY IF EXISTS "Anyone can submit contact form anon" ON contact_submissions;
 CREATE POLICY "Anyone can submit contact form anon"
   ON contact_submissions FOR INSERT
   TO anon
   WITH CHECK (true);
-
 DROP POLICY IF EXISTS "Admins can update contact submissions" ON contact_submissions;
 CREATE POLICY "Admins can update contact submissions"
   ON contact_submissions FOR UPDATE
@@ -421,8 +373,6 @@ CREATE POLICY "Admins can update contact submissions"
       WHERE profiles.id = auth.uid() AND profiles.role = 'admin'
     )
   );
-
-
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -430,44 +380,36 @@ BEGIN
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
-
 DROP TRIGGER IF EXISTS update_profiles_updated_at ON profiles;
 CREATE TRIGGER update_profiles_updated_at
   BEFORE UPDATE ON profiles
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
-
 DROP TRIGGER IF EXISTS update_students_updated_at ON students;
 CREATE TRIGGER update_students_updated_at
   BEFORE UPDATE ON students
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
-
 DROP TRIGGER IF EXISTS update_donations_updated_at ON donations;
 CREATE TRIGGER update_donations_updated_at
   BEFORE UPDATE ON donations
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
-
 DROP TRIGGER IF EXISTS update_sponsorships_updated_at ON sponsorships;
 CREATE TRIGGER update_sponsorships_updated_at
   BEFORE UPDATE ON sponsorships
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
-
 DROP TRIGGER IF EXISTS update_news_updated_at ON news;
 CREATE TRIGGER update_news_updated_at
   BEFORE UPDATE ON news
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
-
 DROP TRIGGER IF EXISTS update_gallery_items_updated_at ON gallery_items;
 CREATE TRIGGER update_gallery_items_updated_at
   BEFORE UPDATE ON gallery_items
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
-
-
 CREATE INDEX IF NOT EXISTS idx_students_status ON students(sponsorship_status);
 CREATE INDEX IF NOT EXISTS idx_donations_donor ON donations(donor_id);
 CREATE INDEX IF NOT EXISTS idx_donations_student ON donations(student_id);

@@ -1,6 +1,3 @@
--- Fix assign_role_permissions: original body was incorrect in 20260703000001
--- The role_permissions table uses role_id (UUID FK references roles.id),
--- and permission_id (UUID FK references permissions.id), not text columns.
 CREATE OR REPLACE FUNCTION public.assign_role_permissions(p_role_name text, p_permission_codes text[])
 RETURNS void
 LANGUAGE plpgsql
