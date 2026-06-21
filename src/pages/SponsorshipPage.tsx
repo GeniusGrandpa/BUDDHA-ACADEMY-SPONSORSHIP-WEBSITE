@@ -74,7 +74,7 @@ export function SponsorshipPage() {
                 Make a Lasting Impact
               </h2>
               <p className="text-gray-600 mb-6 leading-relaxed">
-                When you sponsor a child, you're not just providing financial support – you're giving them the opportunity to learn, grow, and build a better future for themselves and their community.
+                When you sponsor a child, you're not just providing financial support you're giving them the opportunity to learn, grow, and build a better future for themselves and their community.
               </p>
               <p className="text-gray-600 mb-6 leading-relaxed">
                 Your monthly contribution covers school fees, books, uniforms, meals, and healthcare. You'll receive regular updates and can even exchange letters with your sponsored child.
@@ -92,7 +92,7 @@ export function SponsorshipPage() {
             </div>
             <div>
               <img
-                src="https://images.pexels.com/photos/8471831/pexels-photo-8471831.jpeg?auto=compress&cs=tinysrgb&w=800"
+                src="https://scontent.fktm21-2.fna.fbcdn.net/v/t39.30808-6/556427375_25328287233443625_2513747603860499176_n.jpg?stp=dst-jpg_tt6&cstp=mx960x720&ctp=s960x720&_nc_cat=103&ccb=1-7&_nc_sid=0b6b33&_nc_ohc=pQpRsnvjyfgQ7kNvwEQcEU7&_nc_oc=Adpvc8sCc81iB_sUh44FC2BfzP8fx4-kD3TWKW1pOnulMb6FCO5PPkle8XzSVyQnP8039_WNgfaRgP1nxNjTLv2P&_nc_zt=23&_nc_ht=scontent.fktm21-2.fna&_nc_gid=rzQISC7Ruo9ahJnZIK2X7Q&_nc_ss=7b2a8&oh=00_Af9lNcRL_vJJU0OiVOrbm8fDfX4zgBqAMCp5OqoYhb--WA&oe=6A3D893B"
                 alt="Happy students"
                 className="rounded-lg shadow-xl"
               />
@@ -127,12 +127,12 @@ export function SponsorshipPage() {
         </div>
       </section>
 
-      <section className="py-24 bg-[#1E2A38] text-white">
+      <section className="py-24 bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
             Ready to Change a Life?
           </h2>
-          <p className="text-gray-300 max-w-2xl mx-auto mb-8">
+          <p className="text-white/80 max-w-2xl mx-auto mb-8">
             Browse our student profiles and find a child to sponsor. Your sponsorship can transform their future.
           </p>
           <Link to="/students">
