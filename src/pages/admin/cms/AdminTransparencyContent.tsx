@@ -203,7 +203,7 @@ export function AdminTransparencyContent() {
                   className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
                 <div className="flex items-center gap-2">
                   <input type="number" value={item.value} onChange={e => updateAllocation(idx, 'value', e.target.value)}
-                    min={0} max={100}
+                    min={0} max={100} aria-label={`Allocation percentage for ${item.name || 'category ' + (idx + 1)}`}
                     className="w-20 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50 text-center" />
                   <span className="text-gray-500 text-sm">%</span>
                 </div>

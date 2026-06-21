@@ -26,7 +26,6 @@ function loadGoogleFont(font: string) {
 function TypographyPreview({ typography }: { typography: DesignTypography }) {
   return (
     <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 space-y-4" style={{ fontFamily: `'${typography.body_font}', sans-serif` }}>
-      {/* dynamic typography values from user settings cannot be expressed as Tailwind classes */}
       <h1 style={{ fontFamily: `'${typography.heading_font}', sans-serif`, fontSize: `${typography.h1_size}rem`, fontWeight: Number(typography.heading_weight), letterSpacing: `${typography.heading_letter_spacing}em`, lineHeight: typography.heading_line_height }} className="text-[var(--color-text-primary)]">
         Heading 1 — The Quick Brown Fox
       </h1>

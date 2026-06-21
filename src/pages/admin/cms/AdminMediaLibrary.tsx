@@ -158,6 +158,7 @@ export function AdminMediaLibrary() {
             accept={ALLOWED_TYPES.join(',')}
             onChange={handleUpload}
             className="hidden"
+            aria-label="Upload files"
           />
           <button
             onClick={() => fileInputRef.current?.click()}

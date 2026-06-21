@@ -42,8 +42,6 @@ export function BlockRenderer({ block }: BlockRendererProps) {
     paddingTop: settings?.padding_top || '4rem',
     paddingBottom: settings?.padding_bottom || '4rem',
   }
-  // Inline styles for sectionStyle use dynamic CMS values that cannot be expressed as Tailwind classes
-
   const textAlign = (settings?.text_alignment as 'left' | 'center' | 'right') || 'left'
   const maxWidth = settings?.max_width || 'max-w-7xl'
 

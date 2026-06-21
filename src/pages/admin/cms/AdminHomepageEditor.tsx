@@ -91,11 +91,12 @@ export function AdminHomepageEditor() {
           if (key === 'background_image' || key === 'image') {
             return (
               <div key={key}>
-                <label className="block text-sm font-medium text-gray-600 mb-1.5 capitalize">
+                <label htmlFor={key} className="block text-sm font-medium text-gray-600 mb-1.5 capitalize">
                   {key.replace(/_/g, ' ')}
                 </label>
                 <div className="flex gap-3">
                   <input
+                    id={key}
                     type="text"
                     value={typeof value === 'string' ? value : ''}
                     onChange={(e) => updateField(key, e.target.value)}
@@ -115,10 +116,11 @@ export function AdminHomepageEditor() {
           if (typeof value === 'string' && value.length > 100) {
             return (
               <div key={key}>
-                <label className="block text-sm font-medium text-gray-600 mb-1.5 capitalize">
+                <label htmlFor={key} className="block text-sm font-medium text-gray-600 mb-1.5 capitalize">
                   {key.replace(/_/g, ' ')}
                 </label>
                 <textarea
+                  id={key}
                   value={value || ''}
                   onChange={(e) => updateField(key, e.target.value)}
                   rows={4}

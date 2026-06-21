@@ -236,6 +236,7 @@ const userRole = profile?.role as Role | undefined
             <button
               onClick={() => setShowSendForm(false)}
               className="p-1 rounded hover:bg-gray-100"
+              aria-label="Close"
             >
               <X className="w-5 h-5 text-gray-400" />
             </button>

@@ -39,36 +39,11 @@ export function LanguageSwitcher({ mobile = false }: { mobile?: boolean }) {
     setOpen(false)
   }
 
-  const renderItem = (lang: (typeof languages)[number]) => {
-    const active = lang.code === language
-    return (
-      <button
-        key={lang.code}
-        onClick={() => select(lang.code)}
-        role="option"
-        aria-selected={active ? "true" : "false"}
-        className={`w-full flex items-center gap-3 px-3 py-2 text-sm transition-colors ${
-          active
-            ? 'bg-amber-50 text-amber-700 font-medium'
-            : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-        }`}
-      >
-        <img
-          src={getLanguageFlagUrl(lang.code)}
-          alt={getLanguageFlagAlt(lang.code)}
-          className="h-3.5 w-5 rounded-sm object-cover shadow-sm flex-shrink-0"
-          loading="lazy"
-        />
-        <span className="truncate">{lang.nativeLabel}</span>
-      </button>
-    )
-  }
-
   return (
     <div ref={ref} className={`relative ${mobile ? 'w-full' : ''}`}>
       <button
         onClick={() => setOpen(!open)}
-        aria-expanded={open ? "true" : "false"}
+        aria-expanded={open}
         aria-haspopup="listbox"
         aria-label="Select language"
         className={`flex items-center gap-2 transition-colors ${
@@ -98,13 +73,36 @@ export function LanguageSwitcher({ mobile = false }: { mobile?: boolean }) {
                 : 'absolute right-0 mt-2 w-56 origin-top-right'
             } ${mobile ? '' : 'animate-dropdown-fade'}`}
           >
-            <div
+            <ul
               role="listbox"
               aria-label="Select language"
               className="max-h-72 overflow-y-auto"
             >
-              {sortedLanguages.map(renderItem)}
-            </div>
+              {sortedLanguages.map((lang) => {
+                const active = lang.code === language
+                return (
+                  <li
+                    key={lang.code}
+                    role="option"
+                    aria-selected={active}
+                    onClick={() => select(lang.code)}
+                    className={`flex items-center gap-3 px-3 py-2 text-sm transition-colors cursor-pointer ${
+                      active
+                        ? 'bg-amber-50 text-amber-700 font-medium'
+                        : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                    }`}
+                  >
+                    <img
+                      src={getLanguageFlagUrl(lang.code)}
+                      alt={getLanguageFlagAlt(lang.code)}
+                      className="h-3.5 w-5 rounded-sm object-cover shadow-sm flex-shrink-0"
+                      loading="lazy"
+                    />
+                    <span className="truncate">{lang.nativeLabel}</span>
+                  </li>
+                )
+              })}
+            </ul>
           </div>
           <style>{`
             @keyframes dropdown-fade {

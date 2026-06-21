@@ -63,7 +63,6 @@ export function AllocationBreakdown({ allocations }: AllocationBreakdownProps) {
       <div className="bg-white border border-gray-100 rounded-xl shadow-lg px-4 py-3 text-sm">
         <div className="flex items-center gap-2 mb-1">
           <div className="w-3 h-3 rounded-full" style={{ backgroundColor: data.color }} />
-          {/* dynamic chart color cannot be expressed as Tailwind class */}
           <span className="font-medium text-gray-900">{data.name}</span>
         </div>
         <p className="text-gray-500">

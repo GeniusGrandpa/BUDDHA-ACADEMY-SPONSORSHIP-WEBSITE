@@ -137,7 +137,6 @@ export function AdminThemePresetsPage() {
               </div>
               <div className="flex gap-1.5">
                 <div className="w-5 h-5 rounded" style={{ backgroundColor: preset.colors.primary }} />
-                {/* dynamic preset colors cannot be expressed as Tailwind classes */}
                 <div className="w-5 h-5 rounded" style={{ backgroundColor: preset.colors.secondary }} />
                 <div className="w-5 h-5 rounded" style={{ backgroundColor: preset.colors.accent }} />
                 <div className="w-5 h-5 rounded" style={{ backgroundColor: preset.colors.background }} />

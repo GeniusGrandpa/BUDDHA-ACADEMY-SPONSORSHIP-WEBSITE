@@ -52,7 +52,6 @@ export function AdminDepartmentsPage() {
                       className="h-full bg-amber-500 rounded-full transition-all"
                       style={{ width: `${pct}%` }}
                     />
-                    {/* dynamic percentage width cannot be represented as Tailwind class */}
                   </div>
                   <div className="flex justify-between text-xs text-gray-500 mt-1">
                     <span>NPR {goal.raised_amount.toLocaleString()}</span>
