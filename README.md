@@ -628,16 +628,9 @@ npm run build
 
 ## License
 
-License information has not yet been finalized.
+This project is proprietary software. See the [LICENSE](LICENSE) file for details.
 
-Recommended placeholder:
-
-```text
-Copyright (c) Buddha Academy.
-All rights reserved unless a LICENSE file states otherwise.
-```
-
-Add a formal `LICENSE` file before distributing, accepting external contributions, or publishing the project as open source.
+Copyright (c) 2024 Buddha Academy. All rights reserved.
 
 ## Author
 
