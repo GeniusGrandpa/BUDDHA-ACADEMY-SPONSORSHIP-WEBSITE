@@ -554,21 +554,6 @@ For any hosting platform:
 - Confirm storage bucket policies and RLS policies are enabled.
 - Test email verification, sign-in, and password reset in production.
 
-
-## Screenshots
-
-Add screenshots to `docs/screenshots/` or a similar directory when available.
-
-| Screen | Placeholder |
-| --- | --- |
-| Homepage | `docs/screenshots/homepage.png` |
-| Donation Page | `docs/screenshots/donation-page.png` |
-| Donor Dashboard | `docs/screenshots/donor-dashboard.png` |
-| CMS Dashboard | `docs/screenshots/cms-dashboard.png` |
-| Student Management | `docs/screenshots/student-management.png` |
-| Payment Verification | `docs/screenshots/payment-verification.png` |
-
-
 ## Future Roadmap
 
 ### Sponsorship
