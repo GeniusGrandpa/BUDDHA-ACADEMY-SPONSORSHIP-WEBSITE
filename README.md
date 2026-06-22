@@ -628,9 +628,13 @@ npm run build
 
 ## License
 
-This project is proprietary software. See the [LICENSE](LICENSE) file for details.
+Copyright (c) Buddha Academy. All rights reserved.
 
-Copyright (c) 2024 Buddha Academy. All rights reserved.
+This software and associated documentation are proprietary and confidential.
+No part of this software may be copied, modified, distributed, sublicensed,
+sold, or used without prior written permission from Buddha Academy.
+
+See the [LICENSE](LICENSE) file for the full license terms.
 
 ## Author
 
