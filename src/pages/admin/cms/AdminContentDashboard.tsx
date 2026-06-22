@@ -1,5 +1,9 @@
-import { Link } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { useAuth } from '../../../features/auth/providers/AuthContext'
+import { canManageContent } from '../../../features/auth/services/permissions'
+import type { Role } from '../../../features/auth/types/permissions'
 
 const cmsModules = [
   {
@@ -73,6 +77,19 @@ const cmsModules = [
 ]
 
 export function AdminContentDashboard() {
+  const { profile } = useAuth()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (profile && !canManageContent(profile.role as Role)) {
+      navigate('/admin', { replace: true })
+    }
+  }, [profile, navigate])
+
+  if (profile && !canManageContent(profile.role as Role)) {
+    return null
+  }
+
   return (
     <div>
       <div className="mb-8">

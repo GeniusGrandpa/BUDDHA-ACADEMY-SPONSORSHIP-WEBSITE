@@ -19,7 +19,5 @@ export function getAuthRedirectBase(): string {
 export function getAuthRedirectUrl(path: string): string {
   const base = getAuthRedirectBase()
   const normalizedPath = path.startsWith('/') ? path : `/${path}`
-  const url = `${base}${normalizedPath}`
-  console.debug('[AuthRedirect] Generated:', url)
-  return url
+  return `${base}${normalizedPath}`
 }

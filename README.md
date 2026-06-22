@@ -295,12 +295,14 @@ The CMS allows authorized admins to manage public website content without code c
 
 Dynamic pages store content as blocks and render them through a block renderer. Supported block types include hero, text, rich content, image, gallery, CTA, donation, student cards, testimonials, FAQ, stats, timeline, video, sponsors, partners, announcements, and custom sections.
 
-### Block System
+### Advanced Block System
 
-- Blocks are stored as JSONB.
-- Blocks can be reordered.
-- Blocks can be toggled visible or hidden.
-- Blocks support structured data for repeatable content sections.
+- Blocks are stored in a normalized `page_blocks` table (FK → `pages.id`) for type-safe querying.
+- A `sync_page_blocks_json()` trigger function keeps `pages.blocks` JSONB in sync for backward compatibility.
+- AdminBlockEditor component provides drag-and-drop reorder, add/delete/duplicate, visibility/draft toggles, and inline content editing.
+- Blocks can be reordered, toggled visible/hidden, and set to draft mode.
+- Full RLS policies enforce editor+ access; all block CRUD operations are audit-logged.
+- Supports block types: hero, text, rich content, image, gallery, CTA, donation, student cards, testimonials, FAQ, stats, timeline, video, sponsors, partners, announcements, and custom sections.
 
 ### Content Management
 
@@ -364,8 +366,6 @@ The platform includes a database-driven design management system.
 - **Supabase Authentication** with PKCE flow, session management, email verification, and password recovery.
 - **Role-Based Access Control** across seven roles.
 - **Protected Routes** through route-level guards.
-- **Permission Guards** for component-level visibility.
-- **Protected Actions** for function-level permission enforcement.
 - **Row Level Security** on Supabase tables.
 - **Audit Logging** for sensitive administrative actions.
 - **Secure Payment Verification** through controlled RPC workflows and manual review.
@@ -400,8 +400,8 @@ src/
   config/          Navigation configuration and layout definitions
   context/         AuthContext, LanguageContext, ThemeContext providers
   features/        Auth flows and role dashboards for donor, finance, sponsorship, volunteer, and staff workflows
-  hooks/           useRole, usePermissions, useProtectedAction, useToast, usePayment, and dashboard hooks
-  lib/             Supabase client, utility helpers, audit logger, shared helpers
+  hooks/           useRole, useToast, usePayment, and dashboard hooks
+  lib/             Supabase client, audit logger, shared helpers
   pages/           Route pages including public, admin, super-admin, teacher, and auth callback pages
   services/        Domain service layer for Supabase access
   types/           Database types, permission types, CMS types, and feature types
@@ -513,75 +513,46 @@ For deployed environments, replace the domain with the production URL.
 
 ## Deployment
 
-The application builds to static assets in `dist/` and can be deployed to modern static hosting platforms.
+The application builds to static assets in `dist/` and can be deployed to any standard static hosting platform (Netlify, Cloudflare Pages, AWS S3, self-hosted nginx, etc.).
 
-### Vercel
-
-1. Import the repository into Vercel.
-2. Set build command:
+### Build
 
 ```bash
 npm run build
 ```
 
-3. Set output directory:
+Output: `dist/`
 
-```text
-dist
-```
+### Platform Configuration
 
-4. Add environment variables in Vercel project settings.
-5. Add the Vercel production URL to Supabase Auth Site URL and redirect URLs.
+For any hosting platform:
 
-### Netlify
+1. Set the **build command** to `npm run build`.
+2. Set the **publish/output directory** to `dist`.
+3. Configure a **single-page application (SPA) fallback** — all routes should serve `dist/index.html` (handled automatically by most platforms; for nginx use `try_files $uri $uri/ /index.html`).
+4. Add environment variables (see checklist below).
+5. Add the deployment URL to Supabase Auth settings (Site URL + redirect URLs).
 
-1. Create a new Netlify site from the repository.
-2. Set build command:
+### Examples
 
-```bash
-npm run build
-```
-
-3. Set publish directory:
-
-```text
-dist
-```
-
-4. Add environment variables in Netlify site settings.
-5. Configure Supabase redirect URLs for the Netlify domain.
-
-### Cloudflare Pages
-
-1. Connect the repository to Cloudflare Pages.
-2. Set framework preset to Vite or configure manually.
-3. Set build command:
-
-```bash
-npm run build
-```
-
-4. Set build output directory:
-
-```text
-dist
-```
-
-5. Add environment variables in Cloudflare Pages settings.
-6. Configure Supabase redirect URLs for the Cloudflare Pages domain.
+| Platform | Notes |
+| --- | --- |
+| **Netlify** | Create site from repo; set build command `npm run build`, publish dir `dist`; add `_redirects` file for SPA fallback is automatic. |
+| **Cloudflare Pages** | Connect repo; framework preset = Vite; build command `npm run build`, build output dir `dist`. |
+| **AWS S3 + CloudFront** | Upload `dist/` to S3; configure S3 static website hosting or CloudFront with error page pointing to `/index.html`. |
+| **nginx** | Copy `dist/` to web root; configure `try_files $uri $uri/ /index.html;`. |
 
 ### Deployment Checklist
 
 - Set `VITE_SUPABASE_URL`.
 - Set `VITE_SUPABASE_ANON_KEY`.
 - Set `VITE_PUBLIC_BASE_URL`.
-- Configure Supabase Auth Site URL.
-- Configure Supabase Auth redirect URLs.
-- Configure SMTP for auth emails.
-- Apply database migrations.
-- Confirm storage bucket policies.
-- Confirm RLS policies are enabled.
-- Test email verification and password reset in production.
+- Configure Supabase Auth Site URL (set to your deployment URL).
+- Configure Supabase Auth redirect URLs (include `https://your-domain.com/auth/callback`).
+- Configure SMTP provider for auth emails.
+- Apply database migrations (`supabase/migrations/`).
+- Confirm storage bucket policies and RLS policies are enabled.
+- Test email verification, sign-in, and password reset in production.
 
 
 ## Screenshots

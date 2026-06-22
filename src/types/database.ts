@@ -1646,6 +1646,55 @@ export interface Database {
           },
         ]
       }
+      page_blocks: {
+        Row: {
+          id: string
+          page_id: string
+          block_type: string
+          title: string
+          content: Json
+          settings: Json
+          sort_order: number
+          is_visible: boolean
+          is_draft: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          page_id: string
+          block_type: string
+          title: string
+          content?: Json
+          settings?: Json
+          sort_order?: number
+          is_visible?: boolean
+          is_draft?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          page_id?: string
+          block_type?: string
+          title?: string
+          content?: Json
+          settings?: Json
+          sort_order?: number
+          is_visible?: boolean
+          is_draft?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'page_blocks_page_id_fkey',
+            columns: ['page_id'],
+            referencedRelation: 'pages',
+            referencedColumns: ['id'],
+          },
+        ]
+      }
       homepage_sections: {
         Row: {
           id: string

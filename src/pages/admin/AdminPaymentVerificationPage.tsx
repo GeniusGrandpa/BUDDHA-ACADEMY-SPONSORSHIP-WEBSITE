@@ -1,13 +1,15 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { formatNPR } from '../../utils/currency'
 import { getPendingVerifications, verifyPayment } from '../../services/payments'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner'
-import type { PaymentSession } from '../../types/payments'
+import { useToast } from '../../hooks/useToast'
+import { ToastContainer } from '../../components/ToastContainer'
+import type { PaymentSession, PaymentSessionStatus } from '../../types/payments'
 
-interface SessionWithDonor extends PaymentSession {
+interface SessionWithDonor extends Omit<PaymentSession, 'status'> {
   donation?: {
     id: string
     donor_id: string
@@ -24,51 +26,86 @@ interface SessionWithDonor extends PaymentSession {
     full_name: string
     email: string
   }
+  status: PaymentSessionStatus | 'rejected'
 }
 
 export function AdminPaymentVerificationPage() {
   const [sessions, setSessions] = useState<SessionWithDonor[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState<string>('processing')
   const [selectedSession, setSelectedSession] = useState<SessionWithDonor | null>(null)
   const [verificationNotes, setVerificationNotes] = useState('')
-  const [verifying, setVerifying] = useState(false)
+  const [verifying, setVerifying] = useState<Record<string, boolean>>({})
+  const [initialLoad, setInitialLoad] = useState(true)
+  const mountedRef = useRef(true)
+  const { toasts, addToast, removeToast } = useToast()
 
   useEffect(() => {
-    loadSessions()
+    return () => { mountedRef.current = false }
   }, [])
 
-  const loadSessions = async () => {
+  const loadSessions = useCallback(async () => {
     setLoading(true)
     try {
       const data = await getPendingVerifications()
-      setSessions(data as unknown as SessionWithDonor[])
+      if (mountedRef.current) setSessions(data as unknown as SessionWithDonor[])
     } catch {
+      if (mountedRef.current) addToast('Failed to load pending verifications', 'error')
     } finally {
-      setLoading(false)
+      if (mountedRef.current) {
+        setLoading(false)
+        setInitialLoad(false)
+      }
     }
-  }
+  }, [addToast])
+
+  useEffect(() => {
+    loadSessions()
+  }, [loadSessions])
 
   const handleVerify = async (sessionId: string, status: 'verified' | 'rejected') => {
-    setVerifying(true)
+    if (verifying[sessionId]) return
+
+    setVerifying(prev => ({ ...prev, [sessionId]: true }))
+    const prevSelected = selectedSession
+
     try {
+      setSessions(prev => prev.map(s =>
+        s.id === sessionId ? { ...s, status: status === 'verified' ? 'completed' : 'rejected' } : s
+      ))
+
       await verifyPayment(sessionId, status, verificationNotes || undefined)
-      setSelectedSession(null)
-      setVerificationNotes('')
+
+      if (prevSelected?.id === sessionId) {
+        setSelectedSession(null)
+        setVerificationNotes('')
+      }
+
+      addToast(
+        status === 'verified' ? 'Payment verified successfully' : 'Payment rejected',
+        'success'
+      )
+
       await loadSessions()
     } catch {
+      setSessions(prev => prev.map(s =>
+        s.id === sessionId ? { ...s, status: 'processing' } : s
+      ))
+      addToast(
+        status === 'verified' ? 'Failed to verify payment' : 'Failed to reject payment',
+        'error'
+      )
     } finally {
-      setVerifying(false)
+      if (mountedRef.current) {
+        setVerifying(prev => ({ ...prev, [sessionId]: false }))
+      }
     }
   }
 
   const filtered = sessions.filter(s => {
-    const statuses = statusFilter.split(',')
-    if (!statuses.includes(s.status)) return false
     if (search) {
       const q = search.toLowerCase()
-      const donor = s.donation?.donor
+      const donor = s.donor || s.donation?.donor
       return (
         donor?.full_name?.toLowerCase().includes(q) ||
         donor?.email?.toLowerCase().includes(q) ||
@@ -84,7 +121,7 @@ export function AdminPaymentVerificationPage() {
     total: sessions.length,
   }
 
-  if (loading) {
+  if (initialLoad && loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <LoadingSpinner />
@@ -94,22 +131,26 @@ export function AdminPaymentVerificationPage() {
 
   return (
     <div className="space-y-6">
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Payment Verification</h1>
           <p className="text-gray-500 mt-1">Review and verify donor payments</p>
         </div>
-        <Button variant="primary" size="sm" onClick={loadSessions}>
-          Refresh
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={loadSessions} disabled={loading}>
+            {loading ? 'Refreshing...' : 'Refresh'}
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {[
-          { label: 'Awaiting Verification', value: stats.processing, color: 'text-blue-400', bg: 'bg-blue-500/10' },
-          { label: 'In Review Queue', value: stats.total, color: 'text-gray-400', bg: 'bg-gray-500/10' },
+          { label: 'Awaiting Verification', value: stats.processing, color: 'text-blue-600', bg: 'bg-blue-50' },
+          { label: 'In Review Queue', value: stats.total, color: 'text-gray-600', bg: 'bg-gray-50' },
         ].map((stat) => (
-          <Card key={stat.label} variant="bordered" className="bg-white border-gray-100 p-5">
+          <Card key={stat.label} variant="bordered" className={`${stat.bg} border-gray-100 p-5`}>
             <p className="text-sm text-gray-500">{stat.label}</p>
             <p className={`text-2xl font-bold mt-1 ${stat.color}`}>{stat.value}</p>
           </Card>
@@ -127,16 +168,6 @@ export function AdminPaymentVerificationPage() {
               className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-amber-500/50"
             />
           </div>
-          <div className="flex items-center gap-2">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500/50"
-              aria-label="Filter by status"
-            >
-              <option value="processing">Awaiting Verification</option>
-            </select>
-          </div>
         </div>
 
         {filtered.length === 0 ? (
@@ -148,13 +179,15 @@ export function AdminPaymentVerificationPage() {
           <div className="space-y-3">
             {filtered.map((session) => {
               const donor = session.donor || session.donation?.donor
+              const isVerifying = verifying[session.id]
               return (
                 <motion.div
                   key={session.id}
                   initial={{ opacity: 0, y: 5 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-gray-50 border border-gray-100 rounded-xl p-4 hover:bg-gray-100 transition-colors cursor-pointer"
-                  onClick={() => setSelectedSession(session)}
+                  layout
+                  className={`bg-gray-50 border border-gray-100 rounded-xl p-4 hover:bg-gray-100 transition-colors cursor-pointer ${isVerifying ? 'opacity-60 pointer-events-none' : ''}`}
+                  onClick={() => { if (!isVerifying) setSelectedSession(session) }}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div className="flex-1 min-w-0">
@@ -176,9 +209,13 @@ export function AdminPaymentVerificationPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${
-                        session.status === 'processing'
-                          ? 'bg-blue-500/10 text-blue-400 border-blue-500/30'
-                          : 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30'
+                        session.status === 'completed'
+                          ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
+                          : session.status === 'rejected'
+                          ? 'bg-red-50 text-red-600 border-red-200'
+                          : session.status === 'cancelled'
+                          ? 'bg-gray-50 text-gray-500 border-gray-200'
+                          : 'bg-blue-50 text-blue-600 border-blue-200'
                       }`}>
                         {session.status === 'processing' ? 'Payment Submitted' : session.status}
                       </span>
@@ -187,6 +224,7 @@ export function AdminPaymentVerificationPage() {
                           {session.screenshots.length} screenshot(s)
                         </span>
                       )}
+                      {isVerifying && <LoadingSpinner size="sm" />}
                     </div>
                   </div>
                 </motion.div>
@@ -203,7 +241,7 @@ export function AdminPaymentVerificationPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm"
-            onClick={() => setSelectedSession(null)}
+            onClick={() => { if (!verifying[selectedSession.id]) setSelectedSession(null) }}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
@@ -215,7 +253,11 @@ export function AdminPaymentVerificationPage() {
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-lg font-semibold text-gray-900">Payment Details</h2>
-                  <button onClick={() => setSelectedSession(null)} className="text-sm text-gray-500 hover:text-gray-900">
+                  <button
+                    onClick={() => { if (!verifying[selectedSession.id]) setSelectedSession(null) }}
+                    className="text-sm text-gray-500 hover:text-gray-900"
+                    disabled={verifying[selectedSession.id]}
+                  >
                     Close
                   </button>
                 </div>
@@ -296,6 +338,7 @@ export function AdminPaymentVerificationPage() {
                       placeholder="Add verification notes (optional)..."
                       rows={3}
                       className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-amber-500/50"
+                      disabled={verifying[selectedSession.id]}
                     />
                   </div>
 
@@ -303,17 +346,27 @@ export function AdminPaymentVerificationPage() {
                     <Button
                       className="flex-1"
                       onClick={() => handleVerify(selectedSession.id, 'verified')}
-                      disabled={verifying}
+                      disabled={verifying[selectedSession.id]}
                     >
-                      Approve Payment
+                      {verifying[selectedSession.id] ? (
+                        <span className="flex items-center gap-2">
+                          <LoadingSpinner size="sm" />
+                          Verifying...
+                        </span>
+                      ) : 'Approve Payment'}
                     </Button>
                     <Button
                       variant="outline"
                       className="flex-1 border-red-500/50 text-red-400 hover:bg-red-500/10"
                       onClick={() => handleVerify(selectedSession.id, 'rejected')}
-                      disabled={verifying}
+                      disabled={verifying[selectedSession.id]}
                     >
-                      Reject Payment
+                      {verifying[selectedSession.id] ? (
+                        <span className="flex items-center gap-2">
+                          <LoadingSpinner size="sm" />
+                          Rejecting...
+                        </span>
+                      ) : 'Reject Payment'}
                     </Button>
                   </div>
                 </div>

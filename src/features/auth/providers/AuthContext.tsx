@@ -218,6 +218,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         const classified = classifyAuthError(error)
+        const lower = (error.message || '').toLowerCase()
+
+        if (lower.includes('user already registered') || lower.includes('email already registered')) {
+          const { error: resendError } = await supabase.auth.resend({
+            type: 'signup',
+            email,
+            options: {
+              emailRedirectTo: getAuthRedirectUrl('/auth/callback'),
+            },
+          })
+
+          if (!resendError) {
+            return {
+              error: {
+                message: 'This email is already registered but not yet verified. A new verification email has been sent. Please check your inbox.',
+                category: 'verification' as const,
+              },
+            }
+          }
+        }
+
         return { error: { message: classified.userMessage, category: classified.category } }
       }
 

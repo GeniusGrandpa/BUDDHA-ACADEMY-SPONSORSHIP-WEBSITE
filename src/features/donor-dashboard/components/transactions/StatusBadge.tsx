@@ -1,29 +1,17 @@
-import type { DonationStatus } from '../../../../types/database'
-
-interface StatusBadgeProps {
-  status: DonationStatus
-  size?: 'sm' | 'md'
-}
-
-const STATUS_CONFIG: Record<DonationStatus, { label: string; bg: string; text: string }> = {
-  pending: { label: 'Pending', bg: 'bg-orange-100', text: 'text-orange-700' },
-  processing: { label: 'Processing', bg: 'bg-orange-50', text: 'text-orange-600' },
-  verified: { label: 'Verified', bg: 'bg-green-50', text: 'text-green-700' },
-  completed: { label: 'Completed', bg: 'bg-emerald-50', text: 'text-emerald-700' },
-  failed: { label: 'Failed', bg: 'bg-red-50', text: 'text-red-700' },
-  rejected: { label: 'Rejected', bg: 'bg-red-50', text: 'text-red-700' },
-  cancelled: { label: 'Cancelled', bg: 'bg-gray-50', text: 'text-gray-600' },
-  received: { label: 'Received', bg: 'bg-green-50', text: 'text-green-700' },
-  pledged: { label: 'Pledged', bg: 'bg-blue-50', text: 'text-blue-700' },
-}
-
-export function StatusBadge({ status, size = 'md' }: StatusBadgeProps) {
-  const config = STATUS_CONFIG[status]
-  const sizeClasses = size === 'sm' ? 'text-xs px-2 py-0.5' : 'text-sm px-3 py-1'
-
+export function StatusBadge({ status, size = 'sm' }: { status: string; size?: 'sm' | 'md' | 'lg' }) {
+  const colors: Record<string, string> = {
+    pending: 'bg-yellow-100 text-yellow-700',
+    processing: 'bg-blue-100 text-blue-700',
+    completed: 'bg-emerald-100 text-emerald-700',
+    verified: 'bg-emerald-100 text-emerald-700',
+    failed: 'bg-red-100 text-red-700',
+    rejected: 'bg-red-100 text-red-700',
+    cancelled: 'bg-gray-100 text-gray-500',
+  }
+  const sizeClass = size === 'sm' ? 'px-2 py-0.5 text-xs' : size === 'md' ? 'px-3 py-1 text-sm' : 'px-4 py-1.5 text-base'
   return (
-    <span className={`inline-flex items-center rounded-full font-medium ${config.bg} ${config.text} ${sizeClasses}`}>
-      {config.label}
+    <span className={`inline-flex items-center font-medium rounded-full ${sizeClass} ${colors[status] || 'bg-gray-100 text-gray-700'}`}>
+      {status.charAt(0).toUpperCase() + status.slice(1)}
     </span>
   )
 }

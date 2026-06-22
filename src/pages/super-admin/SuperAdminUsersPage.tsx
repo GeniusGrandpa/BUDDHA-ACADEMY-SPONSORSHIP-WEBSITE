@@ -1,9 +1,12 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, useRef } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { Card } from '../../components/ui/Card'
 import { RoleBadge } from '../../components/RoleBadge'
-import { toast } from 'react-hot-toast'
+import { LoadingSpinner } from '../../components/ui/LoadingSpinner'
+import { ToastContainer } from '../../components/ToastContainer'
+import { useToast } from '../../hooks/useToast'
+import { Search, Shield, History, Users, UserCheck, UserX, X, Download, MoreVertical } from 'lucide-react'
 import type { Role } from '../../types/permissions'
 import type { Profile } from '../../types/database'
 
@@ -14,57 +17,194 @@ interface ExtendedProfile extends Profile {
   last_login_at: string | null
 }
 
-function ConfirmModal({
-  open,
-  title,
-  message,
-  confirmLabel,
-  onConfirm,
-  onCancel,
-  loading,
-  variant = 'danger',
-}: {
-  open: boolean
-  title: string
-  message: string
-  confirmLabel: string
-  onConfirm: () => void
-  onCancel: () => void
-  loading: boolean
-  variant?: 'danger' | 'warning' | 'info'
+interface UserStats {
+  total_users: number
+  super_admins: number
+  admins: number
+  finance_managers: number
+  teachers: number
+  donors: number
+  volunteers: number
+  public_users: number
+  suspended_users: number
+  active_users: number
+  banned_users: number
+  inactive_users: number
+}
+
+interface AuditEntry {
+  id: number
+  actor_id: string
+  actor_name: string
+  actor_email: string
+  target_id: string
+  target_name: string
+  target_email: string
+  action: string
+  entity_type: string
+  metadata: Record<string, unknown>
+  created_at: string
+}
+
+function ConfirmModal({ open, title, message, confirmLabel, onConfirm, onCancel, loading, variant = 'danger' }: {
+  open: boolean; title: string; message: string; confirmLabel: string
+  onConfirm: () => void; onCancel: () => void; loading: boolean; variant?: 'danger' | 'warning' | 'info'
 }) {
   if (!open) return null
-
-  const buttonColors = {
-    danger: 'bg-red-500 hover:bg-red-600',
-    warning: 'bg-amber-500 hover:bg-amber-600',
-    info: 'bg-blue-500 hover:bg-blue-600',
-  }
-
+  const buttonColors = { danger: 'bg-red-500 hover:bg-red-600', warning: 'bg-amber-500 hover:bg-amber-600', info: 'bg-emerald-500 hover:bg-emerald-600' }
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-stone-900/50" onClick={onCancel} />
       <div className="relative bg-white border border-gray-200 rounded-2xl p-6 max-w-md w-full shadow-2xl">
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-        </div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
         <p className="text-gray-500 text-sm mb-6">{message}</p>
         <div className="flex gap-3 justify-end">
-          <button
-            onClick={onCancel}
-            disabled={loading}
-            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            disabled={loading}
-            className={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors disabled:opacity-50 ${buttonColors[variant]}`}
-          >
+          <button onClick={onCancel} disabled={loading} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 transition-colors">Cancel</button>
+          <button onClick={onConfirm} disabled={loading} className={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors disabled:opacity-50 ${buttonColors[variant]}`}>
             {loading ? 'Processing...' : confirmLabel}
           </button>
         </div>
+      </div>
+    </div>
+  )
+}
+
+function ChangeRoleModal({ open, user, onClose, onConfirm, loading }: {
+  open: boolean; user: ExtendedProfile | null; onClose: () => void; onConfirm: (userId: string, newRole: string, reason: string) => void; loading: boolean
+}) {
+  const [newRole, setNewRole] = useState<string>('')
+  const [reason, setReason] = useState('')
+
+  useEffect(() => {
+    if (user) { setNewRole(user.role); setReason('') }
+  }, [user])
+
+  if (!open || !user) return null
+
+  const roleOptions: { value: Role; label: string }[] = [
+    { value: 'super_admin', label: 'Super Admin' },
+    { value: 'admin', label: 'Admin' },
+    { value: 'finance_manager', label: 'Finance Manager' },
+    { value: 'teacher', label: 'Teacher' },
+    { value: 'volunteer', label: 'Volunteer' },
+    { value: 'donor', label: 'Donor' },
+    { value: 'public_user', label: 'Public User' },
+  ]
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-stone-900/50" onClick={onClose} />
+      <div className="relative bg-white border border-gray-200 rounded-2xl p-6 max-w-lg w-full shadow-2xl">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-semibold text-gray-900">Change Role</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+        </div>
+        <div className="space-y-4">
+          <div className="bg-gray-50 rounded-xl p-4">
+            <p className="text-sm text-gray-500">User</p>
+            <p className="font-medium text-gray-900">{user.full_name}</p>
+            <p className="text-sm text-gray-500">{user.email}</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Current Role</label>
+            <RoleBadge role={user.role as Role} size="sm" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">New Role</label>
+            <select
+              value={newRole}
+              onChange={(e) => setNewRole(e.target.value)}
+              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500/50"
+            >
+              {roleOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Reason (optional)</label>
+            <textarea
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="Why is this role being changed?"
+              rows={2}
+              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-amber-500/50"
+            />
+          </div>
+          <div className="flex gap-3 pt-2">
+            <button onClick={onClose} disabled={loading} className="flex-1 px-4 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">Cancel</button>
+            <button
+              onClick={() => onConfirm(user.id, newRole, reason)}
+              disabled={loading || newRole === user.role}
+              className="flex-1 px-4 py-2 text-sm font-medium text-white bg-amber-500 rounded-lg hover:bg-amber-600 transition-colors disabled:opacity-50"
+            >
+              {loading ? 'Changing...' : 'Change Role'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function RoleHistoryModal({ open, userId, userName, onClose }: {
+  open: boolean; userId: string | null; userName: string; onClose: () => void
+}) {
+  const [history, setHistory] = useState<AuditEntry[]>([])
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (!open || !userId) return
+    setLoading(true)
+    const fetchHistory = async () => {
+      const result = await supabase.rpc('get_user_role_history' as never, { p_user_id: userId, p_limit: 50 } as never)
+      const typed = result as unknown as { data: AuditEntry[]; error: unknown }
+      if (!typed.error) setHistory(typed.data || [])
+      setLoading(false)
+    }
+    fetchHistory()
+  }, [open, userId])
+
+  if (!open) return null
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-stone-900/50" onClick={onClose} />
+      <div className="relative bg-white border border-gray-200 rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto shadow-2xl">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">Role History</h3>
+            <p className="text-sm text-gray-500">{userName}</p>
+          </div>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+        </div>
+        {loading ? (
+          <div className="flex justify-center py-8"><LoadingSpinner /></div>
+        ) : history.length === 0 ? (
+          <p className="text-center text-gray-500 py-8">No role change history found.</p>
+        ) : (
+          <div className="space-y-3">
+            {history.map((entry) => (
+              <div key={entry.id} className="bg-gray-50 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-700 capitalize">
+                    {entry.action.replace(/^(role|status)\./, '')}
+                  </span>
+                  <span className="text-xs text-gray-500">{new Date(entry.created_at).toLocaleString()}</span>
+                </div>
+                <div className="text-xs text-gray-500">
+                  By: {entry.actor_name}
+                  {typeof entry.metadata === 'object' && entry.metadata && 'previous_role' in entry.metadata && (
+                    <span className="ml-2">
+                      · From: <span className="font-medium">{String(entry.metadata.previous_role)}</span>
+                      {' → '}<span className="font-medium">{String((entry.metadata as Record<string, unknown>).new_role)}</span>
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
@@ -74,106 +214,122 @@ export function SuperAdminUsersPage() {
   const [users, setUsers] = useState<ExtendedProfile[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
+  const [roleFilter, setRoleFilter] = useState<string>('all')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
   const [updating, setUpdating] = useState<string | null>(null)
+  const [stats, setStats] = useState<UserStats | null>(null)
+  const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set())
   const [confirmAction, setConfirmAction] = useState<{
-    type: 'role' | 'super_admin' | 'suspend' | 'restore'
-    userId: string
-    userName: string
-    newRole?: string
-    currentRole?: string
+    type: 'role' | 'super_admin' | 'suspend' | 'restore' | 'bulk_suspend' | 'bulk_restore'
+    userId?: string; userName?: string; newRole?: string; currentRole?: string
   } | null>(null)
+  const [roleModal, setRoleModal] = useState<{ user: ExtendedProfile } | null>(null)
+  const [historyModal, setHistoryModal] = useState<{ userId: string; userName: string } | null>(null)
+  const [dropdownOpen, setDropdownOpen] = useState<string | null>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
   const { profile: currentUser } = useAuth()
+  const { toasts, addToast, removeToast } = useToast()
 
-  const loadUsers = useCallback(async () => {
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setDropdownOpen(null)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  const loadData = useCallback(async () => {
     setLoading(true)
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      setUsers((data || []) as ExtendedProfile[])
+      const [usersResult, statsResult] = await Promise.all([
+        supabase.from('profiles').select('*').order('created_at', { ascending: false }),
+        supabase.rpc('get_user_management_stats' as never) as unknown as Promise<{ data: UserStats; error: unknown }>,
+      ])
+      if (usersResult.error) throw usersResult.error
+      setUsers((usersResult.data || []) as ExtendedProfile[])
+      if (!statsResult.error) setStats(statsResult.data)
     } catch {
-      toast.error('Failed to load users')
+      addToast('Failed to load users', 'error')
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [addToast])
 
-  useEffect(() => {
-    loadUsers()
-  }, [loadUsers])
+  useEffect(() => { loadData() }, [loadData])
 
   const executeRoleUpdate = async (userId: string, newRole: string) => {
     setUpdating(userId)
     try {
-      const { error } = await supabase.rpc('admin_update_role', {
-        target_user_id: userId,
-        new_role: newRole,
-      } as never)
+      const { error } = await supabase.rpc('admin_update_role', { target_user_id: userId, new_role: newRole } as never)
       if (error) throw error
-      toast.success('Role updated successfully')
-      await loadUsers()
+      addToast('Role updated successfully', 'success')
+      await loadData()
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Failed to update role'
-      toast.error(msg)
+      addToast(err instanceof Error ? err.message : 'Failed to update role', 'error')
     } finally {
       setUpdating(null)
       setConfirmAction(null)
-    }
-  }
-
-  const updateRole = (user: ExtendedProfile, newRole: string) => {
-    if (newRole === 'super_admin') {
-      setConfirmAction({
-        type: 'super_admin',
-        userId: user.id,
-        userName: user.full_name,
-        newRole,
-        currentRole: user.role,
-      })
-    } else {
-      setConfirmAction({
-        type: 'role',
-        userId: user.id,
-        userName: user.full_name,
-        newRole,
-        currentRole: user.role,
-      })
+      setRoleModal(null)
     }
   }
 
   const updateStatus = async (userId: string, status: UserStatus) => {
     setUpdating(userId)
     try {
-      const { error } = await (supabase.rpc('admin_update_user_status', {
-        target_user_id: userId,
-        new_status: status,
-      }) as unknown as Promise<{ error: unknown }>)
+      const { error } = await (supabase.rpc('admin_update_user_status', { target_user_id: userId, new_status: status } as never) as unknown as Promise<{ error: unknown }>)
       if (error) throw error
-      toast.success(`User ${status === 'active' ? 'restored' : 'suspended'} successfully`)
-      await loadUsers()
+      addToast(`User ${status === 'active' ? 'restored' : 'suspended'} successfully`, 'success')
+      await loadData()
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Failed to update status'
-      toast.error(msg)
+      addToast(err instanceof Error ? err.message : 'Failed to update status', 'error')
     } finally {
       setUpdating(null)
+      setConfirmAction(null)
     }
   }
 
-  const filteredUsers = users.filter(u =>
-    u.full_name.toLowerCase().includes(search.toLowerCase()) ||
-    u.email.toLowerCase().includes(search.toLowerCase())
-  )
+  const handleBulkAction = async (action: 'suspend' | 'restore') => {
+    setUpdating('bulk')
+    try {
+      for (const uid of selectedUsers) {
+        await supabase.rpc('admin_update_user_status', { target_user_id: uid, new_status: action === 'suspend' ? 'suspended' : 'active' } as never)
+      }
+      addToast(`${selectedUsers.size} users ${action === 'suspend' ? 'suspended' : 'restored'}`, 'success')
+      setSelectedUsers(new Set())
+      await loadData()
+    } catch (err) {
+      addToast(err instanceof Error ? err.message : `Failed to ${action} users`, 'error')
+    } finally {
+      setUpdating(null)
+      setConfirmAction(null)
+    }
+  }
+
+  const filteredUsers = users.filter(u => {
+    if (search && !u.full_name.toLowerCase().includes(search.toLowerCase()) && !u.email.toLowerCase().includes(search.toLowerCase())) return false
+    if (roleFilter !== 'all' && u.role !== roleFilter) return false
+    if (statusFilter !== 'all' && u.status !== statusFilter) return false
+    return true
+  })
 
   const formatDate = (d: string | null) => d ? new Date(d).toLocaleDateString() : 'N/A'
 
   const statusColors: Record<UserStatus, string> = {
-    active: 'bg-emerald-100 text-emerald-700',
-    inactive: 'bg-gray-100 text-gray-600',
-    suspended: 'bg-amber-100 text-amber-700',
-    banned: 'bg-red-100 text-red-700',
+    active: 'bg-emerald-100 text-emerald-700', inactive: 'bg-gray-100 text-gray-600',
+    suspended: 'bg-amber-100 text-amber-700', banned: 'bg-red-100 text-red-700',
+  }
+
+  const getConfirmMessage = () => {
+    if (!confirmAction) return ''
+    switch (confirmAction.type) {
+      case 'super_admin': return `Assign Super Admin to "${confirmAction.userName}"? This role has full system control. This action is permanently audited.`
+      case 'role': return `Change "${confirmAction.userName}" role from ${confirmAction.currentRole} to ${confirmAction.newRole}?`
+      case 'suspend': return `Suspend "${confirmAction.userName}"? They will lose all platform access.`
+      case 'restore': return `Restore "${confirmAction.userName}" account access?`
+      case 'bulk_suspend': return `Suspend ${selectedUsers.size} selected users? They will lose all platform access.`
+      case 'bulk_restore': return `Restore ${selectedUsers.size} selected users?`
+      default: return ''
+    }
   }
 
   const roleOptions: { value: Role; label: string }[] = [
@@ -185,111 +341,140 @@ export function SuperAdminUsersPage() {
     { value: 'donor', label: 'Donor' },
   ]
 
-  const getConfirmMessage = () => {
-    if (!confirmAction) return ''
-    switch (confirmAction.type) {
-      case 'super_admin':
-        return `Are you sure you want to assign Super Admin access to "${confirmAction.userName}"? This role has full system control including user management, role management, security settings, and all administrative controls. This action is permanently audited.`
-      case 'role':
-        return `Change "${confirmAction.userName}" role from ${confirmAction.currentRole} to ${confirmAction.newRole}? Their permissions will update immediately.`
-      case 'suspend':
-        return `Are you sure you want to suspend "${confirmAction.userName}"? They will lose all access to the platform until restored.`
-      case 'restore':
-        return `Restore "${confirmAction.userName}" account access? They will regain all previous permissions.`
-      default:
-        return ''
-    }
-  }
+  const allSelected = filteredUsers.length > 0 && selectedUsers.size === filteredUsers.length
 
-  const getConfirmTitle = () => {
-    if (!confirmAction) return ''
-    switch (confirmAction.type) {
-      case 'super_admin': return 'Promote to Super Admin?'
-      case 'role': return 'Confirm Role Change'
-      case 'suspend': return 'Suspend User?'
-      case 'restore': return 'Restore User?'
-      default: return ''
-    }
-  }
-
-  const getConfirmLabel = () => {
-    if (!confirmAction) return ''
-    switch (confirmAction.type) {
-      case 'super_admin': return 'Promote to Super Admin'
-      case 'role': return 'Change Role'
-      case 'suspend': return 'Suspend User'
-      case 'restore': return 'Restore User'
-      default: return ''
-    }
-  }
-
-  const getConfirmVariant = () => {
-    if (!confirmAction) return 'danger' as const
-    switch (confirmAction.type) {
-      case 'super_admin': return 'warning' as const
-      case 'role': return 'info' as const
-      case 'suspend': return 'danger' as const
-      case 'restore': return 'info' as const
-      default: return 'danger' as const
-    }
-  }
-
-  const handleConfirm = () => {
-    if (!confirmAction) return
-    switch (confirmAction.type) {
-      case 'super_admin':
-      case 'role':
-        executeRoleUpdate(confirmAction.userId, confirmAction.newRole!)
-        break
-      case 'suspend':
-        updateStatus(confirmAction.userId, 'suspended')
-        break
-      case 'restore':
-        updateStatus(confirmAction.userId, 'active')
-        break
-    }
+  const exportUsersCSV = () => {
+    const headers = ['Name', 'Email', 'Role', 'Status', 'Joined', 'Last Login']
+    const rows = filteredUsers.map(u => [u.full_name, u.email, u.role, u.status, formatDate(u.created_at), formatDate(u.last_login_at)])
+    const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url; a.download = 'users.csv'; a.click()
+    URL.revokeObjectURL(url)
   }
 
   return (
     <div className="space-y-6">
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
       <ConfirmModal
         open={confirmAction !== null}
-        title={getConfirmTitle()}
+        title={confirmAction?.type === 'super_admin' ? 'Promote to Super Admin?' : confirmAction?.type === 'suspend' ? 'Suspend User?' : confirmAction?.type === 'restore' ? 'Restore User?' : confirmAction?.type === 'bulk_suspend' ? 'Bulk Suspend?' : confirmAction?.type === 'bulk_restore' ? 'Bulk Restore?' : 'Confirm Role Change'}
         message={getConfirmMessage()}
-        confirmLabel={getConfirmLabel()}
-        onConfirm={handleConfirm}
+        confirmLabel={confirmAction?.type === 'super_admin' ? 'Promote to Super Admin' : confirmAction?.type === 'role' ? 'Change Role' : confirmAction?.type === 'suspend' ? 'Suspend User' : confirmAction?.type === 'restore' ? 'Restore User' : confirmAction?.type === 'bulk_suspend' ? 'Suspend All' : confirmAction?.type === 'bulk_restore' ? 'Restore All' : 'Confirm'}
+        onConfirm={() => {
+          if (!confirmAction) return
+          switch (confirmAction.type) {
+            case 'super_admin': case 'role': executeRoleUpdate(confirmAction.userId!, confirmAction.newRole!); break
+            case 'suspend': updateStatus(confirmAction.userId!, 'suspended'); break
+            case 'restore': updateStatus(confirmAction.userId!, 'active'); break
+            case 'bulk_suspend': handleBulkAction('suspend'); break
+            case 'bulk_restore': handleBulkAction('restore'); break
+          }
+        }}
         onCancel={() => setConfirmAction(null)}
         loading={updating !== null}
-        variant={getConfirmVariant()}
+        variant={confirmAction?.type === 'restore' || confirmAction?.type === 'bulk_restore' ? 'info' : confirmAction?.type === 'super_admin' ? 'warning' : 'danger'}
+      />
+      <ChangeRoleModal
+        open={roleModal !== null}
+        user={roleModal?.user || null}
+        onClose={() => setRoleModal(null)}
+        onConfirm={(userId, newRole) => {
+          const user = users.find(u => u.id === userId)
+          if (newRole === 'super_admin') {
+            setConfirmAction({ type: 'super_admin', userId, userName: user?.full_name || '', newRole })
+          } else {
+            setConfirmAction({ type: 'role', userId, userName: user?.full_name || '', newRole, currentRole: user?.role })
+          }
+        }}
+        loading={updating !== null}
+      />
+      <RoleHistoryModal
+        open={historyModal !== null}
+        userId={historyModal?.userId || null}
+        userName={historyModal?.userName || ''}
+        onClose={() => setHistoryModal(null)}
       />
 
       <div className="flex items-center justify-between">
         <div>
-          <div className="mb-1">
-            <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
-          </div>
+          <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
           <p className="text-gray-500 mt-1">Manage all platform users, assign roles, and control account status</p>
         </div>
-        <div className="px-3 py-1.5 bg-red-500/5 border border-red-500/20 rounded-lg">
-          <span className="text-xs text-red-400 font-medium">Super Admin Access</span>
+        <div className="flex items-center gap-2">
+          <button onClick={exportUsersCSV} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors">
+            <Download className="w-3.5 h-3.5" /> Export CSV
+          </button>
+          <div className="px-3 py-1.5 bg-red-500/5 border border-red-500/20 rounded-lg">
+            <span className="text-xs text-red-400 font-medium">Super Admin Access</span>
+          </div>
         </div>
       </div>
 
-      <div>
-        <input
-          type="text"
-          placeholder="Search users by name or email..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-red-500/50"
-        />
-      </div>
+      {stats && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {[
+            { label: 'Total Users', value: stats.total_users, icon: Users, color: 'text-gray-600', bg: 'bg-gray-50' },
+            { label: 'Admins', value: stats.admins + stats.super_admins, icon: Shield, color: 'text-amber-600', bg: 'bg-amber-50' },
+            { label: 'Finance', value: stats.finance_managers, icon: UserCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+            { label: 'Teachers', value: stats.teachers, icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+            { label: 'Donors', value: stats.donors, icon: Users, color: 'text-green-600', bg: 'bg-green-50' },
+            { label: 'Suspended', value: stats.suspended_users, icon: UserX, color: 'text-red-600', bg: 'bg-red-50' },
+          ].map((stat) => (
+            <Card key={stat.label} variant="bordered" className={`${stat.bg} border-gray-100 p-4`}>
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-gray-500">{stat.label}</p>
+                <stat.icon className={`w-4 h-4 ${stat.color}`} />
+              </div>
+              <p className={`text-xl font-bold mt-1 ${stat.color}`}>{stat.value}</p>
+            </Card>
+          ))}
+        </div>
+      )}
 
       <Card variant="bordered" className="bg-white border-gray-100 overflow-hidden">
+        <div className="p-4 border-b border-gray-100">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input type="text" placeholder="Search users by name or email..." value={search} onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-amber-500/50" />
+            </div>
+            <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}
+              className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500/50">
+              <option value="all">All Roles</option>
+              {roleOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              <option value="public_user">Public User</option>
+            </select>
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500/50">
+              <option value="all">All Status</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="suspended">Suspended</option>
+              <option value="banned">Banned</option>
+            </select>
+          </div>
+          {selectedUsers.size > 0 && (
+            <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
+              <span className="text-sm text-gray-500">{selectedUsers.size} selected</span>
+              <button onClick={() => setSelectedUsers(new Set())} className="text-xs text-gray-500 hover:text-gray-700">Clear</button>
+              <div className="w-px h-4 bg-gray-200 mx-1" />
+              <button onClick={() => setConfirmAction({ type: 'bulk_suspend' })} className="text-xs font-medium text-red-600 hover:text-red-700">Suspend all</button>
+              <button onClick={() => setConfirmAction({ type: 'bulk_restore' })} className="text-xs font-medium text-emerald-600 hover:text-emerald-700">Restore all</button>
+            </div>
+          )}
+        </div>
+
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-100">
+              <tr className="border-b border-gray-100 bg-gray-50/50">
+                <th className="px-4 py-3 text-left w-10">
+                  <input type="checkbox" checked={allSelected} onChange={() => { if (allSelected) setSelectedUsers(new Set()); else setSelectedUsers(new Set(filteredUsers.map(u => u.id))) }}
+                    className="w-4 h-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500/30" />
+                </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
@@ -300,94 +485,85 @@ export function SuperAdminUsersPage() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {loading ? (
-                <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-gray-500">Loading users...</td>
-                </tr>
+                <tr><td colSpan={7} className="px-4 py-12 text-center text-gray-500"><LoadingSpinner /></td></tr>
               ) : filteredUsers.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-gray-500">No users found</td>
-                </tr>
+                <tr><td colSpan={7} className="px-4 py-12 text-center text-gray-500">No users found</td></tr>
               ) : (
                 filteredUsers.map((user) => {
                   const isSelf = user.id === currentUser?.id
                   const isTargetSuperAdmin = user.role === 'super_admin'
+                  const isSelected = selectedUsers.has(user.id)
 
                   return (
-                    <tr key={user.id} className="hover:bg-gray-50">
+                    <tr key={user.id} className={`hover:bg-gray-50 ${isSelected ? 'bg-amber-50/50' : ''}`}>
+                      <td className="px-4 py-3">
+                        <input type="checkbox" checked={isSelected} onChange={() => {
+                          const next = new Set(selectedUsers)
+                          if (isSelected) next.delete(user.id); else next.add(user.id)
+                          setSelectedUsers(next)
+                        }} disabled={isSelf} className="w-4 h-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500/30" />
+                      </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium ${
-                            isTargetSuperAdmin
-                              ? 'bg-gradient-to-br from-red-500 to-amber-600'
-                              : 'bg-gradient-to-br from-amber-400 to-amber-600'
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium shrink-0 ${
+                            isTargetSuperAdmin ? 'bg-gradient-to-br from-red-500 to-amber-600' : 'bg-gradient-to-br from-amber-400 to-amber-600'
                           }`}>
                             {user.full_name.charAt(0)}
                           </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-700">{user.full_name}</p>
-                            <p className="text-xs text-gray-500">{user.email}</p>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-gray-700 truncate">{user.full_name}</p>
+                            <p className="text-xs text-gray-500 truncate">{user.email}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3">
-                        <RoleBadge role={user.role as Role} size="sm" />
-                      </td>
+                      <td className="px-4 py-3"><RoleBadge role={user.role as Role} size="sm" /></td>
                       <td className="px-4 py-3">
                         <span className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full ${statusColors[user.status as UserStatus] || statusColors.active}`}>
                           {user.status || 'active'}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-500">{formatDate(user.last_login_at)}</td>
-                      <td className="px-4 py-3 text-sm text-gray-500">{formatDate(user.created_at)}</td>
+                      <td className="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">{formatDate(user.last_login_at)}</td>
+                      <td className="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">{formatDate(user.created_at)}</td>
                       <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          {!isSelf && !isTargetSuperAdmin && (
-                            <select
-                              value={user.role}
-                              onChange={(e) => updateRole(user, e.target.value)}
+                        {isSelf ? (
+                          <span className="text-xs text-gray-500 italic">Current user</span>
+                        ) : isTargetSuperAdmin && !isSelf ? (
+                          <span className="text-xs text-red-400 font-medium">Protected</span>
+                        ) : (
+                          <div className="relative" ref={dropdownRef}>
+                            <button
+                              onClick={() => setDropdownOpen(dropdownOpen === user.id ? null : user.id)}
                               disabled={updating === user.id}
-                              title="Change user role"
-                              className="text-xs bg-gray-50 border border-gray-200 rounded px-2 py-1 text-gray-600 focus:outline-none focus:border-red-500/50"
+                              className="p-1 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
                             >
-                              {roleOptions.map((opt) => (
-                                <option key={opt.value} value={opt.value}>{opt.label}</option>
-                              ))}
-                            </select>
-                          )}
-                          {isTargetSuperAdmin && !isSelf && (
-                            <span className="text-xs text-red-400 font-medium">Protected</span>
-                          )}
-                          {isSelf && (
-                            <span className="text-xs text-gray-500 italic">Current user</span>
-                          )}
-                          {!isSelf && (
-                            user.status === 'active' ? (
-                              <button
-                                onClick={() => setConfirmAction({
-                                  type: 'suspend',
-                                  userId: user.id,
-                                  userName: user.full_name,
-                                })}
-                                disabled={updating === user.id}
-                                className="px-2 py-1 text-xs font-medium text-gray-600 hover:text-red-600 transition-colors"
-                              >
-                                Suspend
-                              </button>
-                            ) : (
-                              <button
-                                onClick={() => setConfirmAction({
-                                  type: 'restore',
-                                  userId: user.id,
-                                  userName: user.full_name,
-                                })}
-                                disabled={updating === user.id}
-                                className="px-2 py-1 text-xs font-medium text-gray-600 hover:text-emerald-600 transition-colors"
-                              >
-                                Restore
-                              </button>
-                            )
-                          )}
-                        </div>
+                              {updating === user.id ? <LoadingSpinner size="sm" /> : <MoreVertical className="w-4 h-4" />}
+                            </button>
+                            {dropdownOpen === user.id && (
+                              <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-50 py-1">
+                                <button onClick={() => { setRoleModal({ user }); setDropdownOpen(null) }}
+                                  className="w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                                  <Shield className="w-4 h-4" /> Change Role
+                                </button>
+                                <button onClick={() => { setHistoryModal({ userId: user.id, userName: user.full_name }); setDropdownOpen(null) }}
+                                  className="w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                                  <History className="w-4 h-4" /> View History
+                                </button>
+                                <div className="border-t border-gray-100 my-1" />
+                                {user.status === 'active' ? (
+                                  <button onClick={() => { setConfirmAction({ type: 'suspend', userId: user.id, userName: user.full_name }); setDropdownOpen(null) }}
+                                    className="w-full px-4 py-2 text-sm text-left text-red-600 hover:bg-red-50 flex items-center gap-2">
+                                    <UserX className="w-4 h-4" /> Suspend
+                                  </button>
+                                ) : (
+                                  <button onClick={() => { setConfirmAction({ type: 'restore', userId: user.id, userName: user.full_name }); setDropdownOpen(null) }}
+                                    className="w-full px-4 py-2 text-sm text-left text-emerald-600 hover:bg-emerald-50 flex items-center gap-2">
+                                    <UserCheck className="w-4 h-4" /> Restore
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </td>
                     </tr>
                   )

@@ -1,7 +1,19 @@
 import { useEffect, useState, useCallback } from 'react'
 import { BlockRenderer } from './BlockRenderer'
 import { getPageBySlugWithBlocks } from '../../services/pageBlocks'
-import type { PageBlock, SeoMetadata } from '../../types/cms'
+import type { PageBlock, PageBlockDB, SeoMetadata } from '../../types/cms'
+
+function toPageBlock(b: PageBlockDB): PageBlock {
+  return {
+    id: b.id,
+    type: b.block_type,
+    title: b.title,
+    content: b.content,
+    settings: b.settings,
+    is_visible: b.is_visible,
+    is_draft: b.is_draft,
+  }
+}
 
 interface DynamicPageProps {
   slug: string
@@ -23,7 +35,7 @@ export function DynamicPage({ slug, fallbackTitle }: DynamicPageProps) {
         setNotFound(true)
         return
       }
-      setBlocks(page.blocks || [])
+      setBlocks((page.blocks || []).map(toPageBlock))
       setSeo(page.seo || {})
     } catch {
       setNotFound(true)

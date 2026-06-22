@@ -6,7 +6,6 @@ import { useAuth } from '../../../context/AuthContext'
 import { useDashboardData } from '../hooks/useDashboardData'
 import { useDonorTransactions } from '../hooks/useDonorTransactions'
 import { useNotifications } from '../hooks/useNotifications'
-import { useActivityFeed } from '../hooks/useActivityFeed'
 import { useSponsorshipTimeline } from '../hooks/useSponsorshipTimeline'
 import { useTeacherReports } from '../hooks/useTeacherReports'
 import { useAllocations } from '../hooks/useAllocations'
@@ -22,7 +21,7 @@ import { StudentProgressUpdates } from '../components/StudentProgressUpdates'
 import { SponsorshipTimeline } from '../components/SponsorshipTimeline'
 import { ReceiptDownloads } from '../components/ReceiptDownloads'
 import { NotificationCenter } from '../components/NotificationCenter'
-import { ActivityFeed } from '../components/ActivityFeed'
+import { ActivityFeed } from '../../../components/activities/ActivityFeed'
 import { DonationChart } from '../charts/DonationChart'
 import { ImpactTimeline } from '../components/ImpactTimeline'
 import type { Section } from '../components/Sidebar'
@@ -61,7 +60,7 @@ export function DashboardPage() {
   const { transactions, loading: txLoading } = useDonorTransactions(userId)
   const { summary: allocationSummary } = useAllocations(userId)
   const { notifications, unreadCount, markAsRead, markAllAsRead, loading: notifLoading } = useNotifications(userId)
-  const { activities, loading: actLoading } = useActivityFeed(userId)
+
   const { events } = useSponsorshipTimeline(userId)
   const { latestReports } = useTeacherReports(userId)
 
@@ -305,12 +304,7 @@ export function DashboardPage() {
             onMarkAllAsRead={handleMarkAllAsRead}
             loading={notifLoading}
           />
-          <ActivityFeed
-            activities={activities}
-            loading={actLoading}
-            hasMore={false}
-            onLoadMore={() => {}}
-          />
+          <ActivityFeed />
           <SponsorshipTimeline events={events} />
         </div>
       )}

@@ -55,6 +55,7 @@ export interface PageBlock {
   title?: string
   content: Record<string, unknown>
   is_visible: boolean
+  is_draft?: boolean
   settings?: {
     background_color?: string
     background_image?: string
@@ -63,6 +64,20 @@ export interface PageBlock {
     text_alignment?: 'left' | 'center' | 'right'
     max_width?: string
   }
+}
+
+export interface PageBlockDB {
+  id: string
+  page_id: string
+  block_type: PageBlockType
+  title: string
+  content: Record<string, unknown>
+  settings: Record<string, unknown>
+  sort_order: number
+  is_visible: boolean
+  is_draft: boolean
+  created_at: string
+  updated_at: string
 }
 
 export interface SeoMetadata {
