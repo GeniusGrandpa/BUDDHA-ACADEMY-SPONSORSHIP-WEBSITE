@@ -11,6 +11,82 @@ import { useCmsStrings } from '../context/CmsStringsContext'
 import type { Student } from '../types/database'
 import type { HeroContent, SectionContent } from '../types/cms-content'
 
+const DEFAULT_HERO: HeroContent = {
+  id: '',
+  title: 'Empowering Nepal\'s Future',
+  highlight: 'One Child at a Time',
+  description: 'Buddha Academy provides free education, meals, and healthcare to underprivileged children in Kathmandu, Nepal.',
+  background_image: 'https://images.pexels.com/photos/358482/pexels-photo-358482.jpeg?auto=compress&cs=tinysrgb&w=1920',
+  overlay_color: 'bg-gradient-to-r from-stone-950/80 via-stone-950/60 to-transparent',
+  overlay_opacity: 1,
+  cta_primary_text: 'Sponsor a Child',
+  cta_primary_link: '/students',
+  cta_secondary_text: 'Donate Now',
+  cta_secondary_link: '/donate',
+  statistics: [
+    { value: 'Since 1977', label: 'Trusted Service' } as never,
+    { value: '49+', label: 'Years of Service' } as never,
+    { value: '100%', label: 'Free Education' } as never,
+    { value: '2000+', label: 'Children Supported' } as never,
+  ],
+  badges: [{ text: 'Verified Nonprofit' }, { text: '12+ Countries' }],
+  layout: 'left',
+  display_order: 1,
+  is_visible: true,
+  animation_enabled: false,
+  updated_by: null,
+  created_at: '',
+  updated_at: '',
+}
+
+const DEFAULT_ABOUT: SectionContent = {
+  id: '',
+  section_key: 'about_preview',
+  title: 'About Buddha Academy',
+  subtitle: '',
+  description: 'Founded in 1977, Buddha Academy is a nonprofit boarding school in Kathmandu, Nepal, dedicated to providing free education to underprivileged children.',
+  content: {
+    milestones: [
+      { year: '1977', event: 'Founded with 12 students' },
+      { year: '1990s', event: 'Hostel expansion program' },
+      { year: '2010s', event: 'Computer lab established' },
+      { year: 'Today', event: 'Educating hundreds annually' },
+    ],
+  },
+  images: [],
+  is_visible: true,
+  sort_order: 1,
+  updated_by: null,
+  created_at: '',
+  updated_at: '',
+}
+
+const DEFAULT_SPONSORSHIP: SectionContent = {
+  id: '',
+  section_key: 'sponsorship_steps',
+  title: 'How Sponsorship Works',
+  subtitle: '',
+  description: 'Your journey to changing a child\'s life starts here. Follow these simple steps to become a sponsor.',
+  content: {
+    steps: [
+      { num: '01', title: 'Browse Profiles', desc: 'Review children waiting for sponsors' },
+      { num: '02', title: 'Choose a Child', desc: 'Select a student to sponsor' },
+      { num: '03', title: 'Make Your Pledge', desc: 'Complete donation form securely' },
+      { num: '04', title: 'We Connect', desc: 'Link you with your sponsored child' },
+      { num: '05', title: 'Receive Updates', desc: 'Get progress reports & photos' },
+      { num: '06', title: 'Build Connection', desc: 'Exchange letters & messages' },
+      { num: '07', title: 'Track Impact', desc: 'See your contribution at work' },
+      { num: '08', title: 'Join Community', desc: 'Connect with other sponsors' },
+    ],
+  },
+  images: [],
+  is_visible: true,
+  sort_order: 1,
+  updated_by: null,
+  created_at: '',
+  updated_at: '',
+}
+
 const BADGE_MAP: Record<string, 'success' | 'warning' | 'info'> = {
   available: 'success',
   partially_sponsored: 'warning',
@@ -101,61 +177,65 @@ export function HomePage() {
     } catch {}
   }
 
-  const milestones: { year: string; event: string }[] =
-    (aboutSection?.content as { milestones?: { year: string; event: string }[] })?.milestones || []
+  const activeHero = hero || DEFAULT_HERO
+  const activeAbout = aboutSection || DEFAULT_ABOUT
+  const activeSponsorship = sponsorshipSection || DEFAULT_SPONSORSHIP
 
-  const sponsorshipData = sponsorshipSection?.content as { steps?: { num: string; title: string; desc: string }[] } | undefined
+  const milestones: { year: string; event: string }[] =
+    (activeAbout.content as { milestones?: { year: string; event: string }[] })?.milestones || []
+
+  const sponsorshipData = activeSponsorship.content as { steps?: { num: string; title: string; desc: string }[] } | undefined
   const sponsorshipSteps = sponsorshipData?.steps || []
 
   if (loading) return <div className="text-center py-12 text-gray-400">{t('home_loading')}</div>
 
   return (
     <div>
-      {sectionsVisible.hero !== false && hero && (
+      {sectionsVisible.hero !== false && (
         <section className="relative min-h-[600px] flex items-center overflow-hidden">
-          {hero.background_image && (
+          {activeHero.background_image && (
             <div
               className="absolute inset-0 bg-cover bg-center transition-opacity duration-500"
               style={{
-                backgroundImage: heroBgReady ? `url('${hero.background_image}')` : 'none',
+                backgroundImage: heroBgReady ? `url('${activeHero.background_image}')` : 'none',
                 opacity: heroBgReady ? 1 : 0,
               }}
             />
           )}
-          <div className={`absolute inset-0 ${hero.overlay_color || 'bg-gradient-to-r from-stone-950/80 via-stone-950/60 to-transparent'}`} />
+          <div className={`absolute inset-0 ${activeHero.overlay_color || 'bg-gradient-to-r from-stone-950/80 via-stone-950/60 to-transparent'}`} />
           {!heroBgReady && <div className="absolute inset-0 bg-stone-800" />}
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-            <div className={`max-w-2xl ${hero.layout === 'center' ? 'mx-auto text-center' : ''}`}>
-              {hero.title && (
+            <div className={`max-w-2xl ${activeHero.layout === 'center' ? 'mx-auto text-center' : ''}`}>
+              {activeHero.title && (
                 <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight animate-fade-in">
-                  {hero.title}
-                  {hero.highlight && <><br /><span className="text-amber-400">{hero.highlight}</span></>}
+                  {activeHero.title}
+                  {activeHero.highlight && <><br /><span className="text-amber-400">{activeHero.highlight}</span></>}
                 </h1>
               )}
 
-              {hero.description && (
-                <p className="text-xl text-gray-300 mb-8 leading-relaxed">{hero.description}</p>
+              {activeHero.description && (
+                <p className="text-xl text-gray-300 mb-8 leading-relaxed">{activeHero.description}</p>
               )}
 
-              {(hero.cta_primary_text || hero.cta_secondary_text) && (
+              {(activeHero.cta_primary_text || activeHero.cta_secondary_text) && (
                 <div className="flex flex-col sm:flex-row gap-4">
-                  {hero.cta_primary_text && (
-                    <Link to={hero.cta_primary_link || '/students'}>
-                      <Button size="lg" className="w-full sm:w-auto">{hero.cta_primary_text}</Button>
+                  {activeHero.cta_primary_text && (
+                    <Link to={activeHero.cta_primary_link || '/students'}>
+                      <Button size="lg" className="w-full sm:w-auto">{activeHero.cta_primary_text}</Button>
                     </Link>
                   )}
-                  {hero.cta_secondary_text && (
-                    <Link to={hero.cta_secondary_link || '/donate'}>
-                      <Button size="lg" variant="glass" className="w-full sm:w-auto">{hero.cta_secondary_text}</Button>
+                  {activeHero.cta_secondary_text && (
+                    <Link to={activeHero.cta_secondary_link || '/donate'}>
+                      <Button size="lg" variant="glass" className="w-full sm:w-auto">{activeHero.cta_secondary_text}</Button>
                     </Link>
                   )}
                 </div>
               )}
 
-              {hero.badges && hero.badges.length > 0 && (
+              {activeHero.badges && activeHero.badges.length > 0 && (
                 <div className="flex items-center gap-6 mt-10 pt-8 border-t border-white/20">
-                  {hero.badges.map((badge, idx) => (
+                  {activeHero.badges.map((badge, idx) => (
                     <span key={idx} className="text-sm text-gray-300">{badge.text}</span>
                   ))}
                 </div>
@@ -165,11 +245,11 @@ export function HomePage() {
         </section>
       )}
 
-      {sectionsVisible.stats !== false && hero?.statistics && hero.statistics.length > 0 && (
+      {sectionsVisible.stats !== false && activeHero.statistics && activeHero.statistics.length > 0 && (
         <section className="bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-white text-center">
-              {hero.statistics.map((stat, idx) => (
+              {activeHero.statistics.map((stat, idx) => (
                 <div key={idx}>
                   <div className="text-4xl font-bold mb-1">{stat.value}</div>
                   <div className="text-white/90 text-sm">{stat.label}</div>
@@ -180,19 +260,19 @@ export function HomePage() {
         </section>
       )}
 
-      {sectionsVisible.about_preview !== false && aboutSection && (
+      {sectionsVisible.about_preview !== false && (
         <section className="py-24 bg-gray-50">
           <div className="px-4 sm:px-8 lg:px-12">
             <div className="grid lg:grid-cols-2 gap-16 items-center max-w-7xl mx-auto">
               <div>
-                {aboutSection.title && (
-                  <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">{aboutSection.title}</h2>
+                {activeAbout.title && (
+                  <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">{activeAbout.title}</h2>
                 )}
-                {aboutSection.description && (
-                  <p className="text-gray-600 mb-6 leading-relaxed">{aboutSection.description}</p>
+                {activeAbout.description && (
+                  <p className="text-gray-600 mb-6 leading-relaxed">{activeAbout.description}</p>
                 )}
-                {aboutSection.content && (aboutSection.content as Record<string, string>).mission_description && (
-                  <p className="text-gray-600 mb-8 leading-relaxed">{(aboutSection.content as Record<string, string>).mission_description}</p>
+                {activeAbout.content && (activeAbout.content as Record<string, string>).mission_description && (
+                  <p className="text-gray-600 mb-8 leading-relaxed">{(activeAbout.content as Record<string, string>).mission_description}</p>
                 )}
                 <Link to="/about">
                   <Button variant="outline">
@@ -273,14 +353,14 @@ export function HomePage() {
         </section>
       )}
 
-      {sectionsVisible.sponsorship_steps !== false && sponsorshipSection && sponsorshipSteps.length > 0 && (
+      {sectionsVisible.sponsorship_steps !== false && sponsorshipSteps.length > 0 && (
         <section className="py-24 bg-gradient-to-br from-amber-50 via-white to-orange-50">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            {sponsorshipSection.title && (
+            {activeSponsorship.title && (
               <div className="text-center mb-16">
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{sponsorshipSection.title}</h2>
-                {sponsorshipSection.description && (
-                  <p className="text-gray-600 max-w-2xl mx-auto">{sponsorshipSection.description}</p>
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{activeSponsorship.title}</h2>
+                {activeSponsorship.description && (
+                  <p className="text-gray-600 max-w-2xl mx-auto">{activeSponsorship.description}</p>
                 )}
               </div>
             )}

@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Send, Loader2, CheckCircle, AlertCircle } from 'lucide-react'
 import { Card } from '../../components/ui/Card'
 import { broadcastNotification, getAllUserIds } from '../../services/notifications'
 import { logAuditEvent } from '../../lib/audit'
@@ -161,11 +160,6 @@ export function SuperAdminNotificationsPage() {
                   disabled={sending || !title.trim() || !message.trim()}
                   className="inline-flex items-center gap-2 px-5 py-2.5 bg-orange-500 text-white text-sm font-medium rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  {sending ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Send className="w-4 h-4" />
-                  )}
                   {sending ? 'Sending...' : 'Send Notification'}
                 </button>
               </div>
@@ -177,14 +171,12 @@ export function SuperAdminNotificationsPage() {
               <h3 className="text-sm font-semibold text-gray-900 mb-3">Delivery Result</h3>
               <div className="flex items-center gap-6">
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5 text-emerald-500" />
                   <span className="text-sm text-gray-700">
                     <strong className="text-emerald-600">{result.success}</strong> delivered
                   </span>
                 </div>
                 {result.failed > 0 && (
                   <div className="flex items-center gap-2">
-                    <AlertCircle className="w-5 h-5 text-red-500" />
                     <span className="text-sm text-gray-700">
                       <strong className="text-red-600">{result.failed}</strong> failed
                     </span>
@@ -218,7 +210,7 @@ export function SuperAdminNotificationsPage() {
               <div className="bg-orange-50 border border-orange-100 rounded-lg p-3">
                 <p className="text-xs text-orange-700 font-medium">Estimated Recipients</p>
                 <p className="text-2xl font-bold text-orange-600 mt-1">
-                  {userCount !== null ? userCount : <Loader2 className="w-5 h-5 animate-spin inline" />}
+                  {userCount !== null ? userCount : <span className="text-orange-400 animate-pulse">...</span>}
                 </p>
                 <p className="text-xs text-orange-500 mt-0.5">active users</p>
               </div>

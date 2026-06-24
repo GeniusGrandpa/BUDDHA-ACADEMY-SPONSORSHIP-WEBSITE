@@ -5,7 +5,6 @@ import { RoleBadge } from '../../components/RoleBadge'
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner'
 import { ToastContainer } from '../../components/ToastContainer'
 import { useToast } from '../../hooks/useToast'
-import { Check, AlertTriangle } from 'lucide-react'
 import type { Role, PermissionCode } from '../../types/permissions'
 import { ROLE_NAMES, ROLE_DESCRIPTIONS, ALL_PERMISSIONS, DEFAULT_ROLE_PERMISSIONS } from '../../types/permissions'
 
@@ -69,7 +68,7 @@ function PermissionGroupCard({
                   isChecked ? 'bg-emerald-500 border-emerald-500' : 'border-gray-300 hover:border-gray-400'
                 }`}
               >
-                {isChecked && <Check className="w-3.5 h-3.5 text-white" />}
+                {isChecked && <span className="text-white text-xs font-bold">&#10003;</span>}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-700">{p.name}</p>
@@ -227,8 +226,7 @@ export function SuperAdminRolesPage() {
         ))}
       </div>
 
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
-        <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
         <div className="text-sm text-amber-800">
           <p className="font-medium">{ROLE_NAMES[selectedRole]}</p>
           <p className="mt-1">{ROLE_DESCRIPTIONS[selectedRole]}</p>

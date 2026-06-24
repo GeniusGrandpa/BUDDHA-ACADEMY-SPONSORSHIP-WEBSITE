@@ -58,16 +58,29 @@ export function Footer() {
             {footerContent?.description && (
               <p className="text-sm mb-4 text-[var(--color-footer-text)]">{footerContent.description}</p>
             )}
-            {socialLinks.length > 0 && (
-              <div className="flex space-x-4">
-                {socialLinks.map((link, idx) => (
-                  <a key={idx} href={link.url} aria-label={link.label} target="_blank" rel="noopener noreferrer"
+            <div className="flex space-x-4">
+              {socialLinks.length > 0 ? socialLinks.map((link, idx) => (
+                <a key={idx} href={link.url} aria-label={link.label} target="_blank" rel="noopener noreferrer"
+                  className="transition-colors hover:opacity-80 text-[var(--color-footer-text)]">
+                  {SOCIAL_ICONS[link.platform] || null}
+                </a>
+              )) : (
+                <>
+                  <a href="https://facebook.com" aria-label="Facebook" target="_blank" rel="noopener noreferrer"
                     className="transition-colors hover:opacity-80 text-[var(--color-footer-text)]">
-                    {SOCIAL_ICONS[link.platform] || null}
+                    <Facebook className="w-5 h-5" />
                   </a>
-                ))}
-              </div>
-            )}
+                  <a href="https://instagram.com" aria-label="Instagram" target="_blank" rel="noopener noreferrer"
+                    className="transition-colors hover:opacity-80 text-[var(--color-footer-text)]">
+                    <Instagram className="w-5 h-5" />
+                  </a>
+                  <a href="https://twitter.com" aria-label="Twitter" target="_blank" rel="noopener noreferrer"
+                    className="transition-colors hover:opacity-80 text-[var(--color-footer-text)]">
+                    <Twitter className="w-5 h-5" />
+                  </a>
+                </>
+              )}
+            </div>
           </div>
 
           <div>

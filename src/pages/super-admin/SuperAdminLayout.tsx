@@ -1,8 +1,6 @@
 import { useState } from 'react'
 import { Outlet, Link, useLocation, useNavigate, Navigate } from 'react-router-dom'
-import {
-  Menu, X, Bell,
-} from 'lucide-react'
+import { Bell } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { RoleBadge } from '../../components/RoleBadge'
 import type { Role } from '../../types/permissions'
@@ -89,8 +87,8 @@ export function SuperAdminLayout() {
                   <p className="text-xs text-gray-500">Admin Portal</p>
                 </div>
               </div>
-              <button onClick={() => setSidebarOpen(false)} aria-label="Close sidebar" className="p-1.5 rounded-lg hover:bg-orange-50">
-                <X className="w-5 h-5 text-gray-400" />
+              <button onClick={() => setSidebarOpen(false)} aria-label="Close sidebar" className="p-1.5 rounded-lg hover:bg-orange-50 text-gray-400 text-sm">
+                Close
               </button>
             </div>
             <nav className="flex-1 px-3 py-4 overflow-y-auto scrollbar-thin">
@@ -142,9 +140,9 @@ export function SuperAdminLayout() {
               <button
                 onClick={() => setSidebarOpen(true)}
                 aria-label="Open sidebar"
-                className="lg:hidden p-2 rounded-lg hover:bg-orange-50 text-gray-400"
+                className="lg:hidden p-2 rounded-lg hover:bg-orange-50 text-gray-400 text-sm"
               >
-                <Menu className="w-5 h-5" />
+                Menu
               </button>
               <div className="hidden sm:flex items-center">
                 <span className="text-sm text-gray-500">Admin Dashboard</span>

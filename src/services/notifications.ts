@@ -30,18 +30,20 @@ export async function getUnreadCount(userId: string): Promise<number> {
 }
 
 export async function markAsRead(notificationId: string): Promise<void> {
-  await supabase
+  const { error } = await supabase
     .from('notifications')
     .update({ read: true, read_at: new Date().toISOString() })
     .eq('id', notificationId)
+  if (error) console.error('Error marking notification as read:', error)
 }
 
 export async function markAllAsRead(userId: string): Promise<void> {
-  await supabase
+  const { error } = await supabase
     .from('notifications')
     .update({ read: true, read_at: new Date().toISOString() })
     .eq('user_id', userId)
     .eq('read', false)
+  if (error) console.error('Error marking all notifications as read:', error)
 }
 
 export async function createNotification(

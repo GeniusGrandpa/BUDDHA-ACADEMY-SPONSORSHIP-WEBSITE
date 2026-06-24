@@ -6,7 +6,6 @@ import { RoleBadge } from '../../components/RoleBadge'
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner'
 import { ToastContainer } from '../../components/ToastContainer'
 import { useToast } from '../../hooks/useToast'
-import { Search, Shield, History, Users, UserCheck, UserX, X, Download, MoreVertical } from 'lucide-react'
 import type { Role } from '../../types/permissions'
 import type { Profile } from '../../types/database'
 
@@ -97,7 +96,7 @@ function ChangeRoleModal({ open, user, onClose, onConfirm, loading }: {
       <div className="relative bg-white border border-gray-200 rounded-2xl p-6 max-w-lg w-full shadow-2xl">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold text-gray-900">Change Role</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-sm">Close</button>
         </div>
         <div className="space-y-4">
           <div className="bg-gray-50 rounded-xl p-4">
@@ -176,7 +175,7 @@ function RoleHistoryModal({ open, userId, userName, onClose }: {
             <h3 className="text-lg font-semibold text-gray-900">Role History</h3>
             <p className="text-sm text-gray-500">{userName}</p>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-sm">Close</button>
         </div>
         {loading ? (
           <div className="flex justify-center py-8"><LoadingSpinner /></div>
@@ -404,7 +403,7 @@ export function SuperAdminUsersPage() {
         </div>
         <div className="flex items-center gap-2">
           <button onClick={exportUsersCSV} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors">
-            <Download className="w-3.5 h-3.5" /> Export CSV
+            Export CSV
           </button>
           <div className="px-3 py-1.5 bg-red-500/5 border border-red-500/20 rounded-lg">
             <span className="text-xs text-red-400 font-medium">Super Admin Access</span>
@@ -415,17 +414,16 @@ export function SuperAdminUsersPage() {
       {stats && (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {[
-            { label: 'Total Users', value: stats.total_users, icon: Users, color: 'text-gray-600', bg: 'bg-gray-50' },
-            { label: 'Admins', value: stats.admins + stats.super_admins, icon: Shield, color: 'text-amber-600', bg: 'bg-amber-50' },
-            { label: 'Finance', value: stats.finance_managers, icon: UserCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-            { label: 'Teachers', value: stats.teachers, icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-            { label: 'Donors', value: stats.donors, icon: Users, color: 'text-green-600', bg: 'bg-green-50' },
-            { label: 'Suspended', value: stats.suspended_users, icon: UserX, color: 'text-red-600', bg: 'bg-red-50' },
+            { label: 'Total Users', value: stats.total_users, color: 'text-gray-600', bg: 'bg-gray-50' },
+            { label: 'Admins', value: stats.admins + stats.super_admins, color: 'text-amber-600', bg: 'bg-amber-50' },
+            { label: 'Finance', value: stats.finance_managers, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+            { label: 'Teachers', value: stats.teachers, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+            { label: 'Donors', value: stats.donors, color: 'text-green-600', bg: 'bg-green-50' },
+            { label: 'Suspended', value: stats.suspended_users, color: 'text-red-600', bg: 'bg-red-50' },
           ].map((stat) => (
             <Card key={stat.label} variant="bordered" className={`${stat.bg} border-gray-100 p-4`}>
               <div className="flex items-center justify-between">
                 <p className="text-xs text-gray-500">{stat.label}</p>
-                <stat.icon className={`w-4 h-4 ${stat.color}`} />
               </div>
               <p className={`text-xl font-bold mt-1 ${stat.color}`}>{stat.value}</p>
             </Card>
@@ -437,9 +435,8 @@ export function SuperAdminUsersPage() {
         <div className="p-4 border-b border-gray-100">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input type="text" placeholder="Search users by name or email..." value={search} onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-amber-500/50" />
+                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-amber-500/50" />
             </div>
             <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}
               className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500/50">
@@ -536,28 +533,28 @@ export function SuperAdminUsersPage() {
                               disabled={updating === user.id}
                               className="p-1 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
                             >
-                              {updating === user.id ? <LoadingSpinner size="sm" /> : <MoreVertical className="w-4 h-4" />}
+                              {updating === user.id ? <LoadingSpinner size="sm" /> : <span className="text-gray-400 text-sm">Actions</span>}
                             </button>
                             {dropdownOpen === user.id && (
                               <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-50 py-1">
                                 <button onClick={() => { setRoleModal({ user }); setDropdownOpen(null) }}
-                                  className="w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-50 flex items-center gap-2">
-                                  <Shield className="w-4 h-4" /> Change Role
+                                  className="w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-50">
+                                  Change Role
                                 </button>
                                 <button onClick={() => { setHistoryModal({ userId: user.id, userName: user.full_name }); setDropdownOpen(null) }}
-                                  className="w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-50 flex items-center gap-2">
-                                  <History className="w-4 h-4" /> View History
+                                  className="w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-50">
+                                  View History
                                 </button>
                                 <div className="border-t border-gray-100 my-1" />
                                 {user.status === 'active' ? (
                                   <button onClick={() => { setConfirmAction({ type: 'suspend', userId: user.id, userName: user.full_name }); setDropdownOpen(null) }}
-                                    className="w-full px-4 py-2 text-sm text-left text-red-600 hover:bg-red-50 flex items-center gap-2">
-                                    <UserX className="w-4 h-4" /> Suspend
+                                    className="w-full px-4 py-2 text-sm text-left text-red-600 hover:bg-red-50">
+                                    Suspend
                                   </button>
                                 ) : (
                                   <button onClick={() => { setConfirmAction({ type: 'restore', userId: user.id, userName: user.full_name }); setDropdownOpen(null) }}
-                                    className="w-full px-4 py-2 text-sm text-left text-emerald-600 hover:bg-emerald-50 flex items-center gap-2">
-                                    <UserCheck className="w-4 h-4" /> Restore
+                                    className="w-full px-4 py-2 text-sm text-left text-emerald-600 hover:bg-emerald-50">
+                                    Restore
                                   </button>
                                 )}
                               </div>

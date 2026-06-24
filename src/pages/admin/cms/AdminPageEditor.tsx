@@ -5,7 +5,7 @@ import toast from 'react-hot-toast'
 import { getPageBySlug, upsertPage } from '../../../services/content'
 import { AdminBlockEditor } from '../../../components/blocks/AdminBlockEditor'
 import type { Json } from '../../../types/database'
-import type { PageContentItem, PageContentRecord, PageContentValue, SeoMetadata } from '../../../types/cms'
+import type { PageContentItem, PageContentRecord, PageContentValue } from '../../../types/cms'
 
 interface FieldConfig {
   label: string
@@ -151,8 +151,7 @@ export function AdminPageEditor() {
   const [pageId, setPageId] = useState('')
   const [published, setPublished] = useState(false)
   const [formData, setFormData] = useState<PageContentRecord>({})
-  const [seo, setSeo] = useState<SeoMetadata>({})
-  const [activeTab, setActiveTab] = useState<'content' | 'seo' | 'blocks'>('content')
+  const [activeTab, setActiveTab] = useState<'content' | 'blocks'>('content')
 
   const meta = slug ? PAGE_META[slug] : undefined
 
@@ -169,15 +168,11 @@ export function AdminPageEditor() {
         } else {
           setFormData(meta?.defaultContent ?? {})
         }
-        if (page.seo && typeof page.seo === 'object' && !Array.isArray(page.seo)) {
-          setSeo(page.seo as SeoMetadata)
-        }
       } else {
         setPageId('')
         setPageExists(false)
         setPublished(false)
         setFormData(meta?.defaultContent ?? {})
-        setSeo({})
       }
     } catch {
       toast.error('Failed to load page content')
@@ -200,13 +195,11 @@ export function AdminPageEditor() {
 
     setSaving(true)
     try {
-      const seoToSave = Object.keys(seo).length > 0 ? seo : undefined
       await upsertPage({
         slug,
         title: meta.title,
         content: formData,
         published,
-        seo: seoToSave,
       })
       toast.success(`${meta.title} saved successfully`)
     } catch {
@@ -222,13 +215,11 @@ export function AdminPageEditor() {
     setPublished(newPublished)
     setSaving(true)
     try {
-      const seoToSave = Object.keys(seo).length > 0 ? seo : undefined
       await upsertPage({
         slug,
         title: meta.title,
         content: formData,
         published: newPublished,
-        seo: seoToSave,
       })
       toast.success(`Page ${newPublished ? 'published' : 'unpublished'}`)
     } catch {
@@ -274,7 +265,6 @@ export function AdminPageEditor() {
 
   const tabs: { key: typeof activeTab; label: string; icon: string }[] = [
     { key: 'content', label: 'Content', icon: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z' },
-    { key: 'seo', label: 'SEO', icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' },
     { key: 'blocks', label: 'Blocks', icon: 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z' },
   ]
 
@@ -507,96 +497,7 @@ export function AdminPageEditor() {
         </motion.div>
       )}
 
-      {activeTab === 'seo' && (
-        <motion.div key="seo" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-          <div className="bg-white border border-gray-100 rounded-xl p-6">
-            <label className="block text-sm font-medium text-gray-600 mb-2">SEO Title</label>
-            <input
-              type="text"
-              value={seo.title || ''}
-              onChange={(e) => setSeo(prev => ({ ...prev, title: e.target.value }))}
-              placeholder="Override page title for search engines..."
-              className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:border-amber-500/50"
-            />
-          </div>
-          <div className="bg-white border border-gray-100 rounded-xl p-6">
-            <label className="block text-sm font-medium text-gray-600 mb-2">Meta Description</label>
-            <textarea
-              value={seo.description || ''}
-              onChange={(e) => setSeo(prev => ({ ...prev, description: e.target.value }))}
-              rows={3}
-              placeholder="Brief description for search results..."
-              className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:border-amber-500/50 resize-vertical"
-            />
-            <p className="text-xs text-gray-400 mt-1">{seo.description ? seo.description.length : 0}/160 characters</p>
-          </div>
-          <div className="bg-white border border-gray-100 rounded-xl p-6">
-            <label className="block text-sm font-medium text-gray-600 mb-2">Keywords</label>
-            <input
-              type="text"
-              value={Array.isArray(seo.keywords) ? seo.keywords.join(', ') : ''}
-              onChange={(e) => setSeo(prev => ({ ...prev, keywords: e.target.value.split(',').map(k => k.trim()).filter(Boolean) }))}
-              placeholder="keyword1, keyword2, keyword3"
-              className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:border-amber-500/50"
-            />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white border border-gray-100 rounded-xl p-6">
-              <label className="block text-sm font-medium text-gray-600 mb-2">OG Title</label>
-              <input
-                type="text"
-                value={seo.og_title || ''}
-                onChange={(e) => setSeo(prev => ({ ...prev, og_title: e.target.value }))}
-                placeholder="Title shown when shared on social media"
-                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:border-amber-500/50"
-              />
-            </div>
-            <div className="bg-white border border-gray-100 rounded-xl p-6">
-              <label className="block text-sm font-medium text-gray-600 mb-2">OG Image URL</label>
-              <input
-                type="url"
-                value={seo.og_image || ''}
-                onChange={(e) => setSeo(prev => ({ ...prev, og_image: e.target.value }))}
-                placeholder="https://..."
-                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:border-amber-500/50"
-              />
-            </div>
-          </div>
-          <div className="bg-white border border-gray-100 rounded-xl p-6">
-            <label className="block text-sm font-medium text-gray-600 mb-2">OG Description</label>
-            <textarea
-              value={seo.og_description || ''}
-              onChange={(e) => setSeo(prev => ({ ...prev, og_description: e.target.value }))}
-              rows={2}
-              placeholder="Description shown when shared on social media"
-              className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:border-amber-500/50 resize-vertical"
-            />
-          </div>
-          <div className="bg-white border border-gray-100 rounded-xl p-6">
-            <label className="block text-sm font-medium text-gray-600 mb-2">Canonical URL</label>
-            <input
-              type="url"
-              value={seo.canonical_url || ''}
-              onChange={(e) => setSeo(prev => ({ ...prev, canonical_url: e.target.value }))}
-              placeholder="https://buddhaacademy.edu.np/page-slug"
-              className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:border-amber-500/50"
-            />
-          </div>
-          <div className="bg-white border border-gray-100 rounded-xl p-6">
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={seo.no_index || false}
-                onChange={(e) => setSeo(prev => ({ ...prev, no_index: e.target.checked }))}
-                className="w-4 h-4 rounded border-gray-300 text-amber-500 focus:ring-amber-500/50"
-              />
-              <span className="text-sm font-medium text-gray-600">No Index — Prevent search engines from indexing this page</span>
-            </label>
-          </div>
-        </motion.div>
-      )}
-
-      {activeTab === 'blocks' && pageId && (
+      {activeTab === 'blocks' && (
         <motion.div key="blocks" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <AdminBlockEditor slug={slug} pageId={pageId} />
         </motion.div>
