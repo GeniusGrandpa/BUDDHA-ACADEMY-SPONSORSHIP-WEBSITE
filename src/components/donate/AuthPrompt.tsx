@@ -1,14 +1,16 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-
-const benefits = [
-  'Track your donation history and impact',
-  'Receive official donation certificates',
-  'Monitor your sponsored students progress',
-  'Get updates on community achievements',
-]
+import { useCmsStrings } from '../../context/CmsStringsContext'
 
 export function AuthPrompt() {
+  const { t } = useCmsStrings()
+  const benefits = [
+    t('auth_benefit_1'),
+    t('auth_benefit_2'),
+    t('auth_benefit_3'),
+    t('auth_benefit_4'),
+  ]
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -17,11 +19,10 @@ export function AuthPrompt() {
     >
       <div className="p-6 sm:p-8">
         <h3 className="text-lg font-medium text-[#0f172a] mb-2">
-          Join Our Community of Supporters
+          {t('auth_heading')}
         </h3>
         <p className="text-sm text-gray-600 mb-6 leading-relaxed">
-          Creating an account lets you track your contributions, receive certificates,
-          and stay connected with the students you support.
+          {t('auth_description')}
         </p>
 
         <div className="grid sm:grid-cols-2 gap-3 mb-6">
@@ -38,13 +39,13 @@ export function AuthPrompt() {
             to="/login"
             className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-[#f59e0b] text-white text-sm font-medium hover:bg-[#d97706] transition-colors"
           >
-            Sign In
+            {t('auth_sign_in')}
           </Link>
           <Link
             to="/register"
             className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg border border-gray-300 text-[#0f172a] text-sm font-medium hover:bg-gray-50 transition-colors"
           >
-            Create an Account
+            {t('auth_create_account')}
           </Link>
         </div>
       </div>

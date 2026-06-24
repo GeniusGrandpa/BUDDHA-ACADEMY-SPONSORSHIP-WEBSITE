@@ -5,13 +5,19 @@ import { Card } from '../components/ui/Card'
 import { Tabs } from '../components/ui/Tabs'
 import { Button } from '../components/ui/Button'
 import { getStudents } from '../services/students'
+import { getPageHeader, getSiteImage } from '../services/cms-content'
+import { useCmsStrings } from '../context/CmsStringsContext'
 import type { Student } from '../types/database'
+import type { PageHeader } from '../types/cms-content'
 import { formatNPR } from '../utils/currency'
 
 export function StudentsPage() {
+  const { t } = useCmsStrings()
   const [students, setStudents] = useState<Student[]>([])
   const [loading, setLoading] = useState(true)
   const [activeFilter, setActiveFilter] = useState('all')
+  const [pageHeader, setPageHeader] = useState<PageHeader | null>(null)
+  const [studentFallback, setStudentFallback] = useState('')
 
   useEffect(() => {
     loadStudents()
@@ -19,8 +25,14 @@ export function StudentsPage() {
 
   const loadStudents = async () => {
     try {
-      const data = await getStudents()
+      const [data, header, fallbackImg] = await Promise.all([
+        getStudents(),
+        getPageHeader('students'),
+        getSiteImage('student_fallback'),
+      ])
       setStudents(data)
+      if (header) setPageHeader(header)
+      if (fallbackImg?.image_url) setStudentFallback(fallbackImg.image_url)
     } catch (error) {
       console.error('Error loading students:', error)
     } finally {
@@ -33,36 +45,38 @@ export function StudentsPage() {
     : students.filter(s => s.sponsorship_status === activeFilter)
 
   const tabs = [
-    { id: 'all', label: 'All', count: students.length },
-    { id: 'available', label: 'Available', count: students.filter(s => s.sponsorship_status === 'available').length },
-    { id: 'partially_sponsored', label: 'Partially Sponsored', count: students.filter(s => s.sponsorship_status === 'partially_sponsored').length },
-    { id: 'fully_sponsored', label: 'Fully Sponsored', count: students.filter(s => s.sponsorship_status === 'fully_sponsored').length },
+    { id: 'all', label: t('students_tab_all'), count: students.length },
+    { id: 'available', label: t('students_tab_available'), count: students.filter(s => s.sponsorship_status === 'available').length },
+    { id: 'partially_sponsored', label: t('students_tab_partial'), count: students.filter(s => s.sponsorship_status === 'partially_sponsored').length },
+    { id: 'fully_sponsored', label: t('students_tab_fully'), count: students.filter(s => s.sponsorship_status === 'fully_sponsored').length },
   ]
 
   return (
     <div>
-      <section className="relative py-24 bg-gradient-to-br from-amber-50 to-orange-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Meet Our Students
-            </h1>
-            <p className="text-xl text-gray-600">
-              Browse profiles of children waiting for sponsors. Each child has a unique story and dreams for a brighter future.
-            </p>
+      {pageHeader && (
+        <section className="relative py-24 bg-gradient-to-br from-amber-50 to-orange-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-3xl mx-auto">
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                {pageHeader.title}
+              </h1>
+              {pageHeader.subtitle && (
+                <p className="text-xl text-gray-600">
+                  {pageHeader.subtitle}
+                </p>
+              )}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Tabs tabs={tabs} activeTab={activeFilter} onChange={setActiveFilter} className="mb-8" />
 
-          <p className="text-xs text-gray-400 mb-4">All amounts in Nepalese Rupees (NPR)</p>
-
           {loading ? (
             <div className="text-center py-12">
-              <div className="animate-pulse text-gray-500">Loading students...</div>
+              <div className="animate-pulse text-gray-500">{t('students_loading')}</div>
             </div>
           ) : filteredStudents.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -70,7 +84,7 @@ export function StudentsPage() {
                 <Card key={student.id} variant="bordered" className="overflow-hidden hover:shadow-lg transition-shadow">
                   <div className="aspect-w-4 aspect-h-3">
                     <img
-                      src={student.photo_url || `https://images.pexels.com/photos/1171086/pexels-photo-1171086.jpeg?auto=compress&cs=tinysrgb&w=600`}
+                      src={student.photo_url || studentFallback || ''}
                       alt={student.name}
                       className="w-full h-56 object-cover"
                     />
@@ -81,21 +95,21 @@ export function StudentsPage() {
                       <Badge variant={student.sponsorship_status as 'success' | 'warning' | 'default'}>{student.sponsorship_status}</Badge>
                     </div>
                     <div className="flex gap-4 text-sm text-gray-600 mb-3">
-                      <span>Age: {student.age}</span>
-                      <span>Grade: {student.grade}</span>
+                      <span>{t('students_age_label', { age: student.age })}</span>
+                      <span>{t('students_grade_label', { grade: student.grade })}</span>
                     </div>
                     <p className="text-gray-600 text-sm mb-4 line-clamp-3">
                       {student.bio}
                     </p>
                     <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                      <span>Sponsorship: {formatNPR(student.sponsorship_amount)}/month</span>
+                      <span>{t('students_sponsorship_label', { amount: formatNPR(student.sponsorship_amount) })}</span>
                       {student.current_sponsorship > 0 && (
-                        <span>{formatNPR(student.current_sponsorship)} raised</span>
+                        <span>{t('students_raised_label', { amount: formatNPR(student.current_sponsorship) })}</span>
                       )}
                     </div>
                     <Link to={`/students/${student.id}`}>
                       <Button variant="outline" className="w-full">
-                        View Profile
+                        {t('students_view_profile')}
                       </Button>
                     </Link>
                   </div>
@@ -104,7 +118,7 @@ export function StudentsPage() {
             </div>
           ) : (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">No students found in this category.</p>
+              <p className="text-gray-500 text-lg">{t('students_empty')}</p>
             </div>
           )}
         </div>

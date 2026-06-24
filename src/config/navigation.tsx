@@ -122,6 +122,36 @@ export const navigationConfig: NavSection[] = [
         permission: 'content.partners',
       },
       {
+        label: 'Donation Page',
+        href: '/admin/content/donation',
+        permission: 'content.pages',
+      },
+      {
+        label: 'Sponsorship Page',
+        href: '/admin/content/sponsorship',
+        permission: 'content.pages',
+      },
+      {
+        label: 'Volunteer Page',
+        href: '/admin/content/volunteer',
+        permission: 'content.pages',
+      },
+      {
+        label: 'Footer',
+        href: '/admin/content/footer',
+        permission: 'content.settings',
+      },
+      {
+        label: 'Site Images',
+        href: '/admin/content/images',
+        permission: 'content.media',
+      },
+      {
+        label: 'Section Visibility',
+        href: '/admin/content/sections',
+        permission: 'content.pages',
+      },
+      {
         label: 'About Page',
         href: '/admin/content/pages/about',
         permission: 'content.pages',

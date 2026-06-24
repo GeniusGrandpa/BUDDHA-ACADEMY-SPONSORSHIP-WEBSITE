@@ -94,6 +94,15 @@ export function ProtectedRoute({
     return () => { cancelled = true }
   }, [user, user?.id, location.pathname, profile?.role, profile?.status, refreshProfile])
 
+  const effectiveStatus = serverStatus || profile?.status
+
+  useEffect(() => {
+    if ((effectiveStatus === 'suspended' || effectiveStatus === 'banned') && !signedOut.current) {
+      signedOut.current = true
+      signOut()
+    }
+  }, [effectiveStatus, signOut])
+
   if (loading || checkingServer) {
     return <LoadingScreen />
   }
@@ -102,13 +111,7 @@ export function ProtectedRoute({
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 
-  const effectiveStatus = serverStatus || profile?.status
-
   if (effectiveStatus === 'suspended' || effectiveStatus === 'banned') {
-    if (!signedOut.current) {
-      signedOut.current = true
-      signOut()
-    }
     return <SigningOut />
   }
 

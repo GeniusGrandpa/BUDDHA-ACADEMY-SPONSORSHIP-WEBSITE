@@ -1,24 +1,29 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
-import { Card } from '../components/ui/Card'
+import { getPageBySlug } from '../services/content'
+import { useCmsStrings } from '../context/CmsStringsContext'
+
 export function NotFoundPage() {
+  const { t } = useCmsStrings()
+  const [content, setContent] = useState<{ title?: string; description?: string } | null>(null)
+
+  useEffect(() => {
+    getPageBySlug('not-found').then(page => {
+      if (page?.content) setContent(page.content as { title?: string; description?: string })
+    }).catch(() => {})
+  }, [])
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
-      <Card variant="bordered" padding="lg" className="w-full max-w-md text-center">
-        <div className="mb-6">
-          <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto">
-            <span className="text-3xl font-bold text-amber-600">?</span>
-          </div>
-        </div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-3">Page Not Found</h1>
-        <p className="text-gray-600 mb-6">The page you're looking for doesn't exist or you don't have access to it.</p>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="text-center max-w-md mx-auto px-4">
+        <div className="text-9xl font-bold text-amber-500 mb-4">404</div>
+        {content?.title && <h1 className="text-3xl font-bold text-gray-900 mb-4">{content.title}</h1>}
+        {content?.description && <p className="text-gray-600 mb-8">{content.description}</p>}
         <Link to="/">
-          <Button type="button" className="w-full" size="lg">
-            Back to Home
-          </Button>
+          <Button>{t('notfound_home_button')}</Button>
         </Link>
-      </Card>
+      </div>
     </div>
   )
 }

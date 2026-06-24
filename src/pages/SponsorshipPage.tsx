@@ -1,147 +1,144 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { CheckCircle, ArrowRight } from 'lucide-react'
 import { Button } from '../components/ui/Button'
-import { getHomepageSection } from '../services/content'
-
-interface StepItem { num: string; title: string; desc: string }
+import { getSponsorshipContent, getSiteImage } from '../services/cms-content'
+import { useCmsStrings } from '../context/CmsStringsContext'
+import type { SponsorshipContent } from '../types/cms-content'
 
 export function SponsorshipPage() {
-  const [sponsorshipData, setSponsorshipData] = useState<{ title?: string; description?: string; steps?: StepItem[] }>({})
+  const { t } = useCmsStrings()
+  const [content, setContent] = useState<SponsorshipContent | null>(null)
+  const [heroImage, setHeroImage] = useState('')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    loadContent()
+    Promise.all([loadContent(), loadHeroImage()]).finally(() => setLoading(false))
   }, [])
 
   const loadContent = async () => {
     try {
-      const section = await getHomepageSection('sponsorship_steps')
-      if (section?.content) {
-        setSponsorshipData(section.content as { title?: string; description?: string; steps?: StepItem[] })
-      }
-    } catch {
-    } finally {
-      setLoading(false)
-    }
+      const data = await getSponsorshipContent()
+      if (data) setContent(data)
+    } catch {}
   }
 
-  const heroTitle = 'Sponsor a Child'
-  const heroDesc = 'Your sponsorship provides education, meals, healthcare, and hope to a child in need. Change a life today.'
-  const steps = sponsorshipData?.steps || [
-    { num: '01', title: 'Browse Student Profiles', desc: 'Explore profiles of children waiting for sponsorship. Each profile includes their background, needs, and dreams for the future.' },
-    { num: '02', title: 'Choose a Child to Sponsor', desc: 'Select a student whose story resonates with you. Consider their age, grade, and personal circumstances.' },
-    { num: '03', title: 'Select Your Sponsorship Level', desc: "Choose a monthly contribution amount that works for you. Every amount makes a difference in a child's life." },
-    { num: '04', title: 'Complete the Sponsorship Form', desc: "Fill out our secure form with your information. We'll link your sponsorship to your chosen child." },
-    { num: '05', title: 'Receive Welcome Package', desc: "Get a welcome kit with your sponsored child's photo, profile, and information about their community." },
-    { num: '06', title: 'Build a Connection', desc: 'Exchange letters and messages with your sponsored child. Watch them grow and thrive with your support.' },
-    { num: '07', title: 'Get Progress Updates', desc: "Receive regular updates on your child's academic progress, health, and personal development." },
-    { num: '08', title: 'See Your Impact', desc: "Track how your contribution is making a real difference in your sponsored child's life." },
-    { num: '09', title: 'Transform a Life', desc: 'Your ongoing support helps break the cycle of poverty and creates lasting change for generations.' },
-  ]
-  const sectionTitle = sponsorshipData?.title || 'How Sponsorship Works'
-  const sectionDesc = sponsorshipData?.description || "Follow these simple steps to start your sponsorship journey and change a child's life."
-  const benefits = [
-    'Provide quality education',
-    'Ensure nutritious meals',
-    'Access to healthcare',
-    'Safe learning environment',
-    'Educational materials',
-    'Character development',
-  ]
+  const loadHeroImage = async () => {
+    try {
+      const img = await getSiteImage('sponsorship_hero')
+      if (img) setHeroImage(img.image_url)
+    } catch {}
+  }
 
   if (loading) return <div className="text-center py-12 text-gray-400">Loading...</div>
 
+  const steps = content?.steps || []
+  const benefits = content?.benefits || []
+
+  if (!content) return null
+
   return (
     <div>
-      <section className="relative py-24 bg-gradient-to-br from-amber-500 to-orange-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              {heroTitle}
-            </h1>
-            <p className="text-xl text-amber-100 leading-relaxed">
-              {heroDesc}
-            </p>
+      {content.hero_title && (
+        <section className="relative py-24 bg-gradient-to-br from-amber-50 to-orange-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-3xl mx-auto">
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">{content.hero_title}</h1>
+              {content.hero_subtitle && <p className="text-xl text-gray-600">{content.hero_subtitle}</p>}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      <section className="py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-                Make a Lasting Impact
-              </h2>
-              <p className="text-gray-600 mb-6 leading-relaxed">
-                When you sponsor a child, you're not just providing financial support you're giving them the opportunity to learn, grow, and build a better future for themselves and their community.
-              </p>
-              <p className="text-gray-600 mb-6 leading-relaxed">
-                Your monthly contribution covers school fees, books, uniforms, meals, and healthcare. You'll receive regular updates and can even exchange letters with your sponsored child.
-              </p>
-              <div className="bg-amber-50 rounded-lg p-6">
-                <h3 className="font-semibold text-gray-900 mb-4">Your Sponsorship Provides:</h3>
-                <ul className="space-y-2">
-                  {benefits.map((benefit, idx) => (
-                    <li key={idx} className="flex items-center gap-2 text-gray-700">
-                      <span>{benefit}</span>
-                    </li>
-                  ))}
-                </ul>
+      {steps.length > 0 && (
+        <section className="py-24">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {(content.section_title || content.section_description) && (
+              <div className="text-center mb-16">
+                {content.section_title && <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{content.section_title}</h2>}
+                {content.section_description && <p className="text-gray-600 max-w-2xl mx-auto">{content.section_description}</p>}
+              </div>
+            )}
+
+            <div className="relative">
+              <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-amber-200 hidden md:block" />
+              <div className="space-y-12">
+                {steps.map((step, idx) => {
+                  const isLeft = idx % 2 === 0
+                  return (
+                    <div key={idx} className={`relative flex items-start gap-8 ${isLeft ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
+                      <div className={`flex-1 ${isLeft ? 'md:text-right' : 'md:text-left'}`}>
+                        <div className="bg-warm-50 rounded-2xl border border-amber-200 p-6 hover:shadow-lg hover:border-amber-300 transition-all">
+                          <div className={`flex items-center gap-3 mb-3 ${isLeft ? 'md:flex-row-reverse' : ''}`}>
+                            <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-amber-500 text-white text-sm font-bold flex-shrink-0">{step.num}</span>
+                            <h3 className="text-base font-semibold text-gray-900">{step.title}</h3>
+                          </div>
+                          <p className={`text-gray-500 text-sm ${isLeft ? 'md:pl-0' : 'pl-0'}`}>{step.desc}</p>
+                        </div>
+                      </div>
+                      <div className="hidden md:flex flex-col items-center flex-shrink-0 relative">
+                        <div className="w-4 h-4 rounded-full bg-amber-500 border-4 border-amber-100 shadow" />
+                      </div>
+                      <div className="flex-1 hidden md:block" />
+                    </div>
+                  )
+                })}
               </div>
             </div>
-            <div>
-              <img
-                src="https://scontent.fktm21-2.fna.fbcdn.net/v/t39.30808-6/556427375_25328287233443625_2513747603860499176_n.jpg?stp=dst-jpg_tt6&cstp=mx960x720&ctp=s960x720&_nc_cat=103&ccb=1-7&_nc_sid=0b6b33&_nc_ohc=pQpRsnvjyfgQ7kNvwEQcEU7&_nc_oc=Adpvc8sCc81iB_sUh44FC2BfzP8fx4-kD3TWKW1pOnulMb6FCO5PPkle8XzSVyQnP8039_WNgfaRgP1nxNjTLv2P&_nc_zt=23&_nc_ht=scontent.fktm21-2.fna&_nc_gid=rzQISC7Ruo9ahJnZIK2X7Q&_nc_ss=7b2a8&oh=00_Af9lNcRL_vJJU0OiVOrbm8fDfX4zgBqAMCp5OqoYhb--WA&oe=6A3D893B"
-                alt="Happy students"
-                className="rounded-lg shadow-xl"
-              />
+          </div>
+        </section>
+      )}
+
+      {benefits.length > 0 && (
+        <section className="py-24 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
+              <div>
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">{t('sponsorship_impact_heading')}</h2>
+                <p className="text-gray-600 mb-6 leading-relaxed">
+                  {t('sponsorship_impact_desc1')}
+                </p>
+                <p className="text-gray-600 mb-8 leading-relaxed">
+                  {t('sponsorship_impact_desc2')}
+                </p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('sponsorship_provides_heading')}</h3>
+                <div className="space-y-3">
+                  {benefits.map((benefit, idx) => (
+                    <div key={idx} className="flex items-center gap-3">
+                      <CheckCircle className="w-5 h-5 text-emerald-500 flex-shrink-0" />
+                      <span className="text-gray-600">{benefit.text}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {heroImage && (
+                <div>
+                  <img
+                    src={heroImage}
+                    alt="Buddha Academy students"
+                    className="rounded-2xl shadow-xl w-full object-cover h-[500px]"
+                  />
+                </div>
+              )}
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      <section className="py-24 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              {sectionTitle}
-            </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              {sectionDesc}
-            </p>
+      {content.cta_title && (
+        <section className="py-24 bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">{content.cta_title}</h2>
+            {content.cta_description && (
+              <p className="text-white/80 max-w-2xl mx-auto mb-8">{content.cta_description}</p>
+            )}
+            <Link to={content.cta_button_link || '/students'}>
+              <Button size="lg">{content.cta_button_text || t('sponsorship_browse_button')} <ArrowRight className="w-4 h-4 ml-2" /></Button>
+            </Link>
           </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {steps.map((step, idx) => (
-                <div key={idx} className="relative bg-warm-50 rounded-lg shadow-md p-8 hover:shadow-lg transition-shadow">
-                  <div className="absolute top-0 right-0 w-16 h-16 bg-amber-50 rounded-bl-full" />
-                  <div className="text-5xl font-bold text-amber-100 mb-3">{step.num}</div>
-                  <div className="mb-2">
-                    <h3 className="font-semibold text-gray-900">{step.title}</h3>
-                  </div>
-                  <p className="text-gray-600 text-sm">{step.desc}</p>
-                </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-24 bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            Ready to Change a Life?
-          </h2>
-          <p className="text-white/80 max-w-2xl mx-auto mb-8">
-            Browse our student profiles and find a child to sponsor. Your sponsorship can transform their future.
-          </p>
-          <Link to="/students">
-            <Button size="lg">
-              Browse Student Profiles
-            </Button>
-          </Link>
-        </div>
-      </section>
+        </section>
+      )}
     </div>
   )
 }

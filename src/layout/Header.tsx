@@ -2,51 +2,41 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { useLanguage } from '../context/LanguageContext'
 import { useTheme } from '../context/ThemeContext'
+import { useCmsStrings } from '../context/CmsStringsContext'
 import { LanguageSwitcher } from '../components/LanguageSwitcher'
 import { getNavigationItems } from '../services/navigation'
 import { getSiteSettings } from '../services/settings'
 import type { NavigationItem } from '../types/cms'
-import fallbackLogo from '../assets/logo.jpg'
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { user, profile, signOut } = useAuth()
-  const { t } = useLanguage()
+  const { t } = useCmsStrings()
   const { branding } = useTheme()
   const location = useLocation()
   const navigate = useNavigate()
   const [navItems, setNavItems] = useState<NavigationItem[]>([])
-  const [siteName, setSiteName] = useState('Buddha Academy')
+  const [siteName, setSiteName] = useState('')
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
 
   useEffect(() => {
     getNavigationItems('header').then(items => setNavItems(items.filter(i => i.is_visible))).catch(() => {})
     getSiteSettings().then(s => {
       if (s) {
-        setSiteName(s.site_name)
+        setSiteName(s.site_name || '')
         setLogoUrl(s.logo_url)
       }
     }).catch(() => {})
   }, [])
 
-  const navigation = navItems.length > 0
-    ? navItems.map(item => ({
-        name: item.label,
-        href: item.route || item.url || '/',
-        target: item.target,
-        isCta: item.is_cta,
-        ctaStyle: item.cta_style,
-      }))
-    : [
-        { name: t('nav.home'), href: '/', target: '_self' as const, isCta: false, ctaStyle: null },
-        { name: t('nav.about'), href: '/about', target: '_self' as const, isCta: false, ctaStyle: null },
-        { name: t('nav.students'), href: '/students', target: '_self' as const, isCta: false, ctaStyle: null },
-        { name: t('nav.gallery'), href: '/gallery', target: '_self' as const, isCta: false, ctaStyle: null },
-        { name: t('nav.news'), href: '/news', target: '_self' as const, isCta: false, ctaStyle: null },
-        { name: t('nav.contact'), href: '/contact', target: '_self' as const, isCta: false, ctaStyle: null },
-      ]
+  const navigation = navItems.map(item => ({
+    name: item.label,
+    href: item.route || item.url || '/',
+    target: item.target,
+    isCta: item.is_cta,
+    ctaStyle: item.cta_style,
+  }))
 
   const isActive = (path: string) => location.pathname === path
 
@@ -60,10 +50,10 @@ export function Header() {
       <div className="w-full px-6 sm:px-10 lg:px-16 xl:px-24">
         <div className="flex justify-between items-center h-24">
           <Link to="/" className="flex items-center space-x-4">
-            <img src={logoUrl || branding.logo_url || fallbackLogo} alt={siteName || branding.organization_name} className="h-14 w-auto drop-shadow-sm" loading="eager" fetchPriority="high" />
+            <img src={logoUrl || branding.logo_url || ''} alt={siteName || branding.organization_name || ''} className="h-14 w-auto drop-shadow-sm" loading="eager" fetchPriority="high" />
             <div className="hidden sm:block">
-              <div className="font-semibold text-[var(--color-navbar-text)]">{siteName || branding.organization_name}</div>
-              <div className="text-xs text-[var(--color-text-muted)]">{branding.tagline}</div>
+              <div className="font-semibold text-[var(--color-navbar-text)]">{siteName || branding.organization_name || ''}</div>
+              {branding.tagline && <div className="text-xs text-[var(--color-text-muted)]">{branding.tagline}</div>}
             </div>
           </Link>
 
@@ -98,28 +88,28 @@ export function Header() {
                 {(profile?.role === 'admin' || profile?.role === 'super_admin') && (
                   <Link to={profile?.role === 'super_admin' ? '/super-admin' : '/admin'}
                     className="text-sm font-medium transition-colors hover:opacity-80 text-[var(--color-navbar-text)]">
-                    {t('nav.admin')}
+                    {t('header_admin')}
                   </Link>
                 )}
                 <Link to="/dashboard"
                   className="text-sm font-medium transition-colors hover:opacity-80 text-[var(--color-navbar-text)]">
-                  {t('nav.dashboard')}
+                  {t('header_dashboard')}
                 </Link>
                 <button onClick={handleSignOut}
                   className="text-sm font-medium transition-colors hover:opacity-80 text-[var(--color-navbar-text)]">
-                  {t('auth.signOut')}
+                  {t('header_sign_out')}
                 </button>
               </div>
             ) : (
               <Link to="/login"
                 className="text-sm font-medium transition-colors hover:opacity-80 text-[var(--color-navbar-text)]">
-                {t('auth.signIn')}
+                {t('header_sign_in')}
               </Link>
             )}
 
             <Link to="/donate"
               className="px-5 py-2.5 rounded-full font-medium text-sm transition-colors hover:opacity-90 bg-[var(--color-button-primary-bg)] text-[var(--color-button-primary-text)]">
-              {t('footer.makeDonation')}
+              {t('header_donate')}
             </Link>
           </div>
 
@@ -145,7 +135,7 @@ export function Header() {
               ))}
               <Link to="/donate" onClick={() => setIsMenuOpen(false)}
                 className="block px-4 py-2 rounded-lg text-sm font-medium text-center bg-[var(--color-button-primary-bg)] text-[var(--color-button-primary-text)]">
-                {t('footer.makeDonation')}
+                {t('header_donate')}
               </Link>
               <LanguageSwitcher mobile />
               {user ? (
@@ -154,22 +144,22 @@ export function Header() {
                     <Link to={profile?.role === 'super_admin' ? '/super-admin' : '/admin'}
                       onClick={() => setIsMenuOpen(false)}
                       className="block px-4 py-2 rounded-lg text-sm font-medium text-[var(--color-navbar-text)]">
-                      {t('nav.admin')}
+                      {t('header_admin')}
                     </Link>
                   )}
                   <Link to="/dashboard" onClick={() => setIsMenuOpen(false)}
                     className="block px-4 py-2 rounded-lg text-sm font-medium text-[var(--color-navbar-text)]">
-                    {t('nav.dashboard')}
+                    {t('header_dashboard')}
                   </Link>
                   <button onClick={() => { handleSignOut(); setIsMenuOpen(false) }}
                     className="block w-full text-left px-4 py-2 rounded-lg text-sm font-medium text-[var(--color-navbar-text)]">
-                    {t('auth.signOut')}
+                    {t('header_sign_out')}
                   </button>
                 </>
               ) : (
                 <Link to="/login" onClick={() => setIsMenuOpen(false)}
                   className="block px-4 py-2 rounded-lg text-sm font-medium text-[var(--color-navbar-text)]">
-                  {t('auth.signIn')}
+                  {t('header_sign_in')}
                 </Link>
               )}
             </nav>

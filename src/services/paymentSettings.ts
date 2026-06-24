@@ -78,6 +78,14 @@ export async function togglePaymentGateway(
 export async function uploadQRCode(
   file: File,
 ): Promise<string> {
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error(`Invalid file type: ${file.type}. Allowed: JPEG, PNG, WebP`)
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error('File size exceeds 5MB limit')
+  }
+
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
   const filePath = `qr-codes/${Date.now()}_${safeName}`
 
@@ -111,7 +119,7 @@ export async function getPaymentSettingByGateway(
     .select('*')
     .eq('gateway_name', gateway)
     .eq('is_active', true)
-    .single()
+    .maybeSingle()
 
   if (error) return null
   return data as unknown as PaymentSetting | null

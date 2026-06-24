@@ -423,8 +423,9 @@ function setGoogleTranslateCookie(language: LanguageCode) {
   const cookieValue = language === 'en' ? '/en/en' : `/en/${googleLanguage}`
   const expires = 'expires=Fri, 31 Dec 9999 23:59:59 GMT'
 
-  document.cookie = `googtrans=${cookieValue}; path=/; ${expires}`
-  document.cookie = `googtrans=${cookieValue}; path=/; domain=${window.location.hostname}; ${expires}`
+  const secure = window.location.protocol === 'https:' ? '; Secure' : ''
+  document.cookie = `googtrans=${cookieValue}; path=/; SameSite=Lax${secure}; ${expires}`
+  document.cookie = `googtrans=${cookieValue}; path=/; domain=${window.location.hostname}; SameSite=Lax${secure}; ${expires}`
 }
 
 function applyGoogleTranslate(language: LanguageCode) {

@@ -4,11 +4,12 @@ import { Card } from '../components/ui/Card'
 import { Tabs } from '../components/ui/Tabs'
 import { getGalleryItems } from '../services/gallery'
 import { getVideos } from '../services/content'
+import { getPageHeader, getSiteImage } from '../services/cms-content'
+import { useCmsStrings } from '../context/CmsStringsContext'
 import type { GalleryItem, Video } from '../types/database'
+import type { PageHeader } from '../types/cms-content'
 
 type GalleryVideo = GalleryItem & { video_type?: string | null }
-
-const FALLBACK_IMAGE = 'https://images.pexels.com/photos/8471831/pexels-photo-8471831.jpeg?auto=compress&cs=tinysrgb&w=600'
 
 function getYoutubeId(url: string): string | null {
   const match = url.match(/(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/)
@@ -36,12 +37,15 @@ function getVideoEmbedUrl(url: string): { type: 'youtube' | 'vimeo' | 'direct' |
 }
 
 export function GalleryPage() {
+  const { t } = useCmsStrings()
   const [items, setItems] = useState<GalleryItem[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('all')
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [selectedVideo, setSelectedVideo] = useState<GalleryVideo | null>(null)
   const [brokenImages, setBrokenImages] = useState<Set<string>>(new Set())
+  const [pageHeader, setPageHeader] = useState<PageHeader | null>(null)
+  const [fallbackImage, setFallbackImage] = useState('')
 
   useEffect(() => {
     loadGallery()
@@ -49,10 +53,14 @@ export function GalleryPage() {
 
   const loadGallery = async () => {
     try {
-      const [galleryData, videoData] = await Promise.all([
+      const [galleryData, videoData, header, fallbackImg] = await Promise.all([
         getGalleryItems({ publishedOnly: true }),
         getVideos(),
+        getPageHeader('gallery'),
+        getSiteImage('gallery_fallback'),
       ])
+      if (header) setPageHeader(header)
+      if (fallbackImg?.image_url) setFallbackImage(fallbackImg.image_url)
       const mappedVideos: GalleryItem[] = videoData.map((v: Video) => {
         const ytThumb = getYoutubeThumbnail(v.url)
         return {
@@ -80,10 +88,10 @@ export function GalleryPage() {
   }
 
   const tabs = [
-    { id: 'all', label: 'All', count: items.length },
-    { id: 'photo', label: 'Photos', count: items.filter(i => i.type === 'photo').length },
-    { id: 'video', label: 'Videos', count: items.filter(i => i.type === 'video').length },
-    { id: 'testimonial', label: 'Testimonials', count: items.filter(i => i.type === 'testimonial').length },
+    { id: 'all', label: t('gallery_tab_all'), count: items.length },
+    { id: 'photo', label: t('gallery_tab_photos'), count: items.filter(i => i.type === 'photo').length },
+    { id: 'video', label: t('gallery_tab_videos'), count: items.filter(i => i.type === 'video').length },
+    { id: 'testimonial', label: t('gallery_tab_testimonials'), count: items.filter(i => i.type === 'testimonial').length },
   ]
 
   const filteredItems = activeTab === 'all'
@@ -92,18 +100,22 @@ export function GalleryPage() {
 
   return (
     <div>
-      <section className="relative py-24 bg-gradient-to-br from-amber-50 to-orange-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Gallery
-            </h1>
-            <p className="text-xl text-gray-600">
-              Explore photos, videos, and testimonials showcasing our students and community.
-            </p>
+      {pageHeader && (
+        <section className="relative py-24 bg-gradient-to-br from-amber-50 to-orange-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-3xl mx-auto">
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                {pageHeader.title}
+              </h1>
+              {pageHeader.subtitle && (
+                <p className="text-xl text-gray-600">
+                  {pageHeader.subtitle}
+                </p>
+              )}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -111,7 +123,7 @@ export function GalleryPage() {
 
           {loading ? (
             <div className="text-center py-12">
-              <div className="animate-pulse text-gray-500">Loading gallery...</div>
+              <div className="animate-pulse text-gray-500">{t('gallery_loading')}</div>
             </div>
           ) : filteredItems.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -120,10 +132,10 @@ export function GalleryPage() {
                   {item.type === 'photo' && (
                     <>
                       <img
-                        src={brokenImages.has(item.id) ? FALLBACK_IMAGE : item.url}
+                        src={brokenImages.has(item.id) ? fallbackImage || '' : item.url || ''}
                         alt={item.title}
                         className="w-full h-56 object-cover cursor-pointer"
-                        onClick={() => setSelectedImage(brokenImages.has(item.id) ? FALLBACK_IMAGE : item.url)}
+                        onClick={() => setSelectedImage(brokenImages.has(item.id) ? item.url : item.url)}
                         onError={() => setBrokenImages(prev => new Set(prev).add(item.id))}
                       />
                       <div className="p-4">
@@ -172,7 +184,6 @@ export function GalleryPage() {
                         </div>
                         <div>
                           <h3 className="font-semibold text-gray-900">{item.author}</h3>
-                          <p className="text-sm text-gray-500">Sponsor</p>
                         </div>
                       </div>
                       <p className="text-gray-700 italic leading-relaxed">
@@ -188,7 +199,7 @@ export function GalleryPage() {
             </div>
           ) : (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">No content in this category yet.</p>
+              <p className="text-gray-500 text-lg">{t('gallery_empty')}</p>
             </div>
           )}
         </div>
@@ -201,7 +212,7 @@ export function GalleryPage() {
         >
           <button
             onClick={() => setSelectedImage(null)}
-            aria-label="Close image"
+            aria-label={t('gallery_close_image')}
             className="absolute top-4 right-4 text-white text-2xl hover:text-amber-400 transition-colors"
           >
             &times;
@@ -221,7 +232,7 @@ export function GalleryPage() {
         >
           <button
             onClick={() => setSelectedVideo(null)}
-            aria-label="Close video"
+            aria-label={t('gallery_close_video')}
             className="absolute top-4 right-4 z-10 text-white hover:text-amber-400 transition-colors"
           >
             <X className="w-8 h-8" />
@@ -268,14 +279,14 @@ export function GalleryPage() {
                     title={selectedVideo.title}
                   />
                   {type === 'youtube' && (
-                    <a
-                      href={selectedVideo.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="absolute bottom-3 right-3 px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-medium transition-colors z-10"
-                    >
-                      Open on YouTube
-                    </a>
+                      <a
+                        href={selectedVideo.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="absolute bottom-3 right-3 px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-medium transition-colors z-10"
+                      >
+                        {t('gallery_open_youtube')}
+                      </a>
                   )}
                 </div>
               )

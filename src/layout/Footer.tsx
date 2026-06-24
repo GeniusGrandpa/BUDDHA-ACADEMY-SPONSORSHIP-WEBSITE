@@ -1,12 +1,41 @@
 import { Link } from 'react-router-dom'
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useLanguage } from '../context/LanguageContext'
 import { useTheme } from '../context/ThemeContext'
-import fallbackLogo from '../assets/logo.jpg'
+import { getFooterContent } from '../services/cms-content'
+import { getSiteSettings } from '../services/settings'
+import type { FooterContent } from '../types/cms-content'
+
+const SOCIAL_ICONS: Record<string, React.ReactNode> = {
+  facebook: <Facebook className="w-5 h-5" />,
+  instagram: <Instagram className="w-5 h-5" />,
+  twitter: <Twitter className="w-5 h-5" />,
+}
 
 export function Footer() {
   const { t } = useLanguage()
   const { branding } = useTheme()
+  const [footerContent, setFooterContent] = useState<FooterContent | null>(null)
+  const [siteSettings, setSiteSettings] = useState<{ contact_address?: string; contact_phone?: string; contact_email?: string }>({})
+
+  useEffect(() => {
+    Promise.all([
+      getFooterContent(),
+      getSiteSettings().catch(() => null),
+    ]).then(([fc, ss]) => {
+      if (fc) setFooterContent(fc)
+      if (ss) setSiteSettings(ss as { contact_address?: string; contact_phone?: string; contact_email?: string })
+    }).catch(() => {})
+  }, [])
+
+  const socialLinks = footerContent?.social_links || []
+  const quickLinks = footerContent?.quick_links || []
+  const contactInfo = footerContent?.contact_info
+  const address = contactInfo?.address || siteSettings.contact_address
+  const phone = contactInfo?.phone || siteSettings.contact_phone
+  const email = contactInfo?.email || siteSettings.contact_email
+  const copyrightText = footerContent?.copyright_text
 
   return (
     <footer className="bg-[var(--color-footer-bg)] border-t border-[var(--color-border)]">
@@ -16,20 +45,29 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center space-x-3 mb-4">
-              <img src={branding.logo_url || fallbackLogo} alt={branding.organization_name} className="h-14 w-auto" />
+              {branding.logo_url && (
+                <img src={branding.logo_url} alt={branding.organization_name || ''} className="h-14 w-auto" />
+              )}
               <div>
-                <div className="font-semibold text-[var(--color-footer-heading)]">{branding.organization_name}</div>
-                <div className="text-xs text-[var(--color-text-muted)]">{branding.tagline}</div>
+                {branding.organization_name && (
+                  <div className="font-semibold text-[var(--color-footer-heading)]">{branding.organization_name}</div>
+                )}
+                {branding.tagline && <div className="text-xs text-[var(--color-text-muted)]">{branding.tagline}</div>}
               </div>
             </div>
-            <p className="text-sm mb-4 text-[var(--color-footer-text)]">
-              {t('footer.description')}
-            </p>
-            <div className="flex space-x-4">
-              <a href="#" aria-label="Facebook" className="transition-colors hover:opacity-80 text-[var(--color-footer-text)]"><Facebook className="w-5 h-5" /></a>
-              <a href="#" aria-label="Instagram" className="transition-colors hover:opacity-80 text-[var(--color-footer-text)]"><Instagram className="w-5 h-5" /></a>
-              <a href="#" aria-label="Twitter" className="transition-colors hover:opacity-80 text-[var(--color-footer-text)]"><Twitter className="w-5 h-5" /></a>
-            </div>
+            {footerContent?.description && (
+              <p className="text-sm mb-4 text-[var(--color-footer-text)]">{footerContent.description}</p>
+            )}
+            {socialLinks.length > 0 && (
+              <div className="flex space-x-4">
+                {socialLinks.map((link, idx) => (
+                  <a key={idx} href={link.url} aria-label={link.label} target="_blank" rel="noopener noreferrer"
+                    className="transition-colors hover:opacity-80 text-[var(--color-footer-text)]">
+                    {SOCIAL_ICONS[link.platform] || null}
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
 
           <div>
@@ -44,29 +82,43 @@ export function Footer() {
           <div>
             <h4 className="font-semibold mb-4 text-[var(--color-footer-heading)]">{t('footer.information')}</h4>
             <ul className="space-y-2 text-sm text-[var(--color-footer-text)]">
-              <li><Link to="/about" className="transition-colors hover:opacity-80 text-inherit">{t('footer.aboutUs')}</Link></li>
-              <li><Link to="/transparency" className="transition-colors hover:opacity-80 text-inherit">{t('footer.transparency')}</Link></li>
-              <li><Link to="/faq" className="transition-colors hover:opacity-80 text-inherit">FAQ</Link></li>
-              <li><Link to="/privacy" className="transition-colors hover:opacity-80 text-inherit">{t('footer.privacy')}</Link></li>
-              <li><Link to="/terms" className="transition-colors hover:opacity-80 text-inherit">{t('footer.terms')}</Link></li>
+              {quickLinks.map((link, idx) => (
+                <li key={idx}>
+                  <Link to={link.url} className="transition-colors hover:opacity-80 text-inherit">{link.label}</Link>
+                </li>
+              ))}
+              {quickLinks.length === 0 && (
+                <>
+                  <li><Link to="/about" className="transition-colors hover:opacity-80 text-inherit">{t('footer.aboutUs')}</Link></li>
+                  <li><Link to="/transparency" className="transition-colors hover:opacity-80 text-inherit">{t('footer.transparency')}</Link></li>
+                  <li><Link to="/privacy" className="transition-colors hover:opacity-80 text-inherit">{t('footer.privacy')}</Link></li>
+                  <li><Link to="/terms" className="transition-colors hover:opacity-80 text-inherit">{t('footer.terms')}</Link></li>
+                </>
+              )}
             </ul>
           </div>
 
           <div>
             <h4 className="font-semibold mb-4 text-[var(--color-footer-heading)]">{t('footer.contact')}</h4>
             <ul className="space-y-3 text-sm text-[var(--color-footer-text)]">
-              <li className="flex items-start space-x-2">
-                <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-[var(--color-text-muted)]" />
-                <span>Buddha Academy, Boudha, Kathmandu, Nepal</span>
-              </li>
-              <li className="flex items-center space-x-2">
-                <Phone className="w-4 h-4 shrink-0 text-[var(--color-text-muted)]" />
-                <span>+977 1 1234567</span>
-              </li>
-              <li className="flex items-center space-x-2">
-                <Mail className="w-4 h-4 shrink-0 text-[var(--color-text-muted)]" />
-                <span>info@buddhaacademy.edu.np</span>
-              </li>
+              {address && (
+                <li className="flex items-start space-x-2">
+                  <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-[var(--color-text-muted)]" />
+                  <span>{address}</span>
+                </li>
+              )}
+              {phone && (
+                <li className="flex items-center space-x-2">
+                  <Phone className="w-4 h-4 shrink-0 text-[var(--color-text-muted)]" />
+                  <span>{phone}</span>
+                </li>
+              )}
+              {email && (
+                <li className="flex items-center space-x-2">
+                  <Mail className="w-4 h-4 shrink-0 text-[var(--color-text-muted)]" />
+                  <span>{email}</span>
+                </li>
+              )}
             </ul>
           </div>
         </div>
@@ -74,8 +126,8 @@ export function Footer() {
         <div className="h-px bg-[var(--color-border)] my-8" />
 
         <div className="flex flex-col md:flex-row justify-between items-center text-sm text-[var(--color-text-muted)]">
-          <p>&copy; {new Date().getFullYear()} {branding.footer_branding}. {t('footer.rights')}</p>
-          <p className="mt-2 md:mt-0">{t('footer.nonprofit')}</p>
+          <p>{copyrightText || `© ${new Date().getFullYear()} ${branding.footer_branding || ''}`} {t('footer.rights')}</p>
+          {footerContent?.nonprofit_text && <p className="mt-2 md:mt-0">{footerContent.nonprofit_text}</p>}
         </div>
       </div>
     </footer>

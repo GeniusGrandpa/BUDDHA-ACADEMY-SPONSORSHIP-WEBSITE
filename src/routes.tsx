@@ -29,6 +29,8 @@ const GalleryPage = lazy(() => import('./pages/GalleryPage').then(m => ({ defaul
 
 const NewsPage = lazy(() => import('./pages/NewsPage').then(m => ({ default: m.NewsPage })))
 
+const NewsDetailPage = lazy(() => import('./pages/NewsDetailPage').then(m => ({ default: m.NewsDetailPage })))
+
 const ContactPage = lazy(() => import('./pages/ContactPage').then(m => ({ default: m.ContactPage })))
 
 const DonatePage = lazy(() => import('./pages/DonatePage').then(m => ({ default: m.DonatePage })))
@@ -131,8 +133,6 @@ const AdminPageEditor = lazy(() => import('./pages/admin/cms/AdminPageEditor').t
 
 const AdminVersionHistory = lazy(() => import('./pages/admin/cms/AdminVersionHistory').then(m => ({ default: m.AdminVersionHistory })))
 
-const AdminContentAnalytics = lazy(() => import('./pages/admin/cms/AdminContentAnalytics').then(m => ({ default: m.AdminContentAnalytics })))
-
 const AdminSiteSettings = lazy(() => import('./pages/admin/cms/AdminSiteSettings').then(m => ({ default: m.AdminSiteSettings })))
 
 const AdminNavigationManager = lazy(() => import('./pages/admin/cms/AdminNavigationManager').then(m => ({ default: m.AdminNavigationManager })))
@@ -140,6 +140,18 @@ const AdminNavigationManager = lazy(() => import('./pages/admin/cms/AdminNavigat
 const AdminAnnouncements = lazy(() => import('./pages/admin/cms/AdminAnnouncements').then(m => ({ default: m.AdminAnnouncements })))
 
 const AdminPartners = lazy(() => import('./pages/admin/cms/AdminPartners').then(m => ({ default: m.AdminPartners })))
+
+const AdminDonationContent = lazy(() => import('./pages/admin/cms/AdminDonationContent').then(m => ({ default: m.AdminDonationContent })))
+
+const AdminSponsorshipContent = lazy(() => import('./pages/admin/cms/AdminSponsorshipContent').then(m => ({ default: m.AdminSponsorshipContent })))
+
+const AdminVolunteerContent = lazy(() => import('./pages/admin/cms/AdminVolunteerContent').then(m => ({ default: m.AdminVolunteerContent })))
+
+const AdminFooterContent = lazy(() => import('./pages/admin/cms/AdminFooterContent').then(m => ({ default: m.AdminFooterContent })))
+
+const AdminSiteImages = lazy(() => import('./pages/admin/cms/AdminSiteImages').then(m => ({ default: m.AdminSiteImages })))
+
+const AdminSectionVisibility = lazy(() => import('./pages/admin/cms/AdminSectionVisibility').then(m => ({ default: m.AdminSectionVisibility })))
 
 const AdminDesignDashboard = lazy(() => import('./pages/admin/design/AdminDesignDashboard').then(m => ({ default: m.AdminDesignDashboard })))
 const AdminBrandingPage = lazy(() => import('./pages/admin/design/AdminBrandingPage').then(m => ({ default: m.AdminBrandingPage })))
@@ -152,8 +164,12 @@ const AdminThemePresetsPage = lazy(() => import('./pages/admin/design/AdminTheme
 
 
 function AdminIndexRedirect() {
-  const { profile } = useAuth()
-  if (!profile) return <LazyPage Component={SuperAdminDashboard} />
+  const { profile, loading } = useAuth()
+  if (loading || !profile) return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600" />
+    </div>
+  )
   if (profile.role === 'finance_manager') {
     return <Navigate to="/admin/finance" replace />
   }
@@ -173,9 +189,9 @@ export const router = createBrowserRouter([
       { path: 'students/:id', element: <LazyPage Component={StudentDetailPage} /> },
       { path: 'gallery', element: <LazyPage Component={GalleryPage} /> },
       { path: 'news', element: <LazyPage Component={NewsPage} /> },
+      { path: 'news/:id', element: <LazyPage Component={NewsDetailPage} /> },
       { path: 'contact', element: <LazyPage Component={ContactPage} /> },
       { path: 'donate', element: <LazyPage Component={DonatePage} /> },
-      { path: 'donations', element: <LazyPage Component={DonationHistoryPage} /> },
       { path: 'transparency', element: <LazyPage Component={TransparencyPage} /> },
       { path: 'faq', element: <LazyPage Component={FAQPage} /> },
       { path: 'volunteer', element: <LazyPage Component={VolunteerPage} /> },
@@ -243,11 +259,16 @@ export const router = createBrowserRouter([
       { path: 'content/media', element: <LazyPage Component={AdminMediaLibrary} /> },
       { path: 'content/pages/:slug', element: <LazyPage Component={AdminPageEditor} /> },
       { path: 'content/versions', element: <LazyPage Component={AdminVersionHistory} /> },
-      { path: 'content/analytics', element: <LazyPage Component={AdminContentAnalytics} /> },
       { path: 'content/settings', element: <LazyPage Component={AdminSiteSettings} /> },
       { path: 'content/navigation', element: <LazyPage Component={AdminNavigationManager} /> },
       { path: 'content/announcements', element: <LazyPage Component={AdminAnnouncements} /> },
       { path: 'content/partners', element: <LazyPage Component={AdminPartners} /> },
+      { path: 'content/donation', element: <LazyPage Component={AdminDonationContent} /> },
+      { path: 'content/sponsorship', element: <LazyPage Component={AdminSponsorshipContent} /> },
+      { path: 'content/volunteer', element: <LazyPage Component={AdminVolunteerContent} /> },
+      { path: 'content/footer', element: <LazyPage Component={AdminFooterContent} /> },
+      { path: 'content/images', element: <LazyPage Component={AdminSiteImages} /> },
+      { path: 'content/sections', element: <LazyPage Component={AdminSectionVisibility} /> },
       { path: 'design', element: <LazyPage Component={AdminDesignDashboard} /> },
       { path: 'design/branding', element: <LazyPage Component={AdminBrandingPage} /> },
       { path: 'design/colors', element: <LazyPage Component={AdminColorsPage} /> },

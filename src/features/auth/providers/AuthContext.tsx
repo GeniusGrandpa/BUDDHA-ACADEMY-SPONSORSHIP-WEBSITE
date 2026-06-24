@@ -187,7 +187,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await logLoginHistory(data.user.id, 'success')
       }
 
-      const currentProfile = profile || await refreshProfile()
+      const currentProfile = await refreshProfile()
       if (currentProfile?.status === 'suspended' || currentProfile?.status === 'banned') {
         await signOut()
         return {

@@ -3,11 +3,12 @@ import { RouterProvider } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { LanguageProvider } from './context/LanguageContext'
 import { ThemeProvider } from './context/ThemeContext'
+import { CmsStringsProvider } from './context/CmsStringsContext'
 import { router } from './routes'
 
 function App() {
   return (
-    <>
+    <LanguageProvider>
       <Toaster
         position="top-right"
         toastOptions={{
@@ -38,14 +39,14 @@ function App() {
           },
         }}
       />
-      <LanguageProvider>
-        <AuthProvider>
-          <ThemeProvider>
+      <AuthProvider>
+        <ThemeProvider>
+          <CmsStringsProvider>
             <RouterProvider router={router} />
-          </ThemeProvider>
-        </AuthProvider>
-      </LanguageProvider>
-    </>
+          </CmsStringsProvider>
+        </ThemeProvider>
+      </AuthProvider>
+    </LanguageProvider>
   )
 }
 

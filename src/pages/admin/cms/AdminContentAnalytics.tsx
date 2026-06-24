@@ -34,11 +34,11 @@ export function AdminContentAnalytics() {
     }
   }
 
-  const StatCard = ({ 
-    label, 
-    value, 
-    published 
-  }: { 
+  const StatCard = ({
+    label,
+    value,
+    published
+  }: {
     label: string
     value: number
     published: number
@@ -130,7 +130,7 @@ export function AdminContentAnalytics() {
                    (analytics.total_testimonials - analytics.published_testimonials)} items
                 </span>
               </div>
-<div className="flex items-center justify-between py-3 border-b border-gray-100">
+              <div className="flex items-center justify-between py-3 border-b border-gray-100">
                 <span className="text-gray-600">Publishing Rate</span>
                 <span className="font-medium text-gray-900">
                   {Math.round(

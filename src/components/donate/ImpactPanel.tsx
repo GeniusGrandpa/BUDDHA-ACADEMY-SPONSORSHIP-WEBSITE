@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { useCmsStrings } from '../../context/CmsStringsContext'
 import { formatNPR } from '../../utils/currency'
 
 interface ImpactPanelProps {
@@ -7,27 +8,12 @@ interface ImpactPanelProps {
 }
 
 export function ImpactPanel({ amount, frequency }: ImpactPanelProps) {
-  const metrics = [
-    {
-      value: Math.max(1, Math.floor(amount / 200)),
-      unit: 'month' + (Math.floor(amount / 200) > 1 ? 's' : ''),
-      description: 'of daily meals for a student',
-    },
-    {
-      value: Math.max(1, Math.floor(amount / 400)),
-      unit: 'set' + (Math.floor(amount / 400) > 1 ? 's' : ''),
-      description: 'of books, stationery & supplies',
-    },
-    {
-      value: Math.max(1, Math.floor(amount / 1000)),
-      unit: 'week' + (Math.floor(amount / 1000) > 1 ? 's' : ''),
-      description: 'of quality education support',
-    },
-    {
-      value: Math.max(1, Math.floor(amount / 5000)),
-      unit: 'student' + (Math.floor(amount / 5000) > 1 ? 's' : ''),
-      description: 'directly benefiting from your support',
-    },
+  const { t } = useCmsStrings()
+  const metricConfigs = [
+    { divisor: 200, key: 'impact_metric_meals' },
+    { divisor: 400, key: 'impact_metric_supplies' },
+    { divisor: 1000, key: 'impact_metric_education' },
+    { divisor: 5000, key: 'impact_metric_benefiting' },
   ]
 
   const monthlyEquivalent = frequency === 'annual' ? Math.round(amount / 12) : amount
@@ -41,7 +27,7 @@ export function ImpactPanel({ amount, frequency }: ImpactPanelProps) {
       <div className="rounded-xl border border-amber-200 bg-warm-50 overflow-hidden">
         <div className="px-6 pt-6 pb-4 border-b border-gray-100">
           <h3 className="text-sm font-medium text-gray-600 uppercase tracking-wider mb-1">
-            Your Impact Preview
+            {t('impact_heading')}
           </h3>
           <div className="flex items-baseline gap-1.5">
             <span className="text-3xl font-light text-[#0f172a]">
@@ -54,39 +40,42 @@ export function ImpactPanel({ amount, frequency }: ImpactPanelProps) {
           {frequency !== 'one-time' && (
             <p className="text-xs text-gray-600 mt-1">
               {frequency === 'annual'
-                ? <>{formatNPR(monthlyEquivalent)} monthly equivalent</>
-                : `Sustained monthly sponsorship`}
+                ? <>{t('impact_monthly_equivalent', { amount: formatNPR(monthlyEquivalent) })}</>
+                : t('impact_sustained')}
             </p>
           )}
         </div>
 
         <div className="px-6 py-5 space-y-3">
-          {metrics.map((metric, idx) => (
-            <motion.div
-              key={metric.description}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 + idx * 0.08 }}
-            >
-              <span className="text-2xl font-medium text-amber-600 tabular-nums">
-                {metric.value} {metric.unit}
-              </span>
-              <p className="text-xs text-gray-600">{metric.description}</p>
-            </motion.div>
-          ))}
+          {metricConfigs.map((cfg, idx) => {
+            const value = Math.max(1, Math.floor(amount / cfg.divisor))
+            return (
+              <motion.div
+                key={cfg.key}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4 + idx * 0.08 }}
+              >
+                <span className="text-2xl font-medium text-amber-600 tabular-nums">
+                  {value}x
+                </span>
+                <p className="text-xs text-gray-600">{t(cfg.key)}</p>
+              </motion.div>
+            )
+          })}
         </div>
 
         <div className="px-6 pb-6">
           <div className="rounded-lg bg-gray-50 px-4 py-3">
-            <p className="text-sm text-gray-600 mb-1">Estimated sponsorship duration:</p>
+            <p className="text-sm text-gray-600 mb-1">{t('impact_duration_label')}</p>
             <p className="text-sm font-medium text-[#0f172a]">
               {amount >= 10000
-                ? 'Full monthly sponsorship for one student'
+                ? t('impact_duration_full')
                 : amount >= 5000
-                  ? 'Comprehensive support package'
+                  ? t('impact_duration_comprehensive')
                   : amount >= 1000
-                    ? 'Essential supplies & materials'
-                    : 'Targeted student assistance'}
+                    ? t('impact_duration_essentials')
+                    : t('impact_duration_targeted')}
             </p>
           </div>
         </div>
@@ -99,16 +88,15 @@ export function ImpactPanel({ amount, frequency }: ImpactPanelProps) {
         className="mt-4"
       >
         <div className="rounded-xl border border-amber-200 bg-warm-50 px-6 py-4">
-          <p className="text-sm font-medium text-[#0f172a] mb-0.5">Why Donate?</p>
+          <p className="text-sm font-medium text-[#0f172a] mb-0.5">{t('impact_why_donate')}</p>
           <p className="text-xs text-gray-600 leading-relaxed">
-            Every contribution, no matter the size, creates ripples of opportunity.
-            Your support helps break the cycle of poverty through education.
+            {t('impact_why_donate_desc')}
           </p>
           <a
             href="/transparency"
             className="inline-flex items-center gap-1 text-xs text-amber-600 hover:text-amber-700 font-medium mt-2"
           >
-            See how funds are used
+            {t('impact_see_funds')}
           </a>
         </div>
       </motion.div>

@@ -4,12 +4,17 @@ import { Link } from 'react-router-dom'
 import { Card } from '../components/ui/Card'
 import { Tabs } from '../components/ui/Tabs'
 import { getNews } from '../services/news'
+import { getPageHeader } from '../services/cms-content'
+import { useCmsStrings } from '../context/CmsStringsContext'
 import type { News } from '../types/database'
+import type { PageHeader } from '../types/cms-content'
 
 export function NewsPage() {
+  const { t } = useCmsStrings()
   const [news, setNews] = useState<News[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('all')
+  const [pageHeader, setPageHeader] = useState<PageHeader | null>(null)
 
   useEffect(() => {
     loadNews()
@@ -17,8 +22,12 @@ export function NewsPage() {
 
   const loadNews = async () => {
     try {
-      const data = await getNews()
+      const [data, header] = await Promise.all([
+        getNews(),
+        getPageHeader('news'),
+      ])
       setNews(data)
+      if (header) setPageHeader(header)
     } catch (error) {
       console.error('Error loading news:', error)
     } finally {
@@ -27,10 +36,10 @@ export function NewsPage() {
   }
 
   const tabs = [
-    { id: 'all', label: 'All', count: news.length },
-    { id: 'updates', label: 'Updates', count: news.filter(n => n.category === 'updates').length },
-    { id: 'events', label: 'Events', count: news.filter(n => n.category === 'events').length },
-    { id: 'impact', label: 'Impact', count: news.filter(n => n.category === 'impact').length },
+    { id: 'all', label: t('news_tab_all'), count: news.length },
+    { id: 'updates', label: t('news_tab_updates'), count: news.filter(n => n.category === 'updates').length },
+    { id: 'events', label: t('news_tab_events'), count: news.filter(n => n.category === 'events').length },
+    { id: 'impact', label: t('news_tab_impact'), count: news.filter(n => n.category === 'impact').length },
   ]
 
   const filteredNews = activeTab === 'all'
@@ -53,18 +62,22 @@ export function NewsPage() {
 
   return (
     <div>
-      <section className="relative py-24 bg-gradient-to-br from-amber-50 to-orange-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              News & Events
-            </h1>
-            <p className="text-xl text-gray-600">
-              Stay updated with the latest news, events, and impact stories from Buddha Academy.
-            </p>
+      {pageHeader && (
+        <section className="relative py-24 bg-gradient-to-br from-amber-50 to-orange-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-3xl mx-auto">
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                {pageHeader.title}
+              </h1>
+              {pageHeader.subtitle && (
+                <p className="text-xl text-gray-600">
+                  {pageHeader.subtitle}
+                </p>
+              )}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -72,7 +85,7 @@ export function NewsPage() {
 
           {loading ? (
             <div className="text-center py-12">
-              <div className="animate-pulse text-gray-500">Loading news...</div>
+              <div className="animate-pulse text-gray-500">{t('news_loading')}</div>
             </div>
           ) : filteredNews.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -104,7 +117,7 @@ export function NewsPage() {
                       to={`/news/${article.id}`}
                       className="text-amber-600 hover:text-amber-700 text-sm font-medium"
                     >
-                      Read more &rarr;
+                      {t('news_read_more')}
                     </Link>
                   </div>
                 </Card>
@@ -112,7 +125,7 @@ export function NewsPage() {
             </div>
           ) : (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">No news in this category yet.</p>
+              <p className="text-gray-500 text-lg">{t('news_empty')}</p>
             </div>
           )}
         </div>

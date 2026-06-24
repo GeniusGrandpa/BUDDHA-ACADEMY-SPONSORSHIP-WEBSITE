@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { useCmsStrings } from '../../context/CmsStringsContext'
 import type { StudentSummary } from './types'
 
 interface DonationFormProps {
@@ -18,14 +19,6 @@ interface DonationFormProps {
   isLoading: boolean
 }
 
-const presetAmounts = [1000, 2500, 5000, 10000, 25000]
-
-const frequencyOptions = [
-  { value: 'one-time' as const, label: 'One Time', description: 'Single contribution' },
-  { value: 'monthly' as const, label: 'Monthly', description: 'Sustained support' },
-  { value: 'annual' as const, label: 'Annual', description: 'Yearly commitment' },
-]
-
 export function DonationForm({
   amount,
   customAmount,
@@ -42,6 +35,7 @@ export function DonationForm({
   isAuthenticated,
   isLoading,
 }: DonationFormProps) {
+  const { t } = useCmsStrings()
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -50,17 +44,21 @@ export function DonationForm({
     >
       <div className="rounded-xl border border-amber-200 bg-warm-50 overflow-hidden">
         <div className="px-6 sm:px-8 pt-6 sm:pt-8 pb-2">
-          <h2 className="text-xl font-medium text-[#0f172a]">Make Your Contribution</h2>
-          <p className="text-sm text-gray-600 mt-1">Your generosity directly supports students in Nepal.</p>
+          <h2 className="text-xl font-medium text-[#0f172a]">{t('donate_form_heading')}</h2>
+          <p className="text-sm text-gray-600 mt-1">{t('donate_form_description')}</p>
         </div>
 
         <div className="px-6 sm:px-8 pb-6 sm:pb-8 space-y-7">
           <div>
             <label className="block text-sm font-medium text-[#0f172a] mb-3">
-              Frequency
+              {t('donate_frequency_label')}
             </label>
             <div className="grid grid-cols-3 gap-2">
-              {frequencyOptions.map((opt) => (
+              {[
+                { value: 'one-time' as const, label: t('donate_frequency_one_time'), description: t('donate_frequency_one_time_desc') },
+                { value: 'monthly' as const, label: t('donate_frequency_monthly'), description: t('donate_frequency_monthly_desc') },
+                { value: 'annual' as const, label: t('donate_frequency_annual'), description: t('donate_frequency_annual_desc') },
+              ].map((opt) => (
                 <button
                   key={opt.value}
                   type="button"
@@ -86,10 +84,10 @@ export function DonationForm({
 
           <div>
             <label className="block text-sm font-medium text-[#0f172a] mb-3">
-              Select Amount
+              {t('donate_amount_label')}
             </label>
             <div className="grid grid-cols-5 gap-2 mb-3">
-              {presetAmounts.map((preset) => {
+              {[1000, 2500, 5000, 10000, 25000].map((preset) => {
                 const isActive = amount === preset && !customAmount
                 return (
                   <button
@@ -101,20 +99,20 @@ export function DonationForm({
                         : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
                       }`}
                   >
-                    <span className="block text-xs text-gray-600 mb-0.5">NPR</span>
+                    <span className="block text-xs text-gray-600 mb-0.5">{t('donate_currency_label')}</span>
                     <span className="block">{preset.toLocaleString('en-US')}</span>
                   </button>
                 )
               })}
             </div>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-600">NPR</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-600">{t('donate_currency_label')}</span>
               <input
                 type="number"
                 min="100"
                 value={customAmount}
                 onChange={(e) => onCustomAmountChange(e.target.value)}
-                placeholder="Enter custom amount"
+                placeholder={t('donate_custom_placeholder')}
                 className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 text-sm text-[#0f172a] placeholder-gray-400 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100 transition-colors"
               />
             </div>
@@ -122,7 +120,7 @@ export function DonationForm({
 
           <div>
             <label className="block text-sm font-medium text-[#0f172a] mb-3">
-              Sponsor a Student
+              {t('donate_student_label')}
             </label>
             {students.length > 0 ? (
               <div className="grid gap-2 max-h-64 overflow-y-auto pr-1">
@@ -134,9 +132,9 @@ export function DonationForm({
                       : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
                     }`}
                 >
-                  <span className="font-medium">General Donation</span>
+                  <span className="font-medium">{t('donate_general_option')}</span>
                   <span className="block text-xs text-gray-600 mt-0.5">
-                    Support where it is needed most
+                    {t('donate_general_desc')}
                   </span>
                 </button>
                 {students.map((student) => (
@@ -161,8 +159,11 @@ export function DonationForm({
                           {student.name}
                         </span>
                         <span className="block text-xs text-gray-600 mt-0.5">
-                          Grade {student.grade} | Age {student.age}
-                          {student.dream_career && ` | Dreams of becoming ${student.dream_career}`}
+                          {t('donate_student_format', {
+                            grade: student.grade,
+                            age: student.age,
+                            career: student.dream_career || '',
+                          })}
                         </span>
                       </div>
                     </div>
@@ -171,30 +172,29 @@ export function DonationForm({
               </div>
             ) : (
               <div className="px-4 py-3 rounded-lg border border-gray-200 text-sm text-gray-600">
-                Loading available students...
+                {t('donate_loading_students')}
               </div>
             )}
           </div>
 
           <div>
             <label className="block text-sm font-medium text-[#0f172a] mb-2">
-              Message (Optional)
+              {t('donate_message_label')}
             </label>
             <textarea
               rows={3}
               value={message}
               onChange={(e) => onMessageChange(e.target.value)}
-              placeholder="Share a message of encouragement for the students or community..."
+              placeholder={t('donate_message_placeholder')}
               className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm text-[#0f172a] placeholder-gray-400 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100 transition-colors resize-none"
             />
           </div>
 
           <div className="bg-amber-50 border border-amber-100 rounded-xl p-4">
             <div className="text-sm text-amber-800">
-              <p className="font-medium mb-0.5">100% Transparent Giving</p>
+              <p className="font-medium mb-0.5">{t('donate_transparent_heading')}</p>
               <p className="text-amber-600">
-                Every rupee is tracked and verified by our finance team.
-                You will receive a detailed receipt and impact report for your donation.
+                {t('donate_transparent_desc')}
               </p>
             </div>
           </div>
@@ -204,7 +204,7 @@ export function DonationForm({
             disabled={!isAuthenticated || amount < 100}
             className="w-full inline-flex items-center justify-center px-6 py-3.5 rounded-lg bg-[#f59e0b] text-white text-sm font-medium hover:bg-[#d97706] disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200"
           >
-            {isLoading ? 'Processing...' : 'Donate'}
+            {isLoading ? t('donate_processing_text') : t('donate_button_text')}
           </button>
         </div>
       </div>

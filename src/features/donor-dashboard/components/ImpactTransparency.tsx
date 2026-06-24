@@ -19,6 +19,7 @@ function AnimatedCounter({ value, suffix = '', duration = 1.5 }: CounterProps) {
   const [count, setCount] = useState(0)
   const ref = useRef<HTMLSpanElement>(null)
   const hasAnimated = useRef(false)
+  const timerRef = useRef<ReturnType<typeof setInterval>>()
 
   useEffect(() => {
     if (hasAnimated.current) return
@@ -29,11 +30,12 @@ function AnimatedCounter({ value, suffix = '', duration = 1.5 }: CounterProps) {
           const steps = 30
           const increment = value / steps
           let current = 0
-          const timer = setInterval(() => {
+          timerRef.current = setInterval(() => {
             current += increment
             if (current >= value) {
               setCount(value)
-              clearInterval(timer)
+              clearInterval(timerRef.current)
+              timerRef.current = undefined
             } else {
               setCount(Math.floor(current))
             }
@@ -43,7 +45,13 @@ function AnimatedCounter({ value, suffix = '', duration = 1.5 }: CounterProps) {
       { threshold: 0.3 },
     )
     if (ref.current) observer.observe(ref.current)
-    return () => observer.disconnect()
+    return () => {
+      observer.disconnect()
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+        timerRef.current = undefined
+      }
+    }
   }, [value, duration])
 
   return (

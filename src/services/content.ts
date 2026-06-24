@@ -258,7 +258,9 @@ export async function uploadMedia(file: File, altText?: string, folder?: string)
   const url = urlData.publicUrl
 
   const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'video/mp4', 'video/webm', 'application/pdf']
-  const mimeType = validTypes.includes(file.type) ? file.type : 'application/octet-stream'
+  if (!validTypes.includes(file.type)) {
+    throw new Error(`Invalid file type: ${file.type}. Allowed types: ${validTypes.join(', ')}`)
+  }
 
   const { data, error } = await supabase
     .from('media_library')
@@ -266,7 +268,7 @@ export async function uploadMedia(file: File, altText?: string, folder?: string)
       url,
       file_name: safeName,
       file_size: file.size,
-      mime_type: mimeType,
+      mime_type: file.type,
       alt_text: altText || null,
       folder: folder || '/',
       uploaded_by: userId,

@@ -144,7 +144,7 @@ export async function getPaymentSession(sessionId: string): Promise<PaymentSessi
     .from('payment_sessions')
     .select('*')
     .eq('id', sessionId)
-    .single()
+    .maybeSingle()
 
   if (error) return null
   return data as unknown as PaymentSession | null
@@ -166,7 +166,7 @@ export async function getPaymentReceipt(donationId: string): Promise<PaymentRece
     .from('payment_receipts')
     .select('*')
     .eq('donation_id', donationId)
-    .single()
+    .maybeSingle()
 
   if (error) return null
   return data as unknown as PaymentReceipt | null
@@ -208,12 +208,23 @@ export async function uploadPaymentScreenshot(
     .from('payment_sessions')
     .select('donor_id')
     .eq('id', sessionId)
-    .single()
+    .maybeSingle()
 
   const userId = session?.donor_id
   if (!userId) throw new Error('Session not found')
 
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error(`Invalid file type: ${file.type}. Allowed: JPEG, PNG, WebP`)
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error('File size exceeds 5MB limit')
+  }
+
   const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+  if (!['jpg', 'jpeg', 'png', 'webp'].includes(fileExt)) {
+    throw new Error(`Invalid file extension: .${fileExt}`)
+  }
   const sanitizedName = `${sessionId}-${Date.now()}.${fileExt}`
   const filePath = `${userId}/${sanitizedName}`
 

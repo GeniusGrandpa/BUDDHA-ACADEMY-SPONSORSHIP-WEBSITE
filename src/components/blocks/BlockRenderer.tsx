@@ -2,7 +2,9 @@ import { Link } from 'react-router-dom'
 import { ArrowRight, Play, ChevronRight } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { Card } from '../ui/Card'
+import { useCmsStrings } from '../../context/CmsStringsContext'
 import type { PageBlock } from '../../types/cms'
+import DOMPurify from 'dompurify'
 
 interface BlockContent {
   preTitle?: string
@@ -35,6 +37,7 @@ interface BlockRendererProps {
 }
 
 export function BlockRenderer({ block }: BlockRendererProps) {
+  const { t } = useCmsStrings()
   const { settings } = block
   const sectionStyle: React.CSSProperties = {
     ...(settings?.background_color ? { backgroundColor: settings.background_color } : {}),
@@ -83,7 +86,7 @@ export function BlockRenderer({ block }: BlockRendererProps) {
           <div className={`${maxWidth} mx-auto px-4 sm:px-6 lg:px-8 text-${textAlign}`}>
             {content.title && <Tag className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{String(content.title)}</Tag>}
             {content.subtitle && <p className="text-lg text-gray-600 mb-4">{String(content.subtitle)}</p>}
-            {content.body && <div className="prose prose-lg max-w-none text-gray-600" dangerouslySetInnerHTML={{ __html: String(content.body) }} />}
+            {content.body && <div className="prose prose-lg max-w-none text-gray-600" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(String(content.body)) }} />}
           </div>
         </section>
       )
@@ -221,16 +224,16 @@ export function BlockRenderer({ block }: BlockRendererProps) {
               {content.video_url && (
                 <div className="relative rounded-xl overflow-hidden shadow-lg">
                   {content.thumbnail_url ? (
-                    <div className="relative cursor-pointer group" onClick={() => window.open(String(content.video_url), '_blank')}>
+                    <a href={String(content.video_url)} target="_blank" rel="noopener noreferrer" className="relative cursor-pointer group block">
                       <img src={String(content.thumbnail_url)} alt={String(content.title || 'Video')} className="w-full" />
                       <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/40 transition-colors">
                         <Play className="w-16 h-16 text-white" fill="white" />
                       </div>
-                    </div>
+                    </a>
                   ) : (
                     <div className="bg-gray-100 aspect-video flex items-center justify-center">
                       <a href={String(content.video_url)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-amber-600 hover:text-amber-700">
-                        <Play className="w-8 h-8" /> Watch Video
+                        <Play className="w-8 h-8" /> {t('block_watch_video')}
                       </a>
                     </div>
                   )}
@@ -293,7 +296,7 @@ export function BlockRenderer({ block }: BlockRendererProps) {
               {content.title && <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{String(content.title)}</h2>}
               {content.description && <p className="text-gray-600 mb-8">{String(content.description)}</p>}
               <Link to={String(content.donate_link || '/donate')}>
-                <Button size="lg">{String(content.button_text || 'Donate Now')}</Button>
+                <Button size="lg">{String(content.button_text || t('block_donate_now'))}</Button>
               </Link>
             </div>
           </div>
@@ -309,7 +312,7 @@ export function BlockRenderer({ block }: BlockRendererProps) {
             <div className="grid md:grid-cols-3 gap-8">
               {(content.items as Array<{ name: string; photo_url?: string; age?: string; grade?: string; bio?: string; link?: string }>)?.map((student, idx) => (
                 <Card key={idx} variant="bordered" className="overflow-hidden">
-                  <img src={student.photo_url || ''} alt={student.name} className="w-full h-48 object-cover" onError={e => { (e.target as HTMLImageElement).src = 'https://images.pexels.com/photos/1171086/pexels-photo-1171086.jpeg?auto=compress&cs=tinysrgb&w=600' }} />
+                  <img src={student.photo_url || ''} alt={student.name} className="w-full h-48 object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
                   <div className="p-6">
                     <h3 className="text-lg font-semibold text-gray-900">{student.name}</h3>
                     {(student.age || student.grade) && <p className="text-sm text-gray-500 mt-1">{[student.age, student.grade].filter(Boolean).join(' · ')}</p>}
@@ -341,7 +344,7 @@ export function BlockRenderer({ block }: BlockRendererProps) {
                   <p className="font-medium">{ann.title}{ann.content ? `: ${ann.content}` : ''}</p>
                 </div>
                 {ann.link_url && (
-                  <a href={ann.link_url} className="text-sm font-medium underline shrink-0">{ann.link_text || 'Learn more'}</a>
+                  <a href={ann.link_url} className="text-sm font-medium underline shrink-0">{ann.link_text || t('block_learn_more')}</a>
                 )}
               </div>
             ))}
@@ -353,7 +356,7 @@ export function BlockRenderer({ block }: BlockRendererProps) {
       return (
         <section style={sectionStyle}>
           <div className={`${maxWidth} mx-auto px-4 sm:px-6 lg:px-8 text-${textAlign}`}>
-            {content.html && <div className="prose prose-lg max-w-none" dangerouslySetInnerHTML={{ __html: String(content.html) }} />}
+            {content.html && <div className="prose prose-lg max-w-none" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(String(content.html)) }} />}
           </div>
         </section>
       )
@@ -363,7 +366,7 @@ export function BlockRenderer({ block }: BlockRendererProps) {
         <section style={sectionStyle}>
           <div className={`${maxWidth} mx-auto px-4 sm:px-6 lg:px-8 text-${textAlign}`}>
             {content.title && <h2 className="text-3xl font-bold text-gray-900 mb-4">{String(content.title)}</h2>}
-            {content.body && <div className="prose prose-lg max-w-none text-gray-600" dangerouslySetInnerHTML={{ __html: String(content.body) }} />}
+            {content.body && <div className="prose prose-lg max-w-none text-gray-600" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(String(content.body)) }} />}
           </div>
         </section>
       )
