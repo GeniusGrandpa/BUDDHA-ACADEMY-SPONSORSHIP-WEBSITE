@@ -8,6 +8,7 @@ import { getPageHeader } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import type { News } from '../types/database'
 import type { PageHeader } from '../types/cms-content'
+import { NewsCardSkeleton } from '../components/ui/LoadingSkeleton'
 
 export function NewsPage() {
   const { t } = useCmsStrings()
@@ -84,8 +85,8 @@ export function NewsPage() {
           <Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} className="mb-8" />
 
           {loading ? (
-            <div className="text-center py-12">
-              <div className="animate-pulse text-gray-500">{t('news_loading')}</div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {Array.from({ length: 6 }).map((_, i) => <NewsCardSkeleton key={i} />)}
             </div>
           ) : filteredNews.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">

@@ -115,13 +115,16 @@ const VolunteerDashboard = lazy(() => import('./pages/admin/dashboards/Volunteer
 const TeacherDashboard = lazy(() => import('./pages/teacher/TeacherDashboard').then(m => ({ default: m.TeacherDashboard })))
 
 const WebsiteDashboard = lazy(() => import('./pages/admin/website/WebsiteDashboard').then(m => ({ default: m.WebsiteDashboard })))
+const WebsiteBuilder = lazy(() => import('./pages/admin/website/WebsiteBuilder').then(m => ({ default: m.WebsiteBuilder })))
+const MediaLibrary = lazy(() => import('./pages/admin/website/MediaLibrary').then(m => ({ default: m.MediaLibrary })))
 const HomePageEditor = lazy(() => import('./pages/admin/website/editors/HomePageEditor').then(m => ({ default: m.HomePageEditor })))
 const BrandingEditor = lazy(() => import('./pages/admin/website/editors/BrandingEditor').then(m => ({ default: m.BrandingEditor })))
 const SEOEditor = lazy(() => import('./pages/admin/website/editors/SEOEditor').then(m => ({ default: m.SEOEditor })))
-
-const AdminContentDashboard = lazy(() => import('./pages/admin/cms/AdminContentDashboard').then(m => ({ default: m.AdminContentDashboard })))
-
-const AdminHomepageEditor = lazy(() => import('./pages/admin/cms/AdminHomepageEditor').then(m => ({ default: m.AdminHomepageEditor })))
+const AboutPageEditor = lazy(() => import('./pages/admin/website/editors/AboutPageEditor').then(m => ({ default: m.AboutPageEditor })))
+const ContactPageEditor = lazy(() => import('./pages/admin/website/editors/ContactPageEditor').then(m => ({ default: m.ContactPageEditor })))
+const CampaignsEditor = lazy(() => import('./pages/admin/website/editors/CampaignsEditor').then(m => ({ default: m.CampaignsEditor })))
+const PrivacyPageEditor = lazy(() => import('./pages/admin/website/editors/PrivacyPageEditor').then(m => ({ default: m.PrivacyPageEditor })))
+const TermsPageEditor = lazy(() => import('./pages/admin/website/editors/TermsPageEditor').then(m => ({ default: m.TermsPageEditor })))
 
 const AdminContentGallery = lazy(() => import('./pages/admin/cms/AdminContentGallery').then(m => ({ default: m.AdminContentGallery })))
 
@@ -136,8 +139,6 @@ const AdminStudentStories = lazy(() => import('./pages/admin/cms/AdminStudentSto
 const AdminTransparencyContent = lazy(() => import('./pages/admin/cms/AdminTransparencyContent').then(m => ({ default: m.AdminTransparencyContent })))
 
 const AdminFaqManager = lazy(() => import('./pages/admin/cms/AdminFaqManager').then(m => ({ default: m.AdminFaqManager })))
-
-const AdminMediaLibrary = lazy(() => import('./pages/admin/cms/AdminMediaLibrary').then(m => ({ default: m.AdminMediaLibrary })))
 
 const AdminPageEditor = lazy(() => import('./pages/admin/cms/AdminPageEditor').then(m => ({ default: m.AdminPageEditor })))
 
@@ -259,7 +260,14 @@ export const router = createBrowserRouter([
       { path: 'reports', element: <LazyPage Component={AdminReportsPage} /> },
       // Website Management (new)
       { path: 'website', element: <LazyPage Component={WebsiteDashboard} /> },
+      { path: 'website/builder', element: <LazyPage Component={WebsiteBuilder} /> },
+      { path: 'website/media', element: <LazyPage Component={MediaLibrary} /> },
       { path: 'website/homepage', element: <LazyPage Component={HomePageEditor} /> },
+      { path: 'website/about', element: <LazyPage Component={AboutPageEditor} /> },
+      { path: 'website/contact', element: <LazyPage Component={ContactPageEditor} /> },
+      { path: 'website/campaigns', element: <LazyPage Component={CampaignsEditor} /> },
+      { path: 'website/privacy', element: <LazyPage Component={PrivacyPageEditor} /> },
+      { path: 'website/terms', element: <LazyPage Component={TermsPageEditor} /> },
       { path: 'website/branding', element: <LazyPage Component={BrandingEditor} /> },
       { path: 'website/seo', element: <LazyPage Component={SEOEditor} /> },
       { path: 'website/donation', element: <LazyPage Component={AdminDonationContent} /> },
@@ -272,7 +280,6 @@ export const router = createBrowserRouter([
       { path: 'website/news', element: <LazyPage Component={AdminContentNews} /> },
       { path: 'website/stories', element: <LazyPage Component={AdminStudentStories} /> },
       { path: 'website/faqs', element: <LazyPage Component={AdminFaqManager} /> },
-      { path: 'website/media', element: <LazyPage Component={AdminMediaLibrary} /> },
       { path: 'website/videos', element: <LazyPage Component={AdminVideoManager} /> },
       { path: 'website/announcements', element: <LazyPage Component={AdminAnnouncements} /> },
       { path: 'website/partners', element: <LazyPage Component={AdminPartners} /> },
@@ -282,29 +289,29 @@ export const router = createBrowserRouter([
       { path: 'website/sections', element: <LazyPage Component={AdminSectionVisibility} /> },
       { path: 'website/transparency', element: <LazyPage Component={AdminTransparencyContent} /> },
       { path: 'website/pages/:slug', element: <LazyPage Component={AdminPageEditor} /> },
-      // Legacy CMS routes
-      { path: 'content', element: <LazyPage Component={AdminContentDashboard} /> },
-      { path: 'content/homepage', element: <LazyPage Component={AdminHomepageEditor} /> },
-      { path: 'content/gallery', element: <LazyPage Component={AdminContentGallery} /> },
-      { path: 'content/videos', element: <LazyPage Component={AdminVideoManager} /> },
-      { path: 'content/testimonials', element: <LazyPage Component={AdminContentTestimonials} /> },
-      { path: 'content/news', element: <LazyPage Component={AdminContentNews} /> },
-      { path: 'content/stories', element: <LazyPage Component={AdminStudentStories} /> },
-      { path: 'content/transparency', element: <LazyPage Component={AdminTransparencyContent} /> },
-      { path: 'content/faqs', element: <LazyPage Component={AdminFaqManager} /> },
-      { path: 'content/media', element: <LazyPage Component={AdminMediaLibrary} /> },
-      { path: 'content/pages/:slug', element: <LazyPage Component={AdminPageEditor} /> },
-      { path: 'content/versions', element: <LazyPage Component={AdminVersionHistory} /> },
-      { path: 'content/settings', element: <LazyPage Component={AdminSiteSettings} /> },
-      { path: 'content/navigation', element: <LazyPage Component={AdminNavigationManager} /> },
-      { path: 'content/announcements', element: <LazyPage Component={AdminAnnouncements} /> },
-      { path: 'content/partners', element: <LazyPage Component={AdminPartners} /> },
-      { path: 'content/donation', element: <LazyPage Component={AdminDonationContent} /> },
-      { path: 'content/sponsorship', element: <LazyPage Component={AdminSponsorshipContent} /> },
-      { path: 'content/volunteer', element: <LazyPage Component={AdminVolunteerContent} /> },
-      { path: 'content/footer', element: <LazyPage Component={AdminFooterContent} /> },
-      { path: 'content/images', element: <LazyPage Component={AdminSiteImages} /> },
-      { path: 'content/sections', element: <LazyPage Component={AdminSectionVisibility} /> },
+      // Legacy CMS redirects
+      { path: 'content', element: <Navigate to="/admin/website" replace /> },
+      { path: 'content/homepage', element: <Navigate to="/admin/website/homepage" replace /> },
+      { path: 'content/gallery', element: <Navigate to="/admin/website/gallery" replace /> },
+      { path: 'content/videos', element: <Navigate to="/admin/website/videos" replace /> },
+      { path: 'content/testimonials', element: <Navigate to="/admin/website/testimonials" replace /> },
+      { path: 'content/news', element: <Navigate to="/admin/website/news" replace /> },
+      { path: 'content/stories', element: <Navigate to="/admin/website/stories" replace /> },
+      { path: 'content/transparency', element: <Navigate to="/admin/website/transparency" replace /> },
+      { path: 'content/faqs', element: <Navigate to="/admin/website/faqs" replace /> },
+      { path: 'content/media', element: <Navigate to="/admin/website/media" replace /> },
+      { path: 'content/pages/:slug', element: <Navigate to="/admin/website/pages/:slug" replace /> },
+      { path: 'content/versions', element: <Navigate to="/admin/website/versions" replace /> },
+      { path: 'content/settings', element: <Navigate to="/admin/website/settings" replace /> },
+      { path: 'content/navigation', element: <Navigate to="/admin/website/navigation" replace /> },
+      { path: 'content/announcements', element: <Navigate to="/admin/website/announcements" replace /> },
+      { path: 'content/partners', element: <Navigate to="/admin/website/partners" replace /> },
+      { path: 'content/donation', element: <Navigate to="/admin/website/donation" replace /> },
+      { path: 'content/sponsorship', element: <Navigate to="/admin/website/sponsorship" replace /> },
+      { path: 'content/volunteer', element: <Navigate to="/admin/website/volunteer" replace /> },
+      { path: 'content/footer', element: <Navigate to="/admin/website/footer" replace /> },
+      { path: 'content/images', element: <Navigate to="/admin/website/images" replace /> },
+      { path: 'content/sections', element: <Navigate to="/admin/website/sections" replace /> },
       { path: 'design', element: <LazyPage Component={AdminDesignDashboard} /> },
       { path: 'design/branding', element: <LazyPage Component={AdminBrandingPage} /> },
       { path: 'design/colors', element: <LazyPage Component={AdminColorsPage} /> },

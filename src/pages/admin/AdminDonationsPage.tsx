@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Card } from '../../components/ui/Card'
 import { Badge } from '../../components/ui/Badge'
+import { Button } from '../../components/ui/Button'
 import { formatNPR } from '../../utils/currency'
 import { getAllDonations, updateDonationStatus } from '../../services/donations'
 import type { Donation } from '../../types/database'
 import { TableSkeleton } from '../../components/ui/LoadingSkeleton'
+import toast from 'react-hot-toast'
 
 export function AdminDonationsPage() {
   const [donations, setDonations] = useState<Donation[]>([])
@@ -25,12 +27,20 @@ export function AdminDonationsPage() {
     }
   }
 
+  const [updating, setUpdating] = useState<Record<string, boolean>>({})
+
   const handleStatusChange = async (id: string, status: Donation['status']) => {
+    if (updating[id]) return
+    setUpdating(prev => ({ ...prev, [id]: true }))
     try {
       await updateDonationStatus(id, status)
       setDonations(donations.map(d => d.id === id ? { ...d, status } : d))
+      toast.success(status === 'completed' ? 'Donation approved' : status === 'rejected' ? 'Donation rejected' : `Status set to ${status}`)
     } catch (error) {
       console.error('Error updating donation:', error)
+      toast.error('Failed to update donation status')
+    } finally {
+      setUpdating(prev => ({ ...prev, [id]: false }))
     }
   }
 
@@ -41,14 +51,6 @@ export function AdminDonationsPage() {
       day: 'numeric',
     })
   }
-
-  const statusOptions = [
-    { value: 'pending', label: 'Pending Review' },
-    { value: 'processing', label: 'In Review' },
-    { value: 'completed', label: 'Approved' },
-    { value: 'rejected', label: 'Rejected' },
-    { value: 'cancelled', label: 'Cancelled' },
-  ]
 
   const totalAmount = donations.reduce((sum, d) => sum + d.amount, 0)
   const receivedAmount = donations.filter(d => d.status === 'completed').reduce((sum, d) => sum + d.amount, 0)
@@ -107,16 +109,33 @@ export function AdminDonationsPage() {
                         {donation.student_id || 'General'}
                       </td>
                       <td className="px-6 py-4">
-                        <select
-                          value={donation.status}
-                          onChange={(e) => handleStatusChange(donation.id, e.target.value as Donation['status'])}
-                          className="text-sm border rounded px-2 py-1"
-                          aria-label="Change donation status"
-                        >
-                          {statusOptions.map(opt => (
-                            <option key={opt.value} value={opt.value}>{opt.label}</option>
-                          ))}
-                        </select>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          donation.status === 'completed' ? 'bg-green-100 text-green-700' :
+                          donation.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                          donation.status === 'processing' ? 'bg-blue-100 text-blue-700' :
+                          donation.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                          'bg-gray-100 text-gray-600'
+                        }`}>
+                          {donation.status}
+                        </span>
+                        {donation.status === 'pending' && (
+                          <div className="flex gap-1 mt-1">
+                            <button
+                              onClick={() => handleStatusChange(donation.id, 'completed')}
+                              disabled={updating[donation.id]}
+                              className="text-xs px-2 py-1 rounded bg-green-100 text-green-700 hover:bg-green-200 disabled:opacity-50"
+                            >
+                              {updating[donation.id] ? '...' : 'Approve'}
+                            </button>
+                            <button
+                              onClick={() => handleStatusChange(donation.id, 'rejected')}
+                              disabled={updating[donation.id]}
+                              className="text-xs px-2 py-1 rounded bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50"
+                            >
+                              {updating[donation.id] ? '...' : 'Reject'}
+                            </button>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   ))

@@ -8,6 +8,7 @@ import { getPageHeader, getSiteImage } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import type { GalleryItem, Video } from '../types/database'
 import type { PageHeader } from '../types/cms-content'
+import { GallerySkeleton } from '../components/ui/LoadingSkeleton'
 
 type GalleryVideo = GalleryItem & { video_type?: string | null }
 
@@ -122,9 +123,7 @@ export function GalleryPage() {
           <Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} className="mb-8" />
 
           {loading ? (
-            <div className="text-center py-12">
-              <div className="animate-pulse text-gray-500">{t('gallery_loading')}</div>
-            </div>
+            <GallerySkeleton />
           ) : filteredItems.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredItems.map((item) => (

@@ -6,6 +6,7 @@ import { getPageHeader } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import type { Faq } from '../types/database'
 import type { PageHeader } from '../types/cms-content'
+import { CardSkeleton } from '../components/ui/LoadingSkeleton'
 
 export function FAQPage() {
   const { t } = useCmsStrings()
@@ -55,7 +56,9 @@ export function FAQPage() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <Card variant="bordered" padding="lg">
             {loading ? (
-              <div className="text-center py-12 text-gray-400">{t('faq_loading')}</div>
+              <div className="space-y-4">
+                {Array.from({ length: 5 }).map((_, i) => <CardSkeleton key={i} />)}
+              </div>
             ) : faqs.length > 0 ? (
               faqs.map((faq, idx) => (
                 <AccordionItem key={faq.id} title={faq.question} defaultOpen={idx === 0}>

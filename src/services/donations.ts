@@ -28,9 +28,15 @@ export async function getAllDonations(): Promise<Donation[]> {
 }
 
 export async function updateDonationStatus(id: string, status: Donation['status']): Promise<Donation> {
+  const userId = (await supabase.auth.getSession()).data.session?.user?.id
+  const updates: Partial<Donation> = { status }
+  if (status === 'completed') {
+    updates.verified_by = userId
+    updates.verified_at = new Date().toISOString()
+  }
   const { data, error } = await supabase
     .from('donations')
-    .update({ status })
+    .update(updates)
     .eq('id', id)
     .select()
     .single()

@@ -15,38 +15,112 @@ interface SectionGroup {
 
 const groups: SectionGroup[] = [
   {
-    title: 'Pages',
-    subtitle: 'Edit the content of each page on your website',
-    icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+    title: 'Home Page',
+    subtitle: 'Every section of your homepage',
+    icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
     items: [
-      { name: 'Home Page', href: '/admin/website/home', desc: 'Hero banner, welcome text, statistics, donation CTA' },
-      { name: 'About Us', href: '/admin/website/about', desc: 'Mission, vision, history, team members' },
-      { name: 'Sponsorship', href: '/admin/website/sponsorship', desc: 'Sponsorship details, packages, how it works' },
-      { name: 'Donations', href: '/admin/website/donations', desc: 'Donation options, impact information, currency' },
-      { name: 'Contact Us', href: '/admin/website/contact', desc: 'Address, phone, email, office hours' },
-      { name: 'FAQ', href: '/admin/website/faq', desc: 'Frequently asked questions and answers' },
+      { name: 'Hero Banner', href: '/admin/website/builder', desc: 'Headline, description, CTAs, background image' },
+      { name: 'Welcome Section', href: '/admin/website/homepage', desc: 'About preview, mission introduction' },
+      { name: 'Statistics', href: '/admin/website/homepage', desc: 'Key numbers and impact metrics' },
+      { name: 'Featured Students', href: '/admin/website/homepage', desc: 'Student preview cards on homepage' },
+      { name: 'Donation CTA', href: '/admin/website/homepage', desc: 'Call-to-action banner for donations' },
+      { name: 'Section Visibility', href: '/admin/website/sections', desc: 'Show/hide sections on homepage' },
     ],
   },
   {
-    title: 'Collections',
-    subtitle: 'Manage content that appears dynamically across your website',
+    title: 'About Page',
+    subtitle: 'Tell your story',
+    icon: 'M13 16h-1v-4h-2m4 0h-6 M17 20H7a2 2 0 01-2-2V6a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V18a2 2 0 01-2 2z',
+    items: [
+      { name: 'Page Header', href: '/admin/website/about', desc: 'Title, subtitle for about page' },
+      { name: 'Mission & Vision', href: '/admin/website/about', desc: 'School mission, vision and description' },
+      { name: 'Statistics', href: '/admin/website/about', desc: 'Years of service, students educated, etc.' },
+      { name: 'Core Values', href: '/admin/website/about', desc: 'Compassion, Education, Community, Integrity' },
+      { name: 'Timeline', href: '/admin/website/about', desc: 'Historical journey milestones' },
+      { name: 'About Images', href: '/admin/website/about', desc: 'Photos displayed on the about page' },
+    ],
+  },
+  {
+    title: 'Sponsorship Page',
+    subtitle: 'How sponsorship works',
+    icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z',
+    items: [
+      { name: 'Hero & Header', href: '/admin/website/sponsorship', desc: 'Title, subtitle for sponsorship page' },
+      { name: 'Steps', href: '/admin/website/sponsorship', desc: 'How sponsorship works step by step' },
+      { name: 'Benefits', href: '/admin/website/sponsorship', desc: 'What sponsors provide' },
+      { name: 'CTA Section', href: '/admin/website/sponsorship', desc: 'Call-to-action button and text' },
+    ],
+  },
+  {
+    title: 'Donation Page',
+    subtitle: 'Donation options and impact',
+    icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+    items: [
+      { name: 'Hero & Header', href: '/admin/website/donation', desc: 'Title, subtitle for donation page' },
+      { name: 'Impact Cards', href: '/admin/website/donation', desc: 'Donation amount cards with descriptions' },
+      { name: 'Process Steps', href: '/admin/website/donation', desc: 'How donation works' },
+      { name: 'Campaigns', href: '/admin/website/campaigns', desc: 'Fundraising goals and progress' },
+    ],
+  },
+  {
+    title: 'Contact Page',
+    subtitle: 'How visitors reach you',
+    icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
+    items: [
+      { name: 'Page Header', href: '/admin/website/contact', desc: 'Title, subtitle for contact page' },
+      { name: 'Contact Details', href: '/admin/website/contact', desc: 'Email, phone, address' },
+      { name: 'Form Labels', href: '/admin/website/contact', desc: 'All form field text and labels' },
+    ],
+  },
+  {
+    title: 'Student Sections',
+    subtitle: 'Student content across the website',
+    icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z',
+    items: [
+      { name: 'Student Stories', href: '/admin/website/stories', desc: 'Success stories and achievements' },
+      { name: 'Featured Students', href: '/admin/website/homepage', desc: 'Students showcased on homepage' },
+      { name: 'Student Profiles', href: '/admin/students', desc: 'Individual student data and profiles' },
+      { name: 'Student Gallery', href: '/admin/website/gallery', desc: 'Photos featuring students' },
+    ],
+  },
+  {
+    title: 'Content Collections',
+    subtitle: 'Dynamic content across your site',
     icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10',
     items: [
-      { name: 'Student Stories', href: '/admin/website/stories', desc: 'Success stories and student achievement updates' },
       { name: 'Testimonials', href: '/admin/website/testimonials', desc: 'Donor, teacher, and student testimonials' },
-      { name: 'Gallery', href: '/admin/website/gallery', desc: 'Photo albums, event images, and captions' },
-      { name: 'News & Updates', href: '/admin/website/news', desc: 'Articles, announcements, and organization news' },
+      { name: 'Gallery', href: '/admin/website/gallery', desc: 'Photo albums, event images, captions' },
+      { name: 'News & Updates', href: '/admin/website/news', desc: 'Articles, announcements, organization news' },
+      { name: 'Videos', href: '/admin/website/videos', desc: 'Video gallery and featured media' },
+      { name: 'Partners & Supporters', href: '/admin/website/partners', desc: 'Partner organization logos' },
+      { name: 'FAQ', href: '/admin/website/faqs', desc: 'Frequently asked questions' },
+      { name: 'Announcements', href: '/admin/website/announcements', desc: 'Site-wide announcement banners' },
+      { name: 'Success Stories', href: '/admin/website/stories', desc: 'Full success stories page' },
     ],
   },
   {
-    title: 'Settings',
-    subtitle: 'Configure navigation, footer, branding, and SEO',
+    title: 'Global Settings',
+    subtitle: 'Configure the entire website',
     icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z',
     items: [
-      { name: 'Navigation', href: '/admin/website/navigation', desc: 'Menu structure, order, and visibility' },
-      { name: 'Footer', href: '/admin/website/footer', desc: 'Footer columns, links, copyright text' },
-      { name: 'Branding', href: '/admin/website/branding', desc: 'Logo, colors, contact info, social links' },
-      { name: 'SEO', href: '/admin/website/seo', desc: 'Meta titles, descriptions, and search settings' },
+      { name: 'Navigation Menu', href: '/admin/website/navigation', desc: 'Header menu, dropdowns, footer menu' },
+      { name: 'Footer', href: '/admin/website/footer', desc: 'Footer columns, links, copyright' },
+      { name: 'Branding', href: '/admin/website/branding', desc: 'Logo, favicon, colors, contact info' },
+      { name: 'SEO', href: '/admin/website/seo', desc: 'Meta titles, descriptions for all pages' },
+      { name: 'Media Library', href: '/admin/website/media', desc: 'Images, videos, document uploads' },
+      { name: 'Site Images', href: '/admin/website/images', desc: 'Site-wide image assets and fallbacks' },
+      { name: 'Site Settings', href: '/admin/website/settings', desc: 'General site configuration' },
+      { name: 'Transparency', href: '/admin/website/transparency', desc: 'Allocation, verification, impact report' },
+    ],
+  },
+  {
+    title: 'Other Pages',
+    subtitle: 'Additional content pages',
+    icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+    items: [
+      { name: 'Privacy Policy', href: '/admin/website/privacy', desc: 'Privacy policy page content' },
+      { name: 'Terms of Service', href: '/admin/website/terms', desc: 'Terms of service page content' },
+      { name: 'Volunteer Page', href: '/admin/website/volunteer', desc: 'Volunteer opportunities and form' },
     ],
   },
 ]
@@ -59,7 +133,7 @@ export function WebsiteDashboard() {
         <p className="text-gray-500 mt-1">Manage your entire website from one place — no coding required</p>
       </div>
 
-      {groups.map((section, si) => (
+      {groups.map((section) => (
         <div key={section.title}>
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 rounded-lg bg-amber-100 text-amber-600">
@@ -74,9 +148,9 @@ export function WebsiteDashboard() {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-            {section.items.map((item, ii) => (
+            {section.items.map((item) => (
               <Link
-                key={item.href}
+                key={item.href + item.name}
                 to={item.href}
                 className="group block bg-white border border-gray-100 rounded-xl px-4 py-3.5 hover:border-amber-500/30 hover:shadow-md hover:shadow-amber-500/5 transition-all duration-200"
               >

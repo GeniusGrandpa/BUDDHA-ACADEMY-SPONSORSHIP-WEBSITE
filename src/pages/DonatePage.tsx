@@ -13,12 +13,14 @@ import { StudentStory } from '../components/donate/StudentStory'
 import type { Student } from '../types/database'
 import type { StudentSummary } from '../components/donate/types'
 import type { DonationContent, PageHeader } from '../types/cms-content'
+import { DetailPageSkeleton } from '../components/ui/LoadingSkeleton'
 
 export function DonatePage() {
   const [searchParams] = useSearchParams()
   const { user } = useAuth()
   const [students, setStudents] = useState<Student[]>([])
   const [showPaymentModal, setShowPaymentModal] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [content, setContent] = useState<DonationContent | null>(null)
   const [pageHeader, setPageHeader] = useState<PageHeader | null>(null)
 
@@ -37,7 +39,7 @@ export function DonatePage() {
       setContent(donationContent)
       setPageHeader(header)
       setStudents(studentsData.filter(s => s.sponsorship_status !== 'fully_sponsored'))
-    }).catch(() => {})
+    }).catch(() => {}).finally(() => setLoading(false))
   }, [])
 
   useEffect(() => {
@@ -69,7 +71,7 @@ export function DonatePage() {
     return students[0] || null
   }, [studentSummaries, studentId, students])
 
-  if (!content) return null
+  if (loading || !content) return <div className="max-w-6xl mx-auto px-4 py-16"><DetailPageSkeleton /></div>
 
   const handlePresetClick = (value: number) => {
     setAmount(value)

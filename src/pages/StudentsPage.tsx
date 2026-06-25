@@ -10,6 +10,7 @@ import { useCmsStrings } from '../context/CmsStringsContext'
 import type { Student } from '../types/database'
 import type { PageHeader } from '../types/cms-content'
 import { formatNPR } from '../utils/currency'
+import { StudentCardSkeleton } from '../components/ui/LoadingSkeleton'
 
 export function StudentsPage() {
   const { t } = useCmsStrings()
@@ -75,8 +76,8 @@ export function StudentsPage() {
           <Tabs tabs={tabs} activeTab={activeFilter} onChange={setActiveFilter} className="mb-8" />
 
           {loading ? (
-            <div className="text-center py-12">
-              <div className="animate-pulse text-gray-500">{t('students_loading')}</div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {Array.from({ length: 6 }).map((_, i) => <StudentCardSkeleton key={i} />)}
             </div>
           ) : filteredStudents.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">

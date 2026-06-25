@@ -238,7 +238,7 @@ export function AdminPaymentVerificationPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm"
-            onClick={() => { if (!verifying[selectedSession.id]) setSelectedSession(null) }}
+            onClick={() => { if (selectedSession && !verifying[selectedSession.id]) setSelectedSession(null) }}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}

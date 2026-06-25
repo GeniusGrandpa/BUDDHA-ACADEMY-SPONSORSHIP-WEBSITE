@@ -10,6 +10,7 @@ import { getPageHeader } from '../services/cms-content'
 import { getSiteSettings } from '../services/settings'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import type { PageHeader } from '../types/cms-content'
+import { FormSkeleton } from '../components/ui/LoadingSkeleton'
 
 export function ContactPage() {
   const { t } = useCmsStrings()
@@ -78,7 +79,7 @@ export function ContactPage() {
     { value: 'other', label: 'Other' },
   ]
 
-  if (headerLoading) return <div className="text-center py-12 text-gray-400">{t('home_loading')}</div>
+  if (headerLoading) return <div className="max-w-4xl mx-auto px-4 py-16"><FormSkeleton fields={6} /></div>
 
   return (
     <div>

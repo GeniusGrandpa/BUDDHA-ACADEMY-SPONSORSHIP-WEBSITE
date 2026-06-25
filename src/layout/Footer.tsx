@@ -140,7 +140,6 @@ export function Footer() {
 
         <div className="flex flex-col md:flex-row justify-between items-center text-sm text-[var(--color-text-muted)]">
           <p>{copyrightText || `© ${new Date().getFullYear()} ${branding.footer_branding || ''}`} {t('footer.rights')}</p>
-          {footerContent?.nonprofit_text && <p className="mt-2 md:mt-0">{footerContent.nonprofit_text}</p>}
         </div>
       </div>
     </footer>
