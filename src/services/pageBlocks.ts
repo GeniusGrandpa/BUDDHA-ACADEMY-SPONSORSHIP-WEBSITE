@@ -40,7 +40,7 @@ export async function createPageBlock(
   slug: string,
   block: { block_type: PageBlockType; title?: string; content?: Record<string, unknown> }
 ): Promise<PageBlockDB> {
-  const { data: page } = await supabase.from('pages').select('id').eq('slug', slug).maybeSingle()
+  const { data: page } = await supabase.from('pages').select('id').eq('slug', slug).single()
   if (!page) throw new Error('Page not found')
 
   const { data: maxOrder } = await supabase
@@ -102,7 +102,7 @@ export async function updatePageBlock(
     .single()
   if (error) throw error
 
-  const { data: block } = await supabase.from('page_blocks').select('page_id').eq('id', blockId).maybeSingle()
+  const { data: block } = await supabase.from('page_blocks').select('page_id').eq('id', blockId).single()
   if (block) await syncPageBlocksJson(block.page_id)
 
   await logAuditEvent({
@@ -115,7 +115,7 @@ export async function updatePageBlock(
 }
 
 export async function deletePageBlock(blockId: string): Promise<void> {
-  const { data: block } = await supabase.from('page_blocks').select('page_id, block_type').eq('id', blockId).maybeSingle()
+  const { data: block } = await supabase.from('page_blocks').select('page_id, block_type').eq('id', blockId).single()
   if (!block) throw new Error('Block not found')
 
   await logAuditEvent({
@@ -131,7 +131,7 @@ export async function deletePageBlock(blockId: string): Promise<void> {
 }
 
 export async function duplicatePageBlock(blockId: string): Promise<PageBlockDB> {
-  const { data: original } = await supabase.from('page_blocks').select('*').eq('id', blockId).maybeSingle()
+  const { data: original } = await supabase.from('page_blocks').select('*').eq('id', blockId).single()
   if (!original) throw new Error('Block not found')
 
   const { data: maxOrder } = await supabase
@@ -187,12 +187,12 @@ export async function reorderPageBlocks(pageId: string, blockIds: string[]): Pro
 }
 
 export async function toggleBlockVisibility(blockId: string): Promise<PageBlockDB> {
-  const { data: current } = await supabase.from('page_blocks').select('is_visible').eq('id', blockId).maybeSingle()
+  const { data: current } = await supabase.from('page_blocks').select('is_visible').eq('id', blockId).single()
   return updatePageBlock(blockId, { is_visible: !current?.is_visible })
 }
 
 export async function toggleBlockDraft(blockId: string): Promise<PageBlockDB> {
-  const { data: current } = await supabase.from('page_blocks').select('is_draft').eq('id', blockId).maybeSingle()
+  const { data: current } = await supabase.from('page_blocks').select('is_draft').eq('id', blockId).single()
   return updatePageBlock(blockId, { is_draft: !current?.is_draft })
 }
 

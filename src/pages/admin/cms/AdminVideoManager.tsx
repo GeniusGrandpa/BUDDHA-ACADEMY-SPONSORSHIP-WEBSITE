@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { getVideos, createVideo, updateVideo, deleteVideo } from '../../../services/content'
 import type { Video } from '../../../types/database'
+import { GallerySkeleton } from '../../../components/ui/LoadingSkeleton'
 
 const VIDEO_CATEGORIES = [
   'School Events', 'Community Activities', 'Student Stories', 'Sponsorship Impact', 'General',
@@ -129,7 +130,7 @@ const [form, setForm] = useState({
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         {loading ? (
-          <div className="col-span-full text-center py-12 text-gray-500">Loading...</div>
+          <GallerySkeleton />
         ) : videos.length === 0 ? (
           <div className="col-span-full text-center py-12 text-gray-500">No videos found</div>
         ) : (

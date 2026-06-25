@@ -6,6 +6,7 @@ import { getNewsById } from '../services/news'
 import { getPageHeader } from '../services/cms-content'
 import type { PageHeader } from '../types/cms-content'
 import type { Database } from '../types/database'
+import { DetailPageSkeleton } from '../components/ui/LoadingSkeleton'
 
 type NewsArticle = Database['public']['Tables']['news']['Row'] & {
   featured_image?: string
@@ -34,7 +35,7 @@ export function NewsDetailPage() {
     }).catch(() => {}).finally(() => setLoading(false))
   }, [id])
 
-  if (loading) return <div className="text-center py-12 text-gray-400">Loading...</div>
+  if (loading) return <DetailPageSkeleton />
   if (!article) return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">

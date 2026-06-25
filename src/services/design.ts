@@ -187,7 +187,7 @@ export async function applyThemePreset(id: string): Promise<DesignSettings> {
     .from('theme_presets')
     .select('*')
     .eq('id', id)
-    .maybeSingle()
+    .single()
   if (fetchError) throw fetchError
 
   const p = preset as unknown as ThemePreset

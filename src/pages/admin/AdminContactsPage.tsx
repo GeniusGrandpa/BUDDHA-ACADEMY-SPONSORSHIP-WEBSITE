@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Card } from '../../components/ui/Card'
 import { getAllContactSubmissions, updateContactSubmissionStatus } from '../../services/contact'
 import type { ContactSubmission } from '../../types/database'
+import { TableSkeleton } from '../../components/ui/LoadingSkeleton'
 
 export function AdminContactsPage() {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([])
@@ -54,15 +55,15 @@ export function AdminContactsPage() {
         <p className="text-gray-600">View and manage contact form messages</p>
       </div>
 
-      <div className="space-y-4">
-        {loading ? (
-          <div className="text-center py-8 text-gray-500">Loading...</div>
-        ) : submissions.length === 0 ? (
-          <Card variant="bordered" className="text-center py-8 text-gray-500">
-            No contact submissions
-          </Card>
-        ) : (
-          submissions.map((submission) => (
+      {loading ? (
+        <TableSkeleton />
+      ) : submissions.length === 0 ? (
+        <Card variant="bordered" className="text-center py-8 text-gray-500">
+          No contact submissions
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {submissions.map((submission) => (
             <Card key={submission.id} variant="bordered" className={`${
               submission.status === 'unread' ? 'border-l-4 border-l-amber-500' : ''
             }`}>
@@ -95,9 +96,9 @@ export function AdminContactsPage() {
                 {formatDate(submission.created_at)}
               </div>
             </Card>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

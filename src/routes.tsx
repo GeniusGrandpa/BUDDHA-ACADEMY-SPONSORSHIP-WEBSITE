@@ -4,11 +4,16 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { Layout } from './layout/Layout'
 import { useAuth } from './context/AuthContext'
+import { DashboardSkeleton } from './components/ui/LoadingSkeleton'
 
 
 function LazyPage({ Component }: { Component: React.LazyExoticComponent<React.ComponentType> }) {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600" /></div>}>
+    <Suspense fallback={
+      <div className="min-h-[60vh] flex items-center justify-center p-8">
+        <DashboardSkeleton />
+      </div>
+    }>
       <Component />
     </Suspense>
   )
@@ -166,8 +171,8 @@ const AdminThemePresetsPage = lazy(() => import('./pages/admin/design/AdminTheme
 function AdminIndexRedirect() {
   const { profile, loading } = useAuth()
   if (loading || !profile) return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600" />
+    <div className="flex items-center justify-center min-h-screen p-8">
+      <DashboardSkeleton />
     </div>
   )
   if (profile.role === 'finance_manager') {

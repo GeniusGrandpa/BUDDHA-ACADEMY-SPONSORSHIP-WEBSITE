@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { upsertVolunteerContent, db } from '../../../services/cms-content'
 import type { VolunteerOpportunity, SkillOption } from '../../../types/cms-content'
+import { FormSkeleton } from '../../../components/ui/LoadingSkeleton'
 
 export function AdminVolunteerContent() {
   const [loading, setLoading] = useState(true)
@@ -51,7 +52,7 @@ export function AdminVolunteerContent() {
     finally { setSaving(false) }
   }
 
-  if (loading) return <div className="text-center py-12 text-gray-400">Loading...</div>
+  if (loading) return <FormSkeleton />
 
   return (
     <div>

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { motion, Reorder } from 'framer-motion'
 import toast from 'react-hot-toast'
 import {
@@ -91,19 +91,25 @@ export function AdminBlockEditor({ slug, pageId }: AdminBlockEditorProps) {
     try {
       const data = await getPageBlocks(slug)
       setBlocks(data)
-    } catch {
+    } catch (err) {
+      console.error('Failed to load blocks:', err)
       toast.error('Failed to load blocks')
     } finally {
       setLoading(false)
     }
   }, [slug])
 
+  useEffect(() => {
+    load()
+  }, [load])
+
   const handleReorder = async (reordered: PageBlockDB[]) => {
     setBlocks(reordered)
     const orderedIds = reordered.map(b => b.id)
     try {
       await reorderPageBlocks(pageId, orderedIds)
-    } catch {
+    } catch (err) {
+      console.error('Failed to reorder blocks:', err)
       toast.error('Failed to reorder')
       load()
     }
@@ -120,7 +126,8 @@ export function AdminBlockEditor({ slug, pageId }: AdminBlockEditorProps) {
       setBlocks(prev => [...prev, block])
       setExpandedId(block.id)
       toast.success(`Added ${BLOCK_TYPE_LABELS[type]}`)
-    } catch {
+    } catch (err) {
+      console.error('Failed to add block:', err)
       toast.error('Failed to add block')
     }
   }
@@ -131,7 +138,8 @@ export function AdminBlockEditor({ slug, pageId }: AdminBlockEditorProps) {
     try {
       const updated = await updatePageBlock(blockId, updates)
       setBlocks(prev => prev.map(b => b.id === blockId ? updated : b))
-    } catch {
+    } catch (err) {
+      console.error('Failed to update block:', err)
       toast.error('Failed to update block')
       load()
     } finally {
@@ -145,7 +153,8 @@ export function AdminBlockEditor({ slug, pageId }: AdminBlockEditorProps) {
       await deletePageBlock(blockId)
       setBlocks(prev => prev.filter(b => b.id !== blockId))
       toast.success('Block deleted')
-    } catch {
+    } catch (err) {
+      console.error('Failed to delete block:', err)
       toast.error('Failed to delete block')
     } finally {
       setDeletingId(null)
@@ -157,7 +166,8 @@ export function AdminBlockEditor({ slug, pageId }: AdminBlockEditorProps) {
       const dup = await duplicatePageBlock(blockId)
       setBlocks(prev => [...prev, dup])
       toast.success('Block duplicated')
-    } catch {
+    } catch (err) {
+      console.error('Failed to duplicate block:', err)
       toast.error('Failed to duplicate block')
     }
   }
@@ -168,7 +178,8 @@ export function AdminBlockEditor({ slug, pageId }: AdminBlockEditorProps) {
     setBlocks(prev => prev.map(b => b.id === blockId ? { ...b, is_visible: !b.is_visible } : b))
     try {
       await toggleBlockVisibility(blockId)
-    } catch {
+    } catch (err) {
+      console.error('Failed to toggle visibility:', err)
       toast.error('Failed to toggle visibility')
       setBlocks(prev => prev.map(b => b.id === blockId ? current : b))
     }
@@ -180,7 +191,8 @@ export function AdminBlockEditor({ slug, pageId }: AdminBlockEditorProps) {
     setBlocks(prev => prev.map(b => b.id === blockId ? { ...b, is_draft: !b.is_draft } : b))
     try {
       await toggleBlockDraft(blockId)
-    } catch {
+    } catch (err) {
+      console.error('Failed to toggle draft:', err)
       toast.error('Failed to toggle draft')
       setBlocks(prev => prev.map(b => b.id === blockId ? current : b))
     }

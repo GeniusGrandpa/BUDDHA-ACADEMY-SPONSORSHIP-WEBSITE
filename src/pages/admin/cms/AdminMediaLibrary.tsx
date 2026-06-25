@@ -4,6 +4,7 @@ import toast from 'react-hot-toast'
 import { useAuth } from '../../../context/AuthContext'
 import { getMedia, uploadMedia, updateMedia, deleteMedia } from '../../../services/content'
 import type { MediaItem } from '../../../types/database'
+import { GallerySkeleton } from '../../../components/ui/LoadingSkeleton'
 
 const ALLOWED_TYPES = [
   'image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml', 'image/bmp',
@@ -201,7 +202,7 @@ export function AdminMediaLibrary() {
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
         {loading ? (
-          <div className="col-span-full text-center py-12 text-gray-400">Loading...</div>
+          <GallerySkeleton />
         ) : filteredMedia.length === 0 ? (
           <div className="col-span-full text-center py-12 text-gray-500">
             <p>No media found</p>

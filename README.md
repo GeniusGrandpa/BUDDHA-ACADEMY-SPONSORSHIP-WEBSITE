@@ -228,9 +228,12 @@ The service layer keeps Supabase access organized by domain:
 
 ### CMS
 
-- Page builder with JSONB content blocks.
-- Structured editors for predefined pages.
-- Dedicated managers for news, gallery, testimonials, videos, FAQs, student stories, media, navigation, announcements, partners, and transparency content.
+- Website Management Hub (`/admin/content`) organizes tools into Pages, Collections, Branding & Design, and Settings sections.
+- Section-based page editors for homepage, about, contact, volunteer, privacy, and terms pages.
+- Dedicated content editors for donation, sponsorship, volunteer, footer, and transparency pages.
+- Collection managers for news, gallery, testimonials, videos, FAQs, student stories, and media library.
+- Homepage uses a drag-and-drop block builder with 18 block types (hero, text, stats, CTA, etc.).
+- Navigation, announcements, partners, site settings, and version history tools.
 
 ### Design System
 
@@ -321,7 +324,6 @@ Dedicated admin managers support:
 - Partners
 - Transparency content
 - Version history
-- Content analytics
 
 ### Media Library
 

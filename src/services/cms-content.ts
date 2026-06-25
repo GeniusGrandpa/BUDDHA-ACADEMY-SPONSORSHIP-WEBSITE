@@ -85,7 +85,7 @@ export async function getHeroContent(): Promise<HeroContent | null> {
     .eq('is_visible', true)
     .order('display_order', { ascending: true })
     .limit(1)
-    .maybeSingle()
+    .single()
   return data as HeroContent | null
 }
 
@@ -189,7 +189,7 @@ export async function getSectionContent(sectionKey: string): Promise<SectionCont
     .select('*')
     .eq('section_key', sectionKey)
     .eq('is_visible', true)
-    .maybeSingle()
+    .single()
   return data as SectionContent | null
 }
 

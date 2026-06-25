@@ -5,6 +5,7 @@ import { Card } from '../components/ui/Card'
 import { getPageHeader, getSiteImagesBySection } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import type { PageHeader, SiteImage } from '../types/cms-content'
+import { DetailPageSkeleton } from '../components/ui/LoadingSkeleton'
 
 interface TimelineItem { year: string; title: string; desc: string }
 interface ValueItem { title: string; desc: string }
@@ -115,7 +116,7 @@ export function AboutPage() {
     } catch {}
   }
 
-  if (loading) return <div className="text-center py-12 text-gray-400">Loading...</div>
+  if (loading) return <DetailPageSkeleton />
 
   const pageHeader = header ?? fallbackHeader
   const pageContent = { ...fallbackContent, ...content }
@@ -199,28 +200,62 @@ export function AboutPage() {
       )}
 
       {timeline.length > 0 && (
-        <section className="py-24 bg-white">
+        <section className="py-24 bg-white overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{text('about_journey_heading')}</h2>
               <p className="text-gray-600 max-w-2xl mx-auto">{text('about_journey_description')}</p>
             </div>
 
-            <div className="relative max-w-4xl mx-auto">
-              <div className="absolute left-3 top-0 bottom-0 w-0.5 bg-amber-200" />
-              <div className="space-y-8">
-                {timeline.map((item, idx) => (
-                  <div key={`${item.year}-${item.title}-${idx}`} className="relative flex items-start gap-6">
-                    <div className="w-6 h-6 rounded-full bg-amber-500 border-4 border-white shadow-lg z-10 flex-shrink-0" />
-                    <div className="flex-1">
-                      <div className="bg-amber-50 rounded-xl p-6 hover:shadow-lg transition-shadow">
-                        <div className="text-amber-600 font-bold text-lg mb-1">{item.year}</div>
-                        <h3 className="text-gray-900 text-xl font-semibold mb-2">{item.title}</h3>
-                        <p className="text-gray-600 text-sm">{item.desc}</p>
+            <div className="relative max-w-5xl mx-auto">
+              <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-amber-200 -translate-x-1/2 hidden md:block" />
+
+              <div className="space-y-12 md:space-y-16">
+                {timeline.map((item, idx) => {
+                  const isLeft = idx % 2 === 0
+                  return (
+                    <div key={`${item.year}-${item.title}-${idx}`} className="relative md:flex md:items-start">
+                      <div className={`flex-1 ${isLeft ? 'md:pr-12 md:text-right' : 'md:pl-12'}`}>
+                        <div className={`bg-amber-50 rounded-xl p-6 hover:shadow-lg transition-shadow relative ${isLeft ? 'md:mr-0' : 'md:ml-0'}`}>
+                          <div className="text-amber-600 font-bold text-lg mb-1">{item.year}</div>
+                          <h3 className="text-gray-900 text-xl font-semibold mb-2">{item.title}</h3>
+                          <p className="text-gray-600 text-sm">{item.desc}</p>
+                        </div>
+                      </div>
+
+                      <div className="hidden md:flex items-center justify-center w-12 shrink-0 relative z-10">
+                        <div className="w-5 h-5 rounded-full bg-amber-500 border-4 border-white shadow-lg" />
+                        {idx < timeline.length - 1 && (
+                          <div className="absolute top-5 w-0.5 h-16 bg-amber-200" />
+                        )}
+                      </div>
+
+                      <div className="hidden md:block flex-1" />
+
+                      <div className="flex md:hidden items-start gap-4 mt-4">
+                        <div className="w-8 h-8 rounded-full bg-amber-500 border-4 border-white shadow-lg flex-shrink-0 mt-1" />
+                        <div className="flex-1">
+                          <div className="bg-amber-50 rounded-xl p-5">
+                            <div className="text-amber-600 font-bold text-base mb-1">{item.year}</div>
+                            <h3 className="text-gray-900 text-lg font-semibold mb-1">{item.title}</h3>
+                            <p className="text-gray-600 text-sm">{item.desc}</p>
+                          </div>
+                        </div>
                       </div>
                     </div>
+                  )
+                })}
+
+                <div className="hidden md:flex justify-center">
+                  <div className="relative inline-flex items-center gap-2 bg-amber-100 rounded-full px-6 py-3 text-amber-800 font-medium">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                    </svg>
+                    {timeline.length > 0 && timeline[timeline.length - 1].title === 'Continuing the Mission'
+                      ? 'The journey continues...'
+                      : 'Growing stronger every year'}
                   </div>
-                ))}
+                </div>
               </div>
             </div>
           </div>

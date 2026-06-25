@@ -68,9 +68,15 @@ All routes defined in `src/routes.tsx` via `createBrowserRouter`.
 - `/admin/content/transparency` — Transparency content
 - `/admin/content/faqs` — FAQ manager
 - `/admin/content/media` — Media library
-- `/admin/content/pages/:slug` — Page editor (blocks + SEO)
+- `/admin/content/pages/:slug` — Page editor (About, Contact, Volunteer, Privacy, Terms)
+- `/admin/content/donation` — Donation page content
+- `/admin/content/sponsorship` — Sponsorship page content
+- `/admin/content/volunteer` — Volunteer page content
+- `/admin/content/footer` — Footer content
+- `/admin/content/transparency` — Transparency content
+- `/admin/content/images` — Site images
+- `/admin/content/sections` — Section visibility
 - `/admin/content/versions` — Version history
-- `/admin/content/analytics` — Content analytics
 - `/admin/content/settings` — Site settings
 - `/admin/content/navigation` — Navigation manager
 - `/admin/content/announcements` — Announcements

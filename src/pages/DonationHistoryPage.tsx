@@ -7,6 +7,7 @@ import { generateReceiptPDF, generateDonationHistoryPDF, exportToCSV } from '../
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { LoadingSpinner } from '../components/ui/LoadingSpinner'
+import { TableSkeleton } from '../components/ui/LoadingSkeleton'
 import { formatNPR } from '../utils/currency'
 import type { Donation } from '../types/database'
 import type { DonationWithPayment } from '../types/payments'
@@ -98,13 +99,7 @@ export function DonationHistoryPage() {
     return true
   })
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <LoadingSpinner />
-      </div>
-    )
-  }
+  if (loading) return <TableSkeleton />
 
   return (
     <div className="min-h-screen bg-gray-50">

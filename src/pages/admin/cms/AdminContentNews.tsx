@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { getAllNews, createNewsWithAuthor, updateNewsWithAuthor } from '../../../services/content'
 import type { News } from '../../../types/database'
+import { ListSkeleton } from '../../../components/ui/LoadingSkeleton'
 
 const NEWS_CATEGORIES = ['updates', 'events', 'impact'] as const
 const NEWS_TAGS = ['Sponsorship', 'Education', 'Community', 'Events', 'Achievements', 'General']
@@ -97,7 +98,7 @@ export function AdminContentNews() {
 
       <div className="space-y-3">
         {loading ? (
-          <div className="text-center py-12 text-gray-400">Loading...</div>
+          <ListSkeleton rows={5} />
         ) : articles.length === 0 ? (
           <div className="text-center py-12 text-gray-500">No articles yet</div>
         ) : (

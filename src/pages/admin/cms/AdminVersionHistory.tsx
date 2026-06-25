@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { getAllContentVersions, restoreContentVersion } from '../../../services/content'
 import type { ContentVersion } from '../../../types/database'
+import { ListSkeleton } from '../../../components/ui/LoadingSkeleton'
 
 const ENTITY_TYPES = [
   { value: 'all', label: 'All Types' },
@@ -77,7 +78,7 @@ export function AdminVersionHistory() {
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-gray-400">Loading...</div>
+        <ListSkeleton rows={5} />
       ) : versions.length === 0 ? (
         <div className="text-center py-12 text-gray-500">No versions found</div>
       ) : (

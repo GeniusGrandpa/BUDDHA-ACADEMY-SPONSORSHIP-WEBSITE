@@ -4,6 +4,7 @@ import { Badge } from '../../components/ui/Badge'
 import { formatNPR } from '../../utils/currency'
 import { getAllDonations, updateDonationStatus } from '../../services/donations'
 import type { Donation } from '../../types/database'
+import { TableSkeleton } from '../../components/ui/LoadingSkeleton'
 
 export function AdminDonationsPage() {
   const [donations, setDonations] = useState<Donation[]>([])
@@ -75,55 +76,55 @@ export function AdminDonationsPage() {
       </div>
 
       <Card variant="bordered" className="overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Frequency</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Student</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {loading ? (
+        {loading ? (
+          <TableSkeleton />
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
                 <tr>
-                  <td colSpan={5} className="px-6 py-4 text-center text-gray-500">Loading...</td>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Frequency</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Student</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                 </tr>
-              ) : donations.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-4 text-center text-gray-500">No donations found</td>
-                </tr>
-              ) : (
-                donations.map((donation) => (
-                  <tr key={donation.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 text-sm text-gray-600">{formatDate(donation.created_at)}</td>
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900">{formatNPR(donation.amount)}</td>
-                    <td className="px-6 py-4">
-                      <Badge variant="default">{donation.frequency}</Badge>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {donation.student_id || 'General'}
-                    </td>
-                    <td className="px-6 py-4">
-                      <select
-                        value={donation.status}
-                        onChange={(e) => handleStatusChange(donation.id, e.target.value as Donation['status'])}
-                        className="text-sm border rounded px-2 py-1"
-                        aria-label="Change donation status"
-                      >
-                        {statusOptions.map(opt => (
-                          <option key={opt.value} value={opt.value}>{opt.label}</option>
-                        ))}
-                      </select>
-                    </td>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {donations.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-4 text-center text-gray-500">No donations found</td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                ) : (
+                  donations.map((donation) => (
+                    <tr key={donation.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 text-sm text-gray-600">{formatDate(donation.created_at)}</td>
+                      <td className="px-6 py-4 text-sm font-medium text-gray-900">{formatNPR(donation.amount)}</td>
+                      <td className="px-6 py-4">
+                        <Badge variant="default">{donation.frequency}</Badge>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600">
+                        {donation.student_id || 'General'}
+                      </td>
+                      <td className="px-6 py-4">
+                        <select
+                          value={donation.status}
+                          onChange={(e) => handleStatusChange(donation.id, e.target.value as Donation['status'])}
+                          className="text-sm border rounded px-2 py-1"
+                          aria-label="Change donation status"
+                        >
+                          {statusOptions.map(opt => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          ))}
+                        </select>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
       </Card>
     </div>
   )

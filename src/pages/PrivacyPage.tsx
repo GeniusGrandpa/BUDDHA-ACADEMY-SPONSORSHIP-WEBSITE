@@ -3,6 +3,7 @@ import { Card } from '../components/ui/Card'
 import { getPageBySlug } from '../services/content'
 import { getPageHeader } from '../services/cms-content'
 import type { PageHeader } from '../types/cms-content'
+import { DetailPageSkeleton } from '../components/ui/LoadingSkeleton'
 
 interface PrivacyContent {
   title?: string
@@ -35,7 +36,7 @@ export function PrivacyPage() {
     }
   }
 
-  if (loading) return <div className="text-center py-12 text-gray-400">Loading...</div>
+  if (loading) return <DetailPageSkeleton />
 
   return (
     <div className="bg-gray-50 min-h-screen">

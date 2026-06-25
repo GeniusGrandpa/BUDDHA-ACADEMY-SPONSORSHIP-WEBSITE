@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { getGalleryItems, createGalleryItem, updateGalleryItem, deleteGalleryItem } from '../../../services/gallery'
 import type { GalleryItem } from '../../../types/database'
+import { GallerySkeleton } from '../../../components/ui/LoadingSkeleton'
 
 const GALLERY_TYPES = ['photo', 'video', 'testimonial']
 const GALLERY_CATEGORIES = ['School Life', 'Events', 'Community', 'Sponsorship', 'General']
@@ -138,7 +139,7 @@ export function AdminContentGallery() {
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {loading ? (
-          <div className="col-span-full text-center py-12 text-gray-500">Loading...</div>
+          <GallerySkeleton />
         ) : items.length === 0 ? (
           <div className="col-span-full text-center py-12 text-gray-500">No gallery items found</div>
         ) : (

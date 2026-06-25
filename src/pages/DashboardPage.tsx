@@ -8,6 +8,7 @@ import { Badge } from '../components/ui/Badge'
 import { getDonationsByDonor } from '../services/donations'
 import { getSponsorshipsByDonor } from '../services/sponsorships'
 import type { Donation, Sponsorship, Student } from '../types/database'
+import { DashboardSkeleton } from '../components/ui/LoadingSkeleton'
 
 type SponsorshipWithStudent = Sponsorship & { student: Student }
 
@@ -47,13 +48,7 @@ export function DashboardPage() {
   const totalDonated = donations.reduce((sum, d) => sum + d.amount, 0)
   const activeSponsorships = sponsorships.filter(s => s.status === 'active').length
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-gray-500">Loading...</div>
-      </div>
-    )
-  }
+  if (loading) return <DashboardSkeleton />
 
   return (
     <div className="bg-gray-50 min-h-screen py-8">

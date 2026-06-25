@@ -24,7 +24,7 @@ export function VolunteerEventsList() {
         .from('profiles')
         .select('role')
         .eq('id', user.id)
-        .maybeSingle()
+        .single()
       setUserRole(profile?.role || null)
 
       const userSignups = await getVolunteerSignups(user.id)

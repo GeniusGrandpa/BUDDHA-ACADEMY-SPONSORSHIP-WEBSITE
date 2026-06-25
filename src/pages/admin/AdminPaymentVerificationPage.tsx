@@ -4,6 +4,7 @@ import { formatNPR } from '../../utils/currency'
 import { getPendingVerifications, verifyPayment } from '../../services/payments'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
+import { TableSkeleton } from '../../components/ui/LoadingSkeleton'
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner'
 import { useToast } from '../../hooks/useToast'
 import { ToastContainer } from '../../components/ToastContainer'
@@ -122,11 +123,7 @@ export function AdminPaymentVerificationPage() {
   }
 
   if (initialLoad && loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <LoadingSpinner />
-      </div>
-    )
+    return <TableSkeleton />
   }
 
   return (

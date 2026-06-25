@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast'
 import { getAllPaymentSettings, updatePaymentSetting, togglePaymentGateway, createPaymentSetting, uploadQRCode } from '../../services/paymentSettings'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
+import { FormSkeleton } from '../../components/ui/LoadingSkeleton'
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner'
 import type { PaymentSetting, PaymentGateway } from '../../types/payments'
 
@@ -106,11 +107,7 @@ export function AdminPaymentSettingsPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <LoadingSpinner />
-      </div>
-    )
+    return <FormSkeleton />
   }
 
   return (

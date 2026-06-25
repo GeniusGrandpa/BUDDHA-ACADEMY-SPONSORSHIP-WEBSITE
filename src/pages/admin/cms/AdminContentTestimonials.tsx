@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { getTestimonialsWithType, createTestimonial, updateTestimonial, deleteTestimonial } from '../../../services/content'
 import type { Testimonial } from '../../../types/database'
+import { ListSkeleton } from '../../../components/ui/LoadingSkeleton'
 
 const TESTIMONIAL_TYPES = [
   { value: 'donor', label: 'Donor' },
@@ -128,7 +129,7 @@ const [form, setForm] = useState<TestimonialForm>({
 
       <div className="space-y-3">
         {loading ? (
-          <div className="text-center py-12 text-gray-400">Loading...</div>
+          <ListSkeleton rows={5} />
         ) : items.length === 0 ? (
           <div className="text-center py-12 text-gray-500">No testimonials found</div>
         ) : (

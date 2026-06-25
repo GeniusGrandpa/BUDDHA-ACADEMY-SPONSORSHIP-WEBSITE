@@ -5,6 +5,7 @@ import { submitVolunteerApplication } from '../services/volunteerApplications'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import type { VolunteerContent, PageHeader } from '../types/cms-content'
 import type { VolunteerEvent } from '../types/database'
+import { FormSkeleton } from '../components/ui/LoadingSkeleton'
 
 export function VolunteerPage() {
   const { t } = useCmsStrings()
@@ -55,7 +56,7 @@ export function VolunteerPage() {
     }
   }
 
-  if (loading) return <div className="text-center py-12 text-gray-400">Loading...</div>
+  if (loading) return <FormSkeleton />
 
   const opportunities = content?.opportunities || []
   const skillOptions = content?.skill_options || []

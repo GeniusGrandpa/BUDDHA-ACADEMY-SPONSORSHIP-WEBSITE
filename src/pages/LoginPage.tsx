@@ -154,7 +154,7 @@ export function LoginPage() {
           .from('profiles')
           .select('role')
           .eq('id', session.user.id)
-          .maybeSingle()
+          .single()
 
         if (profileData?.role) {
           redirectByRole(profileData.role as Role)

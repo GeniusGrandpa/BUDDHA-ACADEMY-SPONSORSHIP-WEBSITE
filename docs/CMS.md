@@ -4,6 +4,8 @@ Admin and Super Admin can manage all visible website content dynamically through
 
 ## Design System (`/admin/design/*`)
 
+Accessible from the **Branding & Design** section of the Website Management Hub (`/admin/content`).
+
 Design tokens are stored as JSONB in the `design_settings` Supabase table with a draft/publish workflow.
 
 ### How It Works
@@ -41,11 +43,22 @@ Design tokens are stored as JSONB in the `design_settings` Supabase table with a
 
 ## Content Management (`/admin/content/*`)
 
-### Page Builder
+### Website Management Hub
 
-Two approaches for content management:
+The [`AdminContentDashboard`](../src/pages/admin/cms/AdminContentDashboard.tsx) at `/admin/content` presents a sectioned dashboard organizing all content tools into four groups:
 
-**Dynamic Page Builder** — `DynamicPage` component fetches a `pages` row by slug, renders each `PageBlock` through `BlockRenderer` (18 block types). Blocks are reorderable, have visibility toggles, and store content as JSONB. Supported block types:
+| Section              | Items                                                                 |
+|----------------------|-----------------------------------------------------------------------|
+| **Pages**            | Home Page, About Us, Sponsorship, Donation, Volunteer, Contact, FAQ, Privacy Policy, Terms of Service, Footer, Transparency |
+| **Collections**      | Student Stories, Testimonials, Gallery, News & Updates, Videos        |
+| **Branding & Design**| Branding (logo/name), Colors, Typography, Site Images, Navigation Menu |
+| **Settings**         | Site Settings, Announcements, Partners, Section Visibility, Version History |
+
+### Page Editors
+
+Three approaches for editing page content:
+
+**Block-based Homepage** — The `AdminBlockEditor` inside [`AdminHomepageEditor`](../src/pages/admin/cms/AdminHomepageEditor.tsx) provides drag-and-drop block management for the Home Page. Supported block types:
 
 | Block Type       | Purpose                           |
 |------------------|-----------------------------------|
@@ -67,11 +80,19 @@ Two approaches for content management:
 | announcements    | Announcement banners              |
 | custom_section   | Free-form HTML/content            |
 
-**Structured Static Pages** — `AdminPageEditor` provides form-based editing for predefined pages (about, contact, volunteer, privacy, terms) using `PAGE_META` config.
+**Form-based Page Editor** — [`AdminPageEditor`](../src/pages/admin/cms/AdminPageEditor.tsx) renders a simple form for each page's content fields (text inputs, textareas, arrays) with a Publish toggle and live Preview link. Used for About, Contact, Volunteer, Privacy Policy, and Terms pages. No block editor — staff edit structured fields directly.
 
-**Homepage Editor** — Section-based editor for homepage sections (hero, stats, features, CTA) from `homepage_sections` table.
+**Dedicated Content Editors** — Separate form-based editors for pages with specialized data models:
 
-### Dedicated Content Managers
+| Editor            | Route                            | Purpose                          |
+|-------------------|----------------------------------|----------------------------------|
+| Donation Content  | `/admin/content/donation`        | Hero, impact cards, process steps|
+| Sponsorship Content| `/admin/content/sponsorship`    | Hero, packages, how-it-works     |
+| Volunteer Content | `/admin/content/volunteer`       | Hero, opportunities, CTA         |
+| Footer Content    | `/admin/content/footer`          | Columns, links, copyright, social|
+| Transparency      | `/admin/content/transparency`    | Donation allocation, impact stats|
+
+### Dedicated Collection Managers
 
 | Manager               | Route                            | Purpose                          |
 |-----------------------|----------------------------------|----------------------------------|
@@ -86,9 +107,9 @@ Two approaches for content management:
 | Site Settings         | `/admin/content/settings`        | Global site name, logo, SEO, social links, maintenance mode |
 | Announcements         | `/admin/content/announcements`   | Announcement banners             |
 | Partners              | `/admin/content/partners`        | Partner/sponsor logos            |
-| Transparency          | `/admin/content/transparency`    | Donation allocation, impact stats|
+| Section Visibility    | `/admin/content/sections`        | Show/hide sections across pages  |
+| Site Images           | `/admin/content/images`          | Manage site-wide images/backgrounds|
 | Version History       | `/admin/content/versions`        | Content version history & restore|
-| Content Analytics     | `/admin/content/analytics`       | Content usage counts             |
 
 ### Header & Footer
 
@@ -112,3 +133,11 @@ Both `Header` and `Footer` components load their data from the CMS:
 | `announcements`     | Announcement banners           |
 | `partners`          | Partner/sponsor entries        |
 | `content_versions`  | Content version history        |
+| `donation_content`  | Donation page content          |
+| `sponsorship_content`| Sponsorship page content      |
+| `volunteer_content` | Volunteer page content         |
+| `footer_content`    | Footer content                 |
+| `transparency_content`| Transparency content         |
+| `site_images`       | Site-wide images and logos     |
+| `section_visibility`| Section visibility toggles     |
+| `cms_strings`       | CMS-driven UI string overrides |

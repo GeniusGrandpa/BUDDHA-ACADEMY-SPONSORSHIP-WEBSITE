@@ -3,6 +3,7 @@ import { motion, AnimatePresence, Reorder } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { getFaqs, createFaq, updateFaq, deleteFaq, reorderFaqs } from '../../../services/content'
 import type { Faq } from '../../../types/database'
+import { ListSkeleton } from '../../../components/ui/LoadingSkeleton'
 
 const FAQ_CATEGORIES = ['Sponsorship', 'Donations', 'General', 'Volunteering', 'Partnerships']
 
@@ -101,7 +102,7 @@ const [form, setForm] = useState({ question: '', answer: '', category: 'General'
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-gray-400">Loading...</div>
+        <ListSkeleton rows={5} />
       ) : faqs.length === 0 ? (
         <div className="text-center py-12 text-gray-500">No FAQs found</div>
       ) : (

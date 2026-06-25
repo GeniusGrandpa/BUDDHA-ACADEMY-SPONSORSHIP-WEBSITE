@@ -4,6 +4,7 @@ import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-p
 import toast from 'react-hot-toast'
 import { getSectionVisibility, updateSectionVisibility, db } from '../../../services/cms-content'
 import type { SectionVisibility } from '../../../types/cms-content'
+import { ListSkeleton } from '../../../components/ui/LoadingSkeleton'
 
 export function AdminSectionVisibility() {
   const [sections, setSections] = useState<SectionVisibility[]>([])
@@ -59,7 +60,7 @@ export function AdminSectionVisibility() {
     finally { setSaving(false) }
   }
 
-  if (loading) return <div className="text-center py-12 text-gray-400">Loading...</div>
+  if (loading) return <ListSkeleton rows={5} />
 
   return (
     <div>

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { getStudentStories, createStudentStory, updateStudentStory, deleteStudentStory } from '../../../services/content'
 import type { StudentStory } from '../../../types/database'
+import { ListSkeleton } from '../../../components/ui/LoadingSkeleton'
 
 export function AdminStudentStories() {
   const [stories, setStories] = useState<StudentStory[]>([])
@@ -105,7 +106,7 @@ export function AdminStudentStories() {
 
       <div className="grid md:grid-cols-2 gap-4">
         {loading ? (
-          <div className="col-span-full text-center py-12 text-gray-400">Loading...</div>
+          <ListSkeleton rows={4} />
         ) : stories.length === 0 ? (
           <div className="col-span-full text-center py-12 text-gray-500">No stories yet</div>
         ) : (

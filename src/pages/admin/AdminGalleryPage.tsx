@@ -3,6 +3,7 @@ import { Edit, Trash2 } from 'lucide-react'
 import { Card } from '../../components/ui/Card'
 import { getGalleryItems, updateGalleryItem, deleteGalleryItem } from '../../services/gallery'
 import type { GalleryItem } from '../../types/database'
+import { GallerySkeleton } from '../../components/ui/LoadingSkeleton'
 
 export function AdminGalleryPage() {
   const [items, setItems] = useState<GalleryItem[]>([])
@@ -63,13 +64,13 @@ export function AdminGalleryPage() {
         </button>
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {loading ? (
-          <div className="col-span-full text-center py-8 text-gray-500">Loading...</div>
-        ) : items.length === 0 ? (
-          <div className="col-span-full text-center py-8 text-gray-500">No gallery items found</div>
-        ) : (
-          items.map((item) => (
+      {loading ? (
+        <GallerySkeleton />
+      ) : items.length === 0 ? (
+        <div className="text-center py-8 text-gray-500">No gallery items found</div>
+      ) : (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {items.map((item) => (
             <Card key={item.id} variant="bordered" className="overflow-hidden">
               {item.type === 'photo' && (
                 <img src={item.url} alt={item.title} className="w-full h-40 object-cover" />
@@ -121,9 +122,9 @@ export function AdminGalleryPage() {
                 </div>
               </div>
             </Card>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

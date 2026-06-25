@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { getTransparencyContent, getPageHeader } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import type { TransparencyContent, PageHeader } from '../types/cms-content'
+import { DetailPageSkeleton } from '../components/ui/LoadingSkeleton'
 
 export function TransparencyPage() {
   const { t } = useCmsStrings()
@@ -19,7 +20,7 @@ export function TransparencyPage() {
     }).finally(() => setLoading(false))
   }, [])
 
-  if (loading) return <div className="text-center py-12 text-gray-400">Loading...</div>
+  if (loading) return <DetailPageSkeleton />
 
   const allocationData = content?.allocation_data || []
   const verificationSteps = content?.verification_steps || []

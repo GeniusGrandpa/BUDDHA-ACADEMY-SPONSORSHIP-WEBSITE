@@ -7,6 +7,7 @@ import { supabase } from '../../lib/supabase'
 import { createNotification, NOTIFICATION_TYPES } from '../../services/notifications'
 import type { Notification } from '../../types/database'
 import type { Role } from '../../types/permissions'
+import { ListSkeleton } from '../../components/ui/LoadingSkeleton'
 
 const PAGE_SIZE = 20
 
@@ -322,9 +323,7 @@ const userRole = profile?.role as Role | undefined
 
       <Card variant="bordered" className="overflow-hidden">
         {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
-          </div>
+          <ListSkeleton />
         ) : notifications.length === 0 ? (
           <div className="flex flex-col items-center py-16 text-center px-4">
             <Bell className="w-12 h-12 text-gray-300 mb-3" />

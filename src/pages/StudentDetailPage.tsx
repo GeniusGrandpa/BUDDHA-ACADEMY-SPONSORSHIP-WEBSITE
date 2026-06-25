@@ -9,6 +9,7 @@ import { getSiteImage } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import type { Student } from '../types/database'
 import { formatNPR } from '../utils/currency'
+import { DetailPageSkeleton } from '../components/ui/LoadingSkeleton'
 
 export function StudentDetailPage() {
   const { t } = useCmsStrings()
@@ -37,13 +38,7 @@ export function StudentDetailPage() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-gray-500">{t('student_loading')}</div>
-      </div>
-    )
-  }
+  if (loading) return <DetailPageSkeleton />
 
   if (!student) {
     return (

@@ -5,6 +5,7 @@ import { Button } from '../components/ui/Button'
 import { getSponsorshipContent, getSiteImage } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import type { SponsorshipContent } from '../types/cms-content'
+import { DetailPageSkeleton } from '../components/ui/LoadingSkeleton'
 
 export function SponsorshipPage() {
   const { t } = useCmsStrings()
@@ -30,7 +31,7 @@ export function SponsorshipPage() {
     } catch {}
   }
 
-  if (loading) return <div className="text-center py-12 text-gray-400">Loading...</div>
+  if (loading) return <DetailPageSkeleton />
 
   const steps = content?.steps || []
   const benefits = content?.benefits || []

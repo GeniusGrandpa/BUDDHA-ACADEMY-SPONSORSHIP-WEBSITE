@@ -1,20 +1,14 @@
 import { useState, useEffect, useCallback } from 'react'
-import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
-import { getPageBySlug, upsertPage, getContentVersions } from '../../../services/content'
+import { getPageBySlug, upsertPage } from '../../../services/content'
 import { AdminBlockEditor } from '../../../components/blocks/AdminBlockEditor'
-import type { ContentVersion } from '../../../types/database'
 
 export function AdminHomepageEditor() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [pageId, setPageId] = useState<string>('')
+  const [pageId, setPageId] = useState('')
   const [pageTitle, setPageTitle] = useState('Homepage')
   const [published, setPublished] = useState(false)
-  const [activeTab, setActiveTab] = useState<'blocks' | 'versions'>('blocks')
-  const [versions, setVersions] = useState<ContentVersion[]>([])
-  const [versionsLoading, setVersionsLoading] = useState(false)
-
   const loadPage = useCallback(async () => {
     setLoading(true)
     try {
@@ -32,25 +26,6 @@ export function AdminHomepageEditor() {
   }, [])
 
   useEffect(() => { loadPage() }, [loadPage])
-
-  const loadVersions = useCallback(async () => {
-    if (!pageId) return
-    setVersionsLoading(true)
-    try {
-      const data = await getContentVersions('pages', pageId)
-      setVersions(data)
-    } catch {
-      toast.error('Failed to load version history')
-    } finally {
-      setVersionsLoading(false)
-    }
-  }, [pageId])
-
-  useEffect(() => {
-    if (activeTab === 'versions' && pageId) {
-      loadVersions()
-    }
-  }, [activeTab, pageId, loadVersions])
 
   const handleTogglePublish = async () => {
     const newPublished = !published
@@ -77,21 +52,26 @@ export function AdminHomepageEditor() {
     return <div className="text-center py-12 text-gray-400">Loading homepage...</div>
   }
 
-  const tabs: { key: typeof activeTab; label: string; icon: string }[] = [
-    { key: 'blocks', label: 'Page Builder', icon: 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z' },
-    { key: 'versions', label: 'Version History', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
-  ]
-
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Homepage Editor</h1>
-          <p className="text-gray-500 mt-1">
-            Build your homepage by adding and arranging content blocks
-          </p>
+          <h1 className="text-2xl font-bold text-gray-900">Home Page</h1>
+          <p className="text-gray-500 mt-1">Edit the content sections on your home page</p>
         </div>
         <div className="flex items-center gap-3">
+          <a
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" />
+            </svg>
+            Preview
+          </a>
           <button
             onClick={handleTogglePublish}
             disabled={saving}
@@ -118,69 +98,15 @@ export function AdminHomepageEditor() {
         </div>
       </div>
 
-      <div className="mb-6">
-        <div className="flex border-b border-gray-200">
-          {tabs.map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center gap-2 px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === tab.key
-                  ? 'border-amber-500 text-amber-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={tab.icon} />
-              </svg>
-              {tab.label}
-            </button>
-          ))}
+      <div className="bg-white border border-gray-100 rounded-xl">
+        <div className="px-6 py-4 border-b border-gray-100">
+          <h3 className="text-sm font-semibold text-gray-900">Content Sections</h3>
+          <p className="text-xs text-gray-500 mt-0.5">Add, edit, and arrange sections on your home page</p>
+        </div>
+        <div className="p-6">
+          <AdminBlockEditor slug="home" pageId={pageId} />
         </div>
       </div>
-
-      {activeTab === 'blocks' && (
-        <motion.div key="blocks" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          <AdminBlockEditor slug="home" pageId={pageId} />
-        </motion.div>
-      )}
-
-      {activeTab === 'versions' && (
-        <motion.div key="versions" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          <div className="bg-white border border-gray-100 rounded-xl">
-            <div className="px-6 py-4 border-b border-gray-100">
-              <h3 className="text-sm font-semibold text-gray-900">Version History</h3>
-              <p className="text-xs text-gray-500 mt-0.5">Each save creates a new version that can be restored</p>
-            </div>
-            {versionsLoading ? (
-              <div className="text-center py-8">
-                <div className="animate-spin w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full mx-auto" />
-              </div>
-            ) : versions.length === 0 ? (
-              <div className="text-center py-8 text-gray-400 text-sm">No versions yet. Save the page to create a version.</div>
-            ) : (
-              <div className="divide-y divide-gray-100">
-                {versions.map((version) => (
-                  <div key={version.id} className="px-6 py-3 flex items-center justify-between">
-                    <div>
-                      <span className="text-sm font-medium text-gray-900">v{version.version_number}</span>
-                      {version.restored_at && (
-                        <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Restored</span>
-                      )}
-                      {version.published && (
-                        <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Published</span>
-                      )}
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        {new Date(version.created_at).toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </motion.div>
-      )}
     </div>
   )
 }

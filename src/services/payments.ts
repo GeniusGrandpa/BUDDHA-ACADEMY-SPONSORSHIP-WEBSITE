@@ -144,7 +144,7 @@ export async function getPaymentSession(sessionId: string): Promise<PaymentSessi
     .from('payment_sessions')
     .select('*')
     .eq('id', sessionId)
-    .maybeSingle()
+    .single()
 
   if (error) return null
   return data as unknown as PaymentSession | null
@@ -166,7 +166,7 @@ export async function getPaymentReceipt(donationId: string): Promise<PaymentRece
     .from('payment_receipts')
     .select('*')
     .eq('donation_id', donationId)
-    .maybeSingle()
+    .single()
 
   if (error) return null
   return data as unknown as PaymentReceipt | null
@@ -208,7 +208,7 @@ export async function uploadPaymentScreenshot(
     .from('payment_sessions')
     .select('donor_id')
     .eq('id', sessionId)
-    .maybeSingle()
+    .single()
 
   const userId = session?.donor_id
   if (!userId) throw new Error('Session not found')

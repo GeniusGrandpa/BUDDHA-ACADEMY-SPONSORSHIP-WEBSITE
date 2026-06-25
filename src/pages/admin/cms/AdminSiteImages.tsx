@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { upsertSiteImage, deleteSiteImage, db } from '../../../services/cms-content'
 import type { SiteImage } from '../../../types/cms-content'
+import { TableSkeleton } from '../../../components/ui/LoadingSkeleton'
 
 const SECTIONS = ['home', 'about', 'donation', 'sponsorship', 'volunteer', 'gallery', 'footer']
 
@@ -100,7 +101,7 @@ export function AdminSiteImages() {
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-gray-400">Loading...</div>
+        <TableSkeleton rows={5} />
       ) : filtered.length === 0 ? (
         <div className="text-center py-12 text-gray-500">No images found</div>
       ) : (

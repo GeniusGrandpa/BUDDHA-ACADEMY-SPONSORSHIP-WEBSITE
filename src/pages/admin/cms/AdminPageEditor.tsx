@@ -1,9 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { useParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { getPageBySlug, upsertPage } from '../../../services/content'
-import { AdminBlockEditor } from '../../../components/blocks/AdminBlockEditor'
 import type { Json } from '../../../types/database'
 import type { PageContentItem, PageContentRecord, PageContentValue } from '../../../types/cms'
 
@@ -21,8 +19,8 @@ interface PageMeta {
 
 const PAGE_META: Record<string, PageMeta> = {
   about: {
-    title: 'About Page',
-    description: 'Edit the about page content, mission, vision, values, timeline.',
+    title: 'About Us',
+    description: 'Edit your about page — mission, vision, values, and history timeline.',
     defaultContent: {
       title: 'About Buddha Academy',
       subtitle: "For over four decades, we've been providing free, quality education.",
@@ -43,8 +41,8 @@ const PAGE_META: Record<string, PageMeta> = {
     },
   },
   contact: {
-    title: 'Contact Page',
-    description: 'Edit contact information, address, phone, email, and office hours.',
+    title: 'Contact',
+    description: 'Edit your contact page — address, phone, email, and office hours.',
     defaultContent: {
       title: 'Contact Us',
       subtitle: "Have questions? We'd love to hear from you.",
@@ -75,8 +73,8 @@ const PAGE_META: Record<string, PageMeta> = {
     },
   },
   volunteer: {
-    title: 'Volunteer Page',
-    description: 'Edit volunteer opportunities, requirements, and call-to-action.',
+    title: 'Volunteer',
+    description: 'Edit your volunteer page — opportunities, requirements, and call-to-action.',
     defaultContent: {
       title: 'Volunteer With Us',
       subtitle: "Share your skills and make a direct impact on children's lives.",
@@ -99,7 +97,7 @@ const PAGE_META: Record<string, PageMeta> = {
   },
   privacy: {
     title: 'Privacy Policy',
-    description: 'Edit the privacy policy legal text.',
+    description: 'Edit your privacy policy text.',
     defaultContent: {
       title: 'Privacy Policy',
       lastUpdated: 'June 2025',
@@ -113,7 +111,7 @@ const PAGE_META: Record<string, PageMeta> = {
   },
   terms: {
     title: 'Terms of Service',
-    description: 'Edit the terms of service legal text.',
+    description: 'Edit your terms and conditions text.',
     defaultContent: {
       title: 'Terms & Conditions',
       lastUpdated: 'June 2025',
@@ -148,10 +146,8 @@ export function AdminPageEditor() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [pageExists, setPageExists] = useState(false)
-  const [pageId, setPageId] = useState('')
   const [published, setPublished] = useState(false)
   const [formData, setFormData] = useState<PageContentRecord>({})
-  const [activeTab, setActiveTab] = useState<'content' | 'blocks'>('content')
 
   const meta = slug ? PAGE_META[slug] : undefined
 
@@ -160,7 +156,6 @@ export function AdminPageEditor() {
     try {
       const page = await getPageBySlug(slug!)
       if (page) {
-        setPageId(page.id)
         setPageExists(true)
         setPublished(page.published ?? false)
         if (page.content && Object.keys(page.content).length > 0) {
@@ -169,7 +164,6 @@ export function AdminPageEditor() {
           setFormData(meta?.defaultContent ?? {})
         }
       } else {
-        setPageId('')
         setPageExists(false)
         setPublished(false)
         setFormData(meta?.defaultContent ?? {})
@@ -263,11 +257,6 @@ export function AdminPageEditor() {
     })
   }
 
-  const tabs: { key: typeof activeTab; label: string; icon: string }[] = [
-    { key: 'content', label: 'Content', icon: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z' },
-    { key: 'blocks', label: 'Blocks', icon: 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z' },
-  ]
-
   if (!slug || !meta) {
     return <div className="text-center py-12 text-gray-400">Page not found</div>
   }
@@ -275,8 +264,6 @@ export function AdminPageEditor() {
   if (loading) {
     return <div className="text-center py-12 text-gray-400">Loading content...</div>
   }
-
-  const fields = Object.keys(formData)
 
   return (
     <div>
@@ -286,19 +273,18 @@ export function AdminPageEditor() {
           <p className="text-gray-500 mt-1">{meta.description}</p>
         </div>
         <div className="flex items-center gap-3">
-          {slug !== 'home' && (
-            <Link
-              to={`/${slug}`}
-              target="_blank"
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" />
-              </svg>
-              Preview
-            </Link>
-          )}
+          <a
+            href={`/${slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" />
+            </svg>
+            Preview
+          </a>
           <button
             onClick={handleTogglePublish}
             disabled={saving}
@@ -344,164 +330,135 @@ export function AdminPageEditor() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-2m4 0h-6" />
           </svg>
           <p className="text-sm text-amber-700">
-            This page has no saved content yet. Edit the fields below and click "Save Changes" to create it.
+            This page has no saved content yet. Fill in the fields below and click "Save Changes" to create it.
           </p>
         </div>
       )}
 
-      <div className="mb-6">
-        <div className="flex border-b border-gray-200">
-          {tabs.map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center gap-2 px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === tab.key
-                  ? 'border-amber-500 text-amber-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={tab.icon} />
-              </svg>
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      <div className="space-y-6">
+        {Object.keys(formData).length === 0 ? (
+          <div className="text-center py-8 text-gray-400">
+            <p>No content fields available for this page.</p>
+          </div>
+        ) : (
+          Object.entries(meta.fieldConfig).map(([key, config]) => {
+            const value = formData[key]
 
-      {activeTab === 'content' && (
-        <motion.div key="content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-          {fields.length === 0 ? (
-            <div className="text-center py-8 text-gray-400">
-              <p>No content fields defined. Add content in the editor.</p>
-            </div>
-          ) : (
-            Object.entries(meta.fieldConfig).map(([key, config]) => {
-              const value = formData[key]
+            if (config.type === 'textarea') {
+              return (
+                <div key={key} className="bg-white border border-gray-100 rounded-xl p-6">
+                  <label className="block text-sm font-medium text-gray-600 mb-2">{config.label}</label>
+                  <textarea
+                    value={typeof value === 'string' ? value : ''}
+                    onChange={(e) => updateField(key, e.target.value)}
+                    rows={6}
+                    placeholder={`Enter ${config.label.toLowerCase()}...`}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 resize-vertical"
+                  />
+                </div>
+              )
+            }
 
-              if (config.type === 'textarea') {
-                return (
-                  <div key={key} className="bg-white border border-gray-100 rounded-xl p-6">
-                    <label className="block text-sm font-medium text-gray-600 mb-2">{config.label}</label>
-                    <textarea
-                      value={typeof value === 'string' ? value : ''}
-                      onChange={(e) => updateField(key, e.target.value)}
-                      rows={6}
-                      placeholder={`Enter ${config.label.toLowerCase()}...`}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:border-amber-500/50 resize-vertical"
-                    />
+            if (config.type === 'text') {
+              return (
+                <div key={key} className="bg-white border border-gray-100 rounded-xl p-6">
+                  <label className="block text-sm font-medium text-gray-600 mb-2">{config.label}</label>
+                  <input
+                    type="text"
+                    value={typeof value === 'string' ? value : ''}
+                    onChange={(e) => updateField(key, e.target.value)}
+                    placeholder={`Enter ${config.label.toLowerCase()}...`}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20"
+                  />
+                </div>
+              )
+            }
+
+            if (config.type === 'array' && Array.isArray(value)) {
+              const isStringArray = typeof value[0] === 'string'
+              const isObjectArray = typeof value[0] === 'object'
+
+              return (
+                <div key={key} className="bg-white border border-gray-100 rounded-xl p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">{config.label}</h3>
+                    <button
+                      onClick={() => addArrayItem(key, isObjectArray ? {} : '')}
+                      className="px-3 py-1.5 rounded-lg text-xs bg-amber-500/20 text-amber-600 hover:bg-amber-500/30 transition-colors"
+                    >
+                      + Add Item
+                    </button>
                   </div>
-                )
-              }
-
-              if (config.type === 'text') {
-                return (
-                  <div key={key} className="bg-white border border-gray-100 rounded-xl p-6">
-                    <label className="block text-sm font-medium text-gray-600 mb-2">{config.label}</label>
-                    <input
-                      type="text"
-                      value={typeof value === 'string' ? value : ''}
-                      onChange={(e) => updateField(key, e.target.value)}
-                      placeholder={`Enter ${config.label.toLowerCase()}...`}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:border-amber-500/50"
-                    />
-                  </div>
-                )
-              }
-
-              if (config.type === 'array' && Array.isArray(value)) {
-                const isStringArray = typeof value[0] === 'string'
-                const isObjectArray = typeof value[0] === 'object'
-
-                return (
-                  <div key={key} className="bg-white border border-gray-100 rounded-xl p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900">{config.label}</h3>
-                      <button
-                        onClick={() => addArrayItem(key, isObjectArray ? {} : '')}
-                        className="px-3 py-1.5 rounded-lg text-xs bg-amber-500/20 text-amber-600 hover:bg-amber-500/30"
-                      >
-                        + Add Item
-                      </button>
+                  {value.length === 0 ? (
+                    <p className="text-gray-400 text-sm">No items yet. Click "Add Item" to add one.</p>
+                  ) : isStringArray ? (
+                    <div className="space-y-2">
+                      {(value as string[]).map((item: string, idx: number) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          <span className="text-xs text-gray-500 w-6">{idx + 1}.</span>
+                          <input
+                            type="text"
+                            value={item}
+                            onChange={(e) => updateArrayItem(key, idx, e.target.value)}
+                            placeholder={`Enter item ${idx + 1}...`}
+                            className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20"
+                          />
+                          <button
+                            onClick={() => removeArrayItem(key, idx)}
+                            className="p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-500"
+                            aria-label={`Remove item ${idx + 1}`}
+                          >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
                     </div>
-                    {value.length === 0 ? (
-                      <p className="text-gray-400 text-sm">No items. Click "Add Item" to add one.</p>
-                    ) : isStringArray ? (
-                      <div className="space-y-2">
-                        {(value as string[]).map((item: string, idx: number) => (
-                          <div key={idx} className="flex items-center gap-2">
-                            <span className="text-xs text-gray-500 w-6">{idx + 1}.</span>
-                            <input
-                              type="text"
-                              value={item}
-                              onChange={(e) => updateArrayItem(key, idx, e.target.value)}
-                              placeholder={`Enter item ${idx + 1}...`}
-                              className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 focus:border-amber-500/50"
-                            />
-                            <button
-                              onClick={() => removeArrayItem(key, idx)}
-                              className="p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-500"
-                              aria-label={`Remove item ${idx + 1}`}
-                            >
-                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                              </svg>
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {(value as PageContentItem[]).map((item, idx) => {
-                          if (typeof item === 'string') return null
+                  ) : (
+                    <div className="space-y-4">
+                      {(value as PageContentItem[]).map((item, idx) => {
+                        if (typeof item === 'string') return null
 
-                          return (
-                            <div key={idx} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                              <div className="flex items-center justify-between mb-3">
-                                <span className="text-sm font-medium text-gray-600">Item {idx + 1}</span>
-                                <button
-                                  onClick={() => removeArrayItem(key, idx)}
-                                  className="p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-500"
-                                  aria-label={`Remove item ${idx + 1}`}
-                                >
-                                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                  </svg>
-                                </button>
-                              </div>
-                              {Object.keys(item).map((subKey) => (
-                                <div key={subKey} className="mb-2 last:mb-0">
-                                  <label className="block text-xs text-gray-500 mb-1 capitalize">{subKey}</label>
-                                  <input
-                                    type="text"
-                                    value={item[subKey] || ''}
-                                    onChange={(e) => updateArrayItem(key, idx, { ...item, [subKey]: e.target.value })}
-                                    placeholder={`Enter ${subKey}...`}
-                                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 focus:border-amber-500/50"
-                                  />
-                                </div>
-                              ))}
+                        return (
+                          <div key={idx} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                            <div className="flex items-center justify-between mb-3">
+                              <span className="text-sm font-medium text-gray-600">Item {idx + 1}</span>
+                              <button
+                                onClick={() => removeArrayItem(key, idx)}
+                                className="p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-500"
+                                aria-label={`Remove item ${idx + 1}`}
+                              >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
                             </div>
-                          )
-                        })}
-                      </div>
-                    )}
-                  </div>
-                )
-              }
+                            {Object.keys(item).map((subKey) => (
+                              <div key={subKey} className="mb-2 last:mb-0">
+                                <label className="block text-xs text-gray-500 mb-1 capitalize">{subKey}</label>
+                                <input
+                                  type="text"
+                                  value={item[subKey] || ''}
+                                  onChange={(e) => updateArrayItem(key, idx, { ...item, [subKey]: e.target.value })}
+                                  placeholder={`Enter ${subKey}...`}
+                                  className="w-full bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )
+            }
 
-              return null
-            })
-          )}
-        </motion.div>
-      )}
-
-      {activeTab === 'blocks' && (
-        <motion.div key="blocks" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          <AdminBlockEditor slug={slug} pageId={pageId} />
-        </motion.div>
-      )}
+            return null
+          })
+        )}
+      </div>
     </div>
   )
 }

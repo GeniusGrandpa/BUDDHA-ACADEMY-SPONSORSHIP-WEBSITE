@@ -119,7 +119,7 @@ export async function getPaymentSettingByGateway(
     .select('*')
     .eq('gateway_name', gateway)
     .eq('is_active', true)
-    .maybeSingle()
+    .single()
 
   if (error) return null
   return data as unknown as PaymentSetting | null

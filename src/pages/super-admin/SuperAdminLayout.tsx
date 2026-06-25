@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Outlet, Link, useLocation, useNavigate, Navigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Bell } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { RoleBadge } from '../../components/RoleBadge'
@@ -210,7 +211,17 @@ export function SuperAdminLayout() {
         </header>
 
         <main className="p-4 lg:p-6">
-          <Outlet />
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.12, ease: 'easeOut' }}
+            >
+              <Outlet />
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
     </div>
