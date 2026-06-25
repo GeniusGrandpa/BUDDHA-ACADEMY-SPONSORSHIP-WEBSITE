@@ -10,11 +10,16 @@ import { router } from './routes'
 function AppContent() {
   const { loading } = useAuth()
 
-  if (loading) {
-    return <PremiumGlobalLoader />
-  }
-
-  return <RouterProvider router={router} />
+  return (
+    <div className="relative min-h-screen">
+      {loading && (
+        <div className="fixed inset-0 z-[9999]">
+          <PremiumGlobalLoader />
+        </div>
+      )}
+      <RouterProvider router={router} />
+    </div>
+  )
 }
 
 function App() {

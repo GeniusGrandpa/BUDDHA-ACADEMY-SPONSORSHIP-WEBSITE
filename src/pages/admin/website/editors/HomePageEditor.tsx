@@ -5,7 +5,7 @@ import { PreviewModal } from '../shared/PreviewModal'
 import { PublishToggle } from '../shared/PublishToggle'
 import { SaveButton } from '../shared/SaveButton'
 import toast from 'react-hot-toast'
-import type { HeroContent, SectionContent } from '../../../../types/cms-content'
+import type { HeroContent } from '../../../../types/cms-content'
 
 export function HomePageEditor() {
   const [loading, setLoading] = useState(true)

@@ -23,9 +23,8 @@ export function ContactPageEditor() {
     'contact_phone_error', 'contact_error_text',
   ]
 
-  useEffect(() => { load() }, [])
-
   const load = async () => {
+    setLoading(true)
     try {
       const [hdr, settings, cmsStrings] = await Promise.all([
         getPageHeader('contact').catch(() => null),
@@ -46,6 +45,9 @@ export function ContactPageEditor() {
     } catch { toast.error('Failed to load contact page data') }
     finally { setLoading(false) }
   }
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { load() }, [])
 
   const handleSave = async () => {
     setSaving(true)

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useRef } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { Card } from '../../components/ui/Card'
@@ -7,10 +7,10 @@ import { LoadingSpinner } from '../../components/ui/LoadingSpinner'
 import { ToastContainer } from '../../components/ToastContainer'
 import { useToast } from '../../hooks/useToast'
 import { useRole } from '../../hooks/useRole'
-import { ROLE_NAMES, ROLE_LEVELS } from '../../features/auth/types/permissions'
+import { ROLE_NAMES } from '../../features/auth/types/permissions'
 import type { Role } from '../../types/permissions'
 import type { Profile } from '../../types/database'
-import { Mail, Shield, AlertCircle, CheckCircle, XCircle, Loader2, Search, ChevronDown } from 'lucide-react'
+import { Mail, CheckCircle, XCircle, Loader2, Search } from 'lucide-react'
 
 type UserStatus = 'active' | 'inactive' | 'suspended' | 'banned'
 
@@ -66,7 +66,7 @@ function ConfirmModal({ open, title, message, confirmLabel, onConfirm, onCancel,
 
 export function AdminUsersPage() {
   const { profile: currentUser } = useAuth()
-  const { isSuperAdmin, isAdmin, role: userRole } = useRole()
+  const { isSuperAdmin, isAdmin } = useRole()
   const [users, setUsers] = useState<ExtendedProfile[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -81,7 +81,6 @@ export function AdminUsersPage() {
   } | null>(null)
   const [verificationStatus, setVerificationStatus] = useState<Record<string, VerificationInfo>>({})
   const [loadingVerification, setLoadingVerification] = useState<Record<string, boolean>>({})
-  const rowDropdownRef = useRef<HTMLDivElement>(null)
   const { toasts, addToast, removeToast } = useToast()
 
   const canManageRole = (targetRole: string): boolean => {
@@ -90,7 +89,7 @@ export function AdminUsersPage() {
     return false
   }
 
-  const getAvailableRoles = (targetRole: string): Role[] => {
+  const getAvailableRoles = (_targetRole: string): Role[] => {
     if (isSuperAdmin) {
       return ['super_admin', 'admin', 'finance_manager', 'teacher', 'donor', 'volunteer', 'public_user']
     }

@@ -5,7 +5,7 @@ import {
   getHeroContent, getSectionContent, getSponsorshipContent, getDonationContent,
   getVolunteerContent, getPageHeader, getSiteImagesBySection, upsertHeroContent,
   upsertSectionContent, upsertSponsorshipContent, upsertDonationContent,
-  upsertPageHeader, upsertVolunteerContent, getAllCmsStrings,
+  upsertPageHeader, upsertVolunteerContent,
   getSectionVisibility, updateSectionVisibility,
 } from '../../../services/cms-content'
 import { getPageBySlug, upsertPage } from '../../../services/content'
@@ -16,7 +16,7 @@ import type { HeroContent, SponsorshipContent, DonationContent, VolunteerContent
 import type { Page } from '../../../types/database'
 
 type DeviceType = 'desktop' | 'tablet' | 'mobile'
-type PanelTab = 'sections' | 'theme' | 'settings'
+
 
 interface SectionDef {
   id: string; key: string; name: string; visible: boolean
@@ -555,6 +555,7 @@ function renderSectionPreview(id: string, data: {
   volunteer: VolunteerContent | null; volunteerHeader: PageHeader | null
   privacyHeader: PageHeader | null; privacyPage: Page | null; termsHeader: PageHeader | null; termsPage: Page | null
   theme: ThemeConfig; selectedSection: string | null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onEdit: Record<string, (...args: any[]) => void>
 }) {
   const t = data.theme
@@ -1229,7 +1230,7 @@ function InlineEdit({ value, onSave, className, style, live }: {
   )
 }
 
-function SectionPreview({ id, selected, onClick, label, children, sectionRef }: {
+function SectionPreview({ id: _id, selected, onClick, label, children, sectionRef }: {
   id: string; selected: boolean; onClick: () => void; label: string; children: React.ReactNode;
   sectionRef: (el: HTMLDivElement | null) => void
 }) {

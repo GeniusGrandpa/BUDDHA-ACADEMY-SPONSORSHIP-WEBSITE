@@ -5,7 +5,6 @@ import { getAllPaymentSettings, updatePaymentSetting, togglePaymentGateway, crea
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
 import { FormSkeleton } from '../../components/ui/LoadingSkeleton'
-import { LoadingSpinner } from '../../components/ui/LoadingSpinner'
 import type { PaymentSetting, PaymentGateway } from '../../types/payments'
 
 export function AdminPaymentSettingsPage() {

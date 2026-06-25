@@ -53,6 +53,7 @@ export function AdminSectionVisibility() {
         updated_at: new Date().toISOString(),
       }))
       for (const u of updates) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (db('section_visibility') as any).update(u).eq('section_key', u.section_key)
       }
       toast.success('Section order saved')

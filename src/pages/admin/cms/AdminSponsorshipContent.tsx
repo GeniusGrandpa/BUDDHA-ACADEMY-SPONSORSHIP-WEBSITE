@@ -24,6 +24,7 @@ export function AdminSponsorshipContent() {
       const { data } = await db('sponsorship_content')
         .select('*').order('created_at', { ascending: false }).limit(1).maybeSingle()
       if (data) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const d = data as any
         setContentId(d.id)
         setHeroTitle(d.hero_title || '')

@@ -24,6 +24,7 @@ export function AdminFooterContent() {
       const { data } = await db('footer_content')
         .select('*').order('created_at', { ascending: false }).limit(1).maybeSingle()
       if (data) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const d = data as any
         setContentId(d.id)
         setDescription(d.description || '')

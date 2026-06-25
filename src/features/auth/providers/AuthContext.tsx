@@ -175,6 +175,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!cancelled) {
+        setLoading(true)
         applySession(session).catch(error => {
           console.error('[Auth] onAuthStateChange failed:', error)
         }).finally(() => {

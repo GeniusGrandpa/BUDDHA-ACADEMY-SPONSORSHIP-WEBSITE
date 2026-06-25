@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../providers/AuthContext'
+import { supabase } from '../../../lib/supabase'
 import type { Role, PermissionCode } from '../types/permissions'
 import { hasPermission, hasAnyPermission, isAdminOrAbove } from '../services/permissions'
 import { getDashboardForRole } from '../../../config/navigation'
@@ -44,8 +45,29 @@ export function ProtectedRoute({
   const location = useLocation()
   const signedOut = useRef(false)
 
-  const userRole = profile?.role as Role | undefined
-  const status = profile?.status
+  const [fallbackRole, setFallbackRole] = useState<string | null>(null)
+  const [fallbackStatus, setFallbackStatus] = useState<string | null>(null)
+  const [fallbackPending, setFallbackPending] = useState(false)
+
+  useEffect(() => {
+    if (!user || profile) return
+    setFallbackPending(true)
+    ;(async () => {
+      try {
+        const { data } = await supabase.from('profiles').select('role, status').eq('id', user.id).maybeSingle()
+        if (data) {
+          setFallbackRole(data.role)
+          setFallbackStatus(data.status)
+        }
+      } catch {
+      } finally {
+        setFallbackPending(false)
+      }
+    })()
+  }, [user, profile])
+
+  const effectiveRole = (profile?.role || fallbackRole) as Role | undefined
+  const status = profile?.status || fallbackStatus
 
   useEffect(() => {
     if ((status === 'suspended' || status === 'banned') && !signedOut.current) {
@@ -54,7 +76,7 @@ export function ProtectedRoute({
     }
   }, [status, signOut])
 
-  if (loading) {
+  if (loading || fallbackPending) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-orange-50">
         <div className="flex flex-col items-center space-y-4">
@@ -74,13 +96,14 @@ export function ProtectedRoute({
   }
 
   const denied =
-    (adminOnly && !isAdminOrAbove(userRole)) ||
-    (requiredRoles !== undefined && requiredRoles.length > 0 && (!userRole || !requiredRoles.includes(userRole))) ||
-    (requiredPermission !== undefined && !hasPermission(userRole, requiredPermission)) ||
-    (requiredAnyPermission !== undefined && !hasAnyPermission(userRole, requiredAnyPermission))
+    (adminOnly && !isAdminOrAbove(effectiveRole)) ||
+    (requiredRoles !== undefined && requiredRoles.length > 0 && (!effectiveRole || !requiredRoles.includes(effectiveRole))) ||
+    (requiredPermission !== undefined && !hasPermission(effectiveRole, requiredPermission)) ||
+    (requiredAnyPermission !== undefined && !hasAnyPermission(effectiveRole, requiredAnyPermission))
 
   if (denied) {
-    const redirect = profile?.role ? getDashboardForRole(profile.role as Role) : '/'
+    const role = profile?.role || fallbackRole
+    const redirect = role ? getDashboardForRole(role as Role) : '/'
     return <Navigate to={redirect} replace />
   }
 
