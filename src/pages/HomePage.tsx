@@ -17,7 +17,7 @@ const DEFAULT_HERO: HeroContent = {
   title: 'Empowering Nepal\'s Future',
   highlight: 'One Child at a Time',
   description: 'Buddha Academy provides free education, meals, and healthcare to underprivileged children in Kathmandu, Nepal.',
-  background_image: 'https://images.pexels.com/photos/358482/pexels-photo-358482.jpeg?auto=compress&cs=tinysrgb&w=1920',
+  background_image: '',
   overlay_color: 'bg-gradient-to-r from-stone-950/80 via-stone-950/60 to-transparent',
   overlay_opacity: 1,
   cta_primary_text: 'Sponsor a Child',
@@ -109,74 +109,24 @@ export function HomePage() {
   const [aboutSection, setAboutSection] = useState<SectionContent | null>(null)
   const [sponsorshipSection, setSponsorshipSection] = useState<SectionContent | null>(null)
   const [sectionsVisible, setSectionsVisible] = useState<Record<string, boolean>>({})
-  const [loading, setLoading] = useState(true)
-  const [heroBgReady, setHeroBgReady] = useState(false)
   const [brokenStudentPhotos, setBrokenStudentPhotos] = useState<Set<string>>(new Set())
   const [studentFallbackImage, setStudentFallbackImage] = useState('')
-
-  useEffect(() => {
-    if (!hero?.background_image) return
-    setHeroBgReady(false)
-    const img = new Image()
-    img.onload = () => setHeroBgReady(true)
-    img.onerror = () => setHeroBgReady(true)
-    img.src = hero.background_image
-  }, [hero?.background_image])
+  const [dataLoaded, setDataLoaded] = useState(false)
 
   useEffect(() => {
     Promise.all([
-      loadHero(),
-      loadAboutSection(),
-      loadSponsorshipSection(),
-      loadVisibility(),
-      loadStudents(),
-      loadStudentFallbackImage(),
-    ]).finally(() => setLoading(false))
+      getHeroContent().then(d => { if (d) setHero(d) }).catch(() => {}),
+      getSectionContent('about_preview').then(d => { if (d) setAboutSection(d) }).catch(() => {}),
+      getSectionContent('sponsorship_steps').then(d => { if (d) setSponsorshipSection(d) }).catch(() => {}),
+      getSectionVisibility().then(sections => {
+        const map: Record<string, boolean> = {}
+        sections.forEach((s: { section_key: string; is_visible: boolean }) => { map[s.section_key] = s.is_visible })
+        setSectionsVisible(map)
+      }).catch(() => {}),
+      getStudents(undefined, { limit: 3 }).then(d => setStudents(d)).catch(() => {}),
+      getSiteImage('student_fallback').then(img => { if (img) setStudentFallbackImage(img.image_url) }).catch(() => {}),
+    ]).finally(() => setDataLoaded(true))
   }, [])
-
-  const loadHero = async () => {
-    try {
-      const data = await getHeroContent()
-      if (data) setHero(data)
-    } catch {}
-  }
-
-  const loadAboutSection = async () => {
-    try {
-      const data = await getSectionContent('about_preview')
-      if (data) setAboutSection(data)
-    } catch {}
-  }
-
-  const loadSponsorshipSection = async () => {
-    try {
-      const data = await getSectionContent('sponsorship_steps')
-      if (data) setSponsorshipSection(data)
-    } catch {}
-  }
-
-  const loadVisibility = async () => {
-    try {
-      const sections = await getSectionVisibility()
-      const map: Record<string, boolean> = {}
-      sections.forEach((s: { section_key: string; is_visible: boolean }) => { map[s.section_key] = s.is_visible })
-      setSectionsVisible(map)
-    } catch {}
-  }
-
-  const loadStudents = async () => {
-    try {
-      const data = await getStudents()
-      setStudents(data.slice(0, 3))
-    } catch {}
-  }
-
-  const loadStudentFallbackImage = async () => {
-    try {
-      const img = await getSiteImage('student_fallback')
-      if (img) setStudentFallbackImage(img.image_url)
-    } catch {}
-  }
 
   const activeHero = hero || DEFAULT_HERO
   const activeAbout = aboutSection || DEFAULT_ABOUT
@@ -188,23 +138,17 @@ export function HomePage() {
   const sponsorshipData = activeSponsorship.content as { steps?: { num: string; title: string; desc: string }[] } | undefined
   const sponsorshipSteps = sponsorshipData?.steps || []
 
-  if (loading) return <HeroSkeleton />
+  if (!dataLoaded && !hero && !aboutSection && !sponsorshipSection) return <HeroSkeleton />
 
   return (
     <div>
       {sectionsVisible.hero !== false && (
-        <section className="relative min-h-[600px] flex items-center overflow-hidden">
+        <section className="relative min-h-[600px] flex items-center overflow-hidden bg-stone-800">
           {activeHero.background_image && (
-            <div
-              className="absolute inset-0 bg-cover bg-center transition-opacity duration-500"
-              style={{
-                backgroundImage: heroBgReady ? `url('${activeHero.background_image}')` : 'none',
-                opacity: heroBgReady ? 1 : 0,
-              }}
-            />
+            <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url('${activeHero.background_image}')` }} />
           )}
-          <div className={`absolute inset-0 ${activeHero.overlay_color || 'bg-gradient-to-r from-stone-950/80 via-stone-950/60 to-transparent'}`} />
-          {!heroBgReady && <div className="absolute inset-0 bg-stone-800" />}
+          <div className="absolute inset-0 bg-stone-900/70" />
+          {activeHero.overlay_color && <div className={`absolute inset-0 ${activeHero.overlay_color}`} />}
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
             <div className={`max-w-2xl ${activeHero.layout === 'center' ? 'mx-auto text-center' : ''}`}>

@@ -4,7 +4,7 @@ const supabase = getSupabaseClient()
 
 type StudentInsert = Database['public']['Tables']['students']['Insert']
 
-export async function getStudents(status?: string): Promise<Student[]> {
+export async function getStudents(status?: string, opts?: { limit?: number }): Promise<Student[]> {
   let query = supabase
     .from('students')
     .select('*')
@@ -12,6 +12,10 @@ export async function getStudents(status?: string): Promise<Student[]> {
 
   if (status && status !== 'all') {
     query = query.eq('sponsorship_status', status as Student['sponsorship_status'])
+  }
+
+  if (opts?.limit) {
+    query = query.limit(opts.limit)
   }
 
   const { data, error } = await query
