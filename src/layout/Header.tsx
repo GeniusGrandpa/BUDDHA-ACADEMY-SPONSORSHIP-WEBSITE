@@ -8,6 +8,7 @@ import { LanguageSwitcher } from '../components/LanguageSwitcher'
 import { getNavigationItems } from '../services/navigation'
 import { getSiteSettings } from '../services/settings'
 import type { NavigationItem } from '../types/cms'
+import fallbackLogo from '../assets/logo.jpg'
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -50,7 +51,7 @@ export function Header() {
       <div className="w-full px-6 sm:px-10 lg:px-16 xl:px-24">
         <div className="flex justify-between items-center h-24">
           <Link to="/" className="flex items-center space-x-4">
-            <img src={logoUrl || branding.logo_url || ''} alt={siteName || branding.organization_name || ''} className="h-14 w-auto drop-shadow-sm" loading="eager" fetchPriority="high" />
+            <img src={logoUrl || branding.logo_url || fallbackLogo} alt={siteName || branding.organization_name || ''} className="h-14 w-auto drop-shadow-sm" loading="eager" fetchPriority="high" />
             <div className="hidden sm:block">
               <div className="font-semibold text-[var(--color-navbar-text)]">{siteName || branding.organization_name || ''}</div>
               {branding.tagline && <div className="text-xs text-[var(--color-text-muted)]">{branding.tagline}</div>}

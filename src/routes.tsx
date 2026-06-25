@@ -94,6 +94,8 @@ const AdminNotificationsPage = lazy(() => import('./pages/admin/AdminNotificatio
 
 const AdminReportsPage = lazy(() => import('./pages/admin/AdminReportsPage').then(m => ({ default: m.AdminReportsPage })))
 
+const AdminUsersPage = lazy(() => import('./pages/admin/AdminUsersPage').then(m => ({ default: m.AdminUsersPage })))
+
 const SuperAdminLayout = lazy(() => import('./pages/super-admin/SuperAdminLayout').then(m => ({ default: m.SuperAdminLayout })))
 
 const SuperAdminUsersPage = lazy(() => import('./pages/super-admin/SuperAdminUsersPage').then(m => ({ default: m.SuperAdminUsersPage })))
@@ -258,6 +260,7 @@ export const router = createBrowserRouter([
       { path: 'events', element: <LazyPage Component={AdminEventsPage} /> },
       { path: 'notifications', element: <LazyPage Component={AdminNotificationsPage} /> },
       { path: 'reports', element: <LazyPage Component={AdminReportsPage} /> },
+      { path: 'users', element: <LazyPage Component={AdminUsersPage} /> },
       // Website Management (new)
       { path: 'website', element: <LazyPage Component={WebsiteDashboard} /> },
       { path: 'website/builder', element: <LazyPage Component={WebsiteBuilder} /> },

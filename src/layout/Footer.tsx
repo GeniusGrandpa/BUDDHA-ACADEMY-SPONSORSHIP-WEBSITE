@@ -6,6 +6,7 @@ import { useTheme } from '../context/ThemeContext'
 import { getFooterContent } from '../services/cms-content'
 import { getSiteSettings } from '../services/settings'
 import type { FooterContent } from '../types/cms-content'
+import fallbackLogo from '../assets/logo.jpg'
 
 const SOCIAL_ICONS: Record<string, React.ReactNode> = {
   facebook: <Facebook className="w-5 h-5" />,
@@ -45,9 +46,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center space-x-3 mb-4">
-              {branding.logo_url && (
-                <img src={branding.logo_url} alt={branding.organization_name || ''} className="h-14 w-auto" />
-              )}
+              <img src={branding.logo_url || fallbackLogo} alt={branding.organization_name || ''} className="h-14 w-auto" />
               <div>
                 {branding.organization_name && (
                   <div className="font-semibold text-[var(--color-footer-heading)]">{branding.organization_name}</div>

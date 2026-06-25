@@ -9,14 +9,31 @@ import { classifyAuthError } from '../utils/authErrors'
 import { getAuthRedirectUrl } from '../utils/redirectUrl'
 const supabase = getSupabaseClient()
 
+interface SignUpResult {
+  error: { message: string; category: string } | null
+  needsVerification?: boolean
+  verificationSent?: boolean
+  message?: string
+}
+
+interface SignInResult {
+  error: { message: string; category: string } | null
+  needsVerification?: boolean
+}
+
+interface ResendResult {
+  error: { message: string; category: string } | null
+  success?: boolean
+}
+
 interface AuthContextType {
   user: User | null
   profile: Profile | null
   permissions: PermissionCode[]
   loading: boolean
-  signIn: (email: string, password: string) => Promise<{ error: { message: string; category: string } | null }>
-  signUp: (email: string, password: string, fullName: string, country: string) => Promise<{ error: { message: string; category: string } | null }>
-  resendVerificationEmail: (email: string) => Promise<{ error: { message: string; category: string } | null }>
+  signIn: (email: string, password: string) => Promise<SignInResult>
+  signUp: (email: string, password: string, fullName: string, country: string) => Promise<SignUpResult>
+  resendVerificationEmail: (email: string) => Promise<ResendResult>
   signOut: () => Promise<void>
   refreshProfile: () => Promise<Profile | null>
   refreshPermissions: (userId?: string) => Promise<void>
@@ -87,7 +104,6 @@ async function logLoginHistory(
       user_id: userId,
       status,
       failure_reason: failureReason || null,
-      user_agent: navigator.userAgent.slice(0, 500),
     })
   } catch {
   }
@@ -177,10 +193,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         const classified = classifyAuthError(error)
+        const lower = (error.message || '').toLowerCase()
         if (data?.user) {
           await logLoginHistory((data.user as { id: string }).id, 'failed', classified.userMessage)
         }
-        return { error: { message: classified.userMessage, category: classified.category } }
+
+        const isUnverified = lower.includes('email not confirmed') || lower.includes('email_not_confirmed')
+        return {
+          error: { message: classified.userMessage, category: classified.category },
+          needsVerification: isUnverified,
+        }
       }
 
       if (data.user) {
@@ -207,7 +229,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = async (email: string, password: string, fullName: string, country: string) => {
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -231,10 +253,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           if (!resendError) {
             return {
-              error: {
-                message: 'This email is already registered but not yet verified. A new verification email has been sent. Please check your inbox.',
-                category: 'verification' as const,
-              },
+              error: null,
+              verificationSent: true,
+              needsVerification: true,
+              message: 'An account with this email already exists but has not been verified. We have sent a new verification email.',
             }
           }
         }
@@ -242,7 +264,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { error: { message: classified.userMessage, category: classified.category } }
       }
 
-      return { error: null }
+      if (data?.user?.identities?.length === 0) {
+        const { error: resendError } = await supabase.auth.resend({
+          type: 'signup',
+          email,
+          options: {
+            emailRedirectTo: getAuthRedirectUrl('/auth/callback'),
+          },
+        })
+        if (!resendError) {
+          return {
+            error: null,
+            verificationSent: true,
+            needsVerification: true,
+            message: 'An account with this email already exists but has not been verified. We have sent a new verification email.',
+          }
+        }
+      }
+
+      return { error: null, needsVerification: true }
     } catch (error) {
       const classified = classifyAuthError(error)
       return { error: { message: classified.userMessage, category: classified.category } }
@@ -264,7 +304,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { error: { message: classified.userMessage, category: classified.category } }
       }
 
-      return { error: null }
+      return { error: null, success: true }
     } catch (error) {
       const classified = classifyAuthError(error)
       return { error: { message: classified.userMessage, category: classified.category } }

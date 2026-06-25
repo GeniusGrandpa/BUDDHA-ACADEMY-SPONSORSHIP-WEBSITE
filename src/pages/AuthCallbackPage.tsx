@@ -187,13 +187,16 @@ export function AuthCallbackPage() {
                   <div>
                     <h1 className="text-xl font-bold text-gray-800">Verification failed</h1>
                     <p className="text-gray-500 text-sm mt-2">{message}</p>
+                    <p className="text-gray-400 text-xs mt-2">You can request a new verification email from the sign in page.</p>
                   </div>
-                  <Link to="/login">
-                    <Button className="w-full" size="lg" variant="outline">
-                      Back to sign in
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
-                  </Link>
+                  <div className="space-y-3">
+                    <Link to="/login">
+                      <Button className="w-full" size="lg" variant="primary">
+                        Sign in
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               )}
             </div>

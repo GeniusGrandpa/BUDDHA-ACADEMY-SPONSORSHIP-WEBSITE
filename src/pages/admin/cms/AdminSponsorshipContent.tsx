@@ -24,15 +24,16 @@ export function AdminSponsorshipContent() {
       const { data } = await db('sponsorship_content')
         .select('*').order('created_at', { ascending: false }).limit(1).maybeSingle()
       if (data) {
-        setContentId(data.id)
-        setHeroTitle(data.hero_title || '')
-        setHeroSubtitle(data.hero_subtitle || '')
-        setSteps(data.steps || [])
-        setBenefits(data.benefits || [])
-        setCtaTitle(data.cta_title || '')
-        setCtaDescription(data.cta_description || '')
-        setCtaButtonText(data.cta_button_text || '')
-        setCtaButtonLink(data.cta_button_link || '')
+        const d = data as any
+        setContentId(d.id)
+        setHeroTitle(d.hero_title || '')
+        setHeroSubtitle(d.hero_subtitle || '')
+        setSteps(d.steps || [])
+        setBenefits(d.benefits || [])
+        setCtaTitle(d.cta_title || '')
+        setCtaDescription(d.cta_description || '')
+        setCtaButtonText(d.cta_button_text || '')
+        setCtaButtonLink(d.cta_button_link || '')
       }
     } catch { toast.error('Failed to load sponsorship content') }
     finally { setLoading(false) }

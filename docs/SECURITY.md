@@ -4,7 +4,14 @@
 
 - **Supabase Auth** with PKCE flow — no passwords transmitted to the frontend beyond the initial sign-in
 - Auth emails (password reset, email verification) handled by Supabase Auth via SMTP
-- Session auto-refresh handled by Supabase client
+- Session auto-refresh handled by Supabase client with refresh token rotation
+- Session recovery on page load via `supabase.auth.getSession()` and `onAuthStateChange` subscription
+- Email confirmations required for signup (`enable_confirmations = true`)
+- `secure_password_change = true` — password change requires current password confirmation
+- **Minimum password length: 8 characters** with complexity requirements (uppercase, lowercase, number, special character) enforced server-side
+- **TOTP MFA** enabled for admin accounts (enrollment + verification) via Supabase Auth
+- Unrecognized auth errors always return a generic message (`'Unable to complete this action. Please try again later.'`) — never raw server errors
+- Login history logged to `login_history` table (no user-agent tracking — removed for privacy)
 
 ## Authorization (RBAC)
 
@@ -19,6 +26,7 @@ Access control is enforced at three independent layers:
 - `super_admin` bypasses all checks by convention
 - Suspended/banned users are detected server-side and signed out with access revoked message
 - Self-role-escalation is prevented at the database level
+- Last super_admin removal is protected by server-side constraints
 
 ## Row Level Security
 
@@ -28,6 +36,7 @@ All Supabase tables have RLS policies enabled:
 - **Admin tables** — mutations restricted to `role_level >= 90`
 - **User data** — users can only access their own records
 - **Payment data** — donors see their own; staff see all
+- **Payment settings** — SELECT available to all (display-only fields — no API keys stored); mutations restricted to role >= 80
 - **System tables** (audit_logs, user management) — `super_admin` only
 
 ## Payment Security
@@ -44,6 +53,7 @@ All Supabase tables have RLS policies enabled:
 - Rich text content can be sanitized with **DOMPurify** (available in dependencies)
 - File uploads sanitize filenames before storage (`${sessionId}-${Date.now()}.${fileExt}`)
 - SQL injection prevented by using Supabase client (parameterized queries) and RPC functions
+- Dynamic CSS/URL injection from CMS settings is mitigated via `isTrustedUrl()` validation before DOM injection
 
 ## HTTP Security Headers
 
@@ -55,6 +65,12 @@ Configured in `vite.config.ts`:
 | `X-Frame-Options` | `DENY` | Prevents clickjacking |
 | `X-XSS-Protection` | `1; mode=block` | Enables browser XSS filter |
 | `Referrer-Policy` | `strict-origin-when-cross-origin` | Controls referrer header |
+
+## SPA Routing Security
+
+- Netlify: `public/_redirects` with `/* /index.html 200`
+- Vercel: `vercel.json` with rewrites to `/index.html`
+- Auth callback URLs validated server-side by Supabase against configured redirect URL whitelist
 
 ## Audit Logging
 
@@ -68,13 +84,16 @@ Audit logs are readable only by `super_admin`.
 
 ## Database Security Hardening
 
-From migration `20260703000001`–`20260703000003`:
+From migrations `20260607000003`–`20260801000001`:
 
 - `search_path` is fixed on all functions to prevent search-path hijacking
 - Functions use `SECURITY INVOKER` (not `DEFINER`) by default to prevent privilege escalation
 - `REVOKE ALL ... FROM PUBLIC` applied to all tables and functions
 - Anonymous role only has `EXECUTE` on specific safe RPCs
 - No function relies on `public` schema being in the search path
+- Old `auth.role() = 'authenticated'` policies replaced with `profile.role IN ('super_admin','admin')` — prevents any authenticated user from accessing admin data
+- Demo accounts and `create_demo_user` function removed in production hardening
+- `admin_toggle_role` function removed; replaced by `admin_update_user_role` with strict hierarchy and audit
 
 ## Storage Security
 
@@ -84,7 +103,7 @@ Three Supabase storage buckets with RLS:
 |--------|------|-------|
 | `media` | Public (authenticated for admin operations) | Admin only |
 | `payment-screenshots` | Admin/staff only | Authenticated users (own files) |
-| `payment-qr-codes` | Admin only | Admin only |
+| `payment-qr-codes` | Admin only | Admin only (role >= 80) |
 
 ## Environment Variables
 
@@ -93,4 +112,13 @@ Sensitive configuration is stored in environment variables:
 - `VITE_SUPABASE_ANON_KEY` — Supabase anonymous key (safe for client-side by design)
 - `VITE_PUBLIC_BASE_URL` — Public base URL for auth redirects
 
-No secrets, API keys, or tokens are hardcoded in the source code.
+No secrets, API keys, or tokens are hardcoded in the source code. The Supabase service role key is never exposed to the frontend.
+
+## Security Events
+
+All sensitive authentication and authorization events are logged:
+- Login attempts (success/failure)
+- Password resets
+- Role changes (audited via `admin_update_user_role`)
+- Suspended/banned account access attempts
+- All payment verification actions

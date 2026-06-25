@@ -23,14 +23,15 @@ export function AdminVolunteerContent() {
       const { data } = await db('volunteer_content')
         .select('*').order('created_at', { ascending: false }).limit(1).maybeSingle()
       if (data) {
-        setContentId(data.id)
-        setHeroTitle(data.hero_title || '')
-        setHeroSubtitle(data.hero_subtitle || '')
-        setSectionTitle(data.section_title || '')
-        setSectionDescription(data.section_description || '')
-        setSuccessMessage(data.success_message || '')
-        setOpportunities(data.opportunities || [])
-        setSkillOptions(data.skill_options || [])
+        const d = data as any
+        setContentId(d.id)
+        setHeroTitle(d.hero_title || '')
+        setHeroSubtitle(d.hero_subtitle || '')
+        setSectionTitle(d.section_title || '')
+        setSectionDescription(d.section_description || '')
+        setSuccessMessage(d.success_message || '')
+        setOpportunities(d.opportunities || [])
+        setSkillOptions(d.skill_options || [])
       }
     } catch { toast.error('Failed to load volunteer content') }
     finally { setLoading(false) }

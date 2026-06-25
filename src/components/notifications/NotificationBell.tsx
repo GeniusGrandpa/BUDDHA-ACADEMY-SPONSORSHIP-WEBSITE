@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { Bell, CheckCheck, Loader2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import { getNotifications, getUnreadCount, markAsRead, markAllAsRead } from '../../services/notifications'
 import type { Notification } from '../../types/database'
 
@@ -52,17 +53,25 @@ export function NotificationBell({ userId }: NotificationBellProps) {
   }, [])
 
   async function handleMarkAsRead(id: string) {
-    await markAsRead(id)
-    setNotifications(prev =>
-      prev.map(n => n.id === id ? { ...n, read: true, read_at: new Date().toISOString() } : n)
-    )
-    setUnreadCount(prev => Math.max(0, prev - 1))
+    try {
+      await markAsRead(id)
+      setNotifications(prev =>
+        prev.map(n => n.id === id ? { ...n, read: true, read_at: new Date().toISOString() } : n)
+      )
+      setUnreadCount(prev => Math.max(0, prev - 1))
+    } catch {
+      toast.error('Failed to mark notification as read')
+    }
   }
 
   async function handleMarkAllRead() {
-    await markAllAsRead(userId)
-    setNotifications(prev => prev.map(n => ({ ...n, read: true, read_at: new Date().toISOString() })))
-    setUnreadCount(0)
+    try {
+      await markAllAsRead(userId)
+      setNotifications(prev => prev.map(n => ({ ...n, read: true, read_at: new Date().toISOString() })))
+      setUnreadCount(0)
+    } catch {
+      toast.error('Failed to mark all as read')
+    }
   }
 
   function getTimeAgo(dateStr: string): string {

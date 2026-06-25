@@ -25,7 +25,7 @@ export function getAuthErrorMessage(error: unknown): string {
     return 'Please verify your email address before signing in'
   }
   if (lower.includes('user already registered') || lower.includes('user_already_registered') || lower.includes('email already registered') || lower.includes('email_exists')) {
-    return 'An account with this email already exists'
+    return 'An account with this email already exists. If you haven\'t verified your email, please sign up again to receive a new verification link.'
   }
   if (lower.includes('password should be at least 6 characters') || lower.includes('weak_password')) {
     return 'Password is too weak. Please choose a stronger password'
@@ -47,7 +47,7 @@ export function getAuthErrorMessage(error: unknown): string {
   }
 
   console.error('[Auth] Unrecognized error:', message)
-  return message || GENERIC_FALLBACK
+  return GENERIC_FALLBACK
 }
 
 function extractHint(error: unknown): string {
@@ -128,7 +128,7 @@ export function classifyAuthError(error: unknown): {
   }
 
   if (lower.includes('user already registered') || lower.includes('user_already_registered') || lower.includes('email already registered') || lower.includes('email_exists') || lower.includes('duplicate')) {
-    return { userMessage: 'An account with this email already exists', category: 'unknown' }
+    return { userMessage: 'An account with this email already exists. If you haven\'t verified your email, try signing up again to receive a new verification link.', category: 'unknown' }
   }
 
   if (lower.includes('password should be at least 6 characters') || lower.includes('weak_password') || lower.includes('password is too weak')) {
@@ -159,6 +159,6 @@ export function classifyAuthError(error: unknown): {
     return { userMessage: 'Your account has been suspended. Please contact support', category: 'account_status' }
   }
 
-  console.error('[Auth] Unrecognized error:', { message, error })
+  console.error('[Auth] Unrecognized error:', { message })
   return { userMessage: GENERIC_FALLBACK, category: 'unknown' }
 }

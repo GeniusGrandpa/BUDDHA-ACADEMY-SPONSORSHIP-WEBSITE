@@ -15,8 +15,7 @@ import type {
 } from '../types/cms-content'
 
 export function db(table: string) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (supabase as any).from(table)
+  return supabase.from(table as never)
 }
 
 export async function getDonationContent(): Promise<DonationContent | null> {

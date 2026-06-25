@@ -162,6 +162,11 @@ export const navigationConfig: NavSection[] = [
         href: '/admin/notifications',
         permission: 'notifications.read',
       },
+      {
+        label: 'User Management',
+        href: '/admin/users',
+        roles: ['super_admin', 'admin'],
+      },
     ],
   },
   {

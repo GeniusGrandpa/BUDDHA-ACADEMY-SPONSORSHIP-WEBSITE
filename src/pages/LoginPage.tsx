@@ -9,7 +9,7 @@ import { Button } from '../components/ui/Button'
 import { validateEmail, validateName, validatePassword, validateConfirmPassword } from '../lib/auth/validation'
 import { getAuthErrorMessage } from '../lib/auth/authErrors'
 import { getRedirectPath } from '../lib/auth/redirectByRole'
-import { getSavedEmail, saveEmail, clearSavedEmail, getRememberMe, setRememberMe } from '../lib/auth/session'
+import { getRememberMe, setRememberMe } from '../lib/auth/session'
 import { getSupabaseClient } from '../lib/supabase'
 import type { Role } from '../types/permissions'
 import logo from '../assets/logo.jpg'
@@ -52,7 +52,7 @@ export function LoginPage() {
 
   const [mode, setMode] = useState<AuthMode>('signin')
 
-  const [email, setEmail] = useState(getSavedEmail())
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -62,6 +62,8 @@ export function LoginPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(searchParams.get('verified') ? 'Email verified. You can now sign in.' : '')
   const [showResend, setShowResend] = useState(false)
+  const [showResendForm, setShowResendForm] = useState(false)
+  const [resendEmail, setResendEmail] = useState('')
   const [fieldErrors, setFieldErrors] = useState<{ fullName?: string; email?: string; password?: string; confirmPassword?: string; country?: string }>({})
 
   const [fullName, setFullName] = useState('')
@@ -90,6 +92,7 @@ export function LoginPage() {
     setSuccess('')
     setFieldErrors({})
     setShowResend(false)
+    setShowResendForm(false)
     setCountry('')
   }
 
@@ -137,14 +140,16 @@ export function LoginPage() {
 
     setLoading(true)
     try {
-      const { error: signInError } = await signIn(email, password)
-      if (signInError) throw signInError
+      const result = await signIn(email, password)
 
-      if (rememberMe) {
-        saveEmail(email)
-      } else {
-        clearSavedEmail()
+      if (result.needsVerification) {
+        setShowResend(true)
+        setError('Please verify your email before continuing.')
+        setSuccess('')
+        return
       }
+
+      if (result.error) throw result.error
 
       const {
         data: { session },
@@ -188,14 +193,22 @@ export function LoginPage() {
 
     setLoading(true)
     try {
-      const { error: signUpError } = await signUp(
+      const result = await signUp(
         email,
         password,
         fullName,
         country || 'Nepal',
       )
-      if (signUpError) throw signUpError
-      setRegistered(true)
+      if (result.error) throw result.error
+
+      if (result.verificationSent) {
+        setSuccess(result.message || 'Verification email sent. Please check your inbox.')
+        setRegistered(true)
+      } else if (result.needsVerification) {
+        setRegistered(true)
+      } else {
+        setRegistered(true)
+      }
     } catch (err) {
       const msg = getAuthErrorMessage(err)
       if (msg) {
@@ -207,14 +220,15 @@ export function LoginPage() {
     }
   }
 
-  const handleResendVerification = async () => {
+  const handleResendVerification = async (targetEmail?: string) => {
     setResending(true)
     setError('')
     try {
-      const { error: resendError } = await resendVerificationEmail(email)
-      if (resendError) throw resendError
+      const result = await resendVerificationEmail(targetEmail || email)
+      if (result.error) throw result.error
       setSuccess('Verification email resent. Please check your inbox.')
       setShowResend(false)
+      setShowResendForm(false)
     } catch (err) {
       const msg = getAuthErrorMessage(err)
       if (msg) {
@@ -467,7 +481,14 @@ export function LoginPage() {
                     </button>
                   </div>
 
-                  <div className="flex justify-end -mt-1">
+                  <div className="flex justify-between -mt-1">
+                    <button
+                      type="button"
+                      onClick={() => { setShowResendForm(!showResendForm); setResendEmail(email) }}
+                      className="text-xs font-medium text-gray-500 hover:text-[#f59e0b] transition-colors"
+                    >
+                      Didn't receive verification email?
+                    </button>
                     <Link
                       to="/forgot-password"
                       className="text-xs font-medium text-[#f59e0b] hover:text-[#d97706] transition-colors"
@@ -507,15 +528,64 @@ export function LoginPage() {
                   </Button>
 
                   {showResend && (
-                    <button
-                      type="button"
-                      onClick={handleResendVerification}
-                      disabled={resending}
-                      className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-amber-200 bg-warm-50 text-sm font-medium text-gray-600 hover:bg-amber-50 hover:border-amber-300 transition-all disabled:opacity-50"
-                    >
-                      <Mail size={16} />
-                      {resending ? 'Sending...' : 'Resend verification email'}
-                    </button>
+                    <div className="flex flex-col gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200">
+                      <div className="flex items-start gap-2.5">
+                        <AlertCircle className="w-4 h-4 mt-0.5 text-amber-600 flex-shrink-0" />
+                        <div className="text-sm text-amber-800">
+                          <p className="font-medium">Email not verified</p>
+                          <p className="text-amber-600 mt-0.5">Please verify your email before continuing.</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleResendVerification()}
+                          disabled={resending}
+                          className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium transition-colors disabled:opacity-50"
+                        >
+                          <Mail size={14} />
+                          {resending ? 'Sending...' : 'Resend verification email'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => { setShowResend(false); setShowResendForm(true) }}
+                          className="py-2 px-3 rounded-lg border border-amber-300 text-amber-700 text-sm font-medium hover:bg-amber-100 transition-colors"
+                        >
+                          Change email
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {showResendForm && (
+                    <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 space-y-3">
+                      <p className="text-sm font-medium text-gray-700">Resend verification email</p>
+                      <p className="text-xs text-gray-500">Enter your email address to receive a new verification link.</p>
+                      <input
+                        type="email"
+                        value={resendEmail}
+                        onChange={(e) => setResendEmail(e.target.value)}
+                        placeholder="Enter your email"
+                        className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-amber-500/50"
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => { if (resendEmail) handleResendVerification(resendEmail) }}
+                          disabled={resending || !resendEmail}
+                          className="flex-1 py-2 px-3 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium transition-colors disabled:opacity-50"
+                        >
+                          {resending ? 'Sending...' : 'Send'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => { setShowResendForm(false); if (error.includes('verify') || error.includes('Verify')) setShowResend(true) }}
+                          className="py-2 px-3 rounded-lg border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-100 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
                   )}
                 </form>
               ) : (

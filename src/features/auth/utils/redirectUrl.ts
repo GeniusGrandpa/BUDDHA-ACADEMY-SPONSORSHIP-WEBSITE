@@ -1,7 +1,7 @@
 export function getAuthRedirectBase(): string {
   const configured = import.meta.env.VITE_PUBLIC_BASE_URL
 
-  if (configured) {
+  if (configured && !configured.includes('localhost')) {
     return configured.replace(/\/$/, '')
   }
 
@@ -13,7 +13,7 @@ export function getAuthRedirectBase(): string {
   } catch {
   }
 
-  return 'http://localhost:5174'
+  return window.location.origin || 'http://localhost:5174'
 }
 
 export function getAuthRedirectUrl(path: string): string {

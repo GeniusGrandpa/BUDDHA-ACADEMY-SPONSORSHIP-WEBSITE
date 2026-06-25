@@ -154,7 +154,7 @@ The service layer keeps Supabase access organized by domain:
 - Navigation
 - Announcements
 - Partners
-- Page blocks
+- CMS content (page content, headers, sections, images, strings)
 
 
 ## Technology Stack
@@ -228,12 +228,15 @@ The service layer keeps Supabase access organized by domain:
 
 ### CMS
 
-- Website Management Hub (`/admin/content`) organizes tools into Pages, Collections, Branding & Design, and Settings sections.
-- Section-based page editors for homepage, about, contact, volunteer, privacy, and terms pages.
+- **Website Dashboard** (`/admin/website`) organizes tools into 9 categorized groups: Home Page, About Page, Sponsorship Page, Donation Page, Contact Page, Student Sections, Content Collections, Global Settings, Other Pages.
+- **WebsiteBuilder** (`/admin/website/homepage`): 3-panel live preview editor with 10 pages, 30+ section types, inline editing, drag-and-drop reorder, section visibility toggles, add/duplicate/hide/delete section actions, and draft/publish workflow.
+- **5 dedicated editors**: AboutPageEditor (mission, vision, stats, values, timeline, images), ContactPageEditor (details + 21 form label strings), CampaignsEditor (donation goals CRUD), PrivacyPageEditor, TermsPageEditor.
 - Dedicated content editors for donation, sponsorship, volunteer, footer, and transparency pages.
 - Collection managers for news, gallery, testimonials, videos, FAQs, student stories, and media library.
-- Homepage uses a drag-and-drop block builder with 18 block types (hero, text, stats, CTA, etc.).
+- Theme & Branding customization panel (colors, fonts, button radius/style) with instant preview via CSS custom properties.
+- Device preview toggles (Desktop, Tablet, Mobile).
 - Navigation, announcements, partners, site settings, and version history tools.
+- Legacy `/admin/content/*` routes redirect to `/admin/website/*` via `<Navigate>`.
 
 ### Design System
 
@@ -292,50 +295,73 @@ The platform is designed around trust, traceability, and nonprofit accountabilit
 
 ## Dynamic CMS
 
-The CMS allows authorized admins to manage public website content without code changes.
+The CMS allows authorized admins to manage public website content without code changes. All sections are accessible from the Website Dashboard at `/admin/website`.
 
-### Page Builder
+### Website Dashboard
 
-Dynamic pages store content as blocks and render them through a block renderer. Supported block types include hero, text, rich content, image, gallery, CTA, donation, student cards, testimonials, FAQ, stats, timeline, video, sponsors, partners, announcements, and custom sections.
+The [`WebsiteDashboard`](src/pages/admin/website/WebsiteDashboard.tsx) at `/admin/website` presents a categorized dashboard with 9 groups:
 
-### Advanced Block System
+| Group | Items |
+|-------|-------|
+| **Home Page** | Hero, About preview, Stats, Features, Impact, CTA, Partners, Gallery preview, Testimonials |
+| **About Page** | Mission, Vision, Stats, Core Values, Timeline, About Images |
+| **Sponsorship Page** | Hero, Packages, How It Works, Benefits, CTA |
+| **Donation Page** | Hero, Impact Cards, Process Steps, CTA |
+| **Contact Page** | Header, Contact Details, 21 Form Labels |
+| **Student Sections** | Student Stories, Testimonials, Gallery, News & Updates, Videos |
+| **Content Collections** | FAQs, Media Library, Navigation, Site Settings, Announcements, Partners, Section Visibility, Site Images, Version History |
+| **Global Settings** | Branding, Colors, Typography, Layout, Components, Config, Presets, SEO |
+| **Other Pages** | Volunteer, Privacy Policy, Terms of Service, Footer, Transparency, Campaigns |
 
-- Blocks are stored in a normalized `page_blocks` table (FK → `pages.id`) for type-safe querying.
-- A `sync_page_blocks_json()` trigger function keeps `pages.blocks` JSONB in sync for backward compatibility.
-- AdminBlockEditor component provides drag-and-drop reorder, add/delete/duplicate, visibility/draft toggles, and inline content editing.
-- Blocks can be reordered, toggled visible/hidden, and set to draft mode.
-- Full RLS policies enforce editor+ access; all block CRUD operations are audit-logged.
-- Supports block types: hero, text, rich content, image, gallery, CTA, donation, student cards, testimonials, FAQ, stats, timeline, video, sponsors, partners, announcements, and custom sections.
+### WebsiteBuilder — 3-Panel Live Preview
 
-### Content Management
+The [`WebsiteBuilder`](src/pages/admin/website/WebsiteBuilder.tsx) is the main visual editor at `/admin/website/homepage`:
 
-Dedicated admin managers support:
+- **Left sidebar**: 10 pages with expandable section trees; drag-and-drop reorder via framer-motion `Reorder.Group`; hover-to-reveal eye icon for visibility toggles; "Add Section" button that opens a grid of 8 available section types
+- **Center preview**: Renders real database content for the selected page/section; selected section gets amber ring + glow + "Currently Editing" badge with auto-scroll; hidden sections show dimmed overlay + "Hidden" badge; inline editing (click any text → Enter/blur saves)
+- **Right properties panel**: Dynamic fields for the selected section; About/Privacy/Terms inline editors; theme & branding panel (color pickers, font selectors, button radius slider, button style toggle)
+- **Top bar**: Device preview toggles (Desktop/Tablet/Mobile) with width transitions; Save Draft / Publish Changes / Discard buttons; unsaved changes indicator (amber pulse dot)
+- **Data flow**: Loads ALL real data from ALL service functions on mount; bulk-saves via `Promise.all(upsert*())`
 
-- News
-- Gallery
-- Videos
-- Testimonials
-- Student stories
-- FAQs
-- Media library
-- Navigation menus
-- Site settings
-- Announcements
-- Partners
-- Transparency content
-- Version history
+### Dedicated Page Editors
 
-### Media Library
+| Editor | Route | Purpose |
+|--------|-------|---------|
+| AboutPageEditor | `/admin/website/about` | Mission, vision, stats, values, timeline, images |
+| ContactPageEditor | `/admin/website/contact` | Contact details, 21 form label strings from `cms_strings` |
+| CampaignsEditor | `/admin/website/campaigns` | Donation goals CRUD |
+| PrivacyPageEditor | `/admin/website/privacy` | Privacy policy header + body |
+| TermsPageEditor | `/admin/website/terms` | Terms of service header + body |
+| HomePageEditor | `/admin/website/homepage` | Section-based homepage editor |
+| BrandingEditor | `/admin/website/branding` | Unified branding/colors/typography/layout/components |
+| SEOEditor | `/admin/website/seo` | Per-page SEO meta tags |
 
-Media assets are stored through Supabase Storage and organized through CMS workflows.
+### Collection Managers
 
-### Navigation Management
-
-Header and footer navigation can be managed dynamically with fallback defaults.
+| Manager | Route | Purpose |
+|---------|-------|---------|
+| News | `/admin/website/news` | Create/edit/publish news articles |
+| Gallery | `/admin/website/gallery` | Upload images, create albums |
+| Videos | `/admin/website/videos` | YouTube embeds, descriptions |
+| Testimonials | `/admin/website/testimonials` | Donor/teacher/student testimonials |
+| Student Stories | `/admin/website/stories` | Success stories, achievements |
+| FAQs | `/admin/website/faqs` | FAQ CRUD + reorder |
+| Media Library | `/admin/website/media` | Upload/organize media assets via Supabase Storage |
+| Navigation | `/admin/website/navigation` | Header/footer menus (drag-and-drop) |
+| Site Settings | `/admin/website/settings` | Global site name, logo, SEO, social links |
+| Announcements | `/admin/website/announcements` | Announcement banners |
+| Partners | `/admin/website/partners` | Partner/sponsor logos |
+| Section Visibility | `/admin/website/sections` | Show/hide sections across pages |
+| Site Images | `/admin/website/images` | Manage site-wide images/backgrounds |
+| Version History | `/admin/website/versions` | Content version history & restore |
 
 ### Draft and Publish Workflow
 
-Design settings and CMS content support controlled publishing patterns so draft changes can be reviewed before going live.
+All CMS content and design settings support controlled publishing patterns so draft changes can be reviewed before going live. The WebsiteBuilder provides Save Draft / Publish Changes / Discard buttons that bulk-save all modified content.
+
+### Legacy System
+
+The old block-based page builder (`BlockRenderer`, `AdminBlockEditor`, `page_blocks` table) has been fully removed. All `/admin/content/*` routes now redirect to `/admin/website/*` via `<Navigate>` — preserving bookmarks.
 
 
 ## Design System
@@ -398,14 +424,14 @@ See [`docs/SUPABASE.md`](docs/SUPABASE.md) for the Supabase integration notes.
 
 ```text
 src/
-  components/      UI primitives, auth guards, block renderer, donation and payment components
+  components/      UI primitives, auth guards, donation and payment components
   config/          Navigation configuration and layout definitions
   context/         AuthContext, LanguageContext, ThemeContext providers
   features/        Auth flows and role dashboards for donor, finance, sponsorship, volunteer, and staff workflows
   hooks/           useRole, useToast, usePayment, and dashboard hooks
   lib/             Supabase client, audit logger, shared helpers
   pages/           Route pages including public, admin, super-admin, teacher, and auth callback pages
-  services/        Domain service layer for Supabase access
+  services/        Domain service layer for Supabase access (~20 files)
   types/           Database types, permission types, CMS types, and feature types
   App.tsx          Application provider hierarchy
   main.tsx         Application entry point and ErrorBoundary setup

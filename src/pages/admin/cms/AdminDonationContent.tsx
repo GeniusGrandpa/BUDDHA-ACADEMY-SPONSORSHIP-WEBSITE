@@ -21,12 +21,13 @@ export function AdminDonationContent() {
       const { data } = await db('donation_content')
         .select('*').order('created_at', { ascending: false }).limit(1).maybeSingle()
       if (data) {
-        setContentId(data.id)
-        setHeroTitle(data.hero_title || '')
-        setHeroSubtitle(data.hero_subtitle || '')
-        setCurrencyLabel(data.currency_label || '$')
-        setImpactCards(data.impact_cards || [])
-        setProcessSteps(data.process_steps || [])
+        const d = data as any
+        setContentId(d.id)
+        setHeroTitle(d.hero_title || '')
+        setHeroSubtitle(d.hero_subtitle || '')
+        setCurrencyLabel(d.currency_label || '$')
+        setImpactCards(d.impact_cards || [])
+        setProcessSteps(d.process_steps || [])
       }
     } catch { toast.error('Failed to load donation content') }
     finally { setLoading(false) }

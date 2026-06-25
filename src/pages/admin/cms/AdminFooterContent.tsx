@@ -24,16 +24,17 @@ export function AdminFooterContent() {
       const { data } = await db('footer_content')
         .select('*').order('created_at', { ascending: false }).limit(1).maybeSingle()
       if (data) {
-        setContentId(data.id)
-        setDescription(data.description || '')
-        setCopyrightText(data.copyright_text || '')
-        setNonprofitText(data.nonprofit_text || '')
-        setQuickLinks(data.quick_links || [])
-        setSocialLinks(data.social_links || [])
-        if (data.contact_info) {
-          setAddress(data.contact_info.address || '')
-          setPhone(data.contact_info.phone || '')
-          setEmail(data.contact_info.email || '')
+        const d = data as any
+        setContentId(d.id)
+        setDescription(d.description || '')
+        setCopyrightText(d.copyright_text || '')
+        setNonprofitText(d.nonprofit_text || '')
+        setQuickLinks(d.quick_links || [])
+        setSocialLinks(d.social_links || [])
+        if (d.contact_info) {
+          setAddress(d.contact_info.address || '')
+          setPhone(d.contact_info.phone || '')
+          setEmail(d.contact_info.email || '')
         }
       }
     } catch { toast.error('Failed to load footer content') }

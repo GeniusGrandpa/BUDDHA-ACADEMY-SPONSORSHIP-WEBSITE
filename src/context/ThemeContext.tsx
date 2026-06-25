@@ -48,6 +48,15 @@ function getContrastColor(hex: string): string {
   return luminance > 0.5 ? '#111827' : '#ffffff'
 }
 
+function isTrustedUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url)
+    return ['http:', 'https:'].includes(parsed.protocol)
+  } catch {
+    return false
+  }
+}
+
 function generateCSSVariables(settings: DesignSettings | null): string {
   const colors = settings?.colors || DEFAULT_COLORS
   const typography = settings?.typography || DEFAULT_TYPOGRAPHY
@@ -145,15 +154,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const applyFavicon = useCallback((branding: DesignBranding | undefined) => {
     const url = branding?.favicon_url
+    if (!url || !isTrustedUrl(url)) return
     let link = document.querySelector<HTMLLinkElement>('link[rel="icon"]')
-    if (url) {
-      if (!link) {
-        link = document.createElement('link')
-        link.rel = 'icon'
-        document.head.appendChild(link)
-      }
-      link.href = url
+    if (!link) {
+      link = document.createElement('link')
+      link.rel = 'icon'
+      document.head.appendChild(link)
     }
+    link.href = url
   }, [])
 
   const loadGoogleFont = useCallback((typography: DesignTypography | undefined) => {
@@ -163,8 +171,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     if (!typography) return
 
     const urls: string[] = []
-    if (typography.heading_font_url) urls.push(typography.heading_font_url)
-    if (typography.body_font_url && typography.body_font_url !== typography.heading_font_url) {
+    if (typography.heading_font_url && isTrustedUrl(typography.heading_font_url)) urls.push(typography.heading_font_url)
+    if (typography.body_font_url && typography.body_font_url !== typography.heading_font_url && isTrustedUrl(typography.body_font_url)) {
       urls.push(typography.body_font_url)
     }
 

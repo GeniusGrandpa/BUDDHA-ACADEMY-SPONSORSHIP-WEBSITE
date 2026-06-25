@@ -29,10 +29,20 @@ No external SDKs — manual confirmation + admin verification workflow using Kha
 - `payment_sessions.idempotency_key` with unique partial index prevents duplicate session creation
 - Direct `donations` table inserts are disabled — frontend `createDonation()` throws
 - Failed/cancelled/expired/abandoned sessions never create donation records
+- `updateDonationStatus()` also sets `verified_by` and `verified_at` when status changes to `completed`
+
+## Payment Setting Fields
+
+The `payment_settings` table stores only display-facing configuration (no API keys):
+- `gateway_name`, `gateway_display_name`, `gateway_description`
+- `qr_image_url`, `account_name`, `account_number`, `instructions`
+- `is_active`, `sort_order`
+
+Actual payment gateway secrets are stored server-side in Supabase project configuration, not in the database.
 
 ## Admin Payment Pages
 
-| Page                         | Route                      | Purpose                  |
-|------------------------------|----------------------------|--------------------------|
-| Payment Verification         | `/admin/payments/verify`   | Review/verify/reject     |
-| Payment Settings             | `/admin/payments/settings` | Gateway config, QR codes |
+| Page | Route | Purpose |
+|------|-------|---------|
+| Payment Verification | `/admin/payments/verify` | Review/verify/reject |
+| Payment Settings | `/admin/payments/settings` | Gateway config, QR codes |

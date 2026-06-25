@@ -274,7 +274,7 @@ export const DEFAULT_BRANDING: DesignBranding = {
   organization_name: 'Buddha Academy',
   tagline: 'Boudha · Kathmandu',
   slogan: 'Empowering Through Education',
-  logo_url: '/src/assets/logo.jpg',
+  logo_url: null,
   secondary_logo_url: null,
   favicon_url: null,
   footer_branding: 'Buddha Academy',

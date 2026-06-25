@@ -2,19 +2,19 @@
 
 ## Roles
 
-| Role             | Level | Description                          |
-|------------------|-------|--------------------------------------|
-| `super_admin`    | 100   | Full system access                   |
-| `admin`          | 90    | Manage donors, students, content     |
-| `finance_manager`| 80    | Donations, financial reports, receipts|
-| `teacher`        | 60    | Assigned students, grades, progress  |
-| `donor`          | 40    | Personal dashboard, sponsorships     |
-| `volunteer`      | 30    | Tasks, events, attendance            |
-| `public_user`    | 10    | Public content only                  |
+| Role | Level | Description |
+|------|-------|-------------|
+| `super_admin` | 100 | Full system access |
+| `admin` | 90 | Manage donors, students, content |
+| `finance_manager` | 80 | Donations, financial reports, receipts |
+| `teacher` | 60 | Assigned students, grades, progress |
+| `donor` | 40 | Personal dashboard, sponsorships |
+| `volunteer` | 30 | Tasks, events, attendance |
+| `public_user` | 10 | Public content only |
 
 ## Enforcement Layers
 
-Access is enforced at three layers:
+Access is enforced at three independent layers:
 
 ### 1. Route Level — `ProtectedRoute`
 
@@ -71,3 +71,10 @@ Wraps callbacks and silently denies execution without the required permission.
 ## Navigation Filtering
 
 The sidebar is filtered per role via `getNavigationForRole()`. Each nav item can specify `roles` or `permission` requirements. Items the user cannot access are hidden.
+
+## Role Management Security
+
+- `admin_update_user_role()` RPC enforces: admin can only manage roles below their own level
+- Self-role-change is prevented at database level
+- Last super_admin removal is prevented by server-side constraint
+- All role changes are audit-logged

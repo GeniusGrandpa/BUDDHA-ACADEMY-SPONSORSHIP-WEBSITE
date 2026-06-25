@@ -34,7 +34,7 @@ export async function markAsRead(notificationId: string): Promise<void> {
     .from('notifications')
     .update({ read: true, read_at: new Date().toISOString() })
     .eq('id', notificationId)
-  if (error) console.error('Error marking notification as read:', error)
+  if (error) throw error
 }
 
 export async function markAllAsRead(userId: string): Promise<void> {
@@ -43,7 +43,7 @@ export async function markAllAsRead(userId: string): Promise<void> {
     .update({ read: true, read_at: new Date().toISOString() })
     .eq('user_id', userId)
     .eq('read', false)
-  if (error) console.error('Error marking all notifications as read:', error)
+  if (error) throw error
 }
 
 export async function createNotification(
