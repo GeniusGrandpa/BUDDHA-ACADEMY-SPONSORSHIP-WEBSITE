@@ -119,7 +119,6 @@ const TeacherDashboard = lazy(() => import('./pages/teacher/TeacherDashboard').t
 const WebsiteDashboard = lazy(() => import('./pages/admin/website/WebsiteDashboard').then(m => ({ default: m.WebsiteDashboard })))
 const WebsiteBuilder = lazy(() => import('./pages/admin/website/WebsiteBuilder').then(m => ({ default: m.WebsiteBuilder })))
 const MediaLibrary = lazy(() => import('./pages/admin/website/MediaLibrary').then(m => ({ default: m.MediaLibrary })))
-const HomePageEditor = lazy(() => import('./pages/admin/website/editors/HomePageEditor').then(m => ({ default: m.HomePageEditor })))
 const BrandingEditor = lazy(() => import('./pages/admin/website/editors/BrandingEditor').then(m => ({ default: m.BrandingEditor })))
 const SEOEditor = lazy(() => import('./pages/admin/website/editors/SEOEditor').then(m => ({ default: m.SEOEditor })))
 const AboutPageEditor = lazy(() => import('./pages/admin/website/editors/AboutPageEditor').then(m => ({ default: m.AboutPageEditor })))
@@ -265,7 +264,7 @@ export const router = createBrowserRouter([
       { path: 'website', element: <LazyPage Component={WebsiteDashboard} /> },
       { path: 'website/builder', element: <LazyPage Component={WebsiteBuilder} /> },
       { path: 'website/media', element: <LazyPage Component={MediaLibrary} /> },
-      { path: 'website/homepage', element: <LazyPage Component={HomePageEditor} /> },
+      { path: 'website/homepage', element: <Navigate to="/admin/website/builder" replace /> },
       { path: 'website/about', element: <LazyPage Component={AboutPageEditor} /> },
       { path: 'website/contact', element: <LazyPage Component={ContactPageEditor} /> },
       { path: 'website/campaigns', element: <LazyPage Component={CampaignsEditor} /> },

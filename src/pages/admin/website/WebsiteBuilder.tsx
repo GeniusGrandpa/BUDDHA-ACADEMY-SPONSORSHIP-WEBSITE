@@ -11,6 +11,7 @@ import {
 import { getPageBySlug, upsertPage } from '../../../services/content'
 import { getSiteSettings } from '../../../services/settings'
 import { FormSkeleton } from '../../../components/ui/LoadingSkeleton'
+import { ImagePicker } from '../../../components/ui/ImagePicker'
 import type { HeroContent, SponsorshipContent, DonationContent, VolunteerContent, PageHeader, SiteImage, SectionContent } from '../../../types/cms-content'
 import type { Page } from '../../../types/database'
 
@@ -1399,7 +1400,7 @@ function PropertiesPanel(props: {
           <PropertyField label="Primary Button" value={props.hero.cta_primary_text} onChange={v => { props.setHero({ ...props.hero!, cta_primary_text: v }); mc() }} />
           <PropertyField label="Button Link" value={props.hero.cta_primary_link} onChange={v => { props.setHero({ ...props.hero!, cta_primary_link: v }); mc() }} />
           <PropertyField label="Secondary Button" value={props.hero.cta_secondary_text} onChange={v => { props.setHero({ ...props.hero!, cta_secondary_text: v }); mc() }} />
-          <PropertyField label="Background Image URL" value={props.hero.background_image} onChange={v => { props.setHero({ ...props.hero!, background_image: v }); mc() }} />
+          <ImagePicker label="Background Image" value={props.hero.background_image} onChange={v => { props.setHero({ ...props.hero!, background_image: v }); mc() }} />
         </PropertyGroup>
       )}
 

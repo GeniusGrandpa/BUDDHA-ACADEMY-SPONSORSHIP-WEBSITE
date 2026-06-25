@@ -7,6 +7,7 @@ import type { PermissionCode } from '../types/permissions'
 import { fetchUserPermissions } from '../services/permissions'
 import { classifyAuthError } from '../utils/authErrors'
 import { getAuthRedirectUrl } from '../utils/redirectUrl'
+import { checkRateLimit, resetRateLimit } from '../../../lib/auth/rateLimiter'
 const supabase = getSupabaseClient()
 
 interface SignUpResult {
@@ -176,8 +177,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!cancelled) {
         applySession(session).catch(error => {
           console.error('[Auth] onAuthStateChange failed:', error)
+        }).finally(() => {
+          if (!cancelled) setLoading(false)
         })
-        setLoading(false)
       }
     })
 
@@ -188,6 +190,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [applySession])
 
   const signIn = async (email: string, password: string) => {
+    const rateKey = `login:${email.toLowerCase().trim()}`
+    const rateCheck = checkRateLimit(rateKey)
+    if (!rateCheck.allowed) {
+      const minutes = Math.ceil(rateCheck.retryAfterMs / 60000)
+      return {
+        error: { message: `Too many attempts. Please try again in ${minutes} minute${minutes === 1 ? '' : 's'}`, category: 'rate_limit' as const },
+      }
+    }
+
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password })
 
@@ -207,6 +218,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (data.user) {
         await logLoginHistory(data.user.id, 'success')
+        resetRateLimit(rateKey)
       }
 
       const currentProfile = await refreshProfile()

@@ -1,7 +1,6 @@
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../providers/AuthContext'
-import { supabase } from '../../../lib/supabase'
 import type { Role, PermissionCode } from '../types/permissions'
 import { hasPermission, hasAnyPermission, isAdminOrAbove } from '../services/permissions'
 import { getDashboardForRole } from '../../../config/navigation'
@@ -34,17 +33,6 @@ function SigningOut() {
   )
 }
 
-function LoadingScreen() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-orange-50">
-      <div className="flex flex-col items-center space-y-4">
-        <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-gray-600 text-sm">Verifying access...</p>
-      </div>
-    </div>
-  )
-}
-
 export function ProtectedRoute({
   children,
   adminOnly = false,
@@ -52,66 +40,36 @@ export function ProtectedRoute({
   requiredPermission,
   requiredAnyPermission,
 }: ProtectedRouteProps) {
-  const { user, profile, loading, signOut, refreshProfile } = useAuth()
+  const { user, profile, loading, signOut } = useAuth()
   const location = useLocation()
   const signedOut = useRef(false)
-  const [serverRole, setServerRole] = useState<string | null>(null)
-  const [serverStatus, setServerStatus] = useState<string | null>(null)
-  const [checkingServer, setCheckingServer] = useState(true)
-  const userRole = (serverRole || profile?.role) as Role | undefined
+
+  const userRole = profile?.role as Role | undefined
+  const status = profile?.status
 
   useEffect(() => {
-    if (!user) {
-      setCheckingServer(false)
-      return
-    }
-
-    let cancelled = false
-    setCheckingServer(true)
-
-    ;(async () => {
-      try {
-        const result = await supabase
-          .from('profiles')
-          .select('role, status')
-          .eq('id', user.id)
-          .maybeSingle()
-        if (cancelled) return
-        const data = result.data as { role: string; status: string } | null
-        if (!result.error && data) {
-          setServerRole(data.role)
-          setServerStatus(data.status)
-
-          if (data.role !== profile?.role || data.status !== profile?.status) {
-            refreshProfile()
-          }
-        }
-      } catch {
-      }
-      if (!cancelled) setCheckingServer(false)
-    })()
-
-    return () => { cancelled = true }
-  }, [user, user?.id, location.pathname, profile?.role, profile?.status, refreshProfile])
-
-  const effectiveStatus = serverStatus || profile?.status
-
-  useEffect(() => {
-    if ((effectiveStatus === 'suspended' || effectiveStatus === 'banned') && !signedOut.current) {
+    if ((status === 'suspended' || status === 'banned') && !signedOut.current) {
       signedOut.current = true
       signOut()
     }
-  }, [effectiveStatus, signOut])
+  }, [status, signOut])
 
-  if (loading || checkingServer) {
-    return <LoadingScreen />
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-orange-50">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-600 text-sm">Verifying access...</p>
+        </div>
+      </div>
+    )
   }
 
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 
-  if (effectiveStatus === 'suspended' || effectiveStatus === 'banned') {
+  if (status === 'suspended' || status === 'banned') {
     return <SigningOut />
   }
 

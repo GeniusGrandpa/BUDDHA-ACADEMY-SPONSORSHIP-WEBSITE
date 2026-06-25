@@ -18,7 +18,7 @@ const DEFAULT_HERO: HeroContent = {
   highlight: 'One Child at a Time',
   description: 'Buddha Academy provides free education, meals, and healthcare to underprivileged children in Kathmandu, Nepal.',
   background_image: '',
-  overlay_color: 'bg-gradient-to-r from-stone-950/80 via-stone-950/60 to-transparent',
+  overlay_color: '',
   overlay_opacity: 1,
   cta_primary_text: 'Sponsor a Child',
   cta_primary_link: '/students',
@@ -143,13 +143,15 @@ export function HomePage() {
   return (
     <div>
       {sectionsVisible.hero !== false && (
-        <section className="relative min-h-[600px] flex items-center overflow-hidden bg-stone-800">
+        <section className="relative min-h-[600px] flex items-center overflow-hidden bg-gradient-to-br from-stone-900 via-stone-800 to-amber-900">
           {activeHero.background_image && (
-            <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url('${activeHero.background_image}')` }} />
+            <img
+              src={activeHero.background_image}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover"
+              onError={e => { (e.target as HTMLImageElement).style.opacity = '0' }}
+            />
           )}
-          <div className="absolute inset-0 bg-stone-900/70" />
-          {activeHero.overlay_color && <div className={`absolute inset-0 ${activeHero.overlay_color}`} />}
-
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
             <div className={`max-w-2xl ${activeHero.layout === 'center' ? 'mx-auto text-center' : ''}`}>
               {activeHero.title && (

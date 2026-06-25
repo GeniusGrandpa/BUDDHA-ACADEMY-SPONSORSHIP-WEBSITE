@@ -5,6 +5,8 @@ export function CtaBanner() {
   const { t } = useCmsStrings()
   return (
     <div className="bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 py-16 sm:py-20 lg:py-24 px-4 sm:px-8 lg:px-12 text-center text-white">
+      <h3 className="text-3xl sm:text-4xl font-bold mb-4 leading-tight">{t('cta_banner_title')}</h3>
+      <p className="text-lg sm:text-xl text-white/90 mb-8 max-w-2xl mx-auto">{t('cta_banner_subtitle')}</p>
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
         <Link
           to="/sponsor"

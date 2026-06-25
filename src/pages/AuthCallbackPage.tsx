@@ -6,6 +6,8 @@ import { supabase } from '../lib/supabase'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { getAuthErrorMessage } from '../lib/auth/authErrors'
+import { getRedirectPath } from '../features/auth/utils/redirectByRole'
+import type { Role } from '../features/auth/types/permissions'
 
 type CallbackStatus = 'loading' | 'success' | 'error'
 
@@ -34,6 +36,20 @@ function sanitizeError(input: string): string {
   }
 
   return input || 'Verification failed. The link may be invalid or expired.'
+}
+
+async function getRedirectPathForCurrentUser(): Promise<string> {
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return '/'
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .maybeSingle()
+    if (profile?.role) return getRedirectPath(profile.role as Role)
+  } catch {}
+  return '/'
 }
 
 export function AuthCallbackPage() {
@@ -65,6 +81,11 @@ export function AuthCallbackPage() {
         return
       }
 
+      const redirectToDashboard = async () => {
+        const path = await getRedirectPathForCurrentUser()
+        if (!cancelled) navigate(path, { replace: true })
+      }
+
       if (hash && hash.includes('access_token')) {
         const { error } = await supabase.auth.setSession({
           access_token: new URLSearchParams(hash.slice(1)).get('access_token') || '',
@@ -78,7 +99,7 @@ export function AuthCallbackPage() {
             setStatus('success')
             setMessage('Email verified. Redirecting...')
             await new Promise(r => setTimeout(r, 1500))
-            if (!cancelled) navigate('/', { replace: true })
+            await redirectToDashboard()
           }
         }
         return
@@ -95,7 +116,7 @@ export function AuthCallbackPage() {
             setStatus('success')
             setMessage('Verified. Redirecting...')
             await new Promise(r => setTimeout(r, 1500))
-            if (!cancelled) navigate('/', { replace: true })
+            await redirectToDashboard()
           }
         }
         return
@@ -107,7 +128,7 @@ export function AuthCallbackPage() {
           setStatus('success')
           setMessage('You are already signed in.')
           await new Promise(r => setTimeout(r, 1500))
-          if (!cancelled) navigate('/', { replace: true })
+          await redirectToDashboard()
         } else {
           setStatus('error')
           setMessage('No verification code found. The link may be invalid or expired.')

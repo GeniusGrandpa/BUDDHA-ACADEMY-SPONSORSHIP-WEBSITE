@@ -465,7 +465,6 @@ function loadGoogleTranslate(language: LanguageCode) {
     script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit'
     script.async = true
     script.crossOrigin = 'anonymous'
-    script.integrity = 'sha384-0000000000000000000000000000000000000000000000000000000000000000'
     document.body.appendChild(script)
     return
   }
