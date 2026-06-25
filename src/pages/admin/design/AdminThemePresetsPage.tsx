@@ -3,6 +3,7 @@ import { Trash2, Check, RotateCcw, Plus } from 'lucide-react'
 import { useTheme } from '../../../context/ThemeContext'
 import { getThemePresets, saveThemePreset, deleteThemePreset, applyThemePreset, resetDesignSettingsToDefaults } from '../../../services/design'
 import toast from 'react-hot-toast'
+import { FormSkeleton } from '../../../components/ui/LoadingSkeleton'
 import type { ThemePreset } from '../../../types/design'
 
 export function AdminThemePresetsPage() {
@@ -116,7 +117,7 @@ export function AdminThemePresetsPage() {
       )}
 
       {loading ? (
-        <div className="text-center py-12 text-[var(--color-text-muted)]">Loading presets...</div>
+        <div className="py-8"><FormSkeleton fields={3} /></div>
       ) : presets.length === 0 ? (
         <div className="text-center py-12 rounded-xl border border-dashed border-[var(--color-border)]">
           <p className="text-[var(--color-text-muted)]">No theme presets saved yet.</p>

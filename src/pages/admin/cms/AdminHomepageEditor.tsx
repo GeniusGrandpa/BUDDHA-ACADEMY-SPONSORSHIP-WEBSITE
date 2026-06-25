@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import toast from 'react-hot-toast'
 import { getPageBySlug, upsertPage } from '../../../services/content'
 import { AdminBlockEditor } from '../../../components/blocks/AdminBlockEditor'
+import { FormSkeleton } from '../../../components/ui/LoadingSkeleton'
 
 export function AdminHomepageEditor() {
   const [loading, setLoading] = useState(true)
@@ -49,7 +50,7 @@ export function AdminHomepageEditor() {
   }
 
   if (loading) {
-    return <div className="text-center py-12 text-gray-400">Loading homepage...</div>
+    return <FormSkeleton />
   }
 
   return (

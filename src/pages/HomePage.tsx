@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { ArrowRight } from 'lucide-react'
 import { Button } from '../components/ui/Button'
+import { HeroSkeleton } from '../components/ui/LoadingSkeleton'
 import { Card } from '../components/ui/Card'
 import { Badge } from '../components/ui/Badge'
 import { CtaBanner } from '../components/CtaBanner'
@@ -187,7 +188,7 @@ export function HomePage() {
   const sponsorshipData = activeSponsorship.content as { steps?: { num: string; title: string; desc: string }[] } | undefined
   const sponsorshipSteps = sponsorshipData?.steps || []
 
-  if (loading) return <div className="text-center py-12 text-gray-400">{t('home_loading')}</div>
+  if (loading) return <HeroSkeleton />
 
   return (
     <div>

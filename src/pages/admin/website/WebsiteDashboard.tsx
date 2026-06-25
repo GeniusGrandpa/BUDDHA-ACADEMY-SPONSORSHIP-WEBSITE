@@ -1,0 +1,106 @@
+import { Link } from 'react-router-dom'
+
+interface NavItem {
+  name: string
+  href: string
+  desc: string
+}
+
+interface SectionGroup {
+  title: string
+  subtitle: string
+  icon: string
+  items: NavItem[]
+}
+
+const groups: SectionGroup[] = [
+  {
+    title: 'Pages',
+    subtitle: 'Edit the content of each page on your website',
+    icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+    items: [
+      { name: 'Home Page', href: '/admin/website/home', desc: 'Hero banner, welcome text, statistics, donation CTA' },
+      { name: 'About Us', href: '/admin/website/about', desc: 'Mission, vision, history, team members' },
+      { name: 'Sponsorship', href: '/admin/website/sponsorship', desc: 'Sponsorship details, packages, how it works' },
+      { name: 'Donations', href: '/admin/website/donations', desc: 'Donation options, impact information, currency' },
+      { name: 'Contact Us', href: '/admin/website/contact', desc: 'Address, phone, email, office hours' },
+      { name: 'FAQ', href: '/admin/website/faq', desc: 'Frequently asked questions and answers' },
+    ],
+  },
+  {
+    title: 'Collections',
+    subtitle: 'Manage content that appears dynamically across your website',
+    icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10',
+    items: [
+      { name: 'Student Stories', href: '/admin/website/stories', desc: 'Success stories and student achievement updates' },
+      { name: 'Testimonials', href: '/admin/website/testimonials', desc: 'Donor, teacher, and student testimonials' },
+      { name: 'Gallery', href: '/admin/website/gallery', desc: 'Photo albums, event images, and captions' },
+      { name: 'News & Updates', href: '/admin/website/news', desc: 'Articles, announcements, and organization news' },
+    ],
+  },
+  {
+    title: 'Settings',
+    subtitle: 'Configure navigation, footer, branding, and SEO',
+    icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z',
+    items: [
+      { name: 'Navigation', href: '/admin/website/navigation', desc: 'Menu structure, order, and visibility' },
+      { name: 'Footer', href: '/admin/website/footer', desc: 'Footer columns, links, copyright text' },
+      { name: 'Branding', href: '/admin/website/branding', desc: 'Logo, colors, contact info, social links' },
+      { name: 'SEO', href: '/admin/website/seo', desc: 'Meta titles, descriptions, and search settings' },
+    ],
+  },
+]
+
+export function WebsiteDashboard() {
+  return (
+    <div className="space-y-10">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Website Management</h1>
+        <p className="text-gray-500 mt-1">Manage your entire website from one place — no coding required</p>
+      </div>
+
+      {groups.map((section, si) => (
+        <div key={section.title}>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 rounded-lg bg-amber-100 text-amber-600">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={section.icon} />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">{section.title}</h2>
+              <p className="text-sm text-gray-500">{section.subtitle}</p>
+            </div>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+            {section.items.map((item, ii) => (
+              <Link
+                key={item.href}
+                to={item.href}
+                className="group block bg-white border border-gray-100 rounded-xl px-4 py-3.5 hover:border-amber-500/30 hover:shadow-md hover:shadow-amber-500/5 transition-all duration-200"
+              >
+                <h3 className="text-sm font-semibold text-gray-900 group-hover:text-amber-600 transition-colors leading-snug">{item.name}</h3>
+                <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{item.desc}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl px-6 py-4">
+        <div className="flex items-start gap-3">
+          <svg className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-2m4 0h-6" />
+          </svg>
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900">Everything updates instantly</h3>
+            <p className="text-sm text-gray-600 mt-0.5">
+              All changes are saved directly to your website. Changes to pages, collections, and settings appear immediately after publishing.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

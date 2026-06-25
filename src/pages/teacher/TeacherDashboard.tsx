@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useAuth } from '../../context/AuthContext'
 import { supabase } from '../../lib/supabase'
+import { DashboardSkeleton } from '../../components/ui/LoadingSkeleton'
 import type { TeacherAssignment, Student, StudentProgress, AttendanceRecord } from '../../types/database'
 
 
@@ -219,14 +220,7 @@ loadData()
    }, [profile?.id, profile])
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-gray-500 text-sm">Loading your classroom...</p>
-        </div>
-      </div>
-    )
+    return <DashboardSkeleton />
   }
 
   const recentUploads = progressEntries.filter(p => p.notes || p.achievement).slice(0, 5)

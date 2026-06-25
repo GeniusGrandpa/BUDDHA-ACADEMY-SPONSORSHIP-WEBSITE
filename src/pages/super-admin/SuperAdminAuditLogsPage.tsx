@@ -134,7 +134,15 @@ export function SuperAdminAuditLogsPage() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {loading ? (
-                <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-500">Loading logs...</td></tr>
+                Array.from({ length: 4 }).map((_, i) => (
+                  <tr key={i}>
+                    {Array.from({ length: 5 }).map((_, j) => (
+                      <td key={j} className="px-4 py-3">
+                        <div className="h-4 bg-[#FBE7CC] rounded animate-pulse" style={{ width: `${[70, 55, 85, 65, 45][j]}%`, animationDelay: `${i * 50}ms` }} />
+                      </td>
+                    ))}
+                  </tr>
+                ))
               ) : filteredLogs.length === 0 ? (
                 <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-500">No audit logs found</td></tr>
               ) : (

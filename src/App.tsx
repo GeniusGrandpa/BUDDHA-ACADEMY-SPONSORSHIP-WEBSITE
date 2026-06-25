@@ -1,10 +1,21 @@
 import { Toaster } from 'react-hot-toast'
 import { RouterProvider } from 'react-router-dom'
-import { AuthProvider } from './context/AuthContext'
+import { AuthProvider, useAuth } from './context/AuthContext'
 import { LanguageProvider } from './context/LanguageContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { CmsStringsProvider } from './context/CmsStringsContext'
+import { PremiumGlobalLoader } from './components/ui/PremiumGlobalLoader'
 import { router } from './routes'
+
+function AppContent() {
+  const { loading } = useAuth()
+
+  if (loading) {
+    return <PremiumGlobalLoader />
+  }
+
+  return <RouterProvider router={router} />
+}
 
 function App() {
   return (
@@ -42,7 +53,7 @@ function App() {
       <AuthProvider>
         <ThemeProvider>
           <CmsStringsProvider>
-            <RouterProvider router={router} />
+            <AppContent />
           </CmsStringsProvider>
         </ThemeProvider>
       </AuthProvider>

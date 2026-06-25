@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { getPageBySlug, upsertPage } from '../../../services/content'
+import { FormSkeleton } from '../../../components/ui/LoadingSkeleton'
 import type { Json } from '../../../types/database'
 import type { PageContentItem, PageContentRecord, PageContentValue } from '../../../types/cms'
 
@@ -262,7 +263,7 @@ export function AdminPageEditor() {
   }
 
   if (loading) {
-    return <div className="text-center py-12 text-gray-400">Loading content...</div>
+    return <FormSkeleton />
   }
 
   return (
