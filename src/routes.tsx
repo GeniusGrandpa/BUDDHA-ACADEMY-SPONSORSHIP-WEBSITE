@@ -176,12 +176,18 @@ const AdminThemePresetsPage = lazy(() => import('./pages/admin/design/AdminTheme
 
 
 function AdminIndexRedirect() {
-  const { profile, loading } = useAuth()
-  if (loading || !profile) return (
+  const { profile, loading, user } = useAuth()
+  if (loading) return (
     <div className="flex items-center justify-center min-h-screen p-8">
       <DashboardSkeleton />
     </div>
   )
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
+  if (!profile) {
+    return <Navigate to="/admin/website" replace />
+  }
   if (profile.role === 'finance_manager') {
     return <Navigate to="/admin/finance" replace />
   }

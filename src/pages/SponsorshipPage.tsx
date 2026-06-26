@@ -36,16 +36,14 @@ export function SponsorshipPage() {
   const steps = content?.steps || []
   const benefits = content?.benefits || []
 
-  if (!content) return null
-
   return (
     <div>
-      {content.hero_title && (
+      {content?.hero_title && (
         <section className="relative py-24 bg-gradient-to-br from-amber-50 to-orange-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto">
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">{content.hero_title}</h1>
-              {content.hero_subtitle && <p className="text-xl text-gray-600">{content.hero_subtitle}</p>}
+              {content?.hero_subtitle && <p className="text-xl text-gray-600">{content.hero_subtitle}</p>}
             </div>
           </div>
         </section>
@@ -54,10 +52,10 @@ export function SponsorshipPage() {
       {steps.length > 0 && (
         <section className="py-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            {(content.section_title || content.section_description) && (
+            {(content?.section_title || content?.section_description) && (
               <div className="text-center mb-16">
-                {content.section_title && <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{content.section_title}</h2>}
-                {content.section_description && <p className="text-gray-600 max-w-2xl mx-auto">{content.section_description}</p>}
+                {content?.section_title && <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{content.section_title}</h2>}
+                {content?.section_description && <p className="text-gray-600 max-w-2xl mx-auto">{content.section_description}</p>}
               </div>
             )}
 
@@ -127,15 +125,15 @@ export function SponsorshipPage() {
         </section>
       )}
 
-      {content.cta_title && (
+      {content?.cta_title && (
         <section className="py-24 bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">{content.cta_title}</h2>
-            {content.cta_description && (
+            {content?.cta_description && (
               <p className="text-white/80 max-w-2xl mx-auto mb-8">{content.cta_description}</p>
             )}
-            <Link to={content.cta_button_link || '/students'}>
-              <Button size="lg">{content.cta_button_text || t('sponsorship_browse_button')} <ArrowRight className="w-4 h-4 ml-2" /></Button>
+            <Link to={content?.cta_button_link || '/students'}>
+              <Button size="lg">{content?.cta_button_text || t('sponsorship_browse_button')} <ArrowRight className="w-4 h-4 ml-2" /></Button>
             </Link>
           </div>
         </section>

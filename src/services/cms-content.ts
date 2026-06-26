@@ -24,7 +24,7 @@ export async function getDonationContent(): Promise<DonationContent | null> {
     .eq('is_published', true)
     .order('created_at', { ascending: false })
     .limit(1)
-    .single()
+    .maybeSingle()
   return data as DonationContent | null
 }
 
@@ -39,7 +39,7 @@ export async function getSponsorshipContent(): Promise<SponsorshipContent | null
     .eq('is_published', true)
     .order('created_at', { ascending: false })
     .limit(1)
-    .single()
+    .maybeSingle()
   return data as SponsorshipContent | null
 }
 
@@ -54,7 +54,7 @@ export async function getVolunteerContent(): Promise<VolunteerContent | null> {
     .eq('is_published', true)
     .order('created_at', { ascending: false })
     .limit(1)
-    .single()
+    .maybeSingle()
   return data as VolunteerContent | null
 }
 
@@ -69,7 +69,7 @@ export async function getTransparencyContent(): Promise<TransparencyContent | nu
     .eq('is_published', true)
     .order('created_at', { ascending: false })
     .limit(1)
-    .single()
+    .maybeSingle()
   return data as TransparencyContent | null
 }
 
@@ -84,7 +84,7 @@ export async function getHeroContent(): Promise<HeroContent | null> {
     .eq('is_visible', true)
     .order('display_order', { ascending: true })
     .limit(1)
-    .single()
+    .maybeSingle()
   return data as HeroContent | null
 }
 
@@ -200,7 +200,6 @@ export async function upsertSectionContent(content: Partial<SectionContent>): Pr
 export async function getAllCmsStrings(): Promise<CmsStringMap> {
   const { data } = await db('cms_strings')
     .select('key, value')
-    .eq('is_published', true)
   const rows = (data || []) as { key: string; value: string }[]
   const map: CmsStringMap = {}
   for (const row of rows) {

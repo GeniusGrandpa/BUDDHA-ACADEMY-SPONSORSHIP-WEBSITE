@@ -66,7 +66,7 @@ export function ProtectedRoute({
     })()
   }, [user, profile])
 
-  const effectiveRole = (profile?.role || fallbackRole) as Role | undefined
+  const effectiveRole: Role | undefined = (profile?.role || fallbackRole || (user ? 'donor' : undefined)) as Role | undefined
   const status = profile?.status || fallbackStatus
 
   useEffect(() => {
