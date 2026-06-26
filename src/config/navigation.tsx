@@ -283,15 +283,4 @@ export function getNavigationForRole(role: Role | undefined | null, userPermissi
     .filter(section => section.items.length > 0)
 }
 
-export function getDashboardForRole(role: Role): string {
-  const dashboards: Record<Role, string> = {
-    super_admin: '/admin',
-    admin: '/admin',
-    finance_manager: '/admin/finance',
-    teacher: '/teacher',
-    donor: '/dashboard',
-    volunteer: '/dashboard',
-    public_user: '/',
-  }
-  return dashboards[role] || '/'
-}
+export { getRedirectPath as getDashboardForRole } from '../features/auth/utils/redirectByRole'

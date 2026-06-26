@@ -10,11 +10,8 @@ import { validateEmail, validateName, validatePassword, validateConfirmPassword 
 import { getAuthErrorMessage } from '../lib/auth/authErrors'
 import { getRedirectPath } from '../lib/auth/redirectByRole'
 import { getRememberMe, setRememberMe } from '../lib/auth/session'
-import { getSupabaseClient } from '../lib/supabase'
 import type { Role } from '../types/permissions'
 import logo from '../assets/logo.jpg'
-
-const supabase = getSupabaseClient()
 
 const countryOptions = [
   { value: 'United States', label: 'United States' },
@@ -81,10 +78,14 @@ export function LoginPage() {
   )
 
   useEffect(() => {
-    if (user && profile && !authLoading) {
-      redirectByRole(profile.role as Role)
+    if (!authLoading) {
+      if (user && profile) {
+        redirectByRole(profile.role as Role)
+      } else if (user && !profile) {
+        navigate('/dashboard', { replace: true })
+      }
     }
-  }, [user, profile, authLoading, redirectByRole])
+  }, [user, profile, authLoading, redirectByRole, navigate])
 
   const switchMode = (newMode: AuthMode) => {
     setMode(newMode)
@@ -150,23 +151,6 @@ export function LoginPage() {
       }
 
       if (result.error) throw result.error
-
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      if (session?.user) {
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', session.user.id)
-          .single()
-
-        if (profileData?.role) {
-          redirectByRole(profileData.role as Role)
-        } else {
-          navigate('/dashboard', { replace: true })
-        }
-      }
     } catch (err) {
       const message = getAuthErrorMessage(err)
       if (message.toLowerCase().includes('verify')) {

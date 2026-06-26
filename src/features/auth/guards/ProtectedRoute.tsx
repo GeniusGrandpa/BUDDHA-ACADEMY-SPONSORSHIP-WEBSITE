@@ -4,7 +4,7 @@ import { useAuth } from '../providers/AuthContext'
 import { supabase } from '../../../lib/supabase'
 import type { Role, PermissionCode } from '../types/permissions'
 import { hasPermission, hasAnyPermission, isAdminOrAbove } from '../services/permissions'
-import { getDashboardForRole } from '../../../config/navigation'
+import { getRedirectPath } from '../utils/redirectByRole'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
@@ -103,7 +103,7 @@ export function ProtectedRoute({
 
   if (denied) {
     const role = profile?.role || fallbackRole
-    const redirect = role ? getDashboardForRole(role as Role) : '/'
+    const redirect = role ? getRedirectPath(role as Role) : '/'
     return <Navigate to={redirect} replace />
   }
 

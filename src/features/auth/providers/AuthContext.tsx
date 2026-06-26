@@ -116,12 +116,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [permissions, setPermissions] = useState<PermissionCode[]>([])
   const [loading, setLoading] = useState(true)
 
-  const applySession = useCallback(async (session: Session | null) => {
+  const applySession = useCallback(async (session: Session | null): Promise<Profile | null> => {
     if (!session?.user) {
       setUser(null)
       setProfile(null)
       setPermissions([])
-      return
+      return null
     }
 
     setUser(session.user)
@@ -131,6 +131,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (currentProfile) {
       setPermissions(await safeFetchPermissions(session.user.id))
     }
+    return currentProfile
   }, [])
 
   const refreshProfile = useCallback(async () => {
@@ -173,14 +174,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     initAuth()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!cancelled) {
-        setLoading(true)
-        applySession(session).catch(error => {
-          console.error('[Auth] onAuthStateChange failed:', error)
-        }).finally(() => {
-          if (!cancelled) setLoading(false)
-        })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (cancelled) return
+      setLoading(true)
+      try {
+        const currentProfile = await applySession(session)
+        if (currentProfile && (currentProfile.status === 'suspended' || currentProfile.status === 'banned')) {
+          await supabase.auth.signOut()
+          setUser(null)
+          setProfile(null)
+          setPermissions([])
+        }
+      } catch (error) {
+        console.error('[Auth] onAuthStateChange failed:', error)
+      } finally {
+        if (!cancelled) setLoading(false)
       }
     })
 
@@ -220,16 +228,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (data.user) {
         await logLoginHistory(data.user.id, 'success')
         resetRateLimit(rateKey)
-      }
 
-      const currentProfile = await refreshProfile()
-      if (currentProfile?.status === 'suspended' || currentProfile?.status === 'banned') {
-        await signOut()
-        return {
-          error: {
-            message: 'Your account has been suspended. Please contact support',
-            category: 'account_status',
-          },
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('status')
+          .eq('id', data.user.id)
+          .maybeSingle()
+
+        if (profileData?.status === 'suspended' || profileData?.status === 'banned') {
+          await supabase.auth.signOut()
+          setUser(null)
+          setProfile(null)
+          setPermissions([])
+          return {
+            error: {
+              message: 'Your account has been suspended. Please contact support',
+              category: 'account_status',
+            },
+          }
         }
       }
 

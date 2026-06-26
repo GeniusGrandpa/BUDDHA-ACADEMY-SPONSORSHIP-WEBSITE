@@ -5,6 +5,8 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 import { Layout } from './layout/Layout'
 import { useAuth } from './context/AuthContext'
 import { DashboardSkeleton } from './components/ui/LoadingSkeleton'
+import { getRedirectPath } from './features/auth/utils/redirectByRole'
+import type { Role } from './features/auth/types/permissions'
 
 
 function LazyPage({ Component }: { Component: React.LazyExoticComponent<React.ComponentType> }) {
@@ -182,14 +184,12 @@ function AdminIndexRedirect() {
       <DashboardSkeleton />
     </div>
   )
-  if (!user) {
-    return <Navigate to="/login" replace />
-  }
-  if (!profile) {
-    return <Navigate to="/admin/website" replace />
-  }
-  if (profile.role === 'finance_manager') {
-    return <Navigate to="/admin/finance" replace />
+  if (!user) return <Navigate to="/login" replace />
+  if (!profile) return <Navigate to="/admin/website" replace />
+
+  const redirectPath = getRedirectPath(profile.role as Role)
+  if (redirectPath !== '/admin') {
+    return <Navigate to={redirectPath} replace />
   }
   return <LazyPage Component={SuperAdminDashboard} />
 }
