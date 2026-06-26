@@ -78,14 +78,10 @@ export function LoginPage() {
   )
 
   useEffect(() => {
-    if (!authLoading) {
-      if (user && profile) {
-        redirectByRole(profile.role as Role)
-      } else if (user && !profile) {
-        navigate('/dashboard', { replace: true })
-      }
+    if (user && profile && !authLoading) {
+      redirectByRole(profile.role as Role)
     }
-  }, [user, profile, authLoading, redirectByRole, navigate])
+  }, [user, profile, authLoading, redirectByRole])
 
   const switchMode = (newMode: AuthMode) => {
     setMode(newMode)

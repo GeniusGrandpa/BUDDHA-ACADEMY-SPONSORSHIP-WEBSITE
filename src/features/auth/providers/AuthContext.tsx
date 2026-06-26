@@ -125,11 +125,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     setUser(session.user)
-    const currentProfile = await safeFetchOrCreateProfile(session.user)
-    setProfile(currentProfile)
 
+    const [currentProfile, currentPermissions] = await Promise.all([
+      safeFetchOrCreateProfile(session.user),
+      safeFetchPermissions(session.user.id),
+    ])
+
+    setProfile(currentProfile)
     if (currentProfile) {
-      setPermissions(await safeFetchPermissions(session.user.id))
+      setPermissions(currentPermissions)
     }
     return currentProfile
   }, [])

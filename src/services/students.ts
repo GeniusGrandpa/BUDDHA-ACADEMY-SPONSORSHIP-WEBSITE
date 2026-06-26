@@ -1,4 +1,5 @@
 import { getSupabaseClient } from '../lib/supabase'
+import { requireRole } from '../lib/auth/secureService'
 import type { Database, Student } from '../types/database'
 const supabase = getSupabaseClient()
 
@@ -19,7 +20,6 @@ export async function getStudents(status?: string, opts?: { limit?: number }): P
   }
 
   const { data, error } = await query
-
   if (error) throw error
   return data || []
 }
@@ -36,6 +36,8 @@ export async function getStudentById(id: string): Promise<Student | null> {
 }
 
 export async function createStudent(student: StudentInsert): Promise<Student> {
+  await requireRole(['admin', 'super_admin'])
+
   const { data, error } = await supabase
     .from('students')
     .insert(student)
@@ -47,6 +49,8 @@ export async function createStudent(student: StudentInsert): Promise<Student> {
 }
 
 export async function updateStudent(id: string, updates: Partial<Student>): Promise<Student> {
+  await requireRole(['admin', 'super_admin'])
+
   const { data, error } = await supabase
     .from('students')
     .update(updates)
@@ -59,6 +63,8 @@ export async function updateStudent(id: string, updates: Partial<Student>): Prom
 }
 
 export async function deleteStudent(id: string): Promise<void> {
+  await requireRole(['admin', 'super_admin'])
+
   const { error } = await supabase
     .from('students')
     .delete()
