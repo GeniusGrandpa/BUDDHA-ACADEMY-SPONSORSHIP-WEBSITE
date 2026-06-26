@@ -66,7 +66,7 @@ export function ProtectedRoute({
     })()
   }, [user, profile])
 
-  const effectiveRole: Role | undefined = (profile?.role || fallbackRole || (user ? 'donor' : undefined)) as Role | undefined
+  const effectiveRole: Role | undefined = (profile?.role || fallbackRole) as Role | undefined
   const status = profile?.status || fallbackStatus
 
   useEffect(() => {
@@ -103,7 +103,7 @@ export function ProtectedRoute({
 
   if (denied) {
     const role = profile?.role || fallbackRole
-    const redirect = role ? getRedirectPath(role as Role) : '/'
+    const redirect = role ? getRedirectPath(role as Role) : '/login'
     return <Navigate to={redirect} replace />
   }
 

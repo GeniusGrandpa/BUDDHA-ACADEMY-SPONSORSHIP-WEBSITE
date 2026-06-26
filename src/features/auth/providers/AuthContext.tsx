@@ -41,17 +41,25 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-async function fetchOrCreateProfile(user: User): Promise<Profile | null> {
-  try {
+async function fetchProfileWithRetry(userId: string, retries = 2, delay = 500): Promise<Profile | null> {
+  for (let attempt = 0; attempt < retries; attempt++) {
     const { data } = await supabase
       .from('profiles')
       .select('*')
-      .eq('id', user.id)
+      .eq('id', userId)
       .maybeSingle()
-
-    if (data) {
-      return data
+    if (data) return data
+    if (attempt < retries - 1) {
+      await new Promise(r => setTimeout(r, delay))
     }
+  }
+  return null
+}
+
+async function fetchOrCreateProfile(user: User): Promise<Profile | null> {
+  try {
+    const existing = await fetchProfileWithRetry(user.id)
+    if (existing) return existing
 
     const meta = user.user_metadata
 

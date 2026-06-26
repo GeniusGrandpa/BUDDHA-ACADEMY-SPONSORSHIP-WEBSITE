@@ -181,7 +181,7 @@ function AdminIndexRedirect() {
     </div>
   )
   if (!user) return <Navigate to="/login" replace />
-  if (!profile) return <Navigate to="/admin/website" replace />
+  if (!profile) return <Navigate to="/login" replace />
 
   const redirectPath = getRedirectPath(profile.role as Role)
   if (redirectPath !== '/admin') {
