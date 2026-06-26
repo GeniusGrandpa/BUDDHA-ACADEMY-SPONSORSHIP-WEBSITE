@@ -1,53 +1,7 @@
-import { useState, useEffect, useRef } from 'react'
-
-const ROTATING_MESSAGES = [
-  'Loading sponsored students...',
-  'Preparing donor impact reports...',
-  'Gathering success stories...',
-  'Connecting our community...',
-  'Building brighter futures...',
-]
-
 export function PremiumGlobalLoader() {
-  const [messageIndex, setMessageIndex] = useState(0)
-  const [visible, setVisible] = useState(true)
-  const [progress, setProgress] = useState(0)
-  const startRef = useRef(Date.now())
-
-  useEffect(() => {
-    const minDuration = 500
-    const elapsed = Date.now() - startRef.current
-    if (elapsed < minDuration) {
-      const timer = setTimeout(() => setVisible(true), minDuration - elapsed)
-      return () => clearTimeout(timer)
-    }
-  }, [])
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setMessageIndex(prev => (prev + 1) % ROTATING_MESSAGES.length)
-    }, 4000)
-    return () => clearInterval(interval)
-  }, [])
-
-  useEffect(() => {
-    const duration = 3000
-    const step = 100
-    const increment = 100 / (duration / step)
-    const interval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 90) return prev
-        return Math.min(prev + increment, 90)
-      })
-    }, step)
-    return () => clearInterval(interval)
-  }, [])
-
   return (
     <div
-      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center transition-opacity duration-500 ease-out ${
-        visible ? 'opacity-100' : 'opacity-0 pointer-events-none'
-      }`}
+      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center transition-opacity duration-500 ease-out"
       style={{ backgroundColor: '#FFF8F0' }}
       role="status"
       aria-busy="true"
@@ -73,36 +27,8 @@ export function PremiumGlobalLoader() {
           </div>
         </div>
 
-        <div className="w-full space-y-4">
-          <p className="text-base text-center font-medium" style={{ color: '#44403C' }}>
-            Preparing opportunities for students...
-          </p>
-
-          <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: '#FBE7CC' }}>
-            <div
-              className="h-full rounded-full transition-all duration-300 ease-out"
-              style={{ width: `${progress}%`, background: 'linear-gradient(90deg, #F59E0B 0%, #D97706 100%)' }}
-            />
-          </div>
-        </div>
-
-        <div className="h-6 relative w-full text-center">
-          {ROTATING_MESSAGES.map((msg, idx) => (
-            <p
-              key={msg}
-              className={`absolute inset-0 text-sm transition-opacity duration-700 ease-out ${
-                idx === messageIndex ? 'opacity-100' : 'opacity-0'
-              }`}
-              style={{ color: '#A8A29E' }}
-              aria-hidden={idx !== messageIndex}
-            >
-              {msg}
-            </p>
-          ))}
-        </div>
+        <div className="w-8 h-8 border-4 border-amber-400 border-t-transparent rounded-full animate-spin" />
       </div>
-
-      <p className="sr-only">Loading application content. Please wait.</p>
     </div>
   )
 }

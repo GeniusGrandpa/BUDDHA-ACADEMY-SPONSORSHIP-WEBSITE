@@ -5,16 +5,38 @@ import { Button } from '../components/ui/Button'
 import { getSponsorshipContent, getSiteImage } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import type { SponsorshipContent } from '../types/cms-content'
-import { DetailPageSkeleton } from '../components/ui/LoadingSkeleton'
+
+const fallbackContent = {
+  hero_title: 'Sponsor a Child',
+  hero_subtitle: 'Your monthly sponsorship provides education, meals, and care to a child in need.',
+  section_title: 'How Sponsorship Works',
+  section_description: 'Sponsoring a child at Buddha Academy is simple and transparent. Your contribution goes directly to education, care, and opportunity.',
+  steps: [
+    { num: '1', title: 'Choose a Child', desc: 'Browse our students and select someone you\'d like to sponsor.' },
+    { num: '2', title: 'Set Your Contribution', desc: 'Choose a monthly amount that works for you. Every contribution makes a difference.' },
+    { num: '3', title: 'Receive Updates', desc: 'Get regular updates on your sponsored child\'s progress, achievements, and milestones.' },
+    { num: '4', title: 'Make a Lasting Impact', desc: 'Your support gives a child access to education, meals, healthcare, and a brighter future.' },
+  ],
+  benefits: [
+    { text: 'Access to quality education and learning materials' },
+    { text: 'Nutritious meals every school day' },
+    { text: 'Regular health check-ups and medical care' },
+    { text: 'A safe and nurturing environment' },
+    { text: 'Opportunities for personal growth and development' },
+  ],
+  cta_title: 'Ready to Change a Life?',
+  cta_description: 'Choose a child to sponsor and start making a difference today.',
+  cta_button_text: 'Browse Students',
+  cta_button_link: '/students',
+} as SponsorshipContent
 
 export function SponsorshipPage() {
   const { t } = useCmsStrings()
-  const [content, setContent] = useState<SponsorshipContent | null>(null)
+  const [content, setContent] = useState<SponsorshipContent>(fallbackContent)
   const [heroImage, setHeroImage] = useState('')
-  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    Promise.all([loadContent(), loadHeroImage()]).finally(() => setLoading(false))
+    Promise.all([loadContent(), loadHeroImage()])
   }, [])
 
   const loadContent = async () => {
@@ -30,8 +52,6 @@ export function SponsorshipPage() {
       if (img) setHeroImage(img.image_url)
     } catch {}
   }
-
-  if (loading) return <DetailPageSkeleton />
 
   const steps = content?.steps || []
   const benefits = content?.benefits || []

@@ -10,12 +10,15 @@ import { getPageHeader } from '../services/cms-content'
 import { getSiteSettings } from '../services/settings'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import type { PageHeader } from '../types/cms-content'
-import { FormSkeleton } from '../components/ui/LoadingSkeleton'
+
+const fallbackHeader: Pick<PageHeader, 'title' | 'subtitle'> = {
+  title: 'Contact Us',
+  subtitle: 'We would love to hear from you. Reach out to us with any questions, feedback, or partnership inquiries.',
+}
 
 export function ContactPage() {
   const { t } = useCmsStrings()
-  const [header, setHeader] = useState<PageHeader | null>(null)
-  const [headerLoading, setHeaderLoading] = useState(true)
+  const [header, setHeader] = useState<Pick<PageHeader, 'title' | 'subtitle'>>(fallbackHeader)
   const [settings, setSettings] = useState<{
     contact_email?: string
     contact_phone?: string
@@ -37,7 +40,7 @@ export function ContactPage() {
     ]).then(([hdr, stgs]) => {
       if (hdr) setHeader(hdr)
       if (stgs) setSettings(stgs as { contact_email?: string; contact_phone?: string; contact_address?: string })
-    }).finally(() => setHeaderLoading(false))
+    })
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -78,8 +81,6 @@ export function ContactPage() {
     { value: 'partnership', label: 'Partnership Proposal' },
     { value: 'other', label: 'Other' },
   ]
-
-  if (headerLoading) return <div className="max-w-4xl mx-auto px-4 py-16"><FormSkeleton fields={6} /></div>
 
   return (
     <div>

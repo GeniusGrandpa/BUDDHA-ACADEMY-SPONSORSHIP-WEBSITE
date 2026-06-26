@@ -5,7 +5,6 @@ import { Card } from '../components/ui/Card'
 import { getPageHeader, getSiteImagesBySection } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import type { PageHeader, SiteImage } from '../types/cms-content'
-import { DetailPageSkeleton } from '../components/ui/LoadingSkeleton'
 
 interface TimelineItem { year: string; title: string; desc: string }
 interface ValueItem { title: string; desc: string }
@@ -79,17 +78,16 @@ function completeTimeline(timeline?: TimelineItem[]) {
 
 export function AboutPage() {
   const { t } = useCmsStrings()
-  const [header, setHeader] = useState<PageHeader | null>(null)
-  const [content, setContent] = useState<AboutContent | null>(null)
+  const [header, setHeader] = useState<Pick<PageHeader, 'title' | 'subtitle'>>(fallbackHeader)
+  const [content, setContent] = useState<AboutContent>(fallbackContent)
   const [images, setImages] = useState<SiteImage[]>([])
-  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     Promise.all([
       loadHeader(),
       loadContent(),
       loadImages(),
-    ]).finally(() => setLoading(false))
+    ])
   }, [])
 
   const loadHeader = async () => {
@@ -116,9 +114,6 @@ export function AboutPage() {
     } catch {}
   }
 
-  if (loading) return <DetailPageSkeleton />
-
-  const pageHeader = header ?? fallbackHeader
   const pageContent = { ...fallbackContent, ...content }
   const stats = pageContent.stats || []
   const values = pageContent.values || []
@@ -133,8 +128,8 @@ export function AboutPage() {
       <section className="relative py-24 bg-gradient-to-br from-amber-50 to-orange-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto">
-            {pageHeader.title && <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">{pageHeader.title}</h1>}
-            {pageHeader.subtitle && <p className="text-xl text-gray-600 leading-relaxed">{pageHeader.subtitle}</p>}
+            {header.title && <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">{header.title}</h1>}
+            {header.subtitle && <p className="text-xl text-gray-600 leading-relaxed">{header.subtitle}</p>}
           </div>
         </div>
       </section>

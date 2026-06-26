@@ -9,7 +9,45 @@ import { getSiteImage } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import type { Student } from '../types/database'
 import { formatNPR } from '../utils/currency'
-import { DetailPageSkeleton } from '../components/ui/LoadingSkeleton'
+
+function DetailSkeleton() {
+  return (
+    <div className="bg-gray-50 min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="h-5 w-32 bg-gray-200 rounded animate-pulse mb-6" />
+        <div className="grid lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-1">
+            <div className="border border-gray-200 rounded-xl overflow-hidden">
+              <div className="w-full h-80 bg-gray-200 animate-pulse" />
+              <div className="p-6 space-y-4">
+                <div className="h-8 w-48 bg-gray-200 rounded animate-pulse" />
+                <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+                <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+                <div className="pt-6 border-t border-gray-200 space-y-2">
+                  <div className="h-4 w-40 bg-gray-200 rounded animate-pulse" />
+                  <div className="h-2 w-full bg-gray-200 rounded animate-pulse" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="lg:col-span-2 space-y-6">
+            <div className="border border-gray-200 rounded-xl p-6 space-y-3">
+              <div className="h-6 w-48 bg-gray-200 rounded animate-pulse" />
+              <div className="h-4 w-full bg-gray-200 rounded animate-pulse" />
+              <div className="h-4 w-full bg-gray-200 rounded animate-pulse" />
+              <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse" />
+            </div>
+            <div className="border border-gray-200 rounded-xl p-6 space-y-3">
+              <div className="h-6 w-40 bg-gray-200 rounded animate-pulse" />
+              <div className="h-4 w-full bg-gray-200 rounded animate-pulse" />
+              <div className="h-4 w-2/3 bg-gray-200 rounded animate-pulse" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export function StudentDetailPage() {
   const { t } = useCmsStrings()
@@ -38,7 +76,7 @@ export function StudentDetailPage() {
     }
   }
 
-  if (loading) return <DetailPageSkeleton />
+  if (loading) return <DetailSkeleton />
 
   if (!student) {
     return (

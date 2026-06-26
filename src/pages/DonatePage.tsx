@@ -13,15 +13,21 @@ import { StudentStory } from '../components/donate/StudentStory'
 import type { Student } from '../types/database'
 import type { StudentSummary } from '../components/donate/types'
 import type { DonationContent, PageHeader } from '../types/cms-content'
-import { DetailPageSkeleton } from '../components/ui/LoadingSkeleton'
+
+const fallbackContent = {
+  hero_title: 'Make a Donation',
+  hero_subtitle: 'Your generous support helps us provide free education, meals, and care to underprivileged children in Nepal.',
+  currency_label: 'NPR',
+  impact_cards: [] as DonationContent['impact_cards'],
+  process_steps: [] as DonationContent['process_steps'],
+} as DonationContent
 
 export function DonatePage() {
   const [searchParams] = useSearchParams()
   const { user } = useAuth()
   const [students, setStudents] = useState<Student[]>([])
   const [showPaymentModal, setShowPaymentModal] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const [content, setContent] = useState<DonationContent | null>(null)
+  const [content, setContent] = useState<DonationContent>(fallbackContent)
   const [pageHeader, setPageHeader] = useState<PageHeader | null>(null)
 
   const [amount, setAmount] = useState(0)
@@ -36,10 +42,10 @@ export function DonatePage() {
       getPageHeader('donate'),
       getStudents(),
     ]).then(([donationContent, header, studentsData]) => {
-      setContent(donationContent)
-      setPageHeader(header)
+      if (donationContent) setContent(donationContent)
+      if (header) setPageHeader(header)
       setStudents(studentsData.filter(s => s.sponsorship_status !== 'fully_sponsored'))
-    }).catch(() => {}).finally(() => setLoading(false))
+    }).catch(() => {})
   }, [])
 
   useEffect(() => {
@@ -70,8 +76,6 @@ export function DonatePage() {
     }
     return students[0] || null
   }, [studentSummaries, studentId, students])
-
-  if (loading || !content) return <div className="max-w-6xl mx-auto px-4 py-16"><DetailPageSkeleton /></div>
 
   const handlePresetClick = (value: number) => {
     setAmount(value)
@@ -108,10 +112,10 @@ export function DonatePage() {
                 {pageHeader?.title || 'Donation Program'}
               </span>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-light text-white leading-tight tracking-tight mb-6">
-                {content.hero_title}
+                {content.hero_title || fallbackContent.hero_title}
               </h1>
               <p className="text-lg sm:text-xl text-white/90 font-light leading-relaxed max-w-2xl mb-10">
-                {content.hero_subtitle}
+                {content.hero_subtitle || fallbackContent.hero_subtitle}
               </p>
             </motion.div>
           </div>
@@ -166,7 +170,7 @@ export function DonatePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-3 gap-8 lg:gap-10">
             <div className="lg:col-span-2 space-y-6">
-              <p className="text-xs text-gray-400">All amounts in {content.currency_label}</p>
+              <p className="text-xs text-gray-400">All amounts in {content.currency_label || 'NPR'}</p>
               {!user && <AuthPrompt />}
 
               <DonationForm

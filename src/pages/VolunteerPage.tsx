@@ -5,14 +5,39 @@ import { submitVolunteerApplication } from '../services/volunteerApplications'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import type { VolunteerContent, PageHeader } from '../types/cms-content'
 import type { VolunteerEvent } from '../types/database'
-import { FormSkeleton } from '../components/ui/LoadingSkeleton'
+
+const fallbackHeader: Pick<PageHeader, 'title' | 'subtitle'> = {
+  title: 'Volunteer With Us',
+  subtitle: 'Your time and skills can make a lasting difference in the lives of children.',
+}
+
+const fallbackContent = {
+  hero_title: 'Volunteer With Us',
+  hero_subtitle: 'Your time and skills can make a lasting difference in the lives of children.',
+  section_title: 'Volunteer Opportunities',
+  section_description: 'We offer a variety of ways to get involved, both locally and remotely.',
+  opportunities: [
+    { title: 'Teaching Assistant', description: 'Help teachers in the classroom with daily lessons and activities.', icon: 'School' },
+    { title: 'Tutoring', description: 'Provide one-on-one academic support to students who need extra help.', icon: 'BookOpen' },
+    { title: 'Sports & Arts', description: 'Lead recreational activities, sports, and creative arts programs.', icon: 'Music' },
+    { title: 'Administrative Support', description: 'Assist with office tasks, communications, and event coordination.', icon: 'ClipboardList' },
+  ],
+  skill_options: [
+    { value: 'teaching', label: 'Teaching / Tutoring' },
+    { value: 'healthcare', label: 'Healthcare / Medical' },
+    { value: 'it', label: 'IT / Web Development' },
+    { value: 'fundraising', label: 'Fundraising / Events' },
+    { value: 'admin', label: 'Administrative' },
+    { value: 'other', label: 'Other' },
+  ],
+  success_message: 'Thank you for applying! We will review your application and get back to you within 5-7 business days.',
+} as VolunteerContent
 
 export function VolunteerPage() {
   const { t } = useCmsStrings()
-  const [content, setContent] = useState<VolunteerContent | null>(null)
-  const [header, setHeader] = useState<PageHeader | null>(null)
+  const [content, setContent] = useState<VolunteerContent>(fallbackContent)
+  const [header, setHeader] = useState<Pick<PageHeader, 'title' | 'subtitle'>>(fallbackHeader)
   const [events, setEvents] = useState<VolunteerEvent[]>([])
-  const [loading, setLoading] = useState(true)
 
   const [formData, setFormData] = useState({
     fullName: '', email: '', phone: '', country: '',
@@ -31,7 +56,7 @@ export function VolunteerPage() {
       if (vc) setContent(vc)
       if (hdr) setHeader(hdr)
       setEvents(evts)
-    }).finally(() => setLoading(false))
+    })
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -55,8 +80,6 @@ export function VolunteerPage() {
       setSubmitting(false)
     }
   }
-
-  if (loading) return <FormSkeleton />
 
   const opportunities = content?.opportunities || []
   const skillOptions = content?.skill_options || []
