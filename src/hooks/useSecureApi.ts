@@ -12,10 +12,6 @@ function createError(message: string, statusCode: number, code: string): ApiErro
   return { message, statusCode, code }
 }
 
-/**
- * Hook that wraps Supabase queries with authentication and role checks.
- * Returns a `secureQuery` function that enforces auth + optional RBAC.
- */
 export function useSecureApi() {
   const { user, profile, loading } = useAuth()
 
@@ -53,15 +49,7 @@ export function useSecureApi() {
     }
   }, [requireAuthenticated, profile])
 
-  /**
-   * Run a Supabase query with auth + optional role check.
-   * Example:
-   *   const data = await secureQuery(
-   *     supabase.from('donations').select('*'),
-   *     { minRole: 'finance_manager' }
-   *   )
-   */
-  const secureQuery = useCallback(async <T>(
+    const secureQuery = useCallback(async <T>(
     query: PromiseLike<{ data: T; error: unknown }>,
     options?: { allowedRoles?: Role[]; minRole?: Role },
   ): Promise<T> => {

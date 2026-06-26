@@ -30,7 +30,6 @@ export async function initiatePaymentCheckout(
 
   if (error) throw error
 
-  
   const response = data as PaymentCheckoutResponse
 
   if (response && response.success === false) {
@@ -53,7 +52,6 @@ export async function initiatePaymentCheckout(
 
   return { sessionId, transactionId }
 }
-
 
 export async function cancelPaymentSession(sessionId: string): Promise<void> {
   const { error } = await supabase.rpc('cancel_payment_session', {

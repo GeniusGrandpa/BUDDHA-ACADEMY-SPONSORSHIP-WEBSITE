@@ -1,66 +1,1 @@
-DROP POLICY IF EXISTS "Users can insert own profile" ON public.profiles;
-DROP POLICY IF EXISTS profiles_insert_own ON public.profiles;
-DROP POLICY IF EXISTS profiles_insert_own ON profiles;
-CREATE POLICY profiles_insert_own ON public.profiles
-  FOR INSERT
-  TO authenticated
-  WITH CHECK (id = auth.uid());
-DROP POLICY IF EXISTS profiles_update_own ON public.profiles;
-DROP POLICY IF EXISTS profiles_update_own ON profiles;
-CREATE POLICY profiles_update_own ON public.profiles
-  FOR UPDATE
-  TO authenticated
-  USING (id = auth.uid())
-  WITH CHECK (
-    id = auth.uid()
-    AND role = public.get_my_role()
-    AND status = public.get_user_status()
-  );
-CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS trigger
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-BEGIN
-  INSERT INTO public.profiles (id, email, full_name, country, role, status)
-  VALUES (
-    NEW.id,
-    COALESCE(NEW.email, ''),
-    COALESCE(NULLIF(NEW.raw_user_meta_data->>'full_name', ''), 'Donor'),
-    COALESCE(NULLIF(NEW.raw_user_meta_data->>'country', ''), ''),
-    'donor',
-    'active'
-  )
-  ON CONFLICT (id) DO UPDATE
-  SET
-    email = EXCLUDED.email,
-    full_name = EXCLUDED.full_name,
-    country = EXCLUDED.country,
-    status = 'active',
-    updated_at = now();
-  RETURN NEW;
-END;
-$$;
-GRANT SELECT ON public.profiles TO authenticated;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies
-    WHERE tablename = 'profiles'
-    AND policyname = 'profiles_insert_own'
-    AND cmd = 'INSERT'
-  ) THEN
-    RAISE WARNING 'profiles_insert_own policy was not created';
-  END IF;
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_proc p
-    JOIN pg_namespace n ON n.oid = p.pronamespace
-    WHERE n.nspname = 'public'
-    AND p.proname = 'handle_new_user'
-    AND p.pronargs = 0
-  ) THEN
-    RAISE WARNING 'handle_new_user function not found';
-  END IF;
-  RAISE NOTICE 'Auth signup flow fixes applied successfully';
-END $$;
+DROP POLICY IF EXISTS "Users can insert own profile" ON public.profiles;DROP POLICY IF EXISTS profiles_insert_own ON public.profiles;DROP POLICY IF EXISTS profiles_insert_own ON profiles;CREATE POLICY profiles_insert_own ON public.profiles  FOR INSERT  TO authenticated  WITH CHECK (id = auth.uid());DROP POLICY IF EXISTS profiles_update_own ON public.profiles;DROP POLICY IF EXISTS profiles_update_own ON profiles;CREATE POLICY profiles_update_own ON public.profiles  FOR UPDATE  TO authenticated  USING (id = auth.uid())  WITH CHECK (    id = auth.uid()    AND role = public.get_my_role()    AND status = public.get_user_status()  );CREATE OR REPLACE FUNCTION public.handle_new_user()RETURNS triggerLANGUAGE plpgsqlSECURITY DEFINERSET search_path = publicAS $$BEGIN  INSERT INTO public.profiles (id, email, full_name, country, role, status)  VALUES (    NEW.id,    COALESCE(NEW.email, ''),    COALESCE(NULLIF(NEW.raw_user_meta_data->>'full_name', ''), 'Donor'),    COALESCE(NULLIF(NEW.raw_user_meta_data->>'country', ''), ''),    'donor',    'active'  )  ON CONFLICT (id) DO UPDATE  SET    email = EXCLUDED.email,    full_name = EXCLUDED.full_name,    country = EXCLUDED.country,    status = 'active',    updated_at = now();  RETURN NEW;END;$$;GRANT SELECT ON public.profiles TO authenticated;DO $$BEGIN  IF NOT EXISTS (    SELECT 1 FROM pg_policies    WHERE tablename = 'profiles'    AND policyname = 'profiles_insert_own'    AND cmd = 'INSERT'  ) THEN    RAISE WARNING 'profiles_insert_own policy was not created';  END IF;  IF NOT EXISTS (    SELECT 1 FROM pg_proc p    JOIN pg_namespace n ON n.oid = p.pronamespace    WHERE n.nspname = 'public'    AND p.proname = 'handle_new_user'    AND p.pronargs = 0  ) THEN    RAISE WARNING 'handle_new_user function not found';  END IF;  RAISE NOTICE 'Auth signup flow fixes applied successfully';END $$;

@@ -42,7 +42,7 @@ export function AdminConfigPage() {
       const visMap: Record<string, boolean> = {}
       vis.forEach(v => { visMap[v.section_key] = v.is_visible })
       setVisibility(visMap)
-    } catch { /* ignore */ }
+    } catch {  }
   }
 
   const handleDragEnd = (result: DropResult) => {

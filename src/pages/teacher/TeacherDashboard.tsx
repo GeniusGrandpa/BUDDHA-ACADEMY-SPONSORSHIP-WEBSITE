@@ -5,7 +5,6 @@ import { supabase } from '../../lib/supabase'
 import { DashboardSkeleton } from '../../components/ui/LoadingSkeleton'
 import type { TeacherAssignment, Student, StudentProgress, AttendanceRecord } from '../../types/database'
 
-
 interface AssignedStudent {
   id: string
   name: string

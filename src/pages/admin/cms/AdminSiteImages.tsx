@@ -22,8 +22,8 @@ export function AdminSiteImages() {
     setLoading(true)
     try {
       const { data } = await db('site_images').select('*').order('created_at', { ascending: false })
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setImages((data || []) as any[])
+
+      setImages((data || []) as any[]) // eslint-disable-line @typescript-eslint/no-explicit-any
     } catch { toast.error('Failed to load site images') }
     finally { setLoading(false) }
   }, [])

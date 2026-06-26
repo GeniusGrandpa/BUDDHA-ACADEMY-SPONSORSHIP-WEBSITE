@@ -21,8 +21,8 @@ export function AdminDonationContent() {
       const { data } = await db('donation_content')
         .select('*').order('created_at', { ascending: false }).limit(1).maybeSingle()
       if (data) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const d = data as any
+
+        const d = data as any // eslint-disable-line @typescript-eslint/no-explicit-any
         setContentId(d.id)
         setHeroTitle(d.hero_title || '')
         setHeroSubtitle(d.hero_subtitle || '')

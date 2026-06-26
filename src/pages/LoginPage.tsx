@@ -237,7 +237,6 @@ export function LoginPage() {
           }}
         />
 
-
         <motion.div
           className="absolute -top-32 -right-32 w-[400px] h-[400px] rounded-full bg-[#fde68a]/20 blur-3xl"
           animate={{ y: [0, -20, 0, 20, 0], scale: [1, 1.08, 1, 0.92, 1] }}
@@ -261,7 +260,6 @@ export function LoginPage() {
               <p className="text-xs text-white/70 tracking-wider uppercase">Boudha &middot; Kathmandu</p>
             </div>
           </motion.div>
-          
 
           <div className="flex-1 flex items-center">
             <div className="space-y-8 max-w-xl">
@@ -707,7 +705,7 @@ export function LoginPage() {
                   </Button>
                 </form>
               )}
-            
+
               <p className="text-center text-sm text-gray-600 pt-1">
                 {mode === 'signin' ? (
                   <>

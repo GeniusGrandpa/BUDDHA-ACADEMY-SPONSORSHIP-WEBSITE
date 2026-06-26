@@ -8,37 +8,28 @@ CREATE TABLE IF NOT EXISTS public.cms_strings (
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
-
 CREATE UNIQUE INDEX IF NOT EXISTS idx_cms_strings_key ON public.cms_strings(key);
 CREATE INDEX IF NOT EXISTS idx_cms_strings_page ON public.cms_strings(page_slug);
 CREATE INDEX IF NOT EXISTS idx_cms_strings_category ON public.cms_strings(category);
-
 ALTER TABLE public.cms_strings ENABLE ROW LEVEL SECURITY;
-
 CREATE POLICY "cms_strings_select_public"
   ON cms_strings FOR SELECT
   USING (is_published = true);
-
 CREATE POLICY "cms_strings_select_staff"
   ON cms_strings FOR SELECT
   USING (public.get_user_role_level() >= 60);
-
 CREATE POLICY "cms_strings_insert_admin"
   ON cms_strings FOR INSERT
   WITH CHECK (public.get_user_role_level() >= 90);
-
 CREATE POLICY "cms_strings_update_admin"
   ON cms_strings FOR UPDATE
   USING (public.get_user_role_level() >= 90)
   WITH CHECK (public.get_user_role_level() >= 90);
-
 CREATE POLICY "cms_strings_delete_admin"
   ON cms_strings FOR DELETE
   USING (public.get_user_role_level() >= 90);
-
 GRANT SELECT ON public.cms_strings TO anon, authenticated;
 GRANT INSERT, UPDATE, DELETE ON public.cms_strings TO authenticated;
-
 CREATE OR REPLACE FUNCTION public.get_all_cms_strings()
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -55,9 +46,7 @@ BEGIN
   RETURN result;
 END;
 $$;
-
 GRANT EXECUTE ON FUNCTION public.get_all_cms_strings() TO anon, authenticated;
-
 INSERT INTO public.cms_strings (key, value, page_slug, category) VALUES
   ('home_loading', 'Loading...', 'home', 'ui_state'),
   ('home_students_heading', 'Children Waiting for Sponsors', 'home', 'section_heading'),

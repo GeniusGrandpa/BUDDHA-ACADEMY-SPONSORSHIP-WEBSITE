@@ -1,131 +1,91 @@
--- Fix RLS: "Admin full access" policies in 20260708000001 used auth.role() = 'authenticated'
--- which grants CRUD to ALL authenticated users, not just admins.
--- Also fix GRANT ALL TO anon (should be GRANT SELECT) and add missing SET search_path.
-
--- ========================================
--- FIX 1: Correct "Admin full access" policies to check profile role
--- ========================================
-
 DROP POLICY IF EXISTS "Admin full access donation_content" ON public.donation_content;
 CREATE POLICY "Admin full access donation_content" ON public.donation_content
   FOR ALL USING (
     EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('admin', 'super_admin') AND status = 'active')
   );
-
 DROP POLICY IF EXISTS "Admin full access sponsorship_content" ON public.sponsorship_content;
 CREATE POLICY "Admin full access sponsorship_content" ON public.sponsorship_content
   FOR ALL USING (
     EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('admin', 'super_admin') AND status = 'active')
   );
-
 DROP POLICY IF EXISTS "Admin full access volunteer_content" ON public.volunteer_content;
 CREATE POLICY "Admin full access volunteer_content" ON public.volunteer_content
   FOR ALL USING (
     EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('admin', 'super_admin') AND status = 'active')
   );
-
 DROP POLICY IF EXISTS "Admin full access transparency_content" ON public.transparency_content;
 CREATE POLICY "Admin full access transparency_content" ON public.transparency_content
   FOR ALL USING (
     EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('admin', 'super_admin') AND status = 'active')
   );
-
 DROP POLICY IF EXISTS "Admin full access hero_content" ON public.hero_content;
 CREATE POLICY "Admin full access hero_content" ON public.hero_content
   FOR ALL USING (
     EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('admin', 'super_admin') AND status = 'active')
   );
-
 DROP POLICY IF EXISTS "Admin full access section_visibility" ON public.section_visibility;
 CREATE POLICY "Admin full access section_visibility" ON public.section_visibility
   FOR ALL USING (
     EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('admin', 'super_admin') AND status = 'active')
   );
-
 DROP POLICY IF EXISTS "Admin full access site_images" ON public.site_images;
 CREATE POLICY "Admin full access site_images" ON public.site_images
   FOR ALL USING (
     EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('admin', 'super_admin') AND status = 'active')
   );
-
 DROP POLICY IF EXISTS "Admin full access footer_content" ON public.footer_content;
 CREATE POLICY "Admin full access footer_content" ON public.footer_content
   FOR ALL USING (
     EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('admin', 'super_admin') AND status = 'active')
   );
-
 DROP POLICY IF EXISTS "Admin full access seo_content" ON public.seo_content;
 CREATE POLICY "Admin full access seo_content" ON public.seo_content
   FOR ALL USING (
     EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('admin', 'super_admin') AND status = 'active')
   );
-
 DROP POLICY IF EXISTS "Admin full access page_headers" ON public.page_headers;
 CREATE POLICY "Admin full access page_headers" ON public.page_headers
   FOR ALL USING (
     EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('admin', 'super_admin') AND status = 'active')
   );
-
 DROP POLICY IF EXISTS "Admin full access section_content" ON public.section_content;
 CREATE POLICY "Admin full access section_content" ON public.section_content
   FOR ALL USING (
     EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('admin', 'super_admin') AND status = 'active')
   );
-
--- ========================================
--- FIX 2: GRANT ALL TO anon -> GRANT SELECT TO anon
--- anon should only SELECT published content, not INSERT/UPDATE/DELETE
--- ========================================
-
 REVOKE ALL ON public.donation_content FROM anon;
 GRANT SELECT ON public.donation_content TO anon;
 GRANT ALL ON public.donation_content TO authenticated;
-
 REVOKE ALL ON public.sponsorship_content FROM anon;
 GRANT SELECT ON public.sponsorship_content TO anon;
 GRANT ALL ON public.sponsorship_content TO authenticated;
-
 REVOKE ALL ON public.volunteer_content FROM anon;
 GRANT SELECT ON public.volunteer_content TO anon;
 GRANT ALL ON public.volunteer_content TO authenticated;
-
 REVOKE ALL ON public.transparency_content FROM anon;
 GRANT SELECT ON public.transparency_content TO anon;
 GRANT ALL ON public.transparency_content TO authenticated;
-
 REVOKE ALL ON public.hero_content FROM anon;
 GRANT SELECT ON public.hero_content TO anon;
 GRANT ALL ON public.hero_content TO authenticated;
-
 REVOKE ALL ON public.section_visibility FROM anon;
 GRANT SELECT ON public.section_visibility TO anon;
 GRANT ALL ON public.section_visibility TO authenticated;
-
 REVOKE ALL ON public.site_images FROM anon;
 GRANT SELECT ON public.site_images TO anon;
 GRANT ALL ON public.site_images TO authenticated;
-
 REVOKE ALL ON public.footer_content FROM anon;
 GRANT SELECT ON public.footer_content TO anon;
 GRANT ALL ON public.footer_content TO authenticated;
-
 REVOKE ALL ON public.seo_content FROM anon;
 GRANT SELECT ON public.seo_content TO anon;
 GRANT ALL ON public.seo_content TO authenticated;
-
 REVOKE ALL ON public.page_headers FROM anon;
 GRANT SELECT ON public.page_headers TO anon;
 GRANT ALL ON public.page_headers TO authenticated;
-
 REVOKE ALL ON public.section_content FROM anon;
 GRANT SELECT ON public.section_content TO anon;
 GRANT ALL ON public.section_content TO authenticated;
-
--- ========================================
--- FIX 3: Add SET search_path = public to all remaining SECURITY DEFINER functions
--- ========================================
-
--- From 20260708000001_cms_complete_content_management.sql
 CREATE OR REPLACE FUNCTION public.get_section_visibility(p_section_key TEXT)
 RETURNS TABLE(is_visible BOOLEAN)
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
@@ -134,7 +94,6 @@ BEGIN
   RETURN QUERY SELECT sv.is_visible FROM public.section_visibility sv WHERE sv.section_key = p_section_key;
 END;
 $$;
-
 CREATE OR REPLACE FUNCTION public.get_page_header(p_slug TEXT)
 RETURNS TABLE(id UUID, title TEXT, subtitle TEXT, background_image TEXT, is_visible BOOLEAN)
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
@@ -143,7 +102,6 @@ BEGIN
   RETURN QUERY SELECT ph.id, ph.title, ph.subtitle, ph.background_image, ph.is_visible FROM public.page_headers ph WHERE ph.page_slug = p_slug;
 END;
 $$;
-
 CREATE OR REPLACE FUNCTION public.get_site_image(p_image_key TEXT)
 RETURNS TABLE(image_url TEXT, alt_text TEXT, title TEXT)
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
@@ -152,8 +110,6 @@ BEGIN
   RETURN QUERY SELECT si.image_url, si.alt_text, si.title FROM public.site_images si WHERE si.image_key = p_image_key LIMIT 1;
 END;
 $$;
-
--- From 20260701000003_content_version_history.sql
 CREATE OR REPLACE FUNCTION public.create_content_version()
 RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
@@ -174,8 +130,6 @@ BEGIN
   RETURN COALESCE(NEW, OLD);
 END;
 $$;
-
--- From 20260704000002_cms_upgrade_tables.sql
 CREATE OR REPLACE FUNCTION public.cms_audit_trigger()
 RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
@@ -200,8 +154,6 @@ BEGIN
   RETURN NEW;
 END;
 $$;
-
--- From 20260707000001_advanced_block_system.sql
 CREATE OR REPLACE FUNCTION public.create_content_version_v2()
 RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
@@ -212,7 +164,6 @@ BEGIN
   SELECT COALESCE(MAX(version_number), 0) + 1 INTO v_version_number
   FROM public.content_versions
   WHERE entity_type = TG_TABLE_NAME AND entity_id = COALESCE(NEW.id, OLD.id);
-
   INSERT INTO public.content_versions (entity_type, entity_id, content, version_number, changed_by)
   VALUES (
     TG_TABLE_NAME,
@@ -228,7 +179,6 @@ BEGIN
   RETURN COALESCE(NEW, OLD);
 END;
 $$;
-
 CREATE OR REPLACE FUNCTION public.audit_page_blocks()
 RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
@@ -251,7 +201,6 @@ BEGIN
   RETURN COALESCE(NEW, OLD);
 END;
 $$;
-
 CREATE OR REPLACE FUNCTION public.sync_page_blocks_json(target_page_id UUID)
 RETURNS void
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
@@ -272,13 +221,11 @@ BEGIN
   ) INTO blocks_json
   FROM public.page_blocks pb
   WHERE pb.page_id = target_page_id;
-
   UPDATE public.pages
   SET blocks = COALESCE(blocks_json, '[]'::jsonb)
   WHERE id = target_page_id;
 END;
 $$;
-
 CREATE OR REPLACE FUNCTION public.migrate_homepage_sections_to_blocks()
 RETURNS text
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
@@ -291,15 +238,12 @@ DECLARE
   total INTEGER := 0;
 BEGIN
   SELECT id INTO home_page_id FROM public.pages WHERE slug = 'home';
-
   IF home_page_id IS NULL THEN
     INSERT INTO public.pages (slug, title, content, published)
     VALUES ('home', 'Homepage', '{}'::jsonb, true)
     RETURNING id INTO home_page_id;
   END IF;
-
   DELETE FROM public.page_blocks WHERE page_id = home_page_id;
-
   FOR section IN
     SELECT * FROM public.homepage_sections ORDER BY sort_order ASC
   LOOP
@@ -314,7 +258,6 @@ BEGIN
       WHEN 'partners' THEN 'partners'
       ELSE 'custom_section'
     END;
-
     INSERT INTO public.page_blocks (page_id, block_type, title, content, sort_order, is_visible)
     VALUES (
       home_page_id,
@@ -326,7 +269,6 @@ BEGIN
     );
     total := total + 1;
   END LOOP;
-
   PERFORM public.sync_page_blocks_json(home_page_id);
   RETURN 'Migrated ' || total || ' homepage sections to blocks on page: home';
 END;

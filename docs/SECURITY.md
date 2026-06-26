@@ -68,8 +68,7 @@ Configured in `vite.config.ts`:
 
 ## SPA Routing Security
 
-- Netlify: `public/_redirects` with `/* /index.html 200`
-- Vercel: `vercel.json` with rewrites to `/index.html`
+- All routes serve `index.html` via Vite's built-in dev/preview server (no platform-specific configs)
 - Auth callback URLs validated server-side by Supabase against configured redirect URL whitelist
 
 ## Audit Logging

@@ -24,8 +24,8 @@ export function AdminFooterContent() {
       const { data } = await db('footer_content')
         .select('*').order('created_at', { ascending: false }).limit(1).maybeSingle()
       if (data) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const d = data as any
+
+        const d = data as any // eslint-disable-line @typescript-eslint/no-explicit-any
         setContentId(d.id)
         setDescription(d.description || '')
         setCopyrightText(d.copyright_text || '')

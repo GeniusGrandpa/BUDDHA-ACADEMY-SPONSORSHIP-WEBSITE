@@ -57,7 +57,6 @@ export function BrandPanel({ mode, onSwitchMode }: BrandPanelProps) {
         }}
       />
 
-
       {}
       <motion.div
         className="relative z-10 flex flex-col justify-between h-full p-12 lg:p-16"

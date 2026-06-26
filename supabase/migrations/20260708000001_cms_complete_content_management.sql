@@ -1,9 +1,3 @@
--- CMS Complete Content Management - Zero Hardcoded Content
--- Migration 20260708000001
--- Adds tables for donation content, sponsorship content, volunteer content,
--- and other missing CMS-managed content types
-
--- 1. DONATION CONTENT
 CREATE TABLE IF NOT EXISTS public.donation_content (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   hero_title TEXT DEFAULT '',
@@ -19,10 +13,7 @@ CREATE TABLE IF NOT EXISTS public.donation_content (
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
-
 CREATE INDEX IF NOT EXISTS idx_donation_content_published ON public.donation_content(is_published);
-
--- 2. SPONSORSHIP CONTENT
 CREATE TABLE IF NOT EXISTS public.sponsorship_content (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   hero_title TEXT DEFAULT '',
@@ -42,10 +33,7 @@ CREATE TABLE IF NOT EXISTS public.sponsorship_content (
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
-
 CREATE INDEX IF NOT EXISTS idx_sponsorship_content_published ON public.sponsorship_content(is_published);
-
--- 3. VOLUNTEER CONTENT
 CREATE TABLE IF NOT EXISTS public.volunteer_content (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   hero_title TEXT DEFAULT '',
@@ -62,10 +50,7 @@ CREATE TABLE IF NOT EXISTS public.volunteer_content (
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
-
 CREATE INDEX IF NOT EXISTS idx_volunteer_content_published ON public.volunteer_content(is_published);
-
--- 4. TRANSPARENCY CONTENT
 CREATE TABLE IF NOT EXISTS public.transparency_content (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   hero_title TEXT DEFAULT '',
@@ -87,10 +72,7 @@ CREATE TABLE IF NOT EXISTS public.transparency_content (
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
-
 CREATE INDEX IF NOT EXISTS idx_transparency_content_published ON public.transparency_content(is_published);
-
--- 5. HOMEPAGE HERO CONTENT (enhanced)
 CREATE TABLE IF NOT EXISTS public.hero_content (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   title TEXT DEFAULT '',
@@ -113,10 +95,7 @@ CREATE TABLE IF NOT EXISTS public.hero_content (
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
-
 CREATE INDEX IF NOT EXISTS idx_hero_content_visible ON public.hero_content(is_visible);
-
--- 6. SECTION VISIBILITY (centralized visibility control)
 CREATE TABLE IF NOT EXISTS public.section_visibility (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   section_key TEXT UNIQUE NOT NULL,
@@ -125,10 +104,7 @@ CREATE TABLE IF NOT EXISTS public.section_visibility (
   sort_order INTEGER DEFAULT 0,
   updated_at TIMESTAMPTZ DEFAULT now()
 );
-
 CREATE INDEX IF NOT EXISTS idx_section_visibility_key ON public.section_visibility(section_key);
-
--- 7. SITE IMAGES (centralized image management)
 CREATE TABLE IF NOT EXISTS public.site_images (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   image_key TEXT UNIQUE NOT NULL,
@@ -142,11 +118,8 @@ CREATE TABLE IF NOT EXISTS public.site_images (
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
-
 CREATE INDEX IF NOT EXISTS idx_site_images_key ON public.site_images(image_key);
 CREATE INDEX IF NOT EXISTS idx_site_images_section ON public.site_images(section);
-
--- 8. FOOTER CONTENT
 CREATE TABLE IF NOT EXISTS public.footer_content (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   description TEXT DEFAULT '',
@@ -160,16 +133,12 @@ CREATE TABLE IF NOT EXISTS public.footer_content (
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
-
--- 9. NEWS DETAIL (separate from news table for full CMS control)
 ALTER TABLE IF EXISTS public.news
   ADD COLUMN IF NOT EXISTS hero_title TEXT DEFAULT '',
   ADD COLUMN IF NOT EXISTS hero_subtitle TEXT DEFAULT '',
   ADD COLUMN IF NOT EXISTS featured_image_caption TEXT DEFAULT '',
   ADD COLUMN IF NOT EXISTS related_post_ids UUID[] DEFAULT '{}',
   ADD COLUMN IF NOT EXISTS seo JSONB DEFAULT '{}'::jsonb;
-
--- 10. SEO CONTENT (centralized SEO for all pages)
 CREATE TABLE IF NOT EXISTS public.seo_content (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   page_slug TEXT UNIQUE NOT NULL,
@@ -187,10 +156,7 @@ CREATE TABLE IF NOT EXISTS public.seo_content (
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
-
 CREATE INDEX IF NOT EXISTS idx_seo_content_slug ON public.seo_content(page_slug);
-
--- 11. PAGE HEADERS (hero for each page)
 CREATE TABLE IF NOT EXISTS public.page_headers (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   page_slug TEXT UNIQUE NOT NULL,
@@ -203,10 +169,7 @@ CREATE TABLE IF NOT EXISTS public.page_headers (
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
-
 CREATE INDEX IF NOT EXISTS idx_page_headers_slug ON public.page_headers(page_slug);
-
--- 12. SECTION CONTENT (for page sections like stats, about preview, etc.)
 CREATE TABLE IF NOT EXISTS public.section_content (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   section_key TEXT UNIQUE NOT NULL,
@@ -221,13 +184,7 @@ CREATE TABLE IF NOT EXISTS public.section_content (
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
-
 CREATE INDEX IF NOT EXISTS idx_section_content_key ON public.section_content(section_key);
-
--- ========================================
--- RLS POLICIES
--- ========================================
-
 ALTER TABLE public.donation_content ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.sponsorship_content ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.volunteer_content ENABLE ROW LEVEL SECURITY;
@@ -239,8 +196,6 @@ ALTER TABLE public.footer_content ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.seo_content ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.page_headers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.section_content ENABLE ROW LEVEL SECURITY;
-
--- Public read access for published content
 CREATE POLICY "Public can view published donation_content" ON public.donation_content
   FOR SELECT USING (is_published = true);
 CREATE POLICY "Public can view published sponsorship_content" ON public.sponsorship_content
@@ -263,8 +218,6 @@ CREATE POLICY "Public can view visible page_headers" ON public.page_headers
   FOR SELECT USING (is_visible = true);
 CREATE POLICY "Public can view visible section_content" ON public.section_content
   FOR SELECT USING (is_visible = true);
-
--- Admin/Super Admin full access
 CREATE POLICY "Admin full access donation_content" ON public.donation_content
   USING (auth.role() = 'authenticated');
 CREATE POLICY "Admin full access sponsorship_content" ON public.sponsorship_content
@@ -287,11 +240,6 @@ CREATE POLICY "Admin full access page_headers" ON public.page_headers
   USING (auth.role() = 'authenticated');
 CREATE POLICY "Admin full access section_content" ON public.section_content
   USING (auth.role() = 'authenticated');
-
--- ========================================
--- GRANTS
--- ========================================
-
 GRANT ALL ON public.donation_content TO authenticated, anon;
 GRANT ALL ON public.sponsorship_content TO authenticated, anon;
 GRANT ALL ON public.volunteer_content TO authenticated, anon;
@@ -303,12 +251,6 @@ GRANT ALL ON public.footer_content TO authenticated, anon;
 GRANT ALL ON public.seo_content TO authenticated, anon;
 GRANT ALL ON public.page_headers TO authenticated, anon;
 GRANT ALL ON public.section_content TO authenticated, anon;
-
--- ========================================
--- SEED DEFAULT DATA
--- ========================================
-
--- Hero content defaults
 INSERT INTO public.hero_content (title, highlight, description, background_image, cta_primary_text, cta_primary_link, cta_secondary_text, cta_secondary_link, statistics, badges, is_visible)
 VALUES (
   'Empowering Nepal''s Future',
@@ -323,10 +265,7 @@ VALUES (
   '[{"text": "Verified Nonprofit"}, {"text": "12+ Countries"}]',
   true
 );
-
--- Section visibility defaults
 ALTER TABLE public.section_visibility ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0;
-
 INSERT INTO public.section_visibility (section_key, section_name, is_visible, sort_order) VALUES
   ('hero', 'Hero Section', true, 1),
   ('stats', 'Statistics Bar', true, 2),
@@ -338,14 +277,10 @@ INSERT INTO public.section_visibility (section_key, section_name, is_visible, so
   ('cta', 'Call to Action', true, 8),
   ('footer', 'Footer', true, 9)
 ON CONFLICT (section_key) DO NOTHING;
-
--- Section content defaults
 INSERT INTO public.section_content (section_key, title, description, content, is_visible) VALUES
 ('about_preview', 'About Buddha Academy', 'Founded in 1977, Buddha Academy is a nonprofit boarding school in Kathmandu, Nepal, dedicated to providing free education to underprivileged children.', '{"milestones": [{"year": "1977", "event": "Founded with 12 students"}, {"year": "1990s", "event": "Hostel expansion program"}, {"year": "2010s", "event": "Computer lab established"}, {"year": "Today", "event": "Educating hundreds annually"}]}', true),
 ('sponsorship_steps', 'How Sponsorship Works', 'Your journey to changing a child''s life starts here. Follow these simple steps to become a sponsor.', '{"steps": [{"num": "01", "title": "Browse Profiles", "desc": "Review children waiting for sponsors"}, {"num": "02", "title": "Choose a Child", "desc": "Select a student to sponsor"}, {"num": "03", "title": "Make Your Pledge", "desc": "Complete donation form securely"}, {"num": "04", "title": "We Connect", "desc": "Link you with your sponsored child"}, {"num": "05", "title": "Receive Updates", "desc": "Get progress reports & photos"}, {"num": "06", "title": "Build Connection", "desc": "Exchange letters & messages"}, {"num": "07", "title": "Track Impact", "desc": "See your contribution at work"}, {"num": "08", "title": "Join Community", "desc": "Connect with other sponsors"}]}', true)
 ON CONFLICT (section_key) DO NOTHING;
-
--- Sponsorship content defaults
 INSERT INTO public.sponsorship_content (hero_title, hero_subtitle, section_title, section_description, steps, benefits, cta_title, cta_description, cta_button_text, cta_button_link, is_published)
 VALUES (
   'Sponsor a Child',
@@ -360,8 +295,6 @@ VALUES (
   '/students',
   true
 );
-
--- Donation content defaults
 INSERT INTO public.donation_content (hero_title, hero_subtitle, currency_label, impact_cards, process_steps, is_published)
 VALUES (
   'Make a Donation',
@@ -371,8 +304,6 @@ VALUES (
   '[{"title": "Choose Amount", "desc": "Select a donation amount or enter custom"}, {"title": "Select Frequency", "desc": "One-time or monthly giving"}, {"title": "Complete Payment", "desc": "Secure payment via Khalti, eSewa, or Bank"}, {"title": "Receive Receipt", "desc": "Get instant tax-deductible receipt"}]',
   true
 );
-
--- Transparency content defaults
 INSERT INTO public.transparency_content (hero_title, hero_subtitle, allocation_title, allocation_description, allocation_data, verification_title, verification_description, verification_steps, impact_report_title, impact_report_items, receipt_policy_title, receipt_policy_text, donor_privacy_title, donor_privacy_text, is_published)
 VALUES (
   'Transparency & Accountability',
@@ -391,8 +322,6 @@ VALUES (
   'We never share donor information with third parties. Your personal data is protected and used only for communication regarding your donations and impact updates.',
   true
 );
-
--- Volunteer content defaults
 INSERT INTO public.volunteer_content (hero_title, hero_subtitle, section_title, section_description, opportunities, skill_options, success_message, is_published)
 VALUES (
   'Volunteer With Us',
@@ -404,8 +333,6 @@ VALUES (
   'Thank you for your interest in volunteering. We''ll be in touch soon.',
   true
 );
-
--- Footer content defaults
 INSERT INTO public.footer_content (description, copyright_text, nonprofit_text, quick_links, social_links, contact_info, is_published)
 VALUES (
   'Buddha Academy is a nonprofit organization dedicated to providing free, quality education to underprivileged children in Nepal.',
@@ -416,8 +343,6 @@ VALUES (
   '{"address": "Buddha Academy, Boudha, Kathmandu, Nepal", "phone": "+977 1 1234567", "email": "info@buddhaacademy.edu.np"}',
   true
 );
-
--- Page headers defaults
 INSERT INTO public.page_headers (page_slug, title, subtitle, is_visible) VALUES
   ('about', 'About Buddha Academy', 'For over four decades, we''ve been providing free, quality education to underprivileged children in Nepal, transforming lives and building brighter futures.', true),
   ('contact', 'Contact Us', 'Have questions? We''d love to hear from you. Send us a message and we''ll respond as soon as possible.', true),
@@ -431,8 +356,6 @@ INSERT INTO public.page_headers (page_slug, title, subtitle, is_visible) VALUES
   ('gallery', 'Gallery', 'Explore photos, videos, and testimonials showcasing our students and community.', true),
   ('success-stories', 'Success Stories', 'Real stories of hope, growth, and transformation. See how sponsorship is changing lives at Buddha Academy.', true)
 ON CONFLICT (page_slug) DO NOTHING;
-
--- Site images defaults
 INSERT INTO public.site_images (image_key, image_url, alt_text, title, section) VALUES
   ('about_mission_1', 'https://images.pexels.com/photos/8471832/pexels-photo-8471832.jpeg?auto=compress&cs=tinysrgb&w=600', 'Students learning', 'Students in Classroom', 'about'),
   ('about_mission_2', 'https://images.pexels.com/photos/8471827/pexels-photo-8471827.jpeg?auto=compress&cs=tinysrgb&w=600', 'School activities', 'School Activities', 'about'),
@@ -440,34 +363,22 @@ INSERT INTO public.site_images (image_key, image_url, alt_text, title, section) 
   ('gallery_fallback', 'https://images.pexels.com/photos/8471831/pexels-photo-8471831.jpeg?auto=compress&cs=tinysrgb&w=600', 'Gallery image', 'Gallery', 'gallery'),
   ('sponsorship_hero', 'https://scontent.fktm21-2.fna.fbcdn.net/v/t39.30808-6/471833586_890283822036353_4086769547494535428_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=3LVD_rzG4N0Q7kNvwEzDsQX&_nc_oc=AdlXnOODHPjcqTBlp9fAhrXFGfqBNq3X0x0CctLvC46m5dA17B7FnAxrJQW0iNd6CqE&_nc_zt=23&_nc_ht=scontent.fktm21-2.fna&_nc_gid=P69xhrqJ_6dGqQHfPsdIqg&oh=00_AfFk2hbvmXKcmE5tLlViO_qE8AhZvU9ldDDhSF1MsWL7MQ&oe=67F7E569', 'Buddha Academy students', 'Buddha Academy', 'sponsorship')
 ON CONFLICT (image_key) DO NOTHING;
-
--- News additional columns set
 UPDATE public.news SET
   hero_title = COALESCE(hero_title, title),
   hero_subtitle = COALESCE(hero_subtitle, '')
 WHERE hero_title IS NULL OR hero_title = '';
-
--- ========================================
--- HELPER FUNCTIONS
--- ========================================
-
--- Get section visibility by key
 CREATE OR REPLACE FUNCTION public.get_section_visibility(p_section_key TEXT)
 RETURNS TABLE(is_visible BOOLEAN) AS $$
 BEGIN
   RETURN QUERY SELECT sv.is_visible FROM public.section_visibility sv WHERE sv.section_key = p_section_key;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- Get page header by slug
 CREATE OR REPLACE FUNCTION public.get_page_header(p_slug TEXT)
 RETURNS TABLE(id UUID, title TEXT, subtitle TEXT, background_image TEXT, is_visible BOOLEAN) AS $$
 BEGIN
   RETURN QUERY SELECT ph.id, ph.title, ph.subtitle, ph.background_image, ph.is_visible FROM public.page_headers ph WHERE ph.page_slug = p_slug;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- Get site image by key
 CREATE OR REPLACE FUNCTION public.get_site_image(p_image_key TEXT)
 RETURNS TABLE(image_url TEXT, alt_text TEXT, title TEXT) AS $$
 BEGIN

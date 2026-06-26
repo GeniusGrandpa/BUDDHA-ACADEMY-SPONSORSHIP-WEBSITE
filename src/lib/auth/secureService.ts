@@ -25,11 +25,6 @@ export class ForbiddenError extends Error {
   }
 }
 
-/**
- * Require the user to be authenticated.
- * Throws AuthError (401) if no session exists.
- * Returns the user ID if authenticated.
- */
 export async function requireAuth(): Promise<string> {
   const { data: { session }, error } = await supabase.auth.getSession()
   if (error || !session?.user) {
@@ -38,10 +33,6 @@ export async function requireAuth(): Promise<string> {
   return session.user.id
 }
 
-/**
- * Require the current user to have a minimum role level.
- * Throws ForbiddenError (403) if below threshold.
- */
 export async function requireMinRole(minRole: Role): Promise<void> {
   const userId = await requireAuth()
   const { data: profile, error } = await supabase
@@ -74,9 +65,6 @@ export async function requireMinRole(minRole: Role): Promise<void> {
   }
 }
 
-/**
- * Require the current user to have one of the specified roles.
- */
 export async function requireRole(allowedRoles: Role[]): Promise<void> {
   const userId = await requireAuth()
   const { data: profile, error } = await supabase
@@ -96,10 +84,6 @@ export async function requireRole(allowedRoles: Role[]): Promise<void> {
   }
 }
 
-/**
- * Wrapper to execute a callback with auth check.
- * Usage: await withAuth(() => supabase.from('donations').select('*'))
- */
 export async function withAuth<T>(fn: () => Promise<T>): Promise<T> {
   await requireAuth()
   return fn()

@@ -1,361 +1,1 @@
-CREATE TABLE IF NOT EXISTS email_logs (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
-  email_to TEXT NOT NULL,
-  email_type TEXT NOT NULL,
-  subject TEXT NOT NULL,
-  body TEXT,
-  status TEXT NOT NULL DEFAULT 'pending',
-  error_message TEXT,
-  sent_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-ALTER TABLE email_logs ENABLE ROW LEVEL SECURITY;
-CREATE INDEX idx_email_logs_user_id ON email_logs(user_id);
-CREATE INDEX idx_email_logs_email_type ON email_logs(email_type);
-CREATE INDEX idx_email_logs_status ON email_logs(status);
-CREATE INDEX idx_email_logs_created_at ON email_logs(created_at DESC);
-DROP POLICY IF EXISTS "super_admin_view_email_logs" ON email_logs;
-CREATE POLICY "super_admin_view_email_logs"
-  ON email_logs FOR SELECT
-  TO authenticated
-  USING (get_user_role() = 'super_admin');
-DROP POLICY IF EXISTS "system_insert_email_logs" ON email_logs;
-CREATE POLICY "system_insert_email_logs"
-  ON email_logs FOR INSERT
-  TO authenticated
-  WITH CHECK (true);
-CREATE TABLE IF NOT EXISTS volunteer_events (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  title TEXT NOT NULL,
-  description TEXT,
-  event_date DATE NOT NULL,
-  event_time TEXT,
-  location TEXT,
-  max_volunteers INTEGER DEFAULT 20,
-  current_volunteers INTEGER DEFAULT 0,
-  required_skills TEXT[] DEFAULT '{}',
-  responsibilities TEXT[] DEFAULT '{}',
-  category TEXT DEFAULT 'general',
-  image_url TEXT,
-  is_active BOOLEAN DEFAULT true,
-  created_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-ALTER TABLE volunteer_events ENABLE ROW LEVEL SECURITY;
-CREATE INDEX idx_volunteer_events_date ON volunteer_events(event_date);
-CREATE INDEX idx_volunteer_events_active ON volunteer_events(is_active);
-DROP POLICY IF EXISTS "public_view_active_volunteer_events" ON volunteer_events;
-CREATE POLICY "public_view_active_volunteer_events"
-  ON volunteer_events FOR SELECT
-  TO authenticated, anon
-  USING (is_active = true);
-DROP POLICY IF EXISTS "admin_manage_volunteer_events" ON volunteer_events;
-CREATE POLICY "admin_manage_volunteer_events"
-  ON volunteer_events FOR ALL
-  TO authenticated
-  USING (get_user_role() IN ('super_admin', 'admin'))
-  WITH CHECK (get_user_role() IN ('super_admin', 'admin'));
-CREATE TABLE IF NOT EXISTS volunteer_event_signups (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  event_id UUID NOT NULL REFERENCES volunteer_events(id) ON DELETE CASCADE,
-  volunteer_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  status TEXT NOT NULL DEFAULT 'registered',
-  attended BOOLEAN DEFAULT false,
-  hours_logged NUMERIC(5,1),
-  notes TEXT,
-  checked_in_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  UNIQUE(event_id, volunteer_id)
-);
-ALTER TABLE volunteer_event_signups ENABLE ROW LEVEL SECURITY;
-CREATE INDEX idx_volunteer_signups_event ON volunteer_event_signups(event_id);
-CREATE INDEX idx_volunteer_signups_volunteer ON volunteer_event_signups(volunteer_id);
-DROP POLICY IF EXISTS "volunteer_view_own_signups" ON volunteer_event_signups;
-CREATE POLICY "volunteer_view_own_signups"
-  ON volunteer_event_signups FOR SELECT
-  TO authenticated
-  USING (volunteer_id = auth.uid());
-DROP POLICY IF EXISTS "volunteer_register_self" ON volunteer_event_signups;
-CREATE POLICY "volunteer_register_self"
-  ON volunteer_event_signups FOR INSERT
-  TO authenticated
-  WITH CHECK (volunteer_id = auth.uid() AND get_user_role() = 'volunteer');
-DROP POLICY IF EXISTS "admin_manage_signups" ON volunteer_event_signups;
-CREATE POLICY "admin_manage_signups"
-  ON volunteer_event_signups FOR ALL
-  TO authenticated
-  USING (get_user_role() IN ('super_admin', 'admin'))
-  WITH CHECK (get_user_role() IN ('super_admin', 'admin'));
-CREATE TABLE IF NOT EXISTS public.student_stories (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  title TEXT NOT NULL,
-  student_name TEXT NOT NULL,
-  content TEXT NOT NULL,
-  image_url TEXT,
-  quote TEXT,
-  achievements TEXT[] DEFAULT '{}',
-  is_published BOOLEAN DEFAULT false,
-  featured BOOLEAN DEFAULT false,
-  published_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now()
-);
-ALTER TABLE student_stories 
-  ADD COLUMN IF NOT EXISTS before_description TEXT,
-  ADD COLUMN IF NOT EXISTS after_description TEXT,
-  ADD COLUMN IF NOT EXISTS before_image_url TEXT,
-  ADD COLUMN IF NOT EXISTS after_image_url TEXT,
-  ADD COLUMN IF NOT EXISTS testimonial_quote TEXT,
-  ADD COLUMN IF NOT EXISTS testimonial_author TEXT,
-  ADD COLUMN IF NOT EXISTS story_type TEXT DEFAULT 'general',
-  ADD COLUMN IF NOT EXISTS tags TEXT[] DEFAULT '{}';
-CREATE INDEX IF NOT EXISTS idx_activities_is_public ON activities(is_public);
-CREATE INDEX IF NOT EXISTS idx_activities_type ON activities(activity_type);
-CREATE INDEX IF NOT EXISTS idx_activities_created_at ON activities(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_notifications_user_unread ON notifications(user_id, read) WHERE read = false;
-CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON notifications(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_login_history_user_status ON login_history(user_id, status);
-CREATE INDEX IF NOT EXISTS idx_login_history_created_at ON login_history(created_at DESC);
-CREATE OR REPLACE FUNCTION cleanup_expired_sessions()
-RETURNS void
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-BEGIN
-  UPDATE user_sessions
-  SET is_active = false
-  WHERE expired_at < now() AND is_active = true;
-END;
-$$;
-CREATE OR REPLACE FUNCTION log_activity()
-RETURNS trigger
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-BEGIN
-  INSERT INTO activities (
-    user_id,
-    activity_type,
-    title,
-    description,
-    metadata,
-    entity_type,
-    entity_id,
-    is_public
-  ) VALUES (
-    COALESCE(NEW.user_id, auth.uid()),
-    TG_ARGV[0],
-    COALESCE(NEW.title, TG_ARGV[1]),
-    NEW.description,
-    NEW.metadata,
-    TG_TABLE_NAME,
-    NEW.id,
-    COALESCE(NEW.is_public, false)
-  );
-  RETURN NEW;
-END;
-$$;
-CREATE OR REPLACE FUNCTION log_donation_activity()
-RETURNS trigger
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-BEGIN
-  INSERT INTO activities (
-    user_id,
-    activity_type,
-    title,
-    description,
-    entity_type,
-    entity_id,
-    is_public,
-    metadata
-  ) VALUES (
-    NEW.donor_id,
-    'donation_completed',
-    CASE 
-      WHEN NEW.status = 'verified' THEN 'Donation Verified'
-      ELSE 'Donation Received'
-    END,
-    CASE 
-      WHEN NEW.status = 'verified' THEN format('Donation of NPR %s has been verified.', NEW.amount::text)
-      ELSE format('A donation of NPR %s has been received.', NEW.amount::text)
-    END,
-    'donations',
-    NEW.id,
-    CASE WHEN NEW.status = 'verified' THEN true ELSE false END,
-    jsonb_build_object('amount', NEW.amount, 'status', NEW.status)
-  );
-  RETURN NEW;
-END;
-$$;
-DROP TRIGGER IF EXISTS on_donation_verified ON donations;
-DROP TRIGGER IF EXISTS on_donation_verified ON donations;
-CREATE TRIGGER on_donation_verified
-  AFTER UPDATE OF status ON donations
-  FOR EACH ROW
-  WHEN (NEW.status = 'verified' OR NEW.status = 'completed')
-  EXECUTE FUNCTION log_donation_activity();
-CREATE OR REPLACE FUNCTION log_sponsorship_activity()
-RETURNS trigger
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-DECLARE
-  student_name TEXT;
-BEGIN
-  SELECT name INTO student_name FROM students WHERE id = NEW.student_id;
-  INSERT INTO activities (
-    user_id,
-    activity_type,
-    title,
-    description,
-    entity_type,
-    entity_id,
-    is_public,
-    metadata
-  ) VALUES (
-    NEW.donor_id,
-    'sponsorship_started',
-    'New Sponsorship Begins',
-    format('%s has been sponsored. Welcome to the Buddha Academy family!', student_name),
-    'sponsorships',
-    NEW.id,
-    true,
-    jsonb_build_object('student_id', NEW.student_id, 'student_name', student_name, 'amount', NEW.amount)
-  );
-  RETURN NEW;
-END;
-$$;
-DROP TRIGGER IF EXISTS on_sponsorship_created ON sponsorships;
-DROP TRIGGER IF EXISTS on_sponsorship_created ON sponsorships;
-CREATE TRIGGER on_sponsorship_created
-  AFTER INSERT ON sponsorships
-  FOR EACH ROW
-  EXECUTE FUNCTION log_sponsorship_activity();
-CREATE OR REPLACE FUNCTION log_teacher_report_activity()
-RETURNS trigger
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-DECLARE
-  student_name TEXT;
-BEGIN
-  SELECT name INTO student_name FROM students WHERE id = NEW.student_id;
-  INSERT INTO activities (
-    user_id,
-    activity_type,
-    title,
-    description,
-    entity_type,
-    entity_id,
-    is_public,
-    metadata
-  ) VALUES (
-    NEW.teacher_id,
-    'teacher_report',
-    format('Progress Report: %s', student_name),
-    format('A new progress report has been submitted for %s.', student_name),
-    'teacher_reports',
-    NEW.id,
-    true,
-    jsonb_build_object('student_id', NEW.student_id, 'student_name', student_name, 'subject', NEW.subject)
-  );
-  RETURN NEW;
-END;
-$$;
-DROP TRIGGER IF EXISTS on_teacher_report ON teacher_reports;
-DROP TRIGGER IF EXISTS on_teacher_report ON teacher_reports;
-CREATE TRIGGER on_teacher_report
-  AFTER INSERT ON teacher_reports
-  FOR EACH ROW
-  EXECUTE FUNCTION log_teacher_report_activity();
-CREATE OR REPLACE FUNCTION record_login_attempt(
-  p_user_id UUID,
-  p_status TEXT,
-  p_failure_reason TEXT DEFAULT NULL
-)
-RETURNS void
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-BEGIN
-  INSERT INTO login_history (
-    user_id,
-    ip_address,
-    user_agent,
-    device_info,
-    status,
-    failure_reason
-  ) VALUES (
-    p_user_id,
-    current_setting('request.headers', true)::json->>'x-forwarded-for',
-    current_setting('request.headers', true)::json->>'user-agent',
-    jsonb_build_object(
-      'ip', current_setting('request.headers', true)::json->>'x-forwarded-for',
-      'agent', current_setting('request.headers', true)::json->>'user-agent'
-    ),
-    p_status,
-    p_failure_reason
-  );
-  IF p_status = 'success' THEN
-    UPDATE profiles 
-    SET last_login_at = now(), login_attempts = 0
-    WHERE id = p_user_id;
-  END IF;
-END;
-$$;
-CREATE OR REPLACE FUNCTION create_notification(
-  p_user_id UUID,
-  p_type TEXT,
-  p_title TEXT,
-  p_message TEXT DEFAULT NULL,
-  p_data JSONB DEFAULT NULL
-)
-RETURNS UUID
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-DECLARE
-  v_notification_id UUID;
-BEGIN
-  INSERT INTO notifications (user_id, type, title, message, data)
-  VALUES (p_user_id, p_type, p_title, p_message, p_data)
-  RETURNING id INTO v_notification_id;
-  RETURN v_notification_id;
-END;
-$$;
-CREATE INDEX IF NOT EXISTS idx_donation_goals_active ON donation_goals(is_active);
-CREATE INDEX IF NOT EXISTS idx_donation_goals_category ON donation_goals(category);
-CREATE INDEX IF NOT EXISTS idx_students_sponsorship_status ON students(sponsorship_status);
-CREATE INDEX IF NOT EXISTS idx_students_age ON students(age);
-CREATE INDEX IF NOT EXISTS idx_students_grade ON students(grade);
-DROP POLICY IF EXISTS "volunteer_view_own_assignments" ON volunteer_assignments;
-DROP POLICY IF EXISTS "volunteer_view_own_assignments" ON volunteer_assignments;
-CREATE POLICY "volunteer_view_own_assignments"
-  ON volunteer_assignments FOR SELECT
-  TO authenticated
-  USING (volunteer_id = auth.uid());
-DROP POLICY IF EXISTS "public_view_activities" ON activities;
-DROP POLICY IF EXISTS "public_view_activities" ON activities;
-CREATE POLICY "public_view_activities"
-  ON activities FOR SELECT
-  TO authenticated, anon
-  USING (is_public = true);
-DROP POLICY IF EXISTS "users_view_own_activities" ON activities;
-DROP POLICY IF EXISTS "users_view_own_activities" ON activities;
-CREATE POLICY "users_view_own_activities"
-  ON activities FOR SELECT
-  TO authenticated
-  USING (user_id = auth.uid());
-CREATE INDEX IF NOT EXISTS idx_security_events_severity ON security_events(severity);
-CREATE INDEX IF NOT EXISTS idx_security_events_type ON security_events(event_type);
+CREATE TABLE IF NOT EXISTS email_logs (  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),  user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,  email_to TEXT NOT NULL,  email_type TEXT NOT NULL,  subject TEXT NOT NULL,  body TEXT,  status TEXT NOT NULL DEFAULT 'pending',  error_message TEXT,  sent_at TIMESTAMPTZ,  created_at TIMESTAMPTZ NOT NULL DEFAULT now());ALTER TABLE email_logs ENABLE ROW LEVEL SECURITY;CREATE INDEX idx_email_logs_user_id ON email_logs(user_id);CREATE INDEX idx_email_logs_email_type ON email_logs(email_type);CREATE INDEX idx_email_logs_status ON email_logs(status);CREATE INDEX idx_email_logs_created_at ON email_logs(created_at DESC);DROP POLICY IF EXISTS "super_admin_view_email_logs" ON email_logs;CREATE POLICY "super_admin_view_email_logs"  ON email_logs FOR SELECT  TO authenticated  USING (get_user_role() = 'super_admin');DROP POLICY IF EXISTS "system_insert_email_logs" ON email_logs;CREATE POLICY "system_insert_email_logs"  ON email_logs FOR INSERT  TO authenticated  WITH CHECK (true);CREATE TABLE IF NOT EXISTS volunteer_events (  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),  title TEXT NOT NULL,  description TEXT,  event_date DATE NOT NULL,  event_time TEXT,  location TEXT,  max_volunteers INTEGER DEFAULT 20,  current_volunteers INTEGER DEFAULT 0,  required_skills TEXT[] DEFAULT '{}',  responsibilities TEXT[] DEFAULT '{}',  category TEXT DEFAULT 'general',  image_url TEXT,  is_active BOOLEAN DEFAULT true,  created_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),  updated_at TIMESTAMPTZ NOT NULL DEFAULT now());ALTER TABLE volunteer_events ENABLE ROW LEVEL SECURITY;CREATE INDEX idx_volunteer_events_date ON volunteer_events(event_date);CREATE INDEX idx_volunteer_events_active ON volunteer_events(is_active);DROP POLICY IF EXISTS "public_view_active_volunteer_events" ON volunteer_events;CREATE POLICY "public_view_active_volunteer_events"  ON volunteer_events FOR SELECT  TO authenticated, anon  USING (is_active = true);DROP POLICY IF EXISTS "admin_manage_volunteer_events" ON volunteer_events;CREATE POLICY "admin_manage_volunteer_events"  ON volunteer_events FOR ALL  TO authenticated  USING (get_user_role() IN ('super_admin', 'admin'))  WITH CHECK (get_user_role() IN ('super_admin', 'admin'));CREATE TABLE IF NOT EXISTS volunteer_event_signups (  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),  event_id UUID NOT NULL REFERENCES volunteer_events(id) ON DELETE CASCADE,  volunteer_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,  status TEXT NOT NULL DEFAULT 'registered',  attended BOOLEAN DEFAULT false,  hours_logged NUMERIC(5,1),  notes TEXT,  checked_in_at TIMESTAMPTZ,  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),  UNIQUE(event_id, volunteer_id));ALTER TABLE volunteer_event_signups ENABLE ROW LEVEL SECURITY;CREATE INDEX idx_volunteer_signups_event ON volunteer_event_signups(event_id);CREATE INDEX idx_volunteer_signups_volunteer ON volunteer_event_signups(volunteer_id);DROP POLICY IF EXISTS "volunteer_view_own_signups" ON volunteer_event_signups;CREATE POLICY "volunteer_view_own_signups"  ON volunteer_event_signups FOR SELECT  TO authenticated  USING (volunteer_id = auth.uid());DROP POLICY IF EXISTS "volunteer_register_self" ON volunteer_event_signups;CREATE POLICY "volunteer_register_self"  ON volunteer_event_signups FOR INSERT  TO authenticated  WITH CHECK (volunteer_id = auth.uid() AND get_user_role() = 'volunteer');DROP POLICY IF EXISTS "admin_manage_signups" ON volunteer_event_signups;CREATE POLICY "admin_manage_signups"  ON volunteer_event_signups FOR ALL  TO authenticated  USING (get_user_role() IN ('super_admin', 'admin'))  WITH CHECK (get_user_role() IN ('super_admin', 'admin'));CREATE TABLE IF NOT EXISTS public.student_stories (  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,  title TEXT NOT NULL,  student_name TEXT NOT NULL,  content TEXT NOT NULL,  image_url TEXT,  quote TEXT,  achievements TEXT[] DEFAULT '{}',  is_published BOOLEAN DEFAULT false,  featured BOOLEAN DEFAULT false,  published_at TIMESTAMPTZ,  created_at TIMESTAMPTZ DEFAULT now(),  updated_at TIMESTAMPTZ DEFAULT now());ALTER TABLE student_stories   ADD COLUMN IF NOT EXISTS before_description TEXT,  ADD COLUMN IF NOT EXISTS after_description TEXT,  ADD COLUMN IF NOT EXISTS before_image_url TEXT,  ADD COLUMN IF NOT EXISTS after_image_url TEXT,  ADD COLUMN IF NOT EXISTS testimonial_quote TEXT,  ADD COLUMN IF NOT EXISTS testimonial_author TEXT,  ADD COLUMN IF NOT EXISTS story_type TEXT DEFAULT 'general',  ADD COLUMN IF NOT EXISTS tags TEXT[] DEFAULT '{}';CREATE INDEX IF NOT EXISTS idx_activities_is_public ON activities(is_public);CREATE INDEX IF NOT EXISTS idx_activities_type ON activities(activity_type);CREATE INDEX IF NOT EXISTS idx_activities_created_at ON activities(created_at DESC);CREATE INDEX IF NOT EXISTS idx_notifications_user_unread ON notifications(user_id, read) WHERE read = false;CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON notifications(created_at DESC);CREATE INDEX IF NOT EXISTS idx_login_history_user_status ON login_history(user_id, status);CREATE INDEX IF NOT EXISTS idx_login_history_created_at ON login_history(created_at DESC);CREATE OR REPLACE FUNCTION cleanup_expired_sessions()RETURNS voidLANGUAGE plpgsqlSECURITY DEFINERSET search_path = publicAS $$BEGIN  UPDATE user_sessions  SET is_active = false  WHERE expired_at < now() AND is_active = true;END;$$;CREATE OR REPLACE FUNCTION log_activity()RETURNS triggerLANGUAGE plpgsqlSECURITY DEFINERSET search_path = publicAS $$BEGIN  INSERT INTO activities (    user_id,    activity_type,    title,    description,    metadata,    entity_type,    entity_id,    is_public  ) VALUES (    COALESCE(NEW.user_id, auth.uid()),    TG_ARGV[0],    COALESCE(NEW.title, TG_ARGV[1]),    NEW.description,    NEW.metadata,    TG_TABLE_NAME,    NEW.id,    COALESCE(NEW.is_public, false)  );  RETURN NEW;END;$$;CREATE OR REPLACE FUNCTION log_donation_activity()RETURNS triggerLANGUAGE plpgsqlSECURITY DEFINERSET search_path = publicAS $$BEGIN  INSERT INTO activities (    user_id,    activity_type,    title,    description,    entity_type,    entity_id,    is_public,    metadata  ) VALUES (    NEW.donor_id,    'donation_completed',    CASE       WHEN NEW.status = 'verified' THEN 'Donation Verified'      ELSE 'Donation Received'    END,    CASE       WHEN NEW.status = 'verified' THEN format('Donation of NPR %s has been verified.', NEW.amount::text)      ELSE format('A donation of NPR %s has been received.', NEW.amount::text)    END,    'donations',    NEW.id,    CASE WHEN NEW.status = 'verified' THEN true ELSE false END,    jsonb_build_object('amount', NEW.amount, 'status', NEW.status)  );  RETURN NEW;END;$$;DROP TRIGGER IF EXISTS on_donation_verified ON donations;DROP TRIGGER IF EXISTS on_donation_verified ON donations;CREATE TRIGGER on_donation_verified  AFTER UPDATE OF status ON donations  FOR EACH ROW  WHEN (NEW.status = 'verified' OR NEW.status = 'completed')  EXECUTE FUNCTION log_donation_activity();CREATE OR REPLACE FUNCTION log_sponsorship_activity()RETURNS triggerLANGUAGE plpgsqlSECURITY DEFINERSET search_path = publicAS $$DECLARE  student_name TEXT;BEGIN  SELECT name INTO student_name FROM students WHERE id = NEW.student_id;  INSERT INTO activities (    user_id,    activity_type,    title,    description,    entity_type,    entity_id,    is_public,    metadata  ) VALUES (    NEW.donor_id,    'sponsorship_started',    'New Sponsorship Begins',    format('%s has been sponsored. Welcome to the Buddha Academy family!', student_name),    'sponsorships',    NEW.id,    true,    jsonb_build_object('student_id', NEW.student_id, 'student_name', student_name, 'amount', NEW.amount)  );  RETURN NEW;END;$$;DROP TRIGGER IF EXISTS on_sponsorship_created ON sponsorships;DROP TRIGGER IF EXISTS on_sponsorship_created ON sponsorships;CREATE TRIGGER on_sponsorship_created  AFTER INSERT ON sponsorships  FOR EACH ROW  EXECUTE FUNCTION log_sponsorship_activity();CREATE OR REPLACE FUNCTION log_teacher_report_activity()RETURNS triggerLANGUAGE plpgsqlSECURITY DEFINERSET search_path = publicAS $$DECLARE  student_name TEXT;BEGIN  SELECT name INTO student_name FROM students WHERE id = NEW.student_id;  INSERT INTO activities (    user_id,    activity_type,    title,    description,    entity_type,    entity_id,    is_public,    metadata  ) VALUES (    NEW.teacher_id,    'teacher_report',    format('Progress Report: %s', student_name),    format('A new progress report has been submitted for %s.', student_name),    'teacher_reports',    NEW.id,    true,    jsonb_build_object('student_id', NEW.student_id, 'student_name', student_name, 'subject', NEW.subject)  );  RETURN NEW;END;$$;DROP TRIGGER IF EXISTS on_teacher_report ON teacher_reports;DROP TRIGGER IF EXISTS on_teacher_report ON teacher_reports;CREATE TRIGGER on_teacher_report  AFTER INSERT ON teacher_reports  FOR EACH ROW  EXECUTE FUNCTION log_teacher_report_activity();CREATE OR REPLACE FUNCTION record_login_attempt(  p_user_id UUID,  p_status TEXT,  p_failure_reason TEXT DEFAULT NULL)RETURNS voidLANGUAGE plpgsqlSECURITY DEFINERSET search_path = publicAS $$BEGIN  INSERT INTO login_history (    user_id,    ip_address,    user_agent,    device_info,    status,    failure_reason  ) VALUES (    p_user_id,    current_setting('request.headers', true)::json->>'x-forwarded-for',    current_setting('request.headers', true)::json->>'user-agent',    jsonb_build_object(      'ip', current_setting('request.headers', true)::json->>'x-forwarded-for',      'agent', current_setting('request.headers', true)::json->>'user-agent'    ),    p_status,    p_failure_reason  );  IF p_status = 'success' THEN    UPDATE profiles     SET last_login_at = now(), login_attempts = 0    WHERE id = p_user_id;  END IF;END;$$;CREATE OR REPLACE FUNCTION create_notification(  p_user_id UUID,  p_type TEXT,  p_title TEXT,  p_message TEXT DEFAULT NULL,  p_data JSONB DEFAULT NULL)RETURNS UUIDLANGUAGE plpgsqlSECURITY DEFINERSET search_path = publicAS $$DECLARE  v_notification_id UUID;BEGIN  INSERT INTO notifications (user_id, type, title, message, data)  VALUES (p_user_id, p_type, p_title, p_message, p_data)  RETURNING id INTO v_notification_id;  RETURN v_notification_id;END;$$;CREATE INDEX IF NOT EXISTS idx_donation_goals_active ON donation_goals(is_active);CREATE INDEX IF NOT EXISTS idx_donation_goals_category ON donation_goals(category);CREATE INDEX IF NOT EXISTS idx_students_sponsorship_status ON students(sponsorship_status);CREATE INDEX IF NOT EXISTS idx_students_age ON students(age);CREATE INDEX IF NOT EXISTS idx_students_grade ON students(grade);DROP POLICY IF EXISTS "volunteer_view_own_assignments" ON volunteer_assignments;DROP POLICY IF EXISTS "volunteer_view_own_assignments" ON volunteer_assignments;CREATE POLICY "volunteer_view_own_assignments"  ON volunteer_assignments FOR SELECT  TO authenticated  USING (volunteer_id = auth.uid());DROP POLICY IF EXISTS "public_view_activities" ON activities;DROP POLICY IF EXISTS "public_view_activities" ON activities;CREATE POLICY "public_view_activities"  ON activities FOR SELECT  TO authenticated, anon  USING (is_public = true);DROP POLICY IF EXISTS "users_view_own_activities" ON activities;DROP POLICY IF EXISTS "users_view_own_activities" ON activities;CREATE POLICY "users_view_own_activities"  ON activities FOR SELECT  TO authenticated  USING (user_id = auth.uid());CREATE INDEX IF NOT EXISTS idx_security_events_severity ON security_events(severity);CREATE INDEX IF NOT EXISTS idx_security_events_type ON security_events(event_type);

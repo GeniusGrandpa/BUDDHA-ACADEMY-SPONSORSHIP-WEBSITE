@@ -1,9 +1,3 @@
--- Role Management & Audit Improvements
--- Adds audit logging to existing role/status functions
--- Creates role change history view
--- Adds secure RPCs for user management
-
--- 1. Enhance admin_update_role with audit logging
 DROP FUNCTION IF EXISTS public.admin_update_role(UUID, TEXT);
 CREATE OR REPLACE FUNCTION public.admin_update_role(
   target_user_id UUID,
@@ -23,18 +17,14 @@ BEGIN
   IF caller_role IS NULL OR caller_role != 'super_admin' THEN
     RAISE EXCEPTION 'Only super administrators can change user roles';
   END IF;
-
   IF new_role NOT IN ('super_admin', 'admin', 'finance_manager', 'teacher', 'donor', 'volunteer', 'public_user') THEN
     RAISE EXCEPTION 'Invalid role: %', new_role;
   END IF;
-
   SELECT role, status INTO current_target_role, current_target_status
   FROM profiles WHERE id = target_user_id;
-
   IF current_target_role IS NULL THEN
     RAISE EXCEPTION 'Target user not found';
   END IF;
-
   IF new_role != 'super_admin' THEN
     IF current_target_role = 'super_admin' THEN
       IF (SELECT COUNT(*) FROM profiles WHERE role = 'super_admin' AND status = 'active') <= 1 THEN
@@ -42,9 +32,7 @@ BEGIN
       END IF;
     END IF;
   END IF;
-
   UPDATE profiles SET role = new_role WHERE id = target_user_id;
-
   INSERT INTO audit_logs (actor_id, action, entity_type, entity_id, metadata, created_at)
   VALUES (
     auth.uid(),
@@ -59,12 +47,9 @@ BEGIN
     ),
     now()
   );
-
   RETURN true;
 END;
 $$;
-
--- 2. Enhance admin_update_user_status with audit logging
 DROP FUNCTION IF EXISTS public.admin_update_user_status(UUID, TEXT);
 CREATE OR REPLACE FUNCTION public.admin_update_user_status(
   target_user_id UUID,
@@ -84,26 +69,20 @@ BEGIN
   IF caller_role IS NULL OR caller_role != 'super_admin' THEN
     RAISE EXCEPTION 'Only super administrators can change user status';
   END IF;
-
   IF new_status NOT IN ('active', 'inactive', 'suspended', 'banned') THEN
     RAISE EXCEPTION 'Invalid status: %', new_status;
   END IF;
-
   SELECT status, role INTO current_status, current_role
   FROM profiles WHERE id = target_user_id;
-
   IF current_status IS NULL THEN
     RAISE EXCEPTION 'Target user not found';
   END IF;
-
   IF current_role = 'super_admin' AND new_status IN ('suspended', 'banned') THEN
     IF (SELECT COUNT(*) FROM profiles WHERE role = 'super_admin' AND status = 'active') <= 1 THEN
       RAISE EXCEPTION 'Cannot suspend or ban the last active super administrator';
     END IF;
   END IF;
-
   UPDATE profiles SET status = new_status WHERE id = target_user_id;
-
   INSERT INTO audit_logs (actor_id, action, entity_type, entity_id, metadata, created_at)
   VALUES (
     auth.uid(),
@@ -118,12 +97,9 @@ BEGIN
     ),
     now()
   );
-
   RETURN true;
 END;
 $$;
-
--- 3. Create RPC for user stats for Super Admin dashboard
 CREATE OR REPLACE FUNCTION public.get_user_management_stats()
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -138,7 +114,6 @@ BEGIN
   IF caller_role IS NULL OR caller_role != 'super_admin' THEN
     RAISE EXCEPTION 'Only super administrators can view user management stats';
   END IF;
-
   SELECT jsonb_build_object(
     'total_users', COUNT(*),
     'super_admins', COUNT(*) FILTER (WHERE role = 'super_admin'),
@@ -154,12 +129,9 @@ BEGIN
     'inactive_users', COUNT(*) FILTER (WHERE status = 'inactive')
   ) INTO result
   FROM profiles;
-
   RETURN result;
 END;
 $$;
-
--- 4. Create RPC for role change history
 CREATE OR REPLACE FUNCTION public.get_role_change_history(
   p_limit INTEGER DEFAULT 100,
   p_offset INTEGER DEFAULT 0
@@ -188,7 +160,6 @@ BEGIN
   IF caller_role IS NULL OR (caller_role != 'super_admin' AND caller_role != 'admin') THEN
     RAISE EXCEPTION 'Only administrators can view audit history';
   END IF;
-
   RETURN QUERY
   SELECT
     al.id,
@@ -211,8 +182,6 @@ BEGIN
   OFFSET p_offset;
 END;
 $$;
-
--- 5. Get user role history (for a specific user)
 CREATE OR REPLACE FUNCTION public.get_user_role_history(
   p_user_id UUID,
   p_limit INTEGER DEFAULT 50
@@ -236,7 +205,6 @@ BEGIN
   IF caller_role IS NULL OR (caller_role != 'super_admin' AND caller_role != 'admin') THEN
     RAISE EXCEPTION 'Only administrators can view role history';
   END IF;
-
   RETURN QUERY
   SELECT
     al.id,
@@ -253,8 +221,6 @@ BEGIN
   LIMIT p_limit;
 END;
 $$;
-
--- 6. Grant execute permissions
 GRANT EXECUTE ON FUNCTION public.admin_update_role TO authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_update_user_status TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_user_management_stats TO authenticated;

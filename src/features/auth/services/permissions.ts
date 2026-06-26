@@ -138,8 +138,8 @@ export function canAccessSection(userRole: Role | undefined | null, section: str
 }
 
 export async function fetchUserPermissions(userId: string): Promise<PermissionCode[]> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any).rpc('get_user_permissions', { user_id: userId }) as { data: PermissionCode[]; error: unknown }
+
+  const { data, error } = await (supabase as any).rpc('get_user_permissions', { user_id: userId }) as { data: PermissionCode[]; error: unknown } // eslint-disable-line @typescript-eslint/no-explicit-any
   if (error) {
     console.error('Error fetching permissions:', error)
     return []

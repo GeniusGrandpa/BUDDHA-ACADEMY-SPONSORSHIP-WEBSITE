@@ -36,7 +36,7 @@ function TypographyPreview({ typography }: { typography: DesignTypography }) {
         Heading 3 — A Quick Brown Fox
       </h3>
       <p style={{ fontSize: `${typography.body_size}rem`, fontWeight: Number(typography.body_weight), letterSpacing: `${typography.body_letter_spacing}em`, lineHeight: typography.body_line_height }} className="text-[var(--color-text-secondary)]">
-        Body text — Buddha Academy is dedicated to providing quality education to children in need. 
+        Body text — Buddha Academy is dedicated to providing quality education to children in need.
         Through sponsorship and donations, we empower young minds to build a brighter future.
       </p>
       <p style={{ fontSize: `${typography.small_size}rem` }} className="text-[var(--color-text-muted)]">

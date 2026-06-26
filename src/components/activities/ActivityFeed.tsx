@@ -70,7 +70,7 @@ export function ActivityFeed() {
 
   return (
     <div className="space-y-3">
-      <AnimatePresence>    
+      <AnimatePresence>
         {activities.map((activity, index) => (
           <motion.div
             key={activity.id}

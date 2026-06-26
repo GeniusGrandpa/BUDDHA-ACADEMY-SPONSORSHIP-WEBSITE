@@ -17,7 +17,6 @@ import type { Page } from '../../../types/database'
 
 type DeviceType = 'desktop' | 'tablet' | 'mobile'
 
-
 interface SectionDef {
   id: string; key: string; name: string; visible: boolean
 }
@@ -122,7 +121,6 @@ export function WebsiteBuilder() {
   const previewRef = useRef<HTMLDivElement>(null)
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
-  // Home page data
   const [hero, setHero] = useState<HeroContent | null>(null)
   const [welcome, setWelcome] = useState<SectionContent | null>(null)
   const [aboutPreview, setAboutPreview] = useState<SectionContent | null>(null)
@@ -132,41 +130,31 @@ export function WebsiteBuilder() {
   const [testimonials, setTestimonials] = useState<SectionContent | null>(null)
   const [donationCta, setDonationCta] = useState<SectionContent | null>(null)
 
-  // About page data
   const [aboutHeader, setAboutHeader] = useState<PageHeader | null>(null)
   const [aboutPage, setAboutPage] = useState<Page | null>(null)
   const [aboutImages, setAboutImages] = useState<SiteImage[]>([])
 
-  // Sponsorship page data
   const [sponsorship, setSponsorship] = useState<SponsorshipContent | null>(null)
 
-  // Donation page data
   const [donation, setDonation] = useState<DonationContent | null>(null)
 
-  // Contact page data
   const [contactHeader, setContactHeader] = useState<PageHeader | null>(null)
   const [contactSettings, setContactSettings] = useState<Record<string, string>>({})
 
-  // FAQ page data
   const [faqHeader, setFaqHeader] = useState<PageHeader | null>(null)
 
-  // Gallery page data
   const [galleryHeader, setGalleryHeader] = useState<PageHeader | null>(null)
 
-  // Volunteer page data
   const [volunteer, setVolunteer] = useState<VolunteerContent | null>(null)
   const [volunteerHeader, setVolunteerHeader] = useState<PageHeader | null>(null)
 
-  // Privacy & Terms page data
   const [privacyHeader, setPrivacyHeader] = useState<PageHeader | null>(null)
   const [privacyPage, setPrivacyPage] = useState<Page | null>(null)
   const [termsHeader, setTermsHeader] = useState<PageHeader | null>(null)
   const [termsPage, setTermsPage] = useState<Page | null>(null)
 
-  // Visibility
   const [visibilityMap, setVisibilityMap] = useState<Record<string, boolean>>({})
 
-  // Theme
   const [theme, setTheme] = useState<ThemeConfig>(defaultTheme)
 
   const markChanged = () => setHasChanges(true)
@@ -311,7 +299,7 @@ export function WebsiteBuilder() {
 
   return (
     <div className="h-[calc(100vh-4rem)] flex flex-col" style={{ backgroundColor: 'var(--theme-bg, #FFF8F0)', ...themeVars }}>
-      {/* Top Bar */}
+      {}
       <div className="flex items-center justify-between px-6 py-3 bg-white border-b shrink-0" style={{ borderColor: theme.colors.accent }}>
         <div className="flex items-center gap-3">
           <h1 className="text-lg font-bold" style={{ color: theme.colors.text }}>Website Builder</h1>
@@ -350,7 +338,7 @@ export function WebsiteBuilder() {
       </div>
 
       <div className="flex flex-1 overflow-hidden" style={{ fontFamily: theme.fontBody }}>
-        {/* Left Sidebar */}
+        {}
         <div className="w-64 bg-white border-r overflow-y-auto shrink-0" style={{ borderColor: theme.colors.accent }}>
           <div className="p-4 space-y-4">
             <div>
@@ -442,7 +430,7 @@ export function WebsiteBuilder() {
           </div>
         </div>
 
-        {/* Center - Live Preview */}
+        {}
         <div className="flex-1 flex items-start justify-center p-6 overflow-y-auto" style={{ backgroundColor: theme.colors.background }}>
           <motion.div layout style={{ maxWidth: deviceWidths[device], ...themeVars, borderColor: theme.colors.accent }}
             className="w-full bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300">
@@ -502,7 +490,7 @@ export function WebsiteBuilder() {
           </motion.div>
         </div>
 
-        {/* Right Properties / Theme Panel */}
+        {}
         <div className="w-80 bg-white border-l overflow-y-auto shrink-0" style={{ borderColor: theme.colors.accent }}>
           {showThemePanel ? (
             <ThemePanel theme={theme} setTheme={setTheme} onClose={() => setShowThemePanel(false)} />
@@ -540,9 +528,6 @@ export function WebsiteBuilder() {
   )
 }
 
-/* ====================================================================
-   SECTION PREVIEW RENDERER
-   ==================================================================== */
 function renderSectionPreview(id: string, data: {
   hero: HeroContent | null; welcome: SectionContent | null; aboutPreview: SectionContent | null
   stats: SectionContent | null; featuredStudents: SectionContent | null
@@ -555,15 +540,14 @@ function renderSectionPreview(id: string, data: {
   volunteer: VolunteerContent | null; volunteerHeader: PageHeader | null
   privacyHeader: PageHeader | null; privacyPage: Page | null; termsHeader: PageHeader | null; termsPage: Page | null
   theme: ThemeConfig; selectedSection: string | null
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onEdit: Record<string, (...args: any[]) => void>
+
+  onEdit: Record<string, (...args: any[]) => void> // eslint-disable-line @typescript-eslint/no-explicit-any
 }) {
   const t = data.theme
   const sel = (s: string) => data.selectedSection === s
 
   const update = (field: string) => (v: string) => { data.onEdit[field]?.(v) }
 
-  // ---- Shared header component ----
   const PageHeaderPreview = (h: PageHeader | null, key: string) => (
     <div className="px-8 py-16 text-center" style={{ background: `linear-gradient(135deg, ${t.colors.primary}, ${t.colors.secondary})` }}>
       <InlineEdit value={h?.title || ''} live={sel(key)}
@@ -577,7 +561,7 @@ function renderSectionPreview(id: string, data: {
   )
 
   switch (id) {
-    /* ----- HOME PAGE SECTIONS ----- */
+
     case 'hero':
       return (
         <div className="relative px-8 py-16 md:py-24 text-white" style={{ backgroundColor: t.colors.secondary }}>
@@ -788,7 +772,6 @@ function renderSectionPreview(id: string, data: {
       )
     }
 
-    /* ----- ABOUT PAGE ----- */
     case 'about_header':
       return PageHeaderPreview(data.aboutHeader, 'about_header')
     case 'about_mission': {
@@ -881,7 +864,6 @@ function renderSectionPreview(id: string, data: {
       )
     }
 
-    /* ----- SPONSORSHIP PAGE ----- */
     case 'sponsor_hero': {
       const s = data.sponsorship
       return (
@@ -956,7 +938,6 @@ function renderSectionPreview(id: string, data: {
       )
     }
 
-    /* ----- DONATION PAGE ----- */
     case 'donate_hero': {
       const d = data.donation
       return (
@@ -1019,7 +1000,6 @@ function renderSectionPreview(id: string, data: {
       )
     }
 
-    /* ----- CONTACT PAGE ----- */
     case 'contact_header':
       return PageHeaderPreview(data.contactHeader, 'contact_header')
     case 'contact_details': {
@@ -1064,7 +1044,6 @@ function renderSectionPreview(id: string, data: {
         </div>
       )
 
-    /* ----- FAQ PAGE ----- */
     case 'faq_header':
       return PageHeaderPreview(data.faqHeader, 'faq_header')
     case 'faq_list':
@@ -1082,7 +1061,6 @@ function renderSectionPreview(id: string, data: {
         </div>
       )
 
-    /* ----- GALLERY PAGE ----- */
     case 'gallery_header':
       return PageHeaderPreview(data.galleryHeader, 'gallery_header')
     case 'gallery_grid':
@@ -1097,7 +1075,6 @@ function renderSectionPreview(id: string, data: {
         </div>
       )
 
-    /* ----- PRIVACY PAGE ----- */
     case 'privacy_header':
       return PageHeaderPreview(data.privacyHeader, 'privacy_header')
     case 'privacy_content': {
@@ -1112,7 +1089,6 @@ function renderSectionPreview(id: string, data: {
       )
     }
 
-    /* ----- TERMS PAGE ----- */
     case 'terms_header':
       return PageHeaderPreview(data.termsHeader, 'terms_header')
     case 'terms_content': {
@@ -1127,7 +1103,6 @@ function renderSectionPreview(id: string, data: {
       )
     }
 
-    /* ----- VOLUNTEER PAGE ----- */
     case 'volunteer_hero': {
       const v = data.volunteer
       return (
@@ -1197,10 +1172,6 @@ function renderSectionPreview(id: string, data: {
       )
   }
 }
-
-/* ====================================================================
-   COMPONENTS
-   ==================================================================== */
 
 function InlineEdit({ value, onSave, className, style, live }: {
   value: string; onSave: (val: string) => void; className?: string; style?: React.CSSProperties; live?: boolean
@@ -1392,7 +1363,7 @@ function PropertiesPanel(props: {
         <span className="text-xs text-gray-400 ml-1">{sectionName}</span>
       </div>
 
-      {/* HOME PAGE SECTIONS */}
+      {}
       {s === 'hero' && props.hero && (
         <PropertyGroup title="Hero Banner">
           <PropertyField label="Title" value={props.hero.title} onChange={v => { props.setHero({ ...props.hero!, title: v }); mc() }} />
@@ -1592,7 +1563,7 @@ function PropertiesPanel(props: {
         </>
       )}
 
-      {/* DONATION PAGE */}
+      {}
       {(s === 'donate_hero') && props.donation && (
         <PropertyGroup title="Donation Hero">
           <PropertyField label="Title" value={props.donation.hero_title} onChange={v => { props.setDonation({ ...props.donation!, hero_title: v }); mc() }} />
@@ -1600,28 +1571,28 @@ function PropertiesPanel(props: {
         </PropertyGroup>
       )}
 
-      {/* CONTACT PAGE */}
+      {}
       {s === 'contact_header' && (
         <PropertyGroup title="Contact Page Header">
           <p className="text-xs text-gray-400">Edit in the Contact Page editor</p>
         </PropertyGroup>
       )}
 
-      {/* FAQ PAGE */}
+      {}
       {s === 'faq_header' && (
         <PropertyGroup title="FAQ Page Header">
           <p className="text-xs text-gray-400">Edit in the FAQ editor</p>
         </PropertyGroup>
       )}
 
-      {/* GALLERY PAGE */}
+      {}
       {s === 'gallery_header' && (
         <PropertyGroup title="Gallery Page Header">
           <p className="text-xs text-gray-400">Edit in the Gallery editor</p>
         </PropertyGroup>
       )}
 
-      {/* VOLUNTEER PAGE */}
+      {}
       {s === 'volunteer_hero' && props.volunteer && (
         <PropertyGroup title="Volunteer Hero">
           <PropertyField label="Title" value={props.volunteer.hero_title} onChange={v => { props.setVolunteer({ ...props.volunteer!, hero_title: v }); mc() }} />
@@ -1636,7 +1607,7 @@ function PropertiesPanel(props: {
         </PropertyGroup>
       )}
 
-      {/* PRIVACY PAGE */}
+      {}
       {s === 'privacy_header' && props.privacyHeader && (
         <PropertyGroup title="Page Header">
           <PropertyField label="Title" value={props.privacyHeader.title} onChange={v => { props.setPrivacyHeader({ ...props.privacyHeader, title: v } as never); mc() }} />
@@ -1657,7 +1628,7 @@ function PropertiesPanel(props: {
         )
       })()}
 
-      {/* TERMS PAGE */}
+      {}
       {s === 'terms_header' && props.termsHeader && (
         <PropertyGroup title="Page Header">
           <PropertyField label="Title" value={props.termsHeader.title} onChange={v => { props.setTermsHeader({ ...props.termsHeader, title: v } as never); mc() }} />
@@ -1678,7 +1649,7 @@ function PropertiesPanel(props: {
         )
       })()}
 
-      {/* FALLBACK for sections without specific editors */}
+      {}
       {!['hero', 'welcome', 'about_preview', 'stats', 'featured_students', 'sponsorship_steps', 'testimonials', 'donation_cta',
         'about_header', 'about_mission', 'about_stats', 'about_values', 'about_timeline',
         'sponsor_hero', 'sponsor_steps', 'sponsor_benefits', 'sponsor_cta',

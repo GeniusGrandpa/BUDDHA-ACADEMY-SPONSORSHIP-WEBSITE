@@ -1,7 +1,3 @@
--- Advanced Block System: page_blocks table, versioning enhancements, audit triggers
--- Migration 20260707000001
-
--- 1. Create page_blocks table for normalized block storage
 CREATE TABLE IF NOT EXISTS public.page_blocks (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   page_id UUID NOT NULL REFERENCES public.pages(id) ON DELETE CASCADE,
@@ -15,19 +11,12 @@ CREATE TABLE IF NOT EXISTS public.page_blocks (
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
-
 CREATE INDEX IF NOT EXISTS idx_page_blocks_page ON public.page_blocks(page_id);
 CREATE INDEX IF NOT EXISTS idx_page_blocks_sort ON public.page_blocks(page_id, sort_order);
 CREATE INDEX IF NOT EXISTS idx_page_blocks_visible ON public.page_blocks(page_id, is_visible);
-
--- 2. Add version tracking columns to pages (if not exist)
 ALTER TABLE IF EXISTS public.pages
   ADD COLUMN IF NOT EXISTS version_number INTEGER DEFAULT 1,
   ADD COLUMN IF NOT EXISTS created_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL;
-
--- 3. Update pages updated_by if it doesn't have proper references (it already exists in initial schema)
-
--- 4. Enhanced create_content_version function that captures blocks & seo
 CREATE OR REPLACE FUNCTION public.create_content_version_v2()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -38,7 +27,6 @@ BEGIN
   FROM public.content_versions
   WHERE entity_type = TG_TABLE_NAME
   AND entity_id = COALESCE(NEW.id, OLD.id);
-
   INSERT INTO public.content_versions (
     entity_type,
     entity_id,
@@ -67,7 +55,6 @@ BEGIN
     COALESCE(NEW.published, OLD.published, false),
     auth.uid()
   ) RETURNING id INTO version_id;
-
   INSERT INTO public.audit_logs (user_id, action, entity_type, entity_id, changes)
   VALUES (
     auth.uid(),
@@ -80,19 +67,15 @@ BEGIN
       ELSE jsonb_build_object('created', to_jsonb(NEW))
     END
   );
-
   RETURN COALESCE(NEW, OLD);
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- 5. Audit trigger for page_blocks
 CREATE OR REPLACE FUNCTION public.audit_page_blocks()
 RETURNS TRIGGER AS $$
 DECLARE
   page_slug TEXT;
 BEGIN
   SELECT slug INTO page_slug FROM public.pages WHERE id = COALESCE(NEW.page_id, OLD.page_id);
-  
   INSERT INTO public.audit_logs (user_id, action, entity_type, entity_id, changes)
   VALUES (
     auth.uid(),
@@ -108,21 +91,15 @@ BEGIN
   RETURN COALESCE(NEW, OLD);
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- 6. Drop old triggers and create new ones
 DROP TRIGGER IF EXISTS version_pages_changes ON public.pages;
 DROP TRIGGER IF EXISTS version_news_changes ON public.news;
 DROP TRIGGER IF EXISTS audit_page_blocks_trigger ON public.page_blocks;
-
 CREATE TRIGGER version_pages_changes
   AFTER INSERT OR UPDATE OR DELETE ON public.pages
   FOR EACH ROW EXECUTE FUNCTION public.create_content_version_v2();
-
 CREATE TRIGGER audit_page_blocks_trigger
   AFTER INSERT OR UPDATE OR DELETE ON public.page_blocks
   FOR EACH ROW EXECUTE FUNCTION public.audit_page_blocks();
-
--- 7. Helper function to sync page.blocks JSON from page_blocks table
 CREATE OR REPLACE FUNCTION public.sync_page_blocks_json(target_page_id UUID)
 RETURNS void AS $$
 DECLARE
@@ -141,14 +118,11 @@ BEGIN
   ) INTO blocks_json
   FROM public.page_blocks pb
   WHERE pb.page_id = target_page_id;
-
   UPDATE public.pages
   SET blocks = COALESCE(blocks_json, '[]'::jsonb)
   WHERE id = target_page_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- 8. Helper to migrate homepage_sections to a 'home' page with blocks
 CREATE OR REPLACE FUNCTION public.migrate_homepage_sections_to_blocks()
 RETURNS text AS $$
 DECLARE
@@ -158,19 +132,13 @@ DECLARE
   block_type_map text;
   total INTEGER := 0;
 BEGIN
-  -- Find or create the home page
   SELECT id INTO home_page_id FROM public.pages WHERE slug = 'home';
-  
   IF home_page_id IS NULL THEN
     INSERT INTO public.pages (slug, title, content, published)
     VALUES ('home', 'Homepage', '{}'::jsonb, true)
     RETURNING id INTO home_page_id;
   END IF;
-
-  -- Delete existing migrated blocks
   DELETE FROM public.page_blocks WHERE page_id = home_page_id;
-
-  -- Map homepage_sections section_key to block_type
   FOR section IN 
     SELECT * FROM public.homepage_sections ORDER BY sort_order ASC
   LOOP
@@ -185,7 +153,6 @@ BEGIN
       WHEN 'partners' THEN 'partners'
       ELSE 'custom_section'
     END;
-
     INSERT INTO public.page_blocks (page_id, block_type, title, content, sort_order, is_visible)
     VALUES (
       home_page_id,
@@ -197,15 +164,10 @@ BEGIN
     );
     total := total + 1;
   END LOOP;
-
-  -- Sync blocks JSON
   PERFORM public.sync_page_blocks_json(home_page_id);
-
   RETURN 'Migrated ' || total || ' homepage sections to blocks on page: home';
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- 9. Migrate existing homepage_sections data automatically
 DO $$
 DECLARE
   section_count INTEGER;
@@ -213,15 +175,11 @@ DECLARE
 BEGIN
   SELECT COUNT(*) INTO section_count FROM public.homepage_sections;
   SELECT COUNT(*) INTO home_count FROM public.page_blocks pb JOIN public.pages p ON p.id = pb.page_id WHERE p.slug = 'home';
-  
   IF section_count > 0 AND home_count = 0 THEN
     PERFORM public.migrate_homepage_sections_to_blocks();
   END IF;
 END $$;
-
--- 10. RLS policies
 ALTER TABLE IF EXISTS public.page_blocks ENABLE ROW LEVEL SECURITY;
-
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'page_blocks' AND policyname = 'page_blocks_select_public') THEN
@@ -249,8 +207,6 @@ BEGIN
       FOR DELETE USING (public.get_user_role_level() >= 90);
   END IF;
 END $$;
-
--- 11. Grant permissions
 GRANT SELECT ON public.page_blocks TO anon, authenticated;
 GRANT INSERT, UPDATE, DELETE ON public.page_blocks TO authenticated;
 GRANT EXECUTE ON FUNCTION public.sync_page_blocks_json TO authenticated;

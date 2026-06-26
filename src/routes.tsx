@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import { lazy, Suspense } from 'react'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { ProtectedRoute } from './components/ProtectedRoute'
@@ -7,7 +6,6 @@ import { useAuth } from './context/AuthContext'
 import { DashboardSkeleton } from './components/ui/LoadingSkeleton'
 import { getRedirectPath } from './features/auth/utils/redirectByRole'
 import type { Role } from './features/auth/types/permissions'
-
 
 function LazyPage({ Component }: { Component: React.LazyExoticComponent<React.ComponentType> }) {
   return (
@@ -20,7 +18,6 @@ function LazyPage({ Component }: { Component: React.LazyExoticComponent<React.Co
     </Suspense>
   )
 }
-
 
 const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })))
 
@@ -176,7 +173,6 @@ const AdminComponentsPage = lazy(() => import('./pages/admin/design/AdminCompone
 const AdminConfigPage = lazy(() => import('./pages/admin/design/AdminConfigPage').then(m => ({ default: m.AdminConfigPage })))
 const AdminThemePresetsPage = lazy(() => import('./pages/admin/design/AdminThemePresetsPage').then(m => ({ default: m.AdminThemePresetsPage })))
 
-
 function AdminIndexRedirect() {
   const { profile, loading, user } = useAuth()
   if (loading) return (
@@ -266,7 +262,7 @@ export const router = createBrowserRouter([
       { path: 'notifications', element: <LazyPage Component={AdminNotificationsPage} /> },
       { path: 'reports', element: <LazyPage Component={AdminReportsPage} /> },
       { path: 'users', element: <LazyPage Component={AdminUsersPage} /> },
-      // Website Management (new)
+
       { path: 'website', element: <LazyPage Component={WebsiteDashboard} /> },
       { path: 'website/builder', element: <LazyPage Component={WebsiteBuilder} /> },
       { path: 'website/media', element: <LazyPage Component={MediaLibrary} /> },
@@ -297,7 +293,7 @@ export const router = createBrowserRouter([
       { path: 'website/sections', element: <LazyPage Component={AdminSectionVisibility} /> },
       { path: 'website/transparency', element: <LazyPage Component={AdminTransparencyContent} /> },
       { path: 'website/pages/:slug', element: <LazyPage Component={AdminPageEditor} /> },
-      // Legacy CMS redirects
+
       { path: 'content', element: <Navigate to="/admin/website" replace /> },
       { path: 'content/homepage', element: <Navigate to="/admin/website/homepage" replace /> },
       { path: 'content/gallery', element: <Navigate to="/admin/website/gallery" replace /> },

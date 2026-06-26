@@ -26,8 +26,8 @@ export function CampaignsEditor() {
   const handleSave = async (goal: DonationGoal) => {
     setSaving(true)
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { id, _new, ...rest } = goal
+
+      const { id: _id, _new: __new, ...rest } = goal // eslint-disable-line @typescript-eslint/no-unused-vars
       const { error } = await supabase.from('donation_goals').upsert({ ...rest, start_date: rest.start_date || null, end_date: rest.end_date || null })
       if (error) throw error
       toast.success('Campaign saved')

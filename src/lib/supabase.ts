@@ -4,7 +4,7 @@ import { Database } from '../types/database'
 let _client: SupabaseClient<Database> | null = null
 
 function getEnvVar(name: string): string {
-  const value = import.meta.env[name] as string | undefined
+  const value = (import.meta.env as unknown as Record<string, string | undefined>)[name]
   if (!value) {
     const msg = `Missing required environment variable: ${name}. Check your .env file.`
     console.error(`[Supabase] ${msg}`)

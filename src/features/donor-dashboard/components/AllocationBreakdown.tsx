@@ -112,7 +112,7 @@ export function AllocationBreakdown({ allocations }: AllocationBreakdownProps) {
           {chartData.map((item) => (
             <div key={item.category} className="flex items-center gap-3">
               <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
-              {/* dynamic color from chart data */}
+              {}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between text-sm">
                   <span className="font-medium text-gray-700 truncate">{item.name}</span>
@@ -126,7 +126,7 @@ export function AllocationBreakdown({ allocations }: AllocationBreakdownProps) {
                     className="h-full rounded-full"
                     style={{ backgroundColor: item.color }}
                   />
-                  {/* dynamic color from chart data */}
+                  {}
                 </div>
               </div>
               <span className="text-xs text-gray-500 w-20 text-right shrink-0">

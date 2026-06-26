@@ -110,7 +110,7 @@ export function usePayment(): UsePaymentReturn {
       try {
         await cancelPaymentSession(checkout.sessionId)
       } catch {
-        
+
       }
     }
     resetCheckout()

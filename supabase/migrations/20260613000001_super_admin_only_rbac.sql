@@ -1,364 +1,1 @@
-CREATE OR REPLACE FUNCTION public.admin_update_role(
-  target_user_id uuid,
-  new_role text
-)
-RETURNS void
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-DECLARE
-  caller_role text;
-  caller_status text;
-  target_role text;
-  new_role_level integer;
-  super_admin_count integer;
-BEGIN
-  IF auth.uid() IS NULL THEN
-    RAISE EXCEPTION 'Authentication required' USING ERRCODE = '42501';
-  END IF;
-  IF target_user_id = auth.uid() THEN
-    RAISE EXCEPTION 'You cannot change your own role' USING ERRCODE = '42501';
-  END IF;
-  SELECT p.role, p.status
-  INTO caller_role, caller_status
-  FROM public.profiles p
-  WHERE p.id = auth.uid();
-  IF caller_role IS NULL THEN
-    RAISE EXCEPTION 'Permission denied: caller not found' USING ERRCODE = '42501';
-  END IF;
-  IF caller_status != 'active' THEN
-    RAISE EXCEPTION 'Account is not active' USING ERRCODE = '42501';
-  END IF;
-  IF caller_role != 'super_admin' THEN
-    RAISE EXCEPTION 'Only super admins can manage roles. Your role: %', caller_role
-      USING ERRCODE = '42501';
-  END IF;
-  SELECT p.role INTO target_role
-  FROM public.profiles p
-  WHERE p.id = target_user_id;
-  IF target_role IS NULL THEN
-    RAISE EXCEPTION 'Target user not found' USING ERRCODE = '42501';
-  END IF;
-  SELECT level INTO new_role_level
-  FROM public.roles WHERE name = new_role;
-  IF new_role_level IS NULL THEN
-    RAISE EXCEPTION 'Invalid role: %', new_role;
-  END IF;
-  IF target_role = 'super_admin' THEN
-    SELECT COUNT(*) INTO super_admin_count
-    FROM public.profiles
-    WHERE role = 'super_admin' AND status = 'active' AND id != target_user_id;
-    IF super_admin_count = 0 THEN
-      RAISE EXCEPTION 'Cannot remove the last super admin. Promote another user first.'
-        USING ERRCODE = '42501';
-    END IF;
-  END IF;
-  UPDATE public.profiles
-  SET role = new_role, updated_at = now()
-  WHERE id = target_user_id;
-  INSERT INTO public.audit_logs (
-    user_id, action, entity_type, entity_id, changes, metadata
-  ) VALUES (
-    auth.uid(),
-    'role_change',
-    'profiles',
-    target_user_id::text,
-    jsonb_build_object(
-      'previous_role', target_role,
-      'new_role', new_role
-    ),
-    jsonb_build_object(
-      'changed_by', auth.uid()::text,
-      'caller_role', caller_role
-    )
-  );
-  INSERT INTO public.notifications (user_id, type, title, message)
-  VALUES (
-    target_user_id,
-    'system',
-    'Role Updated',
-    format('Your role has been changed from %s to %s', target_role, new_role)
-  );
-END;
-$$;
-REVOKE ALL ON FUNCTION public.admin_update_role(uuid, text) FROM PUBLIC;
-REVOKE ALL ON FUNCTION public.admin_update_role(uuid, text) FROM anon;
-GRANT EXECUTE ON FUNCTION public.admin_update_role TO authenticated;
-COMMENT ON FUNCTION public.admin_update_role IS 'Super admin only: change a user role. Enforces last-super-admin protection and full audit logging.';
-CREATE OR REPLACE FUNCTION public.admin_update_user_status(
-  target_user_id uuid,
-  new_status text
-)
-RETURNS void
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-DECLARE
-  caller_role text;
-  caller_status text;
-  target_role text;
-  super_admin_count integer;
-BEGIN
-  IF auth.uid() IS NULL THEN
-    RAISE EXCEPTION 'Authentication required' USING ERRCODE = '42501';
-  END IF;
-  IF target_user_id = auth.uid() THEN
-    RAISE EXCEPTION 'Cannot change your own status' USING ERRCODE = '42501';
-  END IF;
-  SELECT p.role, p.status INTO caller_role, caller_status
-  FROM public.profiles p
-  WHERE p.id = auth.uid();
-  IF caller_role IS NULL THEN
-    RAISE EXCEPTION 'Permission denied' USING ERRCODE = '42501';
-  END IF;
-  IF caller_status != 'active' THEN
-    RAISE EXCEPTION 'Account is not active' USING ERRCODE = '42501';
-  END IF;
-  IF caller_role != 'super_admin' THEN
-    RAISE EXCEPTION 'Only super admins can manage user status. Your role: %', caller_role
-      USING ERRCODE = '42501';
-  END IF;
-  SELECT p.role INTO target_role
-  FROM public.profiles p
-  WHERE p.id = target_user_id;
-  IF target_role IS NULL THEN
-    RAISE EXCEPTION 'Target user not found' USING ERRCODE = '42501';
-  END IF;
-  IF target_role = 'super_admin' AND new_status IN ('suspended', 'banned') THEN
-    SELECT COUNT(*) INTO super_admin_count
-    FROM public.profiles
-    WHERE role = 'super_admin' AND status = 'active' AND id != target_user_id;
-    IF super_admin_count = 0 THEN
-      RAISE EXCEPTION 'Cannot suspend the last super admin.'
-        USING ERRCODE = '42501';
-    END IF;
-  END IF;
-  UPDATE public.profiles
-  SET status = new_status, updated_at = now()
-  WHERE id = target_user_id;
-  IF NOT FOUND THEN
-    RAISE EXCEPTION 'User not found' USING ERRCODE = '42501';
-  END IF;
-  PERFORM public.log_audit_event(
-    auth.uid(),
-    'status_change',
-    'profiles',
-    target_user_id::text,
-    jsonb_build_object('new_status', new_status, 'previous_role', target_role),
-    jsonb_build_object('changed_by', auth.uid()::text, 'caller_role', caller_role)
-  );
-END;
-$$;
-REVOKE ALL ON FUNCTION public.admin_update_user_status(uuid, text) FROM PUBLIC;
-REVOKE ALL ON FUNCTION public.admin_update_user_status(uuid, text) FROM anon;
-GRANT EXECUTE ON FUNCTION public.admin_update_user_status(uuid, text) TO authenticated;
-COMMENT ON FUNCTION public.admin_update_user_status IS 'Super admin only: suspend/restore user accounts. Enables last-super-admin protection.';
-DROP POLICY IF EXISTS audit_logs_select ON public.audit_logs;
-DROP POLICY IF EXISTS audit_logs_select ON audit_logs;
-CREATE POLICY audit_logs_select ON public.audit_logs
-  FOR SELECT
-  TO authenticated
-  USING (public.get_my_role() = 'super_admin');
-DROP POLICY IF EXISTS security_events_read ON public.security_events;
-DROP POLICY IF EXISTS security_events_read ON security_events;
-CREATE POLICY security_events_read ON public.security_events
-  FOR SELECT
-  TO authenticated
-  USING (public.get_my_role() = 'super_admin');
-DROP POLICY IF EXISTS profiles_update_admin ON public.profiles;
-DROP POLICY IF EXISTS profiles_update_admin ON profiles;
-CREATE POLICY profiles_update_admin ON public.profiles
-  FOR UPDATE
-  TO authenticated
-  USING (public.get_my_role() = 'super_admin')
-  WITH CHECK (public.get_my_role() = 'super_admin');
-DROP POLICY IF EXISTS roles_select ON public.roles;
-DROP POLICY IF EXISTS roles_select ON roles;
-CREATE POLICY roles_select ON public.roles
-  FOR SELECT
-  TO authenticated
-  USING (public.get_my_role() = 'super_admin');
-DROP POLICY IF EXISTS roles_insert ON public.roles;
-DROP POLICY IF EXISTS roles_insert ON roles;
-CREATE POLICY roles_insert ON public.roles
-  FOR INSERT
-  TO authenticated
-  WITH CHECK (public.get_my_role() = 'super_admin');
-DROP POLICY IF EXISTS roles_update ON public.roles;
-DROP POLICY IF EXISTS roles_update ON roles;
-CREATE POLICY roles_update ON public.roles
-  FOR UPDATE
-  TO authenticated
-  USING (public.get_my_role() = 'super_admin')
-  WITH CHECK (public.get_my_role() = 'super_admin');
-DROP POLICY IF EXISTS roles_delete ON public.roles;
-DROP POLICY IF EXISTS roles_delete ON roles;
-CREATE POLICY roles_delete ON public.roles
-  FOR DELETE
-  TO authenticated
-  USING (public.get_my_role() = 'super_admin');
-DROP POLICY IF EXISTS permissions_select ON public.permissions;
-DROP POLICY IF EXISTS permissions_select ON permissions;
-CREATE POLICY permissions_select ON public.permissions
-  FOR SELECT
-  TO authenticated
-  USING (public.get_my_role() = 'super_admin');
-DROP POLICY IF EXISTS permissions_insert ON public.permissions;
-DROP POLICY IF EXISTS permissions_insert ON permissions;
-CREATE POLICY permissions_insert ON public.permissions
-  FOR INSERT
-  TO authenticated
-  WITH CHECK (public.get_my_role() = 'super_admin');
-DROP POLICY IF EXISTS permissions_update ON public.permissions;
-DROP POLICY IF EXISTS permissions_update ON permissions;
-CREATE POLICY permissions_update ON public.permissions
-  FOR UPDATE
-  TO authenticated
-  USING (public.get_my_role() = 'super_admin')
-  WITH CHECK (public.get_my_role() = 'super_admin');
-DROP POLICY IF EXISTS permissions_delete ON public.permissions;
-DROP POLICY IF EXISTS permissions_delete ON permissions;
-CREATE POLICY permissions_delete ON public.permissions
-  FOR DELETE
-  TO authenticated
-  USING (public.get_my_role() = 'super_admin');
-DROP POLICY IF EXISTS role_permissions_insert ON public.role_permissions;
-DROP POLICY IF EXISTS role_permissions_delete ON public.role_permissions;
-DROP POLICY IF EXISTS role_permissions_select ON role_permissions;
-CREATE POLICY role_permissions_select ON public.role_permissions
-  FOR SELECT
-  TO authenticated
-  USING (public.get_my_role() = 'super_admin');
-DROP POLICY IF EXISTS role_permissions_insert ON role_permissions;
-CREATE POLICY role_permissions_insert ON public.role_permissions
-  FOR INSERT
-  TO authenticated
-  WITH CHECK (public.get_my_role() = 'super_admin');
-DROP POLICY IF EXISTS role_permissions_delete ON role_permissions;
-CREATE POLICY role_permissions_delete ON public.role_permissions
-  FOR DELETE
-  TO authenticated
-  USING (public.get_my_role() = 'super_admin');
-DROP POLICY IF EXISTS user_roles_insert ON public.user_roles;
-DROP POLICY IF EXISTS user_roles_delete ON public.user_roles;
-DROP POLICY IF EXISTS user_roles_select ON user_roles;
-CREATE POLICY user_roles_select ON public.user_roles
-  FOR SELECT
-  TO authenticated
-  USING (public.get_my_role() = 'super_admin');
-DROP POLICY IF EXISTS user_roles_insert ON user_roles;
-CREATE POLICY user_roles_insert ON public.user_roles
-  FOR INSERT
-  TO authenticated
-  WITH CHECK (public.get_my_role() = 'super_admin');
-DROP POLICY IF EXISTS user_roles_delete ON user_roles;
-CREATE POLICY user_roles_delete ON public.user_roles
-  FOR DELETE
-  TO authenticated
-  USING (public.get_my_role() = 'super_admin');
-CREATE OR REPLACE FUNCTION public.get_user_permissions(user_id uuid)
-RETURNS text[]
-LANGUAGE plpgsql
-STABLE
-SECURITY DEFINER
-SET search_path = public
-AS $$
-DECLARE
-  v_permissions text[];
-  v_caller_role text;
-BEGIN
-  SELECT role INTO v_caller_role
-  FROM public.profiles
-  WHERE id = auth.uid();
-  IF user_id != auth.uid() AND v_caller_role != 'super_admin' THEN
-    RAISE EXCEPTION 'Permission denied' USING ERRCODE = '42501';
-  END IF;
-  SELECT ARRAY_AGG(DISTINCT perm.code ORDER BY perm.code)
-  INTO v_permissions
-  FROM public.profiles p
-  JOIN public.roles r ON r.name = p.role
-  JOIN public.role_permissions rp ON rp.role_id = r.id
-  JOIN public.permissions perm ON perm.id = rp.permission_id
-  WHERE p.id = user_id AND p.status = 'active';
-  RETURN COALESCE(v_permissions, ARRAY[]::text[]);
-END;
-$$;
-REVOKE ALL ON FUNCTION public.get_user_permissions(uuid) FROM PUBLIC;
-REVOKE ALL ON FUNCTION public.get_user_permissions(uuid) FROM anon;
-GRANT EXECUTE ON FUNCTION public.get_user_permissions(uuid) TO authenticated;
-CREATE OR REPLACE FUNCTION public.get_audit_logs_with_users(
-  p_limit integer DEFAULT 100,
-  p_offset integer DEFAULT 0
-)
-RETURNS TABLE(
-  id uuid,
-  action text,
-  entity_type text,
-  entity_id text,
-  changes jsonb,
-  metadata jsonb,
-  ip_address text,
-  user_agent text,
-  created_at timestamptz,
-  actor_name text,
-  actor_email text,
-  actor_role text
-)
-LANGUAGE plpgsql
-STABLE
-SECURITY DEFINER
-SET search_path = public
-AS $$
-BEGIN
-  IF public.get_my_role() != 'super_admin' THEN
-    RAISE EXCEPTION 'Permission denied' USING ERRCODE = '42501';
-  END IF;
-  RETURN QUERY
-  SELECT
-    al.id,
-    al.action,
-    al.entity_type,
-    al.entity_id,
-    al.changes,
-    al.metadata,
-    al.ip_address,
-    al.user_agent,
-    al.created_at,
-    p.full_name AS actor_name,
-    p.email AS actor_email,
-    p.role AS actor_role
-  FROM public.audit_logs al
-  LEFT JOIN public.profiles p ON p.id = al.user_id
-  ORDER BY al.created_at DESC
-  LIMIT p_limit
-  OFFSET p_offset;
-END;
-$$;
-REVOKE ALL ON FUNCTION public.get_audit_logs_with_users(integer, integer) FROM PUBLIC;
-REVOKE ALL ON FUNCTION public.get_audit_logs_with_users(integer, integer) FROM anon;
-GRANT EXECUTE ON FUNCTION public.get_audit_logs_with_users(integer, integer) TO authenticated;
-COMMENT ON FUNCTION public.get_audit_logs_with_users IS 'Super admin only: query audit logs with user details.';
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_proc p
-    JOIN pg_namespace n ON n.oid = p.pronamespace
-    WHERE n.nspname = 'public'
-      AND p.proname = 'admin_update_role'
-      AND p.pronargs = 2
-  ) THEN
-    RAISE EXCEPTION 'admin_update_role function not found';
-  END IF;
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_proc p
-    JOIN pg_namespace n ON n.oid = p.pronamespace
-    WHERE n.nspname = 'public'
-      AND p.proname = 'admin_update_user_status'
-      AND p.pronargs = 2
-  ) THEN
-    RAISE EXCEPTION 'admin_update_user_status function not found';
-  END IF;
-  RAISE NOTICE 'Super admin only RBAC migration applied successfully';
-END $$;
+CREATE OR REPLACE FUNCTION public.admin_update_role(  target_user_id uuid,  new_role text)RETURNS voidLANGUAGE plpgsqlSECURITY DEFINERSET search_path = publicAS $$DECLARE  caller_role text;  caller_status text;  target_role text;  new_role_level integer;  super_admin_count integer;BEGIN  IF auth.uid() IS NULL THEN    RAISE EXCEPTION 'Authentication required' USING ERRCODE = '42501';  END IF;  IF target_user_id = auth.uid() THEN    RAISE EXCEPTION 'You cannot change your own role' USING ERRCODE = '42501';  END IF;  SELECT p.role, p.status  INTO caller_role, caller_status  FROM public.profiles p  WHERE p.id = auth.uid();  IF caller_role IS NULL THEN    RAISE EXCEPTION 'Permission denied: caller not found' USING ERRCODE = '42501';  END IF;  IF caller_status != 'active' THEN    RAISE EXCEPTION 'Account is not active' USING ERRCODE = '42501';  END IF;  IF caller_role != 'super_admin' THEN    RAISE EXCEPTION 'Only super admins can manage roles. Your role: %', caller_role      USING ERRCODE = '42501';  END IF;  SELECT p.role INTO target_role  FROM public.profiles p  WHERE p.id = target_user_id;  IF target_role IS NULL THEN    RAISE EXCEPTION 'Target user not found' USING ERRCODE = '42501';  END IF;  SELECT level INTO new_role_level  FROM public.roles WHERE name = new_role;  IF new_role_level IS NULL THEN    RAISE EXCEPTION 'Invalid role: %', new_role;  END IF;  IF target_role = 'super_admin' THEN    SELECT COUNT(*) INTO super_admin_count    FROM public.profiles    WHERE role = 'super_admin' AND status = 'active' AND id != target_user_id;    IF super_admin_count = 0 THEN      RAISE EXCEPTION 'Cannot remove the last super admin. Promote another user first.'        USING ERRCODE = '42501';    END IF;  END IF;  UPDATE public.profiles  SET role = new_role, updated_at = now()  WHERE id = target_user_id;  INSERT INTO public.audit_logs (    user_id, action, entity_type, entity_id, changes, metadata  ) VALUES (    auth.uid(),    'role_change',    'profiles',    target_user_id::text,    jsonb_build_object(      'previous_role', target_role,      'new_role', new_role    ),    jsonb_build_object(      'changed_by', auth.uid()::text,      'caller_role', caller_role    )  );  INSERT INTO public.notifications (user_id, type, title, message)  VALUES (    target_user_id,    'system',    'Role Updated',    format('Your role has been changed from %s to %s', target_role, new_role)  );END;$$;REVOKE ALL ON FUNCTION public.admin_update_role(uuid, text) FROM PUBLIC;REVOKE ALL ON FUNCTION public.admin_update_role(uuid, text) FROM anon;GRANT EXECUTE ON FUNCTION public.admin_update_role TO authenticated;COMMENT ON FUNCTION public.admin_update_role IS 'Super admin only: change a user role. Enforces last-super-admin protection and full audit logging.';CREATE OR REPLACE FUNCTION public.admin_update_user_status(  target_user_id uuid,  new_status text)RETURNS voidLANGUAGE plpgsqlSECURITY DEFINERSET search_path = publicAS $$DECLARE  caller_role text;  caller_status text;  target_role text;  super_admin_count integer;BEGIN  IF auth.uid() IS NULL THEN    RAISE EXCEPTION 'Authentication required' USING ERRCODE = '42501';  END IF;  IF target_user_id = auth.uid() THEN    RAISE EXCEPTION 'Cannot change your own status' USING ERRCODE = '42501';  END IF;  SELECT p.role, p.status INTO caller_role, caller_status  FROM public.profiles p  WHERE p.id = auth.uid();  IF caller_role IS NULL THEN    RAISE EXCEPTION 'Permission denied' USING ERRCODE = '42501';  END IF;  IF caller_status != 'active' THEN    RAISE EXCEPTION 'Account is not active' USING ERRCODE = '42501';  END IF;  IF caller_role != 'super_admin' THEN    RAISE EXCEPTION 'Only super admins can manage user status. Your role: %', caller_role      USING ERRCODE = '42501';  END IF;  SELECT p.role INTO target_role  FROM public.profiles p  WHERE p.id = target_user_id;  IF target_role IS NULL THEN    RAISE EXCEPTION 'Target user not found' USING ERRCODE = '42501';  END IF;  IF target_role = 'super_admin' AND new_status IN ('suspended', 'banned') THEN    SELECT COUNT(*) INTO super_admin_count    FROM public.profiles    WHERE role = 'super_admin' AND status = 'active' AND id != target_user_id;    IF super_admin_count = 0 THEN      RAISE EXCEPTION 'Cannot suspend the last super admin.'        USING ERRCODE = '42501';    END IF;  END IF;  UPDATE public.profiles  SET status = new_status, updated_at = now()  WHERE id = target_user_id;  IF NOT FOUND THEN    RAISE EXCEPTION 'User not found' USING ERRCODE = '42501';  END IF;  PERFORM public.log_audit_event(    auth.uid(),    'status_change',    'profiles',    target_user_id::text,    jsonb_build_object('new_status', new_status, 'previous_role', target_role),    jsonb_build_object('changed_by', auth.uid()::text, 'caller_role', caller_role)  );END;$$;REVOKE ALL ON FUNCTION public.admin_update_user_status(uuid, text) FROM PUBLIC;REVOKE ALL ON FUNCTION public.admin_update_user_status(uuid, text) FROM anon;GRANT EXECUTE ON FUNCTION public.admin_update_user_status(uuid, text) TO authenticated;COMMENT ON FUNCTION public.admin_update_user_status IS 'Super admin only: suspend/restore user accounts. Enables last-super-admin protection.';DROP POLICY IF EXISTS audit_logs_select ON public.audit_logs;DROP POLICY IF EXISTS audit_logs_select ON audit_logs;CREATE POLICY audit_logs_select ON public.audit_logs  FOR SELECT  TO authenticated  USING (public.get_my_role() = 'super_admin');DROP POLICY IF EXISTS security_events_read ON public.security_events;DROP POLICY IF EXISTS security_events_read ON security_events;CREATE POLICY security_events_read ON public.security_events  FOR SELECT  TO authenticated  USING (public.get_my_role() = 'super_admin');DROP POLICY IF EXISTS profiles_update_admin ON public.profiles;DROP POLICY IF EXISTS profiles_update_admin ON profiles;CREATE POLICY profiles_update_admin ON public.profiles  FOR UPDATE  TO authenticated  USING (public.get_my_role() = 'super_admin')  WITH CHECK (public.get_my_role() = 'super_admin');DROP POLICY IF EXISTS roles_select ON public.roles;DROP POLICY IF EXISTS roles_select ON roles;CREATE POLICY roles_select ON public.roles  FOR SELECT  TO authenticated  USING (public.get_my_role() = 'super_admin');DROP POLICY IF EXISTS roles_insert ON public.roles;DROP POLICY IF EXISTS roles_insert ON roles;CREATE POLICY roles_insert ON public.roles  FOR INSERT  TO authenticated  WITH CHECK (public.get_my_role() = 'super_admin');DROP POLICY IF EXISTS roles_update ON public.roles;DROP POLICY IF EXISTS roles_update ON roles;CREATE POLICY roles_update ON public.roles  FOR UPDATE  TO authenticated  USING (public.get_my_role() = 'super_admin')  WITH CHECK (public.get_my_role() = 'super_admin');DROP POLICY IF EXISTS roles_delete ON public.roles;DROP POLICY IF EXISTS roles_delete ON roles;CREATE POLICY roles_delete ON public.roles  FOR DELETE  TO authenticated  USING (public.get_my_role() = 'super_admin');DROP POLICY IF EXISTS permissions_select ON public.permissions;DROP POLICY IF EXISTS permissions_select ON permissions;CREATE POLICY permissions_select ON public.permissions  FOR SELECT  TO authenticated  USING (public.get_my_role() = 'super_admin');DROP POLICY IF EXISTS permissions_insert ON public.permissions;DROP POLICY IF EXISTS permissions_insert ON permissions;CREATE POLICY permissions_insert ON public.permissions  FOR INSERT  TO authenticated  WITH CHECK (public.get_my_role() = 'super_admin');DROP POLICY IF EXISTS permissions_update ON public.permissions;DROP POLICY IF EXISTS permissions_update ON permissions;CREATE POLICY permissions_update ON public.permissions  FOR UPDATE  TO authenticated  USING (public.get_my_role() = 'super_admin')  WITH CHECK (public.get_my_role() = 'super_admin');DROP POLICY IF EXISTS permissions_delete ON public.permissions;DROP POLICY IF EXISTS permissions_delete ON permissions;CREATE POLICY permissions_delete ON public.permissions  FOR DELETE  TO authenticated  USING (public.get_my_role() = 'super_admin');DROP POLICY IF EXISTS role_permissions_insert ON public.role_permissions;DROP POLICY IF EXISTS role_permissions_delete ON public.role_permissions;DROP POLICY IF EXISTS role_permissions_select ON role_permissions;CREATE POLICY role_permissions_select ON public.role_permissions  FOR SELECT  TO authenticated  USING (public.get_my_role() = 'super_admin');DROP POLICY IF EXISTS role_permissions_insert ON role_permissions;CREATE POLICY role_permissions_insert ON public.role_permissions  FOR INSERT  TO authenticated  WITH CHECK (public.get_my_role() = 'super_admin');DROP POLICY IF EXISTS role_permissions_delete ON role_permissions;CREATE POLICY role_permissions_delete ON public.role_permissions  FOR DELETE  TO authenticated  USING (public.get_my_role() = 'super_admin');DROP POLICY IF EXISTS user_roles_insert ON public.user_roles;DROP POLICY IF EXISTS user_roles_delete ON public.user_roles;DROP POLICY IF EXISTS user_roles_select ON user_roles;CREATE POLICY user_roles_select ON public.user_roles  FOR SELECT  TO authenticated  USING (public.get_my_role() = 'super_admin');DROP POLICY IF EXISTS user_roles_insert ON user_roles;CREATE POLICY user_roles_insert ON public.user_roles  FOR INSERT  TO authenticated  WITH CHECK (public.get_my_role() = 'super_admin');DROP POLICY IF EXISTS user_roles_delete ON user_roles;CREATE POLICY user_roles_delete ON public.user_roles  FOR DELETE  TO authenticated  USING (public.get_my_role() = 'super_admin');CREATE OR REPLACE FUNCTION public.get_user_permissions(user_id uuid)RETURNS text[]LANGUAGE plpgsqlSTABLESECURITY DEFINERSET search_path = publicAS $$DECLARE  v_permissions text[];  v_caller_role text;BEGIN  SELECT role INTO v_caller_role  FROM public.profiles  WHERE id = auth.uid();  IF user_id != auth.uid() AND v_caller_role != 'super_admin' THEN    RAISE EXCEPTION 'Permission denied' USING ERRCODE = '42501';  END IF;  SELECT ARRAY_AGG(DISTINCT perm.code ORDER BY perm.code)  INTO v_permissions  FROM public.profiles p  JOIN public.roles r ON r.name = p.role  JOIN public.role_permissions rp ON rp.role_id = r.id  JOIN public.permissions perm ON perm.id = rp.permission_id  WHERE p.id = user_id AND p.status = 'active';  RETURN COALESCE(v_permissions, ARRAY[]::text[]);END;$$;REVOKE ALL ON FUNCTION public.get_user_permissions(uuid) FROM PUBLIC;REVOKE ALL ON FUNCTION public.get_user_permissions(uuid) FROM anon;GRANT EXECUTE ON FUNCTION public.get_user_permissions(uuid) TO authenticated;CREATE OR REPLACE FUNCTION public.get_audit_logs_with_users(  p_limit integer DEFAULT 100,  p_offset integer DEFAULT 0)RETURNS TABLE(  id uuid,  action text,  entity_type text,  entity_id text,  changes jsonb,  metadata jsonb,  ip_address text,  user_agent text,  created_at timestamptz,  actor_name text,  actor_email text,  actor_role text)LANGUAGE plpgsqlSTABLESECURITY DEFINERSET search_path = publicAS $$BEGIN  IF public.get_my_role() != 'super_admin' THEN    RAISE EXCEPTION 'Permission denied' USING ERRCODE = '42501';  END IF;  RETURN QUERY  SELECT    al.id,    al.action,    al.entity_type,    al.entity_id,    al.changes,    al.metadata,    al.ip_address,    al.user_agent,    al.created_at,    p.full_name AS actor_name,    p.email AS actor_email,    p.role AS actor_role  FROM public.audit_logs al  LEFT JOIN public.profiles p ON p.id = al.user_id  ORDER BY al.created_at DESC  LIMIT p_limit  OFFSET p_offset;END;$$;REVOKE ALL ON FUNCTION public.get_audit_logs_with_users(integer, integer) FROM PUBLIC;REVOKE ALL ON FUNCTION public.get_audit_logs_with_users(integer, integer) FROM anon;GRANT EXECUTE ON FUNCTION public.get_audit_logs_with_users(integer, integer) TO authenticated;COMMENT ON FUNCTION public.get_audit_logs_with_users IS 'Super admin only: query audit logs with user details.';DO $$BEGIN  IF NOT EXISTS (    SELECT 1 FROM pg_proc p    JOIN pg_namespace n ON n.oid = p.pronamespace    WHERE n.nspname = 'public'      AND p.proname = 'admin_update_role'      AND p.pronargs = 2  ) THEN    RAISE EXCEPTION 'admin_update_role function not found';  END IF;  IF NOT EXISTS (    SELECT 1 FROM pg_proc p    JOIN pg_namespace n ON n.oid = p.pronamespace    WHERE n.nspname = 'public'      AND p.proname = 'admin_update_user_status'      AND p.pronargs = 2  ) THEN    RAISE EXCEPTION 'admin_update_user_status function not found';  END IF;  RAISE NOTICE 'Super admin only RBAC migration applied successfully';END $$;

@@ -13,7 +13,6 @@ import type { Database, Json } from '../types/database'
 
 const supabase = getSupabaseClient()
 
-
 export async function getPublishedDesignSettings(): Promise<DesignSettings | null> {
   const { data, error } = await supabase
     .from('design_settings')
@@ -151,7 +150,6 @@ export async function resetToDefaultDesignSettings(): Promise<DesignSettings> {
   return data as unknown as DesignSettings
 }
 
-
 export async function getThemePresets(): Promise<ThemePreset[]> {
   const { data, error } = await supabase
     .from('theme_presets')
@@ -203,7 +201,6 @@ export async function applyThemePreset(id: string): Promise<DesignSettings> {
   })
 }
 
-
 export async function getWebsiteConfigs(): Promise<WebsiteConfigEntry[]> {
   const { data, error } = await supabase
     .from('website_config')
@@ -247,7 +244,6 @@ export async function upsertWebsiteConfig(key: string, label: string, value: Rec
   await logAuditEvent({ action: `Created website config: ${key}`, entityType: 'website_config', entityId: data.id })
   return data as unknown as WebsiteConfigEntry
 }
-
 
 export async function getSectionVisibility(): Promise<SectionVisibilityEntry[]> {
   const { data, error } = await supabase

@@ -18,41 +18,30 @@ BEGIN
   IF auth.uid() IS NULL THEN
     RAISE EXCEPTION 'Authentication required' USING ERRCODE = '42501';
   END IF;
-
   IF target_user_id = auth.uid() THEN
     RAISE EXCEPTION 'You cannot change your own role' USING ERRCODE = '42501';
   END IF;
-
   SELECT p.role, p.status INTO caller_role, caller_status
   FROM public.profiles p WHERE p.id = auth.uid();
-
   IF caller_role IS NULL THEN
     RAISE EXCEPTION 'Permission denied: caller not found' USING ERRCODE = '42501';
   END IF;
-
   IF caller_status != 'active' THEN
     RAISE EXCEPTION 'Account is not active' USING ERRCODE = '42501';
   END IF;
-
   SELECT p.role INTO target_role
   FROM public.profiles p WHERE p.id = target_user_id;
-
   IF target_role IS NULL THEN
     RAISE EXCEPTION 'Target user not found' USING ERRCODE = '42501';
   END IF;
-
   SELECT level INTO new_role_level
   FROM public.roles WHERE name = new_role;
-
   IF new_role_level IS NULL THEN
     RAISE EXCEPTION 'Invalid role: %', new_role;
   END IF;
-
   SELECT level INTO caller_level
   FROM public.roles WHERE name = caller_role;
-
   IF caller_role != 'super_admin' THEN
-    -- Admin can only manage non-admin, non-super_admin roles
     IF new_role IN ('super_admin', 'admin') THEN
       RAISE EXCEPTION 'You do not have permission to assign the % role', new_role USING ERRCODE = '42501';
     END IF;
@@ -63,8 +52,6 @@ BEGIN
       RAISE EXCEPTION 'Cannot assign a role with equal or higher level than your own' USING ERRCODE = '42501';
     END IF;
   END IF;
-
-  -- Super admin protection: cannot remove last super admin
   IF target_role = 'super_admin' AND new_role != 'super_admin' THEN
     SELECT COUNT(*) INTO super_admin_count
     FROM public.profiles
@@ -74,11 +61,9 @@ BEGIN
         USING ERRCODE = '42501';
     END IF;
   END IF;
-
   UPDATE public.profiles
   SET role = new_role, updated_at = now()
   WHERE id = target_user_id;
-
   INSERT INTO public.audit_logs (
     user_id, action, entity_type, entity_id, changes, metadata
   ) VALUES (
@@ -95,7 +80,6 @@ BEGIN
       'caller_role', caller_role
     )
   );
-
   INSERT INTO public.notifications (user_id, type, title, message)
   VALUES (
     target_user_id,
@@ -105,15 +89,10 @@ BEGIN
   );
 END;
 $$;
-
 REVOKE ALL ON FUNCTION public.admin_update_user_role(uuid, text) FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.admin_update_user_role(uuid, text) FROM anon;
 GRANT EXECUTE ON FUNCTION public.admin_update_user_role(uuid, text) TO authenticated;
-
 COMMENT ON FUNCTION public.admin_update_user_role IS 'Admin/Super Admin: change user role. Admin restricted from admin/super_admin roles. Full audit logging.';
-
-
--- Function to get auth.users email_confirmed_at for a user (admin/super_admin only)
 CREATE OR REPLACE FUNCTION public.get_user_verification_status(target_user_id uuid)
 RETURNS jsonb
 LANGUAGE plpgsql
@@ -129,18 +108,14 @@ DECLARE
 BEGIN
   SELECT p.role, p.status INTO caller_role, caller_status
   FROM public.profiles p WHERE p.id = auth.uid();
-
   IF caller_role IS NULL OR caller_status IS NULL THEN
     RAISE EXCEPTION 'Permission denied' USING ERRCODE = '42501';
   END IF;
-
   IF caller_role NOT IN ('super_admin', 'admin') THEN
     RAISE EXCEPTION 'Only admins can view verification status' USING ERRCODE = '42501';
   END IF;
-
   SELECT email, email_confirmed_at INTO v_email, v_confirmed_at
   FROM auth.users WHERE id = target_user_id;
-
   RETURN jsonb_build_object(
     'email', v_email,
     'email_confirmed_at', v_confirmed_at,
@@ -148,15 +123,10 @@ BEGIN
   );
 END;
 $$;
-
 REVOKE ALL ON FUNCTION public.get_user_verification_status(uuid) FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.get_user_verification_status(uuid) FROM anon;
 GRANT EXECUTE ON FUNCTION public.get_user_verification_status(uuid) TO authenticated;
-
 COMMENT ON FUNCTION public.get_user_verification_status IS 'Admin/Super Admin: check if a user has verified their email.';
-
-
--- Enhanced user management stats for admin
 CREATE OR REPLACE FUNCTION public.get_user_management_stats()
 RETURNS jsonb
 LANGUAGE plpgsql
@@ -170,11 +140,9 @@ DECLARE
 BEGIN
   SELECT p.role INTO caller_role
   FROM public.profiles p WHERE p.id = auth.uid();
-
   IF caller_role IS NULL OR caller_role NOT IN ('super_admin', 'admin', 'finance_manager') THEN
     RAISE EXCEPTION 'Permission denied' USING ERRCODE = '42501';
   END IF;
-
   SELECT jsonb_build_object(
     'total_users', COUNT(*),
     'super_admins', COUNT(*) FILTER (WHERE role = 'super_admin'),
@@ -190,19 +158,13 @@ BEGIN
     'inactive_users', COUNT(*) FILTER (WHERE status = 'inactive')
   ) INTO result
   FROM public.profiles;
-
   RETURN result;
 END;
 $$;
-
 REVOKE ALL ON FUNCTION public.get_user_management_stats() FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.get_user_management_stats() FROM anon;
 GRANT EXECUTE ON FUNCTION public.get_user_management_stats() TO authenticated;
-
 COMMENT ON FUNCTION public.get_user_management_stats IS 'Admin/Super Admin: get aggregate user statistics.';
-
-
--- Add profiles read policy for admin (allow admin to read all profiles)
 DROP POLICY IF EXISTS profiles_select_all_admin ON public.profiles;
 CREATE POLICY profiles_select_all_admin ON public.profiles
   FOR SELECT
@@ -211,7 +173,6 @@ CREATE POLICY profiles_select_all_admin ON public.profiles
     public.get_my_role() IN ('super_admin', 'admin')
     OR id = auth.uid()
   );
-
 DO $$
 BEGIN
   IF NOT EXISTS (

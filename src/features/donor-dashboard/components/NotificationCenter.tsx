@@ -12,8 +12,6 @@ interface NotificationCenterProps {
   loading: boolean
 }
 
-
-
 export function NotificationCenter({
   notifications,
   unreadCount,

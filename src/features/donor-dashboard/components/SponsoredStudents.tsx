@@ -36,7 +36,7 @@ export function SponsoredStudents({ sponsorships }: SponsoredStudentsProps) {
               <div className="flex items-center gap-4 mb-4">
                 <div className="relative">
                   <img
-                    src={student.photo_url || 'https://images.pexels.com/photos/1171086/pexels-photo-1171086.jpeg?auto=compress&cs=tinysrgb&w=200'}
+                    src={student.photo_url || ''}
                     alt={student.name}
                     className="w-14 h-14 rounded-xl object-cover"
                   />
