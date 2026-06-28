@@ -191,7 +191,6 @@ export async function getPendingVerifications(): Promise<PaymentSession[]> {
     .from('payment_sessions')
     .select('*, donation:donations(*), donor:profiles!payment_sessions_donor_id_fkey(id, full_name, email)')
     .eq('status', 'processing')
-    .is('donation_id', null)
     .order('created_at', { ascending: false })
 
   if (error) throw error
