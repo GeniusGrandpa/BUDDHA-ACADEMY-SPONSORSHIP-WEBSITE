@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
@@ -128,31 +129,45 @@ export function AboutPage() {
       )}
 
       {timeline.length > 0 && (
-        <section className="py-24 bg-white">
+        <section className="py-24 bg-gradient-to-br from-amber-50 to-orange-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mb-16"
+            >
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{t('about_journey_heading')}</h2>
               <p className="text-gray-600 max-w-2xl mx-auto">{t('about_journey_description')}</p>
-            </div>
+            </motion.div>
             <div className="relative max-w-5xl mx-auto">
-              <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-amber-200 -translate-x-1/2 hidden md:block" />
-              <div className="space-y-12 md:space-y-16">
+              <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-amber-200 to-amber-300 -translate-x-1/2 hidden md:block" />
+              <div className="space-y-10 md:space-y-16">
                 {timeline.map((item, idx) => {
                   const isLeft = idx % 2 === 0
                   return (
-                    <div key={`${item.year}-${item.title}-${idx}`} className={`relative md:flex md:items-start ${!isLeft ? 'md:flex-row-reverse' : ''}`}>
+                    <motion.div
+                      key={`${item.year}-${item.title}-${idx}`}
+                      initial={{ opacity: 0, y: 32 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, margin: '-60px' }}
+                      transition={{ duration: 0.5, delay: idx * 0.1 }}
+                      className={`relative md:flex md:items-start ${!isLeft ? 'md:flex-row-reverse' : ''}`}
+                    >
                       <div className={`flex-1 ${isLeft ? 'md:pr-12 md:text-right' : 'md:pl-12'}`}>
-                        <div className="bg-amber-50 rounded-xl p-6 hover:shadow-lg transition-shadow">
-                          <div className="text-amber-600 font-bold text-lg mb-1">{item.year}</div>
-                          <h3 className="text-gray-900 text-xl font-semibold mb-2">{item.title}</h3>
-                          <p className="text-gray-600 text-sm">{item.desc}</p>
+                        <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all border border-amber-100">
+                          <span className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold uppercase tracking-wider mb-3">
+                            {item.year}
+                          </span>
+                          <h3 className="text-gray-900 text-lg font-semibold mb-2">{item.title}</h3>
+                          <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
                         </div>
                       </div>
                       <div className="hidden md:flex items-center justify-center w-12 shrink-0 relative z-10">
-                        <div className="w-5 h-5 rounded-full bg-amber-500 border-4 border-white shadow-lg" />
+                        <div className="w-4 h-4 rounded-full bg-amber-500 border-3 border-white shadow" />
                       </div>
                       <div className="hidden md:block flex-1" />
-                    </div>
+                    </motion.div>
                   )
                 })}
               </div>
