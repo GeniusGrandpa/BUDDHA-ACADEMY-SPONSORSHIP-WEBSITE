@@ -1,5 +1,6 @@
 import { getSupabaseClient } from '../lib/supabase'
 import { logAuditEvent } from '../lib/audit'
+import { markDonorAsVerified } from './profiles'
 import type {
   PaymentSession,
   PaymentVerification,
@@ -93,6 +94,15 @@ export async function verifyPayment(
   status: 'verified' | 'rejected' | 'failed',
   notes?: string,
 ): Promise<void> {
+  // First get the payment session to get donor_id
+  const { data: session, error: sessionError } = await supabase
+    .from('payment_sessions')
+    .select('donor_id')
+    .eq('id', sessionId)
+    .single()
+  
+  if (sessionError) throw sessionError
+
   const { error } = await supabase.rpc('verify_payment', {
     p_session_id: sessionId,
     p_status: status,
@@ -107,6 +117,10 @@ export async function verifyPayment(
     entityId: sessionId,
     metadata: { notes },
   })
+
+  if (status === 'verified' && session?.donor_id) {
+    await markDonorAsVerified(session.donor_id)
+  }
 }
 
 export async function getDonorDonationsWithPayment(donorId: string): Promise<DonationWithPayment[]> {

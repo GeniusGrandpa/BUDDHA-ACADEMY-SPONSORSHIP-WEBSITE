@@ -30,6 +30,7 @@ export interface Database {
           login_attempts: number
           last_activity_at: string | null
           avatar_updated_at: string | null
+          is_verified: boolean
           created_at: string
           updated_at: string
         }
@@ -48,6 +49,7 @@ export interface Database {
           login_attempts?: number
           last_activity_at?: string | null
           avatar_updated_at?: string | null
+          is_verified?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -66,6 +68,7 @@ export interface Database {
           login_attempts?: number
           last_activity_at?: string | null
           avatar_updated_at?: string | null
+          is_verified?: boolean
           created_at?: string
           updated_at?: string
         }

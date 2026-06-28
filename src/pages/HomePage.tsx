@@ -78,12 +78,14 @@ function HeroSection({ hero, visible }: { hero: HeroContent; visible: boolean })
   )
 }
 
-function StatsSection({ hero, visible }: { hero: HeroContent; visible: boolean }) {
+function StatsSection({ hero, statsSection, visible }: { hero: HeroContent; statsSection: SectionContent | null; visible: boolean }) {
   const stats = (hero.statistics as { value: string; label: string }[]) || []
   if (!visible || stats.length === 0) return null
+  const content = statsSection?.content as { title?: string }
   return (
     <section className="bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {content?.title && <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-12">{content.title}</h2>}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-white text-center">
           {stats.map((stat, idx) => (
             <div key={idx}>
@@ -321,6 +323,7 @@ export function HomePage() {
   const [hero, setHero] = useState<HeroContent | null>(null)
   const [welcomeSection, setWelcomeSection] = useState<SectionContent | null>(null)
   const [aboutSection, setAboutSection] = useState<SectionContent | null>(null)
+  const [statsSection, setStatsSection] = useState<SectionContent | null>(null)
   const [featuredStudentsSection, setFeaturedStudentsSection] = useState<SectionContent | null>(null)
   const [sponsorshipSection, setSponsorshipSection] = useState<SectionContent | null>(null)
   const [testimonialsSection, setTestimonialsSection] = useState<SectionContent | null>(null)
@@ -334,6 +337,7 @@ export function HomePage() {
       getHeroContent().then(d => { if (d) setHero(d) }).catch(() => {}),
       getSectionContent('welcome').then(d => { if (d) setWelcomeSection(d) }).catch(() => {}),
       getSectionContent('about_preview').then(d => { if (d) setAboutSection(d) }).catch(() => {}),
+      getSectionContent('stats').then(d => { if (d) setStatsSection(d) }).catch(() => {}),
       getSectionContent('featured_students').then(d => { if (d) setFeaturedStudentsSection(d) }).catch(() => {}),
       getSectionContent('sponsorship_steps').then(d => { if (d) setSponsorshipSection(d) }).catch(() => {}),
       getSectionContent('testimonials').then(d => { if (d) setTestimonialsSection(d) }).catch(() => {}),
@@ -356,7 +360,7 @@ export function HomePage() {
     <div>
       {hero && <HeroSection hero={hero} visible={sectionsVisible.hero !== false} />}
       {hero?.statistics && hero.statistics.length > 0 && (
-        <StatsSection hero={hero} visible={sectionsVisible.stats !== false} />
+        <StatsSection hero={hero} statsSection={statsSection} visible={sectionsVisible.stats !== false} />
       )}
       {welcomeSection && <WelcomeSection welcome={welcomeSection} visible={sectionsVisible.welcome !== false} />}
       {aboutSection && <AboutSection about={aboutSection} visible={sectionsVisible.about_preview !== false} t={t} />}

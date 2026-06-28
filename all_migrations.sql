@@ -1058,6 +1058,44 @@ CREATE POLICY permissions_delete ON public.permissions FOR DELETE TO authenticat
   USING (public.rls_has_permission('settings.update'));
 DROP POLICY IF EXISTS "role_permissions_read" ON public.role_permissions;
 CREATE POLICY role_permissions_read ON public.role_permissions FOR SELECT TO authenticated USING (true);
+
+-- Add is_verified column to profiles
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS is_verified boolean NOT NULL DEFAULT false;
+
+-- Update handle_new_user to include is_verified
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger AS $$
+BEGIN
+  INSERT INTO public.profiles (id, email, full_name, country, role, is_verified)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    COALESCE(NULLIF(NEW.raw_user_meta_data->>'full_name', ''), 'Buddha Academy Donor'),
+    COALESCE(NULLIF(NEW.raw_user_meta_data->>'country', ''), ''),
+    CASE
+      WHEN NEW.raw_user_meta_data->>'role' = 'admin' THEN 'admin'
+      ELSE 'donor'
+    END,
+    false
+  )
+  ON CONFLICT (id) DO UPDATE
+  SET
+    email = EXCLUDED.email,
+    full_name = EXCLUDED.full_name,
+    country = EXCLUDED.country,
+    role = EXCLUDED.role,
+    updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Backfill existing users who have completed donations as verified
+UPDATE public.profiles
+SET is_verified = true
+WHERE id IN (
+  SELECT DISTINCT donor_id FROM public.donations WHERE status = 'completed'
+);
+
 DROP POLICY IF EXISTS "role_permissions_insert" ON public.role_permissions;
 CREATE POLICY role_permissions_insert ON public.role_permissions FOR INSERT TO authenticated
   WITH CHECK (public.rls_has_permission('users.manage_roles'));
