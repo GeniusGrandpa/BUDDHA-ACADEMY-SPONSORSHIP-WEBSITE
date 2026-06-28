@@ -13,7 +13,17 @@ export async function getSiteSettings(): Promise<SiteSettings | null> {
 export async function updateSiteSettings(updates: Partial<SiteSettings>): Promise<SiteSettings> {
   const userId = (await supabase.auth.getSession()).data.session?.user?.id
   const current = await getSiteSettings()
-  if (!current) throw new Error('Site settings not found')
+
+  if (!current) {
+    const { data, error } = await supabase
+      .from('site_settings')
+      .insert({ ...updates, updated_by: userId })
+      .select()
+      .single()
+    if (error) throw error
+    await logAuditEvent({ action: 'Created site settings', entityType: 'site_settings', entityId: data.id })
+    return data as SiteSettings
+  }
 
   const { data, error } = await supabase
     .from('site_settings')

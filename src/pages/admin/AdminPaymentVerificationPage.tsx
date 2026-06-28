@@ -6,8 +6,8 @@ import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
 import { TableSkeleton } from '../../components/ui/LoadingSkeleton'
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner'
-import { useToast } from '../../hooks/useToast'
-import { ToastContainer } from '../../components/ToastContainer'
+import { AlertCircle, RefreshCw } from 'lucide-react'
+import toast from 'react-hot-toast'
 import type { PaymentSession, PaymentSessionStatus } from '../../types/payments'
 
 interface SessionWithDonor extends Omit<PaymentSession, 'status'> {
@@ -30,6 +30,8 @@ interface SessionWithDonor extends Omit<PaymentSession, 'status'> {
   status: PaymentSessionStatus | 'rejected'
 }
 
+const LOAD_TIMEOUT = 15000
+
 export function AdminPaymentVerificationPage() {
   const [sessions, setSessions] = useState<SessionWithDonor[]>([])
   const [loading, setLoading] = useState(true)
@@ -38,8 +40,8 @@ export function AdminPaymentVerificationPage() {
   const [verificationNotes, setVerificationNotes] = useState('')
   const [verifying, setVerifying] = useState<Record<string, boolean>>({})
   const [initialLoad, setInitialLoad] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const mountedRef = useRef(true)
-  const { toasts, addToast, removeToast } = useToast()
 
   useEffect(() => {
     return () => { mountedRef.current = false }
@@ -47,18 +49,32 @@ export function AdminPaymentVerificationPage() {
 
   const loadSessions = useCallback(async () => {
     setLoading(true)
+    setLoadError(null)
+
+    const timeoutId = setTimeout(() => {
+      if (mountedRef.current) {
+        setLoading(false)
+        setInitialLoad(false)
+        setLoadError('Request timed out. Check your connection and try again.')
+      }
+    }, LOAD_TIMEOUT)
+
     try {
       const data = await getPendingVerifications()
+      clearTimeout(timeoutId)
       if (mountedRef.current) setSessions(data as unknown as SessionWithDonor[])
-    } catch {
-      if (mountedRef.current) addToast('Failed to load pending verifications', 'error')
+    } catch (err) {
+      clearTimeout(timeoutId)
+      if (mountedRef.current) {
+        setLoadError('Failed to load pending verifications. Please try again.')
+      }
     } finally {
       if (mountedRef.current) {
         setLoading(false)
         setInitialLoad(false)
       }
     }
-  }, [addToast])
+  }, [])
 
   useEffect(() => {
     loadSessions()
@@ -82,9 +98,8 @@ export function AdminPaymentVerificationPage() {
         setVerificationNotes('')
       }
 
-      addToast(
-        status === 'verified' ? 'Payment verified successfully' : 'Payment rejected',
-        'success'
+      toast.success(
+        status === 'verified' ? 'Payment verified successfully' : 'Payment rejected'
       )
 
       await loadSessions()
@@ -92,9 +107,8 @@ export function AdminPaymentVerificationPage() {
       setSessions(prev => prev.map(s =>
         s.id === sessionId ? { ...s, status: 'processing' } : s
       ))
-      addToast(
-        status === 'verified' ? 'Failed to verify payment' : 'Failed to reject payment',
-        'error'
+      toast.error(
+        status === 'verified' ? 'Failed to verify payment' : 'Failed to reject payment'
       )
     } finally {
       if (mountedRef.current) {
@@ -128,8 +142,6 @@ export function AdminPaymentVerificationPage() {
 
   return (
     <div className="space-y-6">
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
-
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Payment Verification</h1>
@@ -167,7 +179,17 @@ export function AdminPaymentVerificationPage() {
           </div>
         </div>
 
-        {filtered.length === 0 ? (
+        {loadError ? (
+          <div className="text-center py-12">
+            <AlertCircle className="w-12 h-12 mx-auto text-red-400 mb-3" />
+            <p className="text-gray-700 font-medium">Unable to load payments</p>
+            <p className="text-gray-400 text-sm mt-1 mb-4">{loadError}</p>
+            <Button variant="outline" size="sm" onClick={loadSessions} disabled={loading}>
+              <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              {loading ? 'Retrying...' : 'Retry'}
+            </Button>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-500 font-medium">All caught up!</p>
             <p className="text-gray-400 text-sm mt-1">No pending payments to review.</p>

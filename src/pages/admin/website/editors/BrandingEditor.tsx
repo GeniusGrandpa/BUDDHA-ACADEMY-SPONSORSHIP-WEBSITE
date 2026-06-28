@@ -154,12 +154,19 @@ function Field({ label, value, onChange, textarea }: { label: string; value: str
 }
 
 function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  const [textVal, setTextVal] = useState(value)
+  useEffect(() => { setTextVal(value) }, [value])
+  const commit = (v: string) => {
+    if (/^#[0-9a-fA-F]{6}$/.test(v) || /^#[0-9a-fA-F]{3}$/.test(v)) { onChange(v) }
+    else { setTextVal(value) }
+  }
   return (
     <div>
       <label className="block text-sm font-medium text-gray-600 mb-1">{label}</label>
       <div className="flex items-center gap-2">
         <input type="color" value={value} onChange={e => onChange(e.target.value)} className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer shrink-0" />
-        <input type="text" value={value} onChange={e => onChange(e.target.value)}
+        <input type="text" value={textVal} onChange={e => setTextVal(e.target.value)}
+          onBlur={() => commit(textVal)} onKeyDown={e => { if (e.key === 'Enter') commit(textVal) }}
           className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 font-mono focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20" />
       </div>
     </div>

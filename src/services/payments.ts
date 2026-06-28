@@ -206,7 +206,7 @@ export async function uploadPaymentScreenshot(
     .from('payment_sessions')
     .select('donor_id')
     .eq('id', sessionId)
-    .single()
+    .maybeSingle()
 
   const userId = session?.donor_id
   if (!userId) throw new Error('Session not found')

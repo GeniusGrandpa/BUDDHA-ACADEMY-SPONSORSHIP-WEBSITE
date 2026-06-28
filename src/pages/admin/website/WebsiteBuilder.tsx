@@ -1065,13 +1065,28 @@ function renderSectionPreview(id: string, data: {
       return PageHeaderPreview(data.galleryHeader, 'gallery_header')
     case 'gallery_grid':
       return (
-        <div className="px-8 py-12">
-          <p className="text-center text-gray-400 text-sm mb-6">Gallery content is managed in the Gallery editor</p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="aspect-square rounded-xl" style={{ backgroundColor: t.colors.accent }} />
+        <div className="px-8 py-12 max-w-5xl mx-auto">
+          <div className="flex gap-2 mb-8">
+            {['All', 'Photos', 'Videos', 'Testimonials'].map(tab => (
+              <span key={tab} className={`px-4 py-1.5 rounded-lg text-xs font-medium ${tab === 'All' ? 'bg-amber-500 text-white' : 'bg-gray-100 text-gray-500'}`}>
+                {tab}
+              </span>
             ))}
           </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="rounded-xl border border-gray-200 overflow-hidden bg-white shadow-sm">
+                <div className="h-40 bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center">
+                  <svg className="w-10 h-10 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                </div>
+                <div className="p-4">
+                  <div className="h-3 bg-gray-100 rounded w-3/4 mb-2" />
+                  <div className="h-2 bg-gray-50 rounded w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="text-center text-xs text-gray-400 mt-6">Manage gallery items in the Gallery manager</p>
         </div>
       )
 
@@ -1080,10 +1095,14 @@ function renderSectionPreview(id: string, data: {
     case 'privacy_content': {
       const c = data.privacyPage?.content as { body?: string; lastUpdated?: string } | undefined
       return (
-        <div className="px-8 py-12 max-w-3xl mx-auto">
-          {c?.lastUpdated && <p className="text-xs text-gray-400 mb-4">Last updated: {c.lastUpdated}</p>}
-          <div className="prose prose-sm max-w-none text-gray-600 whitespace-pre-line">
-            {c?.body || 'Privacy policy content goes here...'}
+        <div className="px-8 py-12 max-w-4xl mx-auto">
+          <div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+            {c?.lastUpdated && <p className="text-xs text-gray-400 mb-6">Last updated: {c.lastUpdated}</p>}
+            <div className="text-gray-600 leading-relaxed">
+              {(c?.body || 'Privacy policy content goes here...').split('\n').map((para, idx) => (
+                <p key={idx} className="mb-4 last:mb-0">{para}</p>
+              ))}
+            </div>
           </div>
         </div>
       )
@@ -1094,10 +1113,14 @@ function renderSectionPreview(id: string, data: {
     case 'terms_content': {
       const c = data.termsPage?.content as { body?: string; lastUpdated?: string } | undefined
       return (
-        <div className="px-8 py-12 max-w-3xl mx-auto">
-          {c?.lastUpdated && <p className="text-xs text-gray-400 mb-4">Last updated: {c.lastUpdated}</p>}
-          <div className="prose prose-sm max-w-none text-gray-600 whitespace-pre-line">
-            {c?.body || 'Terms of service content goes here...'}
+        <div className="px-8 py-12 max-w-4xl mx-auto">
+          <div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+            {c?.lastUpdated && <p className="text-xs text-gray-400 mb-6">Last updated: {c.lastUpdated}</p>}
+            <div className="text-gray-600 leading-relaxed">
+              {(c?.body || 'Terms of service content goes here...').split('\n').map((para, idx) => (
+                <p key={idx} className="mb-4 last:mb-0">{para}</p>
+              ))}
+            </div>
           </div>
         </div>
       )
@@ -1226,6 +1249,16 @@ function SectionPreview({ id: _id, selected, onClick, label, children, sectionRe
 function ThemePanel({ theme, setTheme, onClose }: {
   theme: ThemeConfig; setTheme: (t: ThemeConfig) => void; onClose: () => void
 }) {
+  const [colorTexts, setColorTexts] = useState<Record<string, string>>({})
+  const getCT = (k: string) => k in colorTexts ? colorTexts[k] : theme.colors[k as keyof typeof theme.colors]
+  const setCT = (k: string, v: string) => setColorTexts(p => ({ ...p, [k]: v }))
+  const commitColor = (k: string) => {
+    const v = colorTexts[k]
+    if (!v || /^#[0-9a-fA-F]{6}$/.test(v) || /^#[0-9a-fA-F]{3}$/.test(v)) {
+      setTheme({ ...theme, colors: { ...theme.colors, [k]: v || theme.colors[k as keyof typeof theme.colors] } })
+    }
+    const n = { ...colorTexts }; delete n[k]; setColorTexts(n)
+  }
   return (
     <div className="p-4 space-y-5">
       <div className="flex items-center justify-between pb-3 border-b" style={{ borderColor: theme.colors.accent }}>
@@ -1244,8 +1277,10 @@ function ThemePanel({ theme, setTheme, onClose }: {
                 <input type="color" value={theme.colors[key]}
                   onChange={v => setTheme({ ...theme, colors: { ...theme.colors, [key]: v.target.value } })}
                   className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer shrink-0" />
-                <input value={theme.colors[key]}
-                  onChange={v => setTheme({ ...theme, colors: { ...theme.colors, [key]: v.target.value } })}
+                <input value={getCT(key)}
+                  onChange={e => setCT(key, e.target.value)}
+                  onBlur={() => commitColor(key)}
+                  onKeyDown={e => { if (e.key === 'Enter') commitColor(key) }}
                   className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm" />
               </div>
             </div>

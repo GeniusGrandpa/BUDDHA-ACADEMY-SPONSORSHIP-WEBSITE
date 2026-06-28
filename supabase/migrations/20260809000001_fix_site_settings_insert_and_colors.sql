@@ -1,0 +1,8 @@
+-- Fix site_settings: add INSERT policy so admins can recreate the row if missing
+
+-- Add INSERT policy for site_settings (admins with role_level >= 90)
+CREATE POLICY "site_settings_insert_admin" ON public.site_settings
+  FOR INSERT
+  WITH CHECK (public.get_user_role_level() >= 90);
+
+GRANT INSERT ON public.site_settings TO authenticated;

@@ -40,6 +40,12 @@ function cacheBust(url: string, ver: number): string {
   return `${url}${sep}_cb=${ver}`
 }
 
+const HEX_RE = /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/
+
+function isValidHex(color: string): boolean {
+  return HEX_RE.test(color)
+}
+
 export function SiteBranding() {
   const { branding, isLoaded } = useTheme()
   const verRef = useRef(0)
@@ -68,7 +74,7 @@ export function SiteBranding() {
     setMeta('twitter:title', siteName)
     setMeta('twitter:description', tagline)
 
-    if (b?.theme_color) {
+    if (b?.theme_color && isValidHex(b.theme_color)) {
       setMeta('theme-color', b.theme_color)
     }
 
@@ -96,30 +102,6 @@ export function SiteBranding() {
       setLink('apple-touch-icon', cacheBust(b.apple_touch_icon_url, v), { sizes: '180x180' })
     } else if (fv) {
       setLink('apple-touch-icon', cacheBust(fv, v), { sizes: '180x180' })
-    }
-
-    const mf = document.querySelector<HTMLLinkElement>('link[rel="manifest"]')
-    if (mf) {
-      const manifest = {
-        name: siteName,
-        short_name: siteName,
-        description: tagline || 'Providing free education to underprivileged children in Nepal since 1977',
-        start_url: '/',
-        display: 'standalone',
-        background_color: '#fdfbf7',
-        theme_color: b?.theme_color || '#f26b1d',
-        icons: [
-          ...(fv ? [{ src: cacheBust(fv, v), sizes: '48x48', type: 'image/x-icon' }] : []),
-          ...(b?.apple_touch_icon_url
-            ? [{ src: cacheBust(b.apple_touch_icon_url, v), sizes: '180x180', type: 'image/png' }]
-            : fv ? [{ src: cacheBust(fv, v), sizes: '180x180', type: 'image/png' }] : []),
-        ],
-      }
-      try {
-        URL.revokeObjectURL(mf.href)
-      } catch {}
-      const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' })
-      mf.href = URL.createObjectURL(blob)
     }
 
     return () => {

@@ -126,6 +126,7 @@ const ContactPageEditor = lazy(() => import('./pages/admin/website/editors/Conta
 const CampaignsEditor = lazy(() => import('./pages/admin/website/editors/CampaignsEditor').then(m => ({ default: m.CampaignsEditor })))
 const PrivacyPageEditor = lazy(() => import('./pages/admin/website/editors/PrivacyPageEditor').then(m => ({ default: m.PrivacyPageEditor })))
 const TermsPageEditor = lazy(() => import('./pages/admin/website/editors/TermsPageEditor').then(m => ({ default: m.TermsPageEditor })))
+const HomePageEditor = lazy(() => import('./pages/admin/website/editors/HomePageEditor').then(m => ({ default: m.HomePageEditor })))
 
 const AdminContentGallery = lazy(() => import('./pages/admin/cms/AdminContentGallery').then(m => ({ default: m.AdminContentGallery })))
 
@@ -267,7 +268,7 @@ export const router = createBrowserRouter([
       { path: 'website', element: <LazyPage Component={WebsiteDashboard} /> },
       { path: 'website/builder', element: <LazyPage Component={WebsiteBuilder} /> },
       { path: 'website/media', element: <LazyPage Component={MediaLibrary} /> },
-      { path: 'website/homepage', element: <Navigate to="/admin/website/builder" replace /> },
+      { path: 'website/homepage', element: <LazyPage Component={HomePageEditor} /> },
       { path: 'website/about', element: <LazyPage Component={AboutPageEditor} /> },
       { path: 'website/contact', element: <LazyPage Component={ContactPageEditor} /> },
       { path: 'website/campaigns', element: <LazyPage Component={CampaignsEditor} /> },
