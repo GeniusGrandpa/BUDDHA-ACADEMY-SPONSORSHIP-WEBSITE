@@ -12,7 +12,7 @@ export function SuccessStoriesCarousel() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    loadStories()
+    loadStories().catch(() => setLoading(false))
   }, [])
 
   useEffect(() => {

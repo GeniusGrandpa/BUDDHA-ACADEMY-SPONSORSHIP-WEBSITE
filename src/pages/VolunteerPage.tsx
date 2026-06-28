@@ -29,7 +29,7 @@ export function VolunteerPage() {
       if (vc) setContent(vc)
       if (hdr) setHeader(hdr)
       setEvents(evts)
-    })
+    }).catch(() => {})
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {

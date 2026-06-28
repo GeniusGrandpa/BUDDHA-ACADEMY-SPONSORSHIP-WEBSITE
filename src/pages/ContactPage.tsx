@@ -35,7 +35,7 @@ export function ContactPage() {
     ]).then(([hdr, stgs]) => {
       if (hdr) setHeader(hdr)
       if (stgs) setSettings(stgs as { contact_email?: string; contact_phone?: string; contact_address?: string })
-    })
+    }).catch(() => {})
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {

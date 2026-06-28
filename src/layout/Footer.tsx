@@ -19,7 +19,6 @@ export function Footer() {
   const { branding } = useTheme()
   const [footerContent, setFooterContent] = useState<FooterContent | null>(null)
   const [siteSettings, setSiteSettings] = useState<{ contact_address?: string; contact_phone?: string; contact_email?: string }>({})
-
   useEffect(() => {
     Promise.all([
       getFooterContent(),

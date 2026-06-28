@@ -15,7 +15,7 @@ export function TransparencyPage() {
     ]).then(([tc, hdr]) => {
       if (tc) setContent(tc)
       if (hdr) setHeader(hdr)
-    })
+    }).catch(() => {})
   }, [])
 
   const allocationData = content?.allocation_data || []

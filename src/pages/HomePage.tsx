@@ -275,7 +275,6 @@ export function HomePage() {
   const [brokenStudentPhotos, setBrokenStudentPhotos] = useState<Set<string>>(new Set())
   const [studentFallbackImage, setStudentFallbackImage] = useState('')
   const [studentsLoading, setStudentsLoading] = useState(true)
-
   useEffect(() => {
     Promise.all([
       getHeroContent().then(d => { if (d) setHero(d) }).catch(() => {}),

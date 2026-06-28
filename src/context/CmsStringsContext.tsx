@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react'
 import { getAllCmsStrings } from '../services/cms-content'
 import type { CmsStringMap } from '../types/cms-content'

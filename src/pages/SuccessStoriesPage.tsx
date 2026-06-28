@@ -14,7 +14,7 @@ export function SuccessStoriesPage() {
   const [pageHeader, setPageHeader] = useState<PageHeader | null>(null)
 
   useEffect(() => {
-    loadStories()
+    loadStories().catch(() => setLoading(false))
   }, [])
 
   async function loadStories() {

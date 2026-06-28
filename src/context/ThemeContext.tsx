@@ -1,7 +1,9 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from 'react'
 import type { DesignSettings, DesignColors, DesignBranding, DesignTypography, DesignLayout, DesignTokens, DesignComponentStyles } from '../types/design'
 import { DEFAULT_COLORS, DEFAULT_BRANDING, DEFAULT_TYPOGRAPHY, DEFAULT_LAYOUT, DEFAULT_TOKENS, DEFAULT_COMPONENT_STYLES } from '../types/design'
 import { getPublishedDesignSettings } from '../services/design'
+import { useAuth } from './AuthContext'
 
 interface ThemeContextValue {
   settings: DesignSettings | null
@@ -140,6 +142,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<DesignSettings | null>(null)
   const [isLoaded, setIsLoaded] = useState(false)
   const styleRef = useRef<HTMLStyleElement | null>(null)
+  const { loading: authLoading } = useAuth()
 
   const applyTheme = useCallback((s: DesignSettings | null) => {
     const css = generateCSSVariables(s)
@@ -199,6 +202,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [applyTheme, applyFavicon, loadGoogleFont])
 
   useEffect(() => {
+    if (authLoading) return
     refreshTheme()
     return () => {
       if (styleRef.current) {
@@ -207,7 +211,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       }
       document.querySelectorAll('link[data-theme-font]').forEach(el => el.remove())
     }
-  }, [refreshTheme])
+  }, [authLoading, refreshTheme])
 
   const value: ThemeContextValue = {
     settings,

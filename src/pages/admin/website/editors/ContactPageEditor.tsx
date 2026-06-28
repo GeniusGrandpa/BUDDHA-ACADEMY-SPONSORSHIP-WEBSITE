@@ -5,6 +5,15 @@ import { getAllCmsStrings, upsertCmsString } from '../../../../services/cms-cont
 import { FormSkeleton } from '../../../../components/ui/LoadingSkeleton'
 import toast from 'react-hot-toast'
 
+const STRING_KEYS = [
+    'contact_form_title', 'contact_address_label', 'contact_phone_label', 'contact_email_label',
+    'contact_send_message_heading', 'contact_success_title', 'contact_success_text', 'contact_send_another',
+    'contact_name_label', 'contact_email_label_form', 'contact_phone_label_form', 'contact_phone_placeholder',
+    'contact_subject_label', 'contact_message_label', 'contact_message_placeholder',
+    'contact_submitting_text', 'contact_submit_text', 'contact_location_heading', 'contact_map_button',
+    'contact_phone_error', 'contact_error_text',
+  ]
+
 export function ContactPageEditor() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -14,39 +23,30 @@ export function ContactPageEditor() {
   const [address, setAddress] = useState('')
   const [strings, setStrings] = useState<Record<string, string>>({} as Record<string, string>)
 
-  const stringKeys = [
-    'contact_form_title', 'contact_address_label', 'contact_phone_label', 'contact_email_label',
-    'contact_send_message_heading', 'contact_success_title', 'contact_success_text', 'contact_send_another',
-    'contact_name_label', 'contact_email_label_form', 'contact_phone_label_form', 'contact_phone_placeholder',
-    'contact_subject_label', 'contact_message_label', 'contact_message_placeholder',
-    'contact_submitting_text', 'contact_submit_text', 'contact_location_heading', 'contact_map_button',
-    'contact_phone_error', 'contact_error_text',
-  ]
-
-  const load = async () => {
-    setLoading(true)
-    try {
-      const [hdr, settings, cmsStrings] = await Promise.all([
-        getPageHeader('contact').catch(() => null),
-        getSiteSettings().catch(() => null),
-        getAllCmsStrings().catch(() => ({}) as Record<string, string>),
-      ])
-      if (hdr) setHeader({ title: hdr.title || '', subtitle: hdr.subtitle || '' })
-      if (settings) {
-        setEmail(settings.contact_email || '')
-        setPhone(settings.contact_phone || '')
-        setAddress(settings.contact_address || '')
-      }
-      const strMap: Record<string, string> = {}
-      for (const key of stringKeys) {
-        strMap[key] = cmsStrings[key] || ''
-      }
-      setStrings(strMap)
-    } catch { toast.error('Failed to load contact page data') }
-    finally { setLoading(false) }
-  }
-
-  useEffect(() => { load() }, [load])
+  useEffect(() => {
+    (async () => {
+      setLoading(true)
+      try {
+        const [hdr, settings, cmsStrings] = await Promise.all([
+          getPageHeader('contact').catch(() => null),
+          getSiteSettings().catch(() => null),
+          getAllCmsStrings().catch(() => ({}) as Record<string, string>),
+        ])
+        if (hdr) setHeader({ title: hdr.title || '', subtitle: hdr.subtitle || '' })
+        if (settings) {
+          setEmail(settings.contact_email || '')
+          setPhone(settings.contact_phone || '')
+          setAddress(settings.contact_address || '')
+        }
+        const strMap: Record<string, string> = {}
+        for (const key of STRING_KEYS) {
+          strMap[key] = cmsStrings[key] || ''
+        }
+        setStrings(strMap)
+      } catch { toast.error('Failed to load contact page data') }
+      finally { setLoading(false) }
+    })()
+  }, [])
 
   const handleSave = async () => {
     setSaving(true)
@@ -120,7 +120,7 @@ export function ContactPageEditor() {
       <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-4">
         <h2 className="text-lg font-semibold text-gray-900">Form Labels & Text</h2>
         <div className="grid grid-cols-2 gap-4">
-          {stringKeys.map(key => (
+          {STRING_KEYS.map(key => (
             <div key={key}>
               <label className="block text-xs font-medium text-gray-500 mb-1 uppercase tracking-wider">{key.replace(/_/g, ' ')}</label>
               <input value={strings[key] || ''} onChange={e => updateString(key, e.target.value)}

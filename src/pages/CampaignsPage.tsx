@@ -11,7 +11,7 @@ export function CampaignsPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    loadGoals()
+    loadGoals().catch(() => setLoading(false))
   }, [])
 
   async function loadGoals() {
