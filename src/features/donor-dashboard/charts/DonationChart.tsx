@@ -24,8 +24,8 @@ export function DonationChart({ donations }: DonationChartProps) {
   return (
     <motion.div variants={fadeInUp} initial="initial" animate="animate" className="bg-white rounded-2xl border border-gray-100 p-5 mb-8">
       <h2 className="text-xl font-bold text-gray-900 mb-4">Monthly Contributions</h2>
-      <div className="h-64">
-        <ResponsiveContainer width="100%" height="100%">
+      <div className="h-64 min-w-[300px]">
+        <ResponsiveContainer width="100%" height="100%" minWidth={300} minHeight={200}>
           <BarChart data={data} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
             <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#94a3b8' }} axisLine={false} tickLine={false} />

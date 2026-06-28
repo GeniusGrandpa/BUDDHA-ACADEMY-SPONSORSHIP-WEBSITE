@@ -238,46 +238,33 @@ function StudentsSection({ students, brokenPhotos, fallbackImage, setBrokenPhoto
   )
 }
 
-function SponsorshipSection({ sponsorship, visible }: { sponsorship: SectionContent; visible: boolean }) {
+function SponsorshipStepsSection({ sponsorshipSteps, visible }: { sponsorshipSteps: SectionContent; visible: boolean }) {
   if (!visible) return null
-  const data = sponsorship.content as { steps?: { num: string; title: string; desc: string }[] } | undefined
-  const steps = data?.steps || []
-  if (!sponsorship.title && !sponsorship.description && steps.length === 0) return null
+  const content = sponsorshipSteps.content as { title?: string; description?: string; steps?: Array<{ title: string; desc: string }> }
+  const steps = content?.steps || []
   return (
     <section className="py-24 bg-gradient-to-br from-amber-50 via-white to-orange-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {sponsorship.title && (
+        {content?.title && (
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{sponsorship.title}</h2>
-            {sponsorship.description && (
-              <p className="text-gray-600 max-w-2xl mx-auto">{sponsorship.description}</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{content.title}</h2>
+            {content.description && (
+              <p className="text-gray-600 max-w-2xl mx-auto">{content.description}</p>
             )}
           </div>
         )}
-        <div className="relative">
-          <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-amber-200 hidden md:block" />
-          <div className="space-y-12">
-            {steps.map((step, idx) => {
-              const isLeft = idx % 2 === 0
-              return (
-                <div key={idx} className={`relative flex items-start gap-8 ${isLeft ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
-                  <div className={`flex-1 ${isLeft ? 'md:text-right' : 'md:text-left'}`}>
-                    <div className="bg-warm-50 rounded-2xl border border-amber-200 p-6 hover:shadow-lg hover:border-amber-300 transition-all">
-                      <div className={`flex items-center gap-3 mb-3 ${isLeft ? 'md:flex-row-reverse' : ''}`}>
-                        <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-amber-500 text-white text-sm font-bold flex-shrink-0">{step.num}</span>
-                        <h3 className="text-base font-semibold text-gray-900">{step.title}</h3>
-                      </div>
-                      <p className={`text-gray-500 text-sm ${isLeft ? 'md:pl-0' : 'pl-0'}`}>{step.desc}</p>
-                    </div>
-                  </div>
-                  <div className="hidden md:flex flex-col items-center flex-shrink-0 relative">
-                    <div className="w-4 h-4 rounded-full bg-amber-500 border-4 border-amber-100 shadow" />
-                  </div>
-                  <div className="flex-1 hidden md:block" />
-                </div>
-              )
-            })}
-          </div>
+        <div className="grid md:grid-cols-3 gap-6 mt-8">
+          {(steps.length ? steps : [
+            { title: 'Choose', desc: 'Select a student to sponsor' },
+            { title: 'Contribute', desc: 'Set up your monthly donation' },
+            { title: 'Connect', desc: 'Exchange letters and updates' },
+          ]).map((step, i) => (
+            <div key={i} className="text-center p-5 rounded-xl border border-amber-200">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-3 font-bold text-sm bg-amber-500 text-white">{i + 1}</div>
+              <h3 className="text-base font-semibold text-gray-800">{step.title}</h3>
+              <p className="text-xs text-gray-500 mt-1">{step.desc}</p>
+            </div>
+          ))}
         </div>
       </div>
     </section>
@@ -288,25 +275,38 @@ function TestimonialsSection({ testimonials, visible }: { testimonials: SectionC
   if (!visible) return null
   const content = testimonials.content as { title?: string }
   return (
-    <section className="py-24">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        {content?.title && <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-12">{content.title}</h2>}
-        <div className="bg-gray-50 rounded-2xl p-8 border border-gray-100">
-          <p className="text-lg text-gray-600 italic">Testimonials coming soon!</p>
+    <section className="py-24 bg-gray-50">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {content?.title && <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-12 text-center">{content.title}</h2>}
+        <div className="grid md:grid-cols-2 gap-6">
+          {[1, 2].map(i => (
+            <div key={i} className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-10 h-10 rounded-full bg-amber-100" />
+                <div>
+                  <div className="text-sm font-medium text-gray-700">Supporter</div>
+                  <div className="text-xs text-gray-400">Donor</div>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 italic">Your support makes a real difference in these children's lives.</p>
+            </div>
+          ))}
         </div>
       </div>
     </section>
   )
 }
 
-function DonationCtaSection({ cta, visible }: { cta: SectionContent; visible: boolean }) {
+function DonationCtaSection({ donationCta, visible }: { donationCta: SectionContent; visible: boolean }) {
   if (!visible) return null
-  const content = cta.content as { title?: string; description?: string; button_text?: string; button_link?: string }
+  const content = donationCta.content as { title?: string; description?: string; button_text?: string; button_link?: string }
   return (
-    <section className="py-24 bg-gradient-to-br from-amber-600 to-orange-600">
+    <section className="py-24 bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         {content?.title && <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">{content.title}</h2>}
-        {content?.description && <p className="text-lg text-white/90 mb-8 leading-relaxed">{content.description}</p>}
+        {content?.description && (
+          <p className="text-lg text-white/90 mb-8 leading-relaxed">{content.description}</p>
+        )}
         {content?.button_text && (
           <Link to={content.button_link || '/donate'}>
             <Button size="lg" className="bg-white text-amber-600 hover:bg-gray-100">{content.button_text}</Button>
@@ -325,7 +325,7 @@ export function HomePage() {
   const [aboutSection, setAboutSection] = useState<SectionContent | null>(null)
   const [statsSection, setStatsSection] = useState<SectionContent | null>(null)
   const [featuredStudentsSection, setFeaturedStudentsSection] = useState<SectionContent | null>(null)
-  const [sponsorshipSection, setSponsorshipSection] = useState<SectionContent | null>(null)
+  const [sponsorshipSteps, setSponsorshipSteps] = useState<SectionContent | null>(null)
   const [testimonialsSection, setTestimonialsSection] = useState<SectionContent | null>(null)
   const [donationCtaSection, setDonationCtaSection] = useState<SectionContent | null>(null)
   const [sectionsVisible, setSectionsVisible] = useState<Record<string, boolean>>({})
@@ -339,7 +339,7 @@ export function HomePage() {
       getSectionContent('about_preview').then(d => { if (d) setAboutSection(d) }).catch(() => {}),
       getSectionContent('stats').then(d => { if (d) setStatsSection(d) }).catch(() => {}),
       getSectionContent('featured_students').then(d => { if (d) setFeaturedStudentsSection(d) }).catch(() => {}),
-      getSectionContent('sponsorship_steps').then(d => { if (d) setSponsorshipSection(d) }).catch(() => {}),
+      getSectionContent('sponsorship_steps').then(d => { if (d) setSponsorshipSteps(d) }).catch(() => {}),
       getSectionContent('testimonials').then(d => { if (d) setTestimonialsSection(d) }).catch(() => {}),
       getSectionContent('donation_cta').then(d => { if (d) setDonationCtaSection(d) }).catch(() => {}),
       getSectionVisibility().then(sections => {
@@ -352,7 +352,7 @@ export function HomePage() {
     ])
   }, [])
 
-  if (!hero && !aboutSection && !sponsorshipSection && studentsLoading) {
+  if (!hero && !aboutSection && !sponsorshipSteps && studentsLoading) {
     return <div className="min-h-screen" />
   }
 
@@ -374,9 +374,9 @@ export function HomePage() {
         t={t}
         featuredContent={featuredStudentsSection}
       />
-      {sponsorshipSection && <SponsorshipSection sponsorship={sponsorshipSection} visible={sectionsVisible.sponsorship_steps !== false} />}
+      {sponsorshipSteps && <SponsorshipStepsSection sponsorshipSteps={sponsorshipSteps} visible={sectionsVisible.sponsorship_steps !== false} />}
       {testimonialsSection && <TestimonialsSection testimonials={testimonialsSection} visible={sectionsVisible.testimonials !== false} />}
-      {donationCtaSection && <DonationCtaSection cta={donationCtaSection} visible={sectionsVisible.donation_cta !== false} />}
+      {donationCtaSection && <DonationCtaSection donationCta={donationCtaSection} visible={sectionsVisible.donation_cta !== false} />}
       <section><CtaBanner /></section>
     </div>
   )

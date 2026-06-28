@@ -564,43 +564,53 @@ function renderSectionPreview(id: string, data: {
 
     case 'hero':
       return (
-        <div className="relative px-8 py-16 md:py-24 text-white" style={{ backgroundColor: t.colors.secondary }}>
-          <div className="max-w-3xl">
-            <InlineEdit value={data.hero?.title || ''} live={sel('hero')}
-              onSave={v => data.onEdit.setHero?.(data.hero ? { ...data.hero, title: v } : { id: '', title: v, highlight: '', description: '', background_image: '', overlay_color: '', overlay_opacity: 0, cta_primary_text: '', cta_primary_link: '', cta_secondary_text: '', cta_secondary_link: '', statistics: [], badges: [], layout: '', display_order: 0, is_visible: true, animation_enabled: false, updated_by: null, created_at: '', updated_at: '' })}
-              className="text-4xl md:text-5xl font-bold leading-tight"
-              style={{ fontFamily: t.fontHeading }} />
-            <InlineEdit value={data.hero?.highlight || ''} live={sel('hero')}
-              onSave={v => data.onEdit.setHero?.(data.hero ? { ...data.hero, highlight: v } : null)}
-              className="inline-block mt-2 text-lg font-semibold"
-              style={{ color: t.colors.accent }} />
-            <InlineEdit value={data.hero?.description || ''} live={sel('hero')}
-              onSave={v => data.onEdit.setHero?.(data.hero ? { ...data.hero, description: v } : null)}
-              className="mt-4 text-lg text-white/80 max-w-2xl block" />
-            <div className="flex flex-wrap gap-3 mt-6">
-              {(data.hero?.cta_primary_text || sel('hero')) && (
-                <InlineEdit value={data.hero?.cta_primary_text || ''} live={sel('hero')}
-                  onSave={v => data.onEdit.setHero?.(data.hero ? { ...data.hero, cta_primary_text: v } : null)}
-                  className="px-6 py-3 font-semibold text-sm inline-block"
-                  style={{ backgroundColor: 'white', color: t.colors.primary, borderRadius: `${t.buttonRadius}px` }} />
-              )}
-              {(data.hero?.cta_secondary_text || sel('hero')) && (
-                <InlineEdit value={data.hero?.cta_secondary_text || ''} live={sel('hero')}
-                  onSave={v => data.onEdit.setHero?.(data.hero ? { ...data.hero, cta_secondary_text: v } : null)}
-                  className="px-6 py-3 font-semibold text-sm border-2 border-white/50 text-white inline-block"
-                  style={{ borderRadius: `${t.buttonRadius}px` }} />
+        <div className="relative px-8 py-16 md:py-24 text-white overflow-hidden" style={{ backgroundColor: t.colors.secondary }}>
+          {data.hero?.background_image && (
+            <img
+              src={data.hero.background_image}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover"
+              onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            />
+          )}
+          <div className="relative max-w-7xl mx-auto">
+            <div className={`max-w-3xl ${data.hero?.layout === 'center' ? 'mx-auto text-center' : ''}`}>
+              <InlineEdit value={data.hero?.title || ''} live={sel('hero')}
+                onSave={v => data.onEdit.setHero?.(data.hero ? { ...data.hero, title: v } : { id: '', title: v, highlight: '', description: '', background_image: '', overlay_color: '', overlay_opacity: 0, cta_primary_text: '', cta_primary_link: '', cta_secondary_text: '', cta_secondary_link: '', statistics: [], badges: [], layout: '', display_order: 0, is_visible: true, animation_enabled: false, updated_by: null, created_at: '', updated_at: '' })}
+                className="text-4xl md:text-5xl font-bold leading-tight"
+                style={{ fontFamily: t.fontHeading }} />
+              <InlineEdit value={data.hero?.highlight || ''} live={sel('hero')}
+                onSave={v => data.onEdit.setHero?.(data.hero ? { ...data.hero, highlight: v } : null)}
+                className="inline-block mt-2 text-lg font-semibold"
+                style={{ color: t.colors.accent }} />
+              <InlineEdit value={data.hero?.description || ''} live={sel('hero')}
+                onSave={v => data.onEdit.setHero?.(data.hero ? { ...data.hero, description: v } : null)}
+                className="mt-4 text-lg text-white/80 max-w-2xl block" />
+              <div className="flex flex-wrap gap-3 mt-6">
+                {(data.hero?.cta_primary_text || sel('hero')) && (
+                  <InlineEdit value={data.hero?.cta_primary_text || ''} live={sel('hero')}
+                    onSave={v => data.onEdit.setHero?.(data.hero ? { ...data.hero, cta_primary_text: v } : null)}
+                    className="px-6 py-3 font-semibold text-sm inline-block"
+                    style={{ backgroundColor: 'white', color: t.colors.primary, borderRadius: `${t.buttonRadius}px` }} />
+                )}
+                {(data.hero?.cta_secondary_text || sel('hero')) && (
+                  <InlineEdit value={data.hero?.cta_secondary_text || ''} live={sel('hero')}
+                    onSave={v => data.onEdit.setHero?.(data.hero ? { ...data.hero, cta_secondary_text: v } : null)}
+                    className="px-6 py-3 font-semibold text-sm border-2 border-white/50 text-white inline-block"
+                    style={{ borderRadius: `${t.buttonRadius}px` }} />
+                )}
+              </div>
+              {data.hero?.statistics && data.hero.statistics.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10 pt-8 border-t border-white/20">
+                  {data.hero.statistics.map((s, i) => (
+                    <div key={i} className="text-center">
+                      <div className="text-2xl font-bold">{s.value}</div>
+                      <div className="text-sm text-white/70">{s.label}</div>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
-            {data.hero?.statistics && data.hero.statistics.length > 0 && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10 pt-8 border-t border-white/20">
-                {data.hero.statistics.map((s, i) => (
-                  <div key={i} className="text-center">
-                    <div className="text-2xl font-bold">{s.value}</div>
-                    <div className="text-sm text-white/70">{s.label}</div>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         </div>
       )
