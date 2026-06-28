@@ -1,22 +1,14 @@
 import { Toaster } from 'react-hot-toast'
 import { RouterProvider } from 'react-router-dom'
-import { AuthProvider, useAuth } from './context/AuthContext'
+import { AuthProvider } from './context/AuthContext'
 import { LanguageProvider } from './context/LanguageContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { CmsStringsProvider } from './context/CmsStringsContext'
-import { PremiumGlobalLoader } from './components/ui/PremiumGlobalLoader'
 import { router } from './routes'
 
 function AppContent() {
-  const { loading } = useAuth()
-
   return (
     <div className="relative min-h-screen">
-      {loading && (
-        <div className="fixed inset-0 z-[9999]">
-          <PremiumGlobalLoader />
-        </div>
-      )}
       <RouterProvider router={router} />
     </div>
   )

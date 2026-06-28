@@ -37,37 +37,37 @@ GRANT EXECUTE ON FUNCTION public.get_user_permissions TO anon;
 GRANT EXECUTE ON FUNCTION public.get_my_role TO anon;
 CREATE OR REPLACE FUNCTION public.get_my_role()
 RETURNS text
-LANGUAGE sql STABLE SECURITY INVOKER SET search_path = public
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public
 AS $$
   SELECT role FROM public.profiles WHERE id = auth.uid();
 $$;
 CREATE OR REPLACE FUNCTION public.get_user_role()
 RETURNS text
-LANGUAGE sql STABLE SECURITY INVOKER SET search_path = public
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public
 AS $$
   SELECT role FROM public.profiles WHERE id = auth.uid();
 $$;
 CREATE OR REPLACE FUNCTION public.get_user_status()
 RETURNS text
-LANGUAGE sql STABLE SECURITY INVOKER SET search_path = public
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public
 AS $$
   SELECT status FROM public.profiles WHERE id = auth.uid();
 $$;
 CREATE OR REPLACE FUNCTION public.is_active_user()
 RETURNS boolean
-LANGUAGE sql STABLE SECURITY INVOKER SET search_path = public
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public
 AS $$
   SELECT EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND status = 'active');
 $$;
 CREATE OR REPLACE FUNCTION public.current_user_has_role(role_name text)
 RETURNS boolean
-LANGUAGE sql STABLE SECURITY INVOKER SET search_path = public
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public
 AS $$
   SELECT EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = role_name AND status = 'active');
 $$;
 CREATE OR REPLACE FUNCTION public.is_admin_or_super_admin()
 RETURNS boolean
-LANGUAGE plpgsql SECURITY INVOKER SET search_path = public
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
 AS $$
 BEGIN
   RETURN EXISTS (

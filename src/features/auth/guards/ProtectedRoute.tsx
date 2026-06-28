@@ -1,7 +1,6 @@
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../providers/AuthContext'
-import { supabase } from '../../../lib/supabase'
 import type { Role, PermissionCode } from '../types/permissions'
 import { hasPermission, hasAnyPermission, isAdminOrAbove } from '../services/permissions'
 import { getRedirectPath } from '../utils/redirectByRole'
@@ -45,38 +44,14 @@ export function ProtectedRoute({
   const location = useLocation()
   const signedOut = useRef(false)
 
-  const [fallbackRole, setFallbackRole] = useState<string | null>(null)
-  const [fallbackStatus, setFallbackStatus] = useState<string | null>(null)
-  const [fallbackPending, setFallbackPending] = useState(false)
-
   useEffect(() => {
-    if (!user || profile) return
-    setFallbackPending(true)
-    ;(async () => {
-      try {
-        const { data } = await supabase.from('profiles').select('role, status').eq('id', user.id).maybeSingle()
-        if (data) {
-          setFallbackRole(data.role)
-          setFallbackStatus(data.status)
-        }
-      } catch {
-      } finally {
-        setFallbackPending(false)
-      }
-    })()
-  }, [user, profile])
-
-  const effectiveRole: Role | undefined = (profile?.role || fallbackRole) as Role | undefined
-  const status = profile?.status || fallbackStatus
-
-  useEffect(() => {
-    if ((status === 'suspended' || status === 'banned') && !signedOut.current) {
+    if ((profile?.status === 'suspended' || profile?.status === 'banned') && !signedOut.current) {
       signedOut.current = true
       signOut()
     }
-  }, [status, signOut])
+  }, [profile?.status, signOut])
 
-  if (loading || fallbackPending) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-orange-50">
         <div className="flex flex-col items-center space-y-4">
@@ -91,9 +66,11 @@ export function ProtectedRoute({
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 
-  if (status === 'suspended' || status === 'banned') {
+  if (profile?.status === 'suspended' || profile?.status === 'banned') {
     return <SigningOut />
   }
+
+  const effectiveRole = profile?.role as Role | undefined
 
   const denied =
     (adminOnly && !isAdminOrAbove(effectiveRole)) ||
@@ -102,8 +79,7 @@ export function ProtectedRoute({
     (requiredAnyPermission !== undefined && !hasAnyPermission(effectiveRole, requiredAnyPermission))
 
   if (denied) {
-    const role = profile?.role || fallbackRole
-    const redirect = role ? getRedirectPath(role as Role) : '/login'
+    const redirect = effectiveRole ? getRedirectPath(effectiveRole) : '/login'
     return <Navigate to={redirect} replace />
   }
 

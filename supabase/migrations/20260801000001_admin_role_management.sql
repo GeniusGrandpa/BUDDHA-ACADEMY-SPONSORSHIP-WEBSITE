@@ -165,14 +165,8 @@ REVOKE ALL ON FUNCTION public.get_user_management_stats() FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.get_user_management_stats() FROM anon;
 GRANT EXECUTE ON FUNCTION public.get_user_management_stats() TO authenticated;
 COMMENT ON FUNCTION public.get_user_management_stats IS 'Admin/Super Admin: get aggregate user statistics.';
-DROP POLICY IF EXISTS profiles_select_all_admin ON public.profiles;
-CREATE POLICY profiles_select_all_admin ON public.profiles
-  FOR SELECT
-  TO authenticated
-  USING (
-    public.get_my_role() IN ('super_admin', 'admin')
-    OR id = auth.uid()
-  );
+-- Note: profiles_select_all_admin policy is now created in:
+-- 20260802000001_fix_rls_recursion_profiles.sql (using user_role_cache to avoid recursion)
 DO $$
 BEGIN
   IF NOT EXISTS (

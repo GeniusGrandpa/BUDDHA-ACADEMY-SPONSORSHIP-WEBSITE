@@ -41,47 +41,45 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-async function fetchProfileWithRetry(userId: string, retries = 2, delay = 500): Promise<Profile | null> {
-  for (let attempt = 0; attempt < retries; attempt++) {
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle()
-    if (data) return data
-    if (attempt < retries - 1) {
-      await new Promise(r => setTimeout(r, delay))
+async function fetchOrCreateProfile(user: User, retries = 1): Promise<Profile | null> {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .maybeSingle()
+      if (data) return data
+
+      if (attempt < retries) {
+        await new Promise(r => setTimeout(r, 300))
+        continue
+      }
+
+      const meta = user.user_metadata
+      const { data: newProfile, error: insertError } = await supabase.from('profiles').insert({
+        id: user.id,
+        email: user.email || '',
+        full_name: (meta?.full_name as string) || 'Donor',
+        country: (meta?.country as string) || '',
+        role: 'donor',
+        status: 'active',
+      }).select().maybeSingle()
+
+      if (insertError) {
+        console.error('[Auth] Fallback profile insert failed:', insertError.message)
+        return null
+      }
+      return newProfile
+    } catch (error) {
+      if (attempt >= retries) {
+        console.error('[Auth] fetchOrCreateProfile error:', error)
+        return null
+      }
+      await new Promise(r => setTimeout(r, 300))
     }
   }
   return null
-}
-
-async function fetchOrCreateProfile(user: User): Promise<Profile | null> {
-  try {
-    const existing = await fetchProfileWithRetry(user.id)
-    if (existing) return existing
-
-    const meta = user.user_metadata
-
-    const { data: newProfile, error: insertError } = await supabase.from('profiles').insert({
-      id: user.id,
-      email: user.email || '',
-      full_name: (meta?.full_name as string) || 'Donor',
-      country: (meta?.country as string) || '',
-      role: 'donor',
-      status: 'active',
-    }).select().maybeSingle()
-
-    if (insertError) {
-      console.error('[Auth] Fallback profile insert failed:', insertError.message)
-      return null
-    }
-
-    return newProfile
-  } catch (error) {
-    console.error('[Auth] fetchOrCreateProfile error:', error)
-    return null
-  }
 }
 
 async function safeFetchOrCreateProfile(user: User): Promise<Profile | null> {
@@ -240,13 +238,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await logLoginHistory(data.user.id, 'success')
         resetRateLimit(rateKey)
 
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('status')
-          .eq('id', data.user.id)
-          .maybeSingle()
+        const currentProfile = await safeFetchOrCreateProfile(data.user)
+        const currentPermissions = currentProfile ? await safeFetchPermissions(data.user.id) : []
 
-        if (profileData?.status === 'suspended' || profileData?.status === 'banned') {
+        setUser(data.user)
+        setProfile(currentProfile)
+        setPermissions(currentPermissions)
+        setLoading(false)
+
+        if (currentProfile?.status === 'suspended' || currentProfile?.status === 'banned') {
           await supabase.auth.signOut()
           setUser(null)
           setProfile(null)
