@@ -97,14 +97,84 @@ export const navigationConfig: NavSection[] = [
         permission: 'content.homepage',
       },
       {
+        label: 'Volunteer Page',
+        href: '/admin/website/volunteer',
+        permission: 'content.settings',
+      },
+      {
+        label: 'Privacy Policy',
+        href: '/admin/website/privacy',
+        permission: 'content.pages',
+      },
+      {
+        label: 'Terms of Service',
+        href: '/admin/website/terms',
+        permission: 'content.pages',
+      },
+    ],
+  },
+  {
+    title: 'Content',
+    items: [
+      {
+        label: 'Gallery',
+        href: '/admin/website/gallery',
+        permission: 'gallery.read',
+      },
+      {
+        label: 'Testimonials',
+        href: '/admin/website/testimonials',
+        permission: 'testimonials.read',
+      },
+      {
+        label: 'News & Updates',
+        href: '/admin/website/news',
+        permission: 'news.read',
+      },
+      {
+        label: 'Student Stories',
+        href: '/admin/website/stories',
+        permission: 'content.stories',
+      },
+      {
+        label: 'FAQ',
+        href: '/admin/website/faqs',
+        permission: 'content.faqs',
+      },
+      {
+        label: 'Videos',
+        href: '/admin/website/videos',
+        permission: 'content.videos',
+      },
+      {
+        label: 'Announcements',
+        href: '/admin/website/announcements',
+        permission: 'content.announcements',
+      },
+      {
+        label: 'Partners',
+        href: '/admin/website/partners',
+        permission: 'content.partners',
+      },
+      {
+        label: 'Transparency',
+        href: '/admin/website/transparency',
+        permission: 'content.settings',
+      },
+    ],
+  },
+  {
+    title: 'Website Settings',
+    items: [
+      {
         label: 'Navigation',
         href: '/admin/website/navigation',
         permission: 'content.navigation',
       },
       {
-        label: 'Media Library',
-        href: '/admin/website/media',
-        permission: 'content.media',
+        label: 'Footer',
+        href: '/admin/website/footer',
+        permission: 'content.settings',
       },
       {
         label: 'Branding',
@@ -117,8 +187,28 @@ export const navigationConfig: NavSection[] = [
         permission: 'content.settings',
       },
       {
-        label: 'Footer',
-        href: '/admin/website/footer',
+        label: 'Media Library',
+        href: '/admin/website/media',
+        permission: 'content.media',
+      },
+      {
+        label: 'Site Images',
+        href: '/admin/website/images',
+        permission: 'content.media',
+      },
+      {
+        label: 'Site Settings',
+        href: '/admin/website/settings',
+        permission: 'content.settings',
+      },
+      {
+        label: 'Section Visibility',
+        href: '/admin/website/sections',
+        permission: 'content.homepage',
+      },
+      {
+        label: 'Version History',
+        href: '/admin/website/versions',
         permission: 'content.settings',
       },
     ],

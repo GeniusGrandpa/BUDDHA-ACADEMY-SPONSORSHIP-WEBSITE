@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Save, Upload } from 'lucide-react'
+import { Save, Upload, Send } from 'lucide-react'
 import { useTheme } from '../../../context/ThemeContext'
-import { upsertDesignSettings } from '../../../services/design'
+import { upsertDesignSettings, publishDesignSettings } from '../../../services/design'
 import { uploadMedia } from '../../../services/content'
 import toast from 'react-hot-toast'
 import type { DesignBranding } from '../../../types/design'
@@ -32,6 +32,7 @@ export function AdminBrandingPage() {
   const { branding, refreshTheme } = useTheme()
   const [form, setForm] = useState<DesignBranding>(branding)
   const [saving, setSaving] = useState(false)
+  const [publishing, setPublishing] = useState(false)
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [uploadingFavicon, setUploadingFavicon] = useState(false)
   const [uploadingHeaderLogo, setUploadingHeaderLogo] = useState(false)
@@ -77,9 +78,21 @@ export function AdminBrandingPage() {
       await upsertDesignSettings({ branding: form })
       await refreshTheme()
       updateBrandingCache(form)
-      toast.success('Branding saved! Use Publish to make live.')
+      toast.success('Draft saved — click Publish to make live.')
     } catch { toast.error('Failed to save') }
     finally { setSaving(false) }
+  }
+
+  const handlePublish = async () => {
+    setPublishing(true)
+    try {
+      await upsertDesignSettings({ branding: form })
+      await publishDesignSettings()
+      await refreshTheme()
+      updateBrandingCache(form)
+      toast.success('Branding published live!')
+    } catch { toast.error('Failed to publish') }
+    finally { setPublishing(false) }
   }
 
   function imageUploader(label: string, field: keyof DesignBranding, uploading: boolean, height = 'h-16') {
@@ -125,9 +138,14 @@ export function AdminBrandingPage() {
           <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">Branding</h1>
           <p className="text-[var(--color-text-secondary)] mt-1">Manage your organization's visual identity</p>
         </div>
-        <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-5 py-2 rounded-xl bg-[var(--color-primary)] text-white text-sm font-medium hover:opacity-90 disabled:opacity-50">
-          <Save className="w-4 h-4" /> {saving ? 'Saving...' : 'Save Draft'}
-        </button>
+        <div className="flex items-center gap-3">
+          <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-5 py-2 rounded-xl border border-[var(--color-border)] text-sm font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] disabled:opacity-50">
+            <Save className="w-4 h-4" /> {saving ? 'Saving...' : 'Save Draft'}
+          </button>
+          <button onClick={handlePublish} disabled={publishing} className="flex items-center gap-2 px-5 py-2 rounded-xl bg-[var(--color-primary)] text-white text-sm font-medium hover:opacity-90 disabled:opacity-50">
+            <Send className="w-4 h-4" /> {publishing ? 'Publishing...' : 'Publish'}
+          </button>
+        </div>
       </div>
 
       <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 space-y-6">

@@ -111,6 +111,7 @@ const groups: SectionGroup[] = [
       { name: 'Site Images', href: '/admin/website/images', desc: 'Site-wide image assets and fallbacks' },
       { name: 'Site Settings', href: '/admin/website/settings', desc: 'General site configuration' },
       { name: 'Transparency', href: '/admin/website/transparency', desc: 'Allocation, verification, impact report' },
+      { name: 'Version History', href: '/admin/website/versions', desc: 'Track and restore content changes' },
     ],
   },
   {

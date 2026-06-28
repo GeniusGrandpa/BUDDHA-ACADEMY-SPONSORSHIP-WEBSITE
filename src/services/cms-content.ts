@@ -104,7 +104,7 @@ export async function getSectionVisibilityByKey(key: string): Promise<boolean> {
   const { data } = await db('section_visibility')
     .select('is_visible')
     .eq('section_key', key as never)
-    .single()
+    .maybeSingle()
   return (data as { is_visible: boolean } | null)?.is_visible ?? true
 }
 
@@ -119,7 +119,7 @@ export async function getSiteImage(imageKey: string): Promise<SiteImage | null> 
   const { data } = await db('site_images')
     .select('*')
     .eq('image_key', imageKey)
-    .single()
+    .maybeSingle()
   return data as SiteImage | null
 }
 
@@ -146,7 +146,7 @@ export async function getFooterContent(): Promise<FooterContent | null> {
     .eq('is_published', true)
     .order('created_at', { ascending: false })
     .limit(1)
-    .single()
+    .maybeSingle()
   return data as FooterContent | null
 }
 
@@ -160,7 +160,7 @@ export async function getSeoContent(pageSlug: string): Promise<SeoContent | null
     .select('*')
     .eq('page_slug', pageSlug)
     .eq('is_published', true)
-    .single()
+    .maybeSingle()
   return data as SeoContent | null
 }
 
@@ -174,7 +174,7 @@ export async function getPageHeader(pageSlug: string): Promise<PageHeader | null
     .select('*')
     .eq('page_slug', pageSlug)
     .eq('is_visible', true)
-    .single()
+    .maybeSingle()
   return data as PageHeader | null
 }
 
@@ -188,7 +188,7 @@ export async function getSectionContent(sectionKey: string): Promise<SectionCont
     .select('*')
     .eq('section_key', sectionKey)
     .eq('is_visible', true)
-    .single()
+    .maybeSingle()
   return data as SectionContent | null
 }
 
@@ -213,7 +213,7 @@ export async function getCmsString(key: string): Promise<string | null> {
     .select('value')
     .eq('key', key)
     .eq('is_published', true)
-    .single()
+    .maybeSingle()
   if (!data) return null
   return (data as { value: string }).value
 }
