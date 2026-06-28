@@ -1,7 +1,3 @@
--- Audit fix migration: missing indexes and updated_at triggers
--- Generated from production readiness audit
-
--- 1. Add missing updated_at triggers on tables that have the column but no trigger
 DO $$
 DECLARE
   tbl TEXT;
@@ -26,7 +22,6 @@ BEGIN
 END;
 $$;
 
--- 2. Add missing indexes on foreign key columns for frequently-joined tables
 CREATE INDEX IF NOT EXISTS idx_payment_sessions_verified_by ON payment_sessions(verified_by);
 CREATE INDEX IF NOT EXISTS idx_payment_sessions_donation_id ON payment_sessions(donation_id);
 CREATE INDEX IF NOT EXISTS idx_payment_sessions_student_id ON payment_sessions(student_id);
@@ -53,7 +48,6 @@ CREATE INDEX IF NOT EXISTS idx_notifications_read ON notifications(read) WHERE r
 CREATE INDEX IF NOT EXISTS idx_login_history_user_id ON login_history(user_id);
 CREATE INDEX IF NOT EXISTS idx_security_events_user_id ON security_events(user_id);
 
--- 3. Drop legacy tables if they still exist
 DROP TABLE IF EXISTS public.user_teams;
 DROP TABLE IF EXISTS public.user_departments;
 DROP TABLE IF EXISTS public.teams;
