@@ -128,7 +128,7 @@ export function AboutPage() {
       )}
 
       {timeline.length > 0 && (
-        <section className="py-24 bg-white overflow-x-hidden">
+        <section className="py-24 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{t('about_journey_heading')}</h2>
@@ -140,7 +140,7 @@ export function AboutPage() {
                 {timeline.map((item, idx) => {
                   const isLeft = idx % 2 === 0
                   return (
-                    <div key={`${item.year}-${item.title}-${idx}`} className="relative md:flex md:items-start">
+                    <div key={`${item.year}-${item.title}-${idx}`} className={`relative md:flex md:items-start ${!isLeft ? 'md:flex-row-reverse' : ''}`}>
                       <div className={`flex-1 ${isLeft ? 'md:pr-12 md:text-right' : 'md:pl-12'}`}>
                         <div className="bg-amber-50 rounded-xl p-6 hover:shadow-lg transition-shadow">
                           <div className="text-amber-600 font-bold text-lg mb-1">{item.year}</div>
