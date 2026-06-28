@@ -41,7 +41,7 @@ export function BrandingEditor() {
             social_youtube: settings.social_youtube || '',
           })
         }
-      } catch { /* ignore */ } finally {
+      } catch { } finally {
         setLoading(false)
       }
     }

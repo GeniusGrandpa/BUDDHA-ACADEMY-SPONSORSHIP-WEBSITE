@@ -20,7 +20,7 @@ export function AdminThemePresetsPage() {
     try {
       const data = await getThemePresets()
       setPresets(data)
-    } catch { /* ignore */ }
+    } catch { }
     finally { setLoading(false) }
   }
 

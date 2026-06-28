@@ -1439,7 +1439,6 @@ function PropertiesPanel(props: {
         </PropertyGroup>
       )}
 
-      {/* ABOUT PAGE */}
       {s === 'about_header' && props.aboutHeader && (
         <PropertyGroup title="Page Header">
           <PropertyField label="Title" value={props.aboutHeader.title} onChange={v => { props.setAboutHeader({ ...props.aboutHeader!, title: v }); mc() }} />
@@ -1537,7 +1536,6 @@ function PropertiesPanel(props: {
         )
       })()}
 
-      {/* SPONSORSHIP PAGE */}
       {(s === 'sponsor_hero' || s === 'sponsor_steps' || s === 'sponsor_cta') && props.sponsorship && (
         <>
           {s === 'sponsor_hero' && (
