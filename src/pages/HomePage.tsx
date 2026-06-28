@@ -97,22 +97,37 @@ function StatsSection({ hero, visible }: { hero: HeroContent; visible: boolean }
   )
 }
 
+function WelcomeSection({ welcome, visible }: { welcome: SectionContent; visible: boolean }) {
+  if (!visible) return null
+  const content = welcome.content as { title?: string; content?: string }
+  if (!content?.title && !content?.content) return null
+  return (
+    <section className="py-24">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        {content.title && <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">{content.title}</h2>}
+        {content.content && <p className="text-lg text-gray-600 leading-relaxed">{content.content}</p>}
+      </div>
+    </section>
+  )
+}
+
 function AboutSection({ about, visible, t }: { about: SectionContent; visible: boolean; t: (k: string) => string }) {
   if (!visible) return null
   const milestones: { year: string; event: string }[] =
     (about.content as { milestones?: { year: string; event: string }[] })?.milestones || []
-  if (!about.title && !about.description && milestones.length === 0) return null
+  const content = about.content as { title?: string; description?: string }
+  if (!about.title && !about.description && !content.title && !content.description && milestones.length === 0) return null
   return (
     <section className="py-24 bg-gray-50">
       <div className="px-4 sm:px-8 lg:px-12">
         <div className="grid lg:grid-cols-2 gap-16 items-center max-w-7xl mx-auto">
           <div>
-            {about.title && (
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">{about.title}</h2>
-            )}
-            {about.description && (
-              <p className="text-gray-600 mb-6 leading-relaxed">{about.description}</p>
-            )}
+            {about.title || content.title ? (
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">{about.title || content.title}</h2>
+            ) : null}
+            {about.description || content.description ? (
+              <p className="text-gray-600 mb-6 leading-relaxed">{about.description || content.description}</p>
+            ) : null}
             {about.content && (about.content as Record<string, string>).mission_description && (
               <p className="text-gray-600 mb-8 leading-relaxed">{(about.content as Record<string, string>).mission_description}</p>
             )}
@@ -146,7 +161,7 @@ function AboutSection({ about, visible, t }: { about: SectionContent; visible: b
   )
 }
 
-function StudentsSection({ students, brokenPhotos, fallbackImage, setBrokenPhotos, visible, loading, t }: {
+function StudentsSection({ students, brokenPhotos, fallbackImage, setBrokenPhotos, visible, loading, t, featuredContent }: {
   students: Student[]
   brokenPhotos: Set<string>
   fallbackImage: string
@@ -154,14 +169,16 @@ function StudentsSection({ students, brokenPhotos, fallbackImage, setBrokenPhoto
   visible: boolean
   loading: boolean
   t: (k: string, r?: Record<string, string | number>) => string
+  featuredContent: SectionContent | null
 }) {
   if (!visible) return null
+  const content = featuredContent?.content as { title?: string }
   return (
     <section className="py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            {t('home_students_heading')}
+            {content?.title || t('home_students_heading')}
           </h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
             {t('home_students_description')}
@@ -265,12 +282,49 @@ function SponsorshipSection({ sponsorship, visible }: { sponsorship: SectionCont
   )
 }
 
+function TestimonialsSection({ testimonials, visible }: { testimonials: SectionContent; visible: boolean }) {
+  if (!visible) return null
+  const content = testimonials.content as { title?: string }
+  return (
+    <section className="py-24">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        {content?.title && <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-12">{content.title}</h2>}
+        <div className="bg-gray-50 rounded-2xl p-8 border border-gray-100">
+          <p className="text-lg text-gray-600 italic">Testimonials coming soon!</p>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function DonationCtaSection({ cta, visible }: { cta: SectionContent; visible: boolean }) {
+  if (!visible) return null
+  const content = cta.content as { title?: string; description?: string; button_text?: string; button_link?: string }
+  return (
+    <section className="py-24 bg-gradient-to-br from-amber-600 to-orange-600">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        {content?.title && <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">{content.title}</h2>}
+        {content?.description && <p className="text-lg text-white/90 mb-8 leading-relaxed">{content.description}</p>}
+        {content?.button_text && (
+          <Link to={content.button_link || '/donate'}>
+            <Button size="lg" className="bg-white text-amber-600 hover:bg-gray-100">{content.button_text}</Button>
+          </Link>
+        )}
+      </div>
+    </section>
+  )
+}
+
 export function HomePage() {
   const { t } = useCmsStrings()
   const [students, setStudents] = useState<Student[]>([])
   const [hero, setHero] = useState<HeroContent | null>(null)
+  const [welcomeSection, setWelcomeSection] = useState<SectionContent | null>(null)
   const [aboutSection, setAboutSection] = useState<SectionContent | null>(null)
+  const [featuredStudentsSection, setFeaturedStudentsSection] = useState<SectionContent | null>(null)
   const [sponsorshipSection, setSponsorshipSection] = useState<SectionContent | null>(null)
+  const [testimonialsSection, setTestimonialsSection] = useState<SectionContent | null>(null)
+  const [donationCtaSection, setDonationCtaSection] = useState<SectionContent | null>(null)
   const [sectionsVisible, setSectionsVisible] = useState<Record<string, boolean>>({})
   const [brokenStudentPhotos, setBrokenStudentPhotos] = useState<Set<string>>(new Set())
   const [studentFallbackImage, setStudentFallbackImage] = useState('')
@@ -278,8 +332,12 @@ export function HomePage() {
   useEffect(() => {
     Promise.all([
       getHeroContent().then(d => { if (d) setHero(d) }).catch(() => {}),
+      getSectionContent('welcome').then(d => { if (d) setWelcomeSection(d) }).catch(() => {}),
       getSectionContent('about_preview').then(d => { if (d) setAboutSection(d) }).catch(() => {}),
+      getSectionContent('featured_students').then(d => { if (d) setFeaturedStudentsSection(d) }).catch(() => {}),
       getSectionContent('sponsorship_steps').then(d => { if (d) setSponsorshipSection(d) }).catch(() => {}),
+      getSectionContent('testimonials').then(d => { if (d) setTestimonialsSection(d) }).catch(() => {}),
+      getSectionContent('donation_cta').then(d => { if (d) setDonationCtaSection(d) }).catch(() => {}),
       getSectionVisibility().then(sections => {
         const map: Record<string, boolean> = {}
         sections.forEach((s: { section_key: string; is_visible: boolean }) => { map[s.section_key] = s.is_visible })
@@ -300,17 +358,21 @@ export function HomePage() {
       {hero?.statistics && hero.statistics.length > 0 && (
         <StatsSection hero={hero} visible={sectionsVisible.stats !== false} />
       )}
+      {welcomeSection && <WelcomeSection welcome={welcomeSection} visible={sectionsVisible.welcome !== false} />}
       {aboutSection && <AboutSection about={aboutSection} visible={sectionsVisible.about_preview !== false} t={t} />}
       <StudentsSection
         students={students}
         brokenPhotos={brokenStudentPhotos}
         fallbackImage={studentFallbackImage}
         setBrokenPhotos={setBrokenStudentPhotos}
-        visible={sectionsVisible.students_preview !== false}
+        visible={sectionsVisible.featured_students !== false}
         loading={studentsLoading}
         t={t}
+        featuredContent={featuredStudentsSection}
       />
       {sponsorshipSection && <SponsorshipSection sponsorship={sponsorshipSection} visible={sectionsVisible.sponsorship_steps !== false} />}
+      {testimonialsSection && <TestimonialsSection testimonials={testimonialsSection} visible={sectionsVisible.testimonials !== false} />}
+      {donationCtaSection && <DonationCtaSection cta={donationCtaSection} visible={sectionsVisible.donation_cta !== false} />}
       <section><CtaBanner /></section>
     </div>
   )
