@@ -171,9 +171,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const { data, error } = await supabase.auth.getSession()
         if (error) {
           console.error('[Auth] getSession error:', error.message)
+          await supabase.auth.signOut()
+          return
         }
-        if (!cancelled && data.session?.user) {
-          await applySession(data.session)
+        if (data.session) {
+          const expiresAt = data.session.expires_at
+          if (expiresAt && Date.now() / 1000 > expiresAt) {
+            await supabase.auth.signOut()
+            return
+          }
+          if (!cancelled) {
+            await applySession(data.session)
+          }
         }
       } catch (error) {
         console.error('[Auth] initAuth failed:', error)
