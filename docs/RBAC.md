@@ -44,7 +44,7 @@ Wraps callbacks and silently denies execution without the required permission.
 
 ### Permission Groups
 
-- **CMS & Content**: `content.pages`, `content.blocks`, `content.seo`, `content.navigation`, `content.settings`, `content.announcements`, `content.partners`, `content.media`, `content.media.folders`, `content.scheduling`, `content.news`, `content.gallery`, `content.testimonials`, `content.stories`, `content.faqs`, `content.videos`, `content.transparency`
+- **CMS & Content**: `content.pages`, `content.seo`, `content.navigation`, `content.settings`, `content.announcements`, `content.partners`, `content.media`, `content.news`, `content.gallery`, `content.testimonials`, `content.stories`, `content.faqs`, `content.videos`, `content.transparency` (vestigial: `content.blocks`, `content.media.folders`, `content.scheduling` — exist in codebase but have no active UI)
 - **Design**: `design.colors`, `design.typography`, `design.layout`, `design.components`, `design.presets`, `design.publish`
 - **Students**: `students.read`, `students.create`, `students.update`, `students.delete`
 - **Donations**: `donations.read`, `donations.create`, `donations.update`, `donations.delete`

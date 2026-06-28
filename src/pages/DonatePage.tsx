@@ -10,24 +10,18 @@ import { DonationForm } from '../components/donate/DonationForm'
 import { ImpactPanel } from '../components/donate/ImpactPanel'
 import { AuthPrompt } from '../components/donate/AuthPrompt'
 import { StudentStory } from '../components/donate/StudentStory'
+import { useCmsStrings } from '../context/CmsStringsContext'
 import type { Student } from '../types/database'
 import type { StudentSummary } from '../components/donate/types'
 import type { DonationContent, PageHeader } from '../types/cms-content'
 
-const fallbackContent = {
-  hero_title: 'Make a Donation',
-  hero_subtitle: 'Your generous support helps us provide free education, meals, and care to underprivileged children in Nepal.',
-  currency_label: 'NPR',
-  impact_cards: [] as DonationContent['impact_cards'],
-  process_steps: [] as DonationContent['process_steps'],
-} as DonationContent
-
 export function DonatePage() {
+  const { t } = useCmsStrings()
   const [searchParams] = useSearchParams()
   const { user } = useAuth()
   const [students, setStudents] = useState<Student[]>([])
   const [showPaymentModal, setShowPaymentModal] = useState(false)
-  const [content, setContent] = useState<DonationContent>(fallbackContent)
+  const [content, setContent] = useState<DonationContent | null>(null)
   const [pageHeader, setPageHeader] = useState<PageHeader | null>(null)
 
   const [amount, setAmount] = useState(0)
@@ -112,26 +106,28 @@ export function DonatePage() {
                 {pageHeader?.title || 'Donation Program'}
               </span>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-light text-white leading-tight tracking-tight mb-6">
-                {content.hero_title || fallbackContent.hero_title}
+                {content?.hero_title || 'Make a Donation'}
               </h1>
               <p className="text-lg sm:text-xl text-white/90 font-light leading-relaxed max-w-2xl mb-10">
-                {content.hero_subtitle || fallbackContent.hero_subtitle}
+                {content?.hero_subtitle}
               </p>
             </motion.div>
           </div>
         </div>
       </section>
 
-      <ImpactCards
-        amounts={content.impact_cards}
-        selectedAmount={amount}
-        onSelect={(val) => {
-          setAmount(val)
-          setCustomAmount('')
-        }}
-      />
+      {content?.impact_cards && content.impact_cards.length > 0 && (
+        <ImpactCards
+          amounts={content.impact_cards}
+          selectedAmount={amount}
+          onSelect={(val) => {
+            setAmount(val)
+            setCustomAmount('')
+          }}
+        />
+      )}
 
-      {content.process_steps.length > 0 && (
+      {content?.process_steps && content.process_steps.length > 0 && (
         <section className="py-16 sm:py-20 bg-warm-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
@@ -141,7 +137,7 @@ export function DonatePage() {
               className="text-center mb-12"
             >
               <h2 className="text-3xl sm:text-4xl font-light text-[#0f172a]">
-                How It Works
+                {t('donate_how_it_works')}
               </h2>
             </motion.div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -170,7 +166,7 @@ export function DonatePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-3 gap-8 lg:gap-10">
             <div className="lg:col-span-2 space-y-6">
-              <p className="text-xs text-gray-400">All amounts in {content.currency_label || 'NPR'}</p>
+              <p className="text-xs text-gray-400">{t('donate_currency_label')}</p>
               {!user && <AuthPrompt />}
 
               <DonationForm

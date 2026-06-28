@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { useCmsStrings } from '../../context/CmsStringsContext'
 
 interface StudentStoryProps {
   student: {
@@ -11,6 +12,7 @@ interface StudentStoryProps {
 }
 
 export function StudentStory({ student }: StudentStoryProps) {
+  const { t } = useCmsStrings()
   return (
     <section className="py-16 sm:py-20 bg-[#fffaf5]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -31,13 +33,13 @@ export function StudentStory({ student }: StudentStoryProps) {
                 </div>
                 <div>
                   <p className="text-xs text-gray-600 uppercase tracking-wider mb-1">
-                    Meet a Student You Could Support
+                    {t('student_story_meet')}
                   </p>
                   <h3 className="text-xl font-medium text-[#0f172a]">
                     {student.name}
                   </h3>
                   <p className="text-sm text-gray-600">
-                    Grade {student.grade} | Age {student.age}
+                    {t('student_story_grade_age', { grade: student.grade, age: student.age })}
                   </p>
                 </div>
               </div>
@@ -52,7 +54,7 @@ export function StudentStory({ student }: StudentStoryProps) {
 
               {student.dream_career && (
                 <div className="mt-6 flex items-center gap-3 px-4 py-3 rounded-lg bg-amber-50 border border-amber-100">
-                  <span className="text-sm text-gray-600">Dreams of becoming a</span>
+                  <span className="text-sm text-gray-600">{t('student_story_dreams')}</span>
                   <span className="text-sm font-medium text-[#0f172a]">
                     {student.dream_career}
                   </span>
@@ -61,12 +63,7 @@ export function StudentStory({ student }: StudentStoryProps) {
 
               <div className="mt-6 pt-6 border-t border-gray-100">
                 <p className="text-sm text-gray-600 leading-relaxed">
-                  Your sponsorship provides {student.name} with daily nutritious meals,
-                  quality learning materials, and the opportunity to attend school with
-                  dignity. For{' '}
-                  <span className="font-medium text-[#0f172a]">NPR 5,000 per month</span>,
-                  you can cover the full cost of {student.name}&apos;s education and give
-                  them a real chance at a better future.
+                  {t('student_story_sponsorship_text', { name: student.name })}
                 </p>
               </div>
             </div>

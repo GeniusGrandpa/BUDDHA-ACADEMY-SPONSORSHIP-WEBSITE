@@ -29,7 +29,7 @@ The entry point is `/admin/website` which renders `WebsiteDashboard` — a categ
 | CampaignsEditor | `/admin/website/campaigns` | Donation goals CRUD (title, target, raised, dates, active) |
 | PrivacyPageEditor | `/admin/website/privacy` | Privacy policy header, body content, last updated date |
 | TermsPageEditor | `/admin/website/terms` | Terms of service header, body content, last updated date |
-| HomePageEditor | `/admin/website/homepage` | Section-based homepage content editor |
+| HomePageEditor | `/admin/website/homepage` (redirects to `/admin/website/builder`) | Section-based homepage content editor |
 | BrandingEditor | `/admin/website/branding` | Unified branding/colors/typography/layout/components |
 | SEOEditor | `/admin/website/seo` | Per-page SEO meta tags |
 
@@ -37,7 +37,7 @@ The entry point is `/admin/website` which renders `WebsiteDashboard` — a categ
 
 All old `/admin/content/*` routes now redirect to `/admin/website/*` via `<Navigate>` in `routes.tsx`. Bookmarks are preserved.
 
-## WebsiteBuilder (`/admin/website/homepage`)
+## WebsiteBuilder (`/admin/website/builder`)
 
 A 3-panel live preview visual builder that replaces the old block-based homepage editor:
 

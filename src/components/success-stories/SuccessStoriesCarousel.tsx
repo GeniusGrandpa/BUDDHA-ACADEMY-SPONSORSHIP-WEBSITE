@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useCmsStrings } from '../../context/CmsStringsContext'
 import { supabase } from '../../lib/supabase'
 import type { StudentStory } from '../../types/database'
 
 export function SuccessStoriesCarousel() {
+  const { t } = useCmsStrings()
   const [stories, setStories] = useState<StudentStory[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -59,9 +61,9 @@ export function SuccessStoriesCarousel() {
   if (stories.length === 0) {
     return (
       <div className="text-center py-12">
-        <h3 className="text-lg font-semibold text-gray-900">Success Stories Coming Soon</h3>
+        <h3 className="text-lg font-semibold text-gray-900">{t('stories_empty_title')}</h3>
         <p className="text-sm text-gray-500 max-w-md mx-auto mt-1">
-          We are collecting the inspiring journeys of our students. Check back soon to read their stories of growth and achievement.
+          {t('stories_empty_description')}
         </p>
       </div>
     )
@@ -88,7 +90,7 @@ export function SuccessStoriesCarousel() {
           )}
           <div className="p-6 md:p-8 md:w-1/2 flex flex-col justify-center">
             <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full self-start mb-3">
-              Success Story
+              {t('stories_badge_success')}
             </span>
             <h3 className="text-xl font-bold text-gray-900 mb-1">{story.title}</h3>
             <p className="text-sm text-emerald-600 font-medium mb-3">{story.student_name}</p>

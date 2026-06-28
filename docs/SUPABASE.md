@@ -10,7 +10,6 @@ One file per domain under `src/services/`. Each imports `getSupabaseClient()` lo
 
 | Service File | Domain |
 |-------------|--------|
-| `auth.ts` | Authentication |
 | `students.ts` | Student management |
 | `donations.ts` | Donation records |
 | `payments.ts` | Payment sessions |
@@ -25,7 +24,8 @@ One file per domain under `src/services/`. Each imports `getSupabaseClient()` lo
 | `news.ts` | News articles |
 | `gallery.ts` | Gallery items |
 | `activities.ts` | Activity log |
-| `contacts.ts` | Contact form submissions |
+| `contact.ts` | Contact form submissions |
+| `sponsorships.ts` | Sponsorship management |
 | `volunteerEvents.ts` | Volunteer event management |
 | `volunteerApplications.ts` | Volunteer applications |
 | `notifications.ts` | User notifications |
@@ -69,6 +69,8 @@ All tables have RLS policies enforced:
 | `20260703000001-003` | Database linter fixes: `search_path` on functions, `SECURITY INVOKER`, `REVOKE ALL ... FROM PUBLIC` |
 | `20260710000001` | Fixes admin access: `auth.role() = 'authenticated'` → `profile.role IN ('super_admin','admin')`; `GRANT ALL TO anon` → `GRANT SELECT TO anon` |
 | `20260801000001` | Admin role management: `admin_update_user_role()` with hierarchy checks, last-super-admin protection, full audit logging |
+| `20260802000001` | RLS recursion fix: `user_role_cache` table + `trg_sync_user_role_cache` trigger; repoints critical policies to cache |
+| `20260803000001` | Audit fix: missing `updated_at` triggers on 21 tables; FK indexes on 8 tables; drops 7 legacy tables |
 
 ## Audit Logging
 
@@ -96,3 +98,7 @@ All schema changes in `supabase/migrations/`, applied in timestamp order. Each m
 | `handle_new_user` | Trigger function: creates profile on signup |
 | `get_user_role_level` | Returns numeric role level for RLS policies |
 | `get_my_role` | Returns current user's role for RLS policies |
+| `sync_user_role_cache` | Manual trigger of `user_role_cache` refresh |
+| `admin_get_user_role` | Fetches a user's role (used by admin interface) |
+| `get_donor_allocations` | Returns donation allocation breakdown for a donor |
+| `get_donor_dashboard_stats` | Returns aggregated dashboard stats for a donor |

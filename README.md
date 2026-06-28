@@ -361,7 +361,7 @@ All CMS content and design settings support controlled publishing patterns so dr
 
 ### Legacy System
 
-The old block-based page builder (`BlockRenderer`, `AdminBlockEditor`, `page_blocks` table) has been fully removed. All `/admin/content/*` routes now redirect to `/admin/website/*` via `<Navigate>` — preserving bookmarks.
+The old block-based page builder (`BlockRenderer`, `AdminBlockEditor`) has been removed from the UI layer — all routes redirect to `/admin/website/*`. The `page_blocks` table remains in the schema for backward compatibility. The `content.blocks` permission code is vestigial.
 
 
 ## Design System

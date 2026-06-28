@@ -57,7 +57,7 @@ All Supabase tables have RLS policies enabled:
 
 ## HTTP Security Headers
 
-Configured in `vite.config.ts`:
+Configured in `vite.config.ts` (dev/preview server only — production platform must replicate these):
 
 | Header | Value | Purpose |
 |--------|-------|---------|
@@ -83,7 +83,7 @@ Audit logs are readable only by `super_admin`.
 
 ## Database Security Hardening
 
-From migrations `20260607000003`–`20260801000001`:
+From migrations `20260607000003`–`20260803000001`:
 
 - `search_path` is fixed on all functions to prevent search-path hijacking
 - Functions use `SECURITY INVOKER` (not `DEFINER`) by default to prevent privilege escalation

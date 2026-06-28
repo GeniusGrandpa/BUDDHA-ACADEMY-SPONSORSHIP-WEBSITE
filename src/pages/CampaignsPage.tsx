@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
+import { useCmsStrings } from '../context/CmsStringsContext'
 import { DonationCampaignCard, CampaignGridSkeleton } from '../components/campaigns/DonationCampaignCard'
 import type { DonationGoal } from '../types/database'
 
 export function CampaignsPage() {
+  const { t } = useCmsStrings()
   const [goals, setGoals] = useState<DonationGoal[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -38,10 +40,10 @@ export function CampaignsPage() {
             className="text-center max-w-3xl mx-auto"
           >
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
-              Our Campaigns
+              {t('campaigns_title')}
             </h1>
             <p className="text-lg md:text-xl text-gray-300 leading-relaxed">
-              Every contribution brings us closer to our goals. See how your support is making a measurable impact.
+              {t('campaigns_description')}
             </p>
           </motion.div>
         </div>
@@ -55,18 +57,18 @@ export function CampaignsPage() {
               animate={{ opacity: 1, y: 0 }}
               className="bg-warm-50 rounded-xl p-6 border border-amber-200 mb-8"
             >
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Overall Progress</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('campaigns_overall_progress')}</h2>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
                 <div>
-                  <p className="text-sm text-gray-500">Total Raised</p>
+                  <p className="text-sm text-gray-500">{t('campaigns_total_raised')}</p>
                   <p className="text-2xl font-bold text-gray-900">NPR {totalRaised.toLocaleString()}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Total Goal</p>
+                  <p className="text-sm text-gray-500">{t('campaigns_total_goal')}</p>
                   <p className="text-2xl font-bold text-gray-900">NPR {totalTarget.toLocaleString()}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Active Campaigns</p>
+                  <p className="text-sm text-gray-500">{t('campaigns_active')}</p>
                   <p className="text-2xl font-bold text-gray-900">{goals.length}</p>
                 </div>
               </div>
@@ -78,7 +80,7 @@ export function CampaignsPage() {
                   className="absolute inset-y-0 left-0 bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full"
                 />
               </div>
-              <p className="text-sm text-gray-500 mt-2">{overallPercentage}% of overall goal achieved</p>
+              <p className="text-sm text-gray-500 mt-2">{t('campaigns_percentage_achieved', { percentage: overallPercentage })}</p>
             </motion.div>
           )}
 
@@ -86,9 +88,9 @@ export function CampaignsPage() {
             <CampaignGridSkeleton />
           ) : goals.length === 0 ? (
             <div className="text-center py-16">
-              <h3 className="text-lg font-semibold text-gray-900">No Campaigns Yet</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{t('campaigns_empty_title')}</h3>
               <p className="text-sm text-gray-500 max-w-md mx-auto mt-1">
-                Fundraising campaigns will appear here. Check back soon to see how you can contribute to specific causes.
+                {t('campaigns_empty_description')}
               </p>
             </div>
           ) : (

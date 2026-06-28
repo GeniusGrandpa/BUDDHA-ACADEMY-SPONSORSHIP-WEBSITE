@@ -1,5 +1,6 @@
-import { useState, useCallback, useMemo, useEffect, type FormEvent } from 'react'
+import { useState, useCallback, useMemo, useEffect, useRef, type FormEvent } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import toast from 'react-hot-toast'
 
 import { supabase } from '../../../lib/supabase'
 import { useAuth } from '../../../context/AuthContext'
@@ -35,6 +36,7 @@ import { Textarea } from '../../../components/ui/Textarea'
 import { ProfileSkeleton } from '../../../components/ui/LoadingSkeleton'
 import { useLanguage, languages } from '../../../context/LanguageContext'
 import { formatNPR } from '../../../utils/currency'
+import { COUNTRY_CODES } from '../../../data/countryCodes'
 
 function getGreeting() {
   const hour = new Date().getHours()
@@ -55,6 +57,7 @@ export function DashboardPage() {
     donorStats,
     loading,
     donorImpact,
+    contributedStudents,
   } = useDashboardData(userId)
 
   const { transactions, loading: txLoading } = useDonorTransactions(userId)
@@ -66,12 +69,27 @@ export function DashboardPage() {
 
   const [section, setSection] = useState<Section>(initialSection)
 
+  const prevDonationsRef = useRef(donations)
+  useEffect(() => {
+    const prev = prevDonationsRef.current
+    for (const donation of donations) {
+      const prevDonation = prev.find(d => d.id === donation.id)
+      if (prevDonation && prevDonation.status !== 'verified' && donation.status === 'verified') {
+        toast.success(
+          `Donation of ${formatNPR(donation.amount)} verified! Thank you for your contribution.`,
+          { duration: 5000 },
+        )
+      }
+    }
+    prevDonationsRef.current = donations
+  }, [donations])
+
   const totalDonated = donorStats?.totalDonated ?? donations.reduce((sum, d) => sum + d.amount, 0)
   const activeSponsorships = sponsorships.filter(s => s.status === 'active')
   const totalSponsored = sponsorships.length
   const lastDonationDate = donorStats?.lastDonationDate ?? ''
 
-  const [profileForm, setProfileForm] = useState({ full_name: '', phone: '', country: '', bio: '' })
+  const [profileForm, setProfileForm] = useState({ full_name: '', phone: '', phone_code: '+1', country: '', bio: '' })
   const [profileSaving, setProfileSaving] = useState(false)
   const [profileSaved, setProfileSaved] = useState(false)
 
@@ -80,6 +98,7 @@ export function DashboardPage() {
       setProfileForm({
         full_name: profile.full_name || '',
         phone: profile.phone || '',
+        phone_code: (profile as Record<string, unknown>).phone_code as string || '+1',
         country: profile.country || '',
         bio: profile.bio || '',
       })
@@ -98,6 +117,7 @@ export function DashboardPage() {
     const { error } = await supabase.from('profiles').update({
       full_name: profileForm.full_name,
       phone: profileForm.phone || null,
+      phone_code: profileForm.phone_code || null,
       country: profileForm.country,
       bio: profileForm.bio || null,
     }).eq('id', user.id)
@@ -218,8 +238,8 @@ export function DashboardPage() {
             />
           </div>
 
-          {sponsorships.length > 0 ? (
-            <SponsoredStudents sponsorships={sponsorships} />
+          {contributedStudents.length > 0 ? (
+            <SponsoredStudents contributions={contributedStudents} />
           ) : (
             <DashboardCard title="Sponsorships" description="You haven't sponsored any students yet">
               <div className="text-center py-8">
@@ -256,9 +276,9 @@ export function DashboardPage() {
             <h2 className="text-2xl font-semibold tracking-tight">Sponsored Students</h2>
             <p className="text-sm text-gray-500 mt-1">Your sponsored children and their progress</p>
           </div>
-          {sponsorships.length > 0 ? (
+          {contributedStudents.length > 0 ? (
             <>
-              <SponsoredStudents sponsorships={sponsorships} />
+              <SponsoredStudents contributions={contributedStudents} />
               <StudentProgressUpdates reports={latestReports} students={sponsorships} />
             </>
           ) : (
@@ -337,13 +357,27 @@ export function DashboardPage() {
                   onChange={(e) => setProfileForm(p => ({ ...p, full_name: e.target.value }))}
                   required
                 />
-                <Input
-                  label="Phone"
-                  type="tel"
-                  value={profileForm.phone}
-                  onChange={(e) => setProfileForm(p => ({ ...p, phone: e.target.value }))}
-                  placeholder="+1 (555) 000-0000"
-                />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                  <div className="flex gap-2">
+                    <select
+                      value={profileForm.phone_code}
+                      onChange={(e) => setProfileForm(p => ({ ...p, phone_code: e.target.value }))}
+                      className="w-40 px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    >
+                      {COUNTRY_CODES.map(cc => (
+                        <option key={cc.code} value={cc.code}>{cc.label}</option>
+                      ))}
+                    </select>
+                    <input
+                      type="tel"
+                      value={profileForm.phone}
+                      onChange={(e) => setProfileForm(p => ({ ...p, phone: e.target.value }))}
+                      placeholder="555-000-0000"
+                      className="flex-1 px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    />
+                  </div>
+                </div>
                 <Select
                   label="Country"
                   options={countryOptions}

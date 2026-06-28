@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthContext'
 import { LanguageProvider } from './context/LanguageContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { CmsStringsProvider } from './context/CmsStringsContext'
+import { SiteBranding } from './components/SiteBranding'
 import { router } from './routes'
 
 function AppContent() {
@@ -49,6 +50,7 @@ function App() {
       />
       <AuthProvider>
         <ThemeProvider>
+          <SiteBranding />
           <CmsStringsProvider>
             <AppContent />
           </CmsStringsProvider>

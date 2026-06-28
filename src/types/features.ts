@@ -9,6 +9,18 @@ export interface DonationWithStudent extends Donation {
   student?: Student | null
 }
 
+export interface ContributionWithStudent {
+  id: string
+  student: Student
+  type: 'sponsorship' | 'donation'
+  amount: number
+  status: string
+  frequency: string
+  start_date: string
+  end_date?: string | null
+  created_at: string
+}
+
 export interface DashboardData {
   donations: DonationWithStudent[]
   sponsorships: SponsorshipWithStudent[]

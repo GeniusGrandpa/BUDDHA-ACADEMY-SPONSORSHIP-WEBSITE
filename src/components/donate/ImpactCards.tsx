@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { useCmsStrings } from '../../context/CmsStringsContext'
 import { formatNPR } from '../../utils/currency'
 import type { ImpactBreakdown } from './types'
 
@@ -9,6 +10,7 @@ interface ImpactCardsProps {
 }
 
 export function ImpactCards({ amounts, selectedAmount, onSelect }: ImpactCardsProps) {
+  const { t } = useCmsStrings()
   return (
     <section className="py-16 sm:py-20 bg-[#fffaf5]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -20,11 +22,11 @@ export function ImpactCards({ amounts, selectedAmount, onSelect }: ImpactCardsPr
           className="text-center mb-12"
         >
           <h2 className="text-3xl sm:text-4xl font-light text-[#0f172a] mb-4">
-            Your Contribution{' '}
-            <span className="font-medium text-[#d97706]">Changes Lives</span>
+            {t('impact_cards_title')}{' '}
+            <span className="font-medium text-[#d97706]">{t('impact_cards_highlight')}</span>
           </h2>
           <p className="text-gray-600 font-light max-w-xl mx-auto">
-            Select an amount below to see the real impact your donation makes for students at Buddha Academy.
+            {t('impact_cards_description')}
           </p>
         </motion.div>
 

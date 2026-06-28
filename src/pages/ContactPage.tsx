@@ -11,14 +11,9 @@ import { getSiteSettings } from '../services/settings'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import type { PageHeader } from '../types/cms-content'
 
-const fallbackHeader: Pick<PageHeader, 'title' | 'subtitle'> = {
-  title: 'Contact Us',
-  subtitle: 'We would love to hear from you. Reach out to us with any questions, feedback, or partnership inquiries.',
-}
-
 export function ContactPage() {
   const { t } = useCmsStrings()
-  const [header, setHeader] = useState<Pick<PageHeader, 'title' | 'subtitle'>>(fallbackHeader)
+  const [header, setHeader] = useState<Pick<PageHeader, 'title' | 'subtitle'> | null>(null)
   const [settings, setSettings] = useState<{
     contact_email?: string
     contact_phone?: string
@@ -74,12 +69,12 @@ export function ContactPage() {
   }
 
   const subjectOptions = [
-    { value: '', label: 'What is your inquiry about?' },
-    { value: 'sponsorship', label: 'Sponsorship Inquiry' },
-    { value: 'donation', label: 'Donation Question' },
-    { value: 'volunteer', label: 'Volunteer Opportunity' },
-    { value: 'partnership', label: 'Partnership Proposal' },
-    { value: 'other', label: 'Other' },
+    { value: '', label: t('contact_inquiry_placeholder') },
+    { value: 'sponsorship', label: t('contact_subject_sponsorship') },
+    { value: 'donation', label: t('contact_subject_donation') },
+    { value: 'volunteer', label: t('contact_subject_volunteer') },
+    { value: 'partnership', label: t('contact_subject_partnership') },
+    { value: 'other', label: t('contact_subject_other') },
   ]
 
   return (
@@ -170,11 +165,11 @@ export function ContactPage() {
                         <select value={formData.countryCode}
                           onChange={(e) => setFormData({ ...formData, countryCode: e.target.value })}
                           className="px-3 py-2.5 rounded-lg border border-gray-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 focus:outline-none bg-white text-gray-900 text-sm flex-shrink-0 w-[140px]">
-                          <option value="+977">Nepal (+977)</option>
-                          <option value="+1">USA (+1)</option>
-                          <option value="+44">UK (+44)</option>
-                          <option value="+91">India (+91)</option>
-                          <option value="+61">Australia (+61)</option>
+                          <option value="+977">{t('contact_country_nepal')}</option>
+                          <option value="+1">{t('contact_country_usa')}</option>
+                          <option value="+44">{t('contact_country_uk')}</option>
+                          <option value="+91">{t('contact_country_india')}</option>
+                          <option value="+61">{t('contact_country_australia')}</option>
                         </select>
                         <div className="flex-1">
                           <input type="tel" name="localPhone" required maxLength={10} placeholder={t('contact_phone_placeholder')}
@@ -210,7 +205,7 @@ export function ContactPage() {
               <MapPin className="w-12 h-12 text-orange-500 mx-auto mb-4" />
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">{t('contact_location_heading')}</h2>
               <p className="text-gray-600 mb-8">{settings.contact_address}</p>
-              <a href="https://maps.app.goo.gl/wXqnysvPTWyoiSLK7" target="_blank" rel="noopener noreferrer"
+              <a href={t('contact_map_link')} target="_blank" rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-full font-semibold transition-colors shadow-lg">
                 <MapPin className="w-5 h-5" />
                 {t('contact_map_button')}

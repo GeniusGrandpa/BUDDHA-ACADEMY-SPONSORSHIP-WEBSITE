@@ -1,0 +1,21 @@
+{
+  "name": "Buddha Academy",
+  "short_name": "Buddha Academy",
+  "description": "Providing free education to underprivileged children in Nepal since 1977",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fdfbf7",
+  "theme_color": "#f26b1d",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

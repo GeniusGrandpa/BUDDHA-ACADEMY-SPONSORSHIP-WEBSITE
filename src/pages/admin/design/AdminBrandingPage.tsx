@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Save, Upload } from 'lucide-react'
 import { useTheme } from '../../../context/ThemeContext'
 import { upsertDesignSettings } from '../../../services/design'
@@ -6,23 +6,62 @@ import { uploadMedia } from '../../../services/content'
 import toast from 'react-hot-toast'
 import type { DesignBranding } from '../../../types/design'
 
+const CACHE_KEY = 'ba_branding_cache'
+
+function updateBrandingCache(branding: DesignBranding) {
+  try {
+    const tagline = branding?.tagline || ''
+    const siteName = branding?.browser_tab_title || branding?.organization_name || 'Buddha Academy'
+    const title = tagline ? `${siteName} - ${tagline}` : siteName
+    const now = Date.now()
+    const cb = (url: string) => `${url}${url.includes('?') ? '&' : '?'}_cb=${now}`
+    const fv = branding?.favicon_url
+    const og = branding?.og_image_url
+    const at = branding?.apple_touch_icon_url || branding?.favicon_url
+    localStorage.setItem(CACHE_KEY, JSON.stringify({
+      title,
+      favicon: fv ? cb(fv) : null,
+      themeColor: branding?.theme_color || null,
+      ogImage: og ? cb(og) : null,
+      appleTouchIcon: at ? cb(at) : null,
+    }))
+  } catch {}
+}
+
 export function AdminBrandingPage() {
   const { branding, refreshTheme } = useTheme()
   const [form, setForm] = useState<DesignBranding>(branding)
   const [saving, setSaving] = useState(false)
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [uploadingFavicon, setUploadingFavicon] = useState(false)
+  const [uploadingHeaderLogo, setUploadingHeaderLogo] = useState(false)
+  const [uploadingFooterLogo, setUploadingFooterLogo] = useState(false)
+  const [uploadingAppIcon, setUploadingAppIcon] = useState(false)
+  const [uploadingAppleTouch, setUploadingAppleTouch] = useState(false)
+  const [uploadingOgImage, setUploadingOgImage] = useState(false)
+  const [uploadingTwitterImage, setUploadingTwitterImage] = useState(false)
 
   useEffect(() => { setForm(branding) }, [branding])
 
-  const handleChange = (key: keyof DesignBranding, value: string | null) => {
+  const handleChange = useCallback((key: keyof DesignBranding, value: string | null) => {
     setForm(prev => ({ ...prev, [key]: value }))
-  }
+  }, [])
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'logo_url' | 'secondary_logo_url' | 'favicon_url') => {
+  const handleImageUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>, field: keyof DesignBranding) => {
     const file = e.target.files?.[0]
     if (!file) return
-    const setUploading = field === 'favicon_url' ? setUploadingFavicon : setUploadingLogo
+    const uploadMap: Record<string, React.Dispatch<React.SetStateAction<boolean>>> = {
+      logo_url: setUploadingLogo,
+      secondary_logo_url: setUploadingLogo,
+      header_logo_url: setUploadingHeaderLogo,
+      footer_logo_url: setUploadingFooterLogo,
+      favicon_url: setUploadingFavicon,
+      app_icon_url: setUploadingAppIcon,
+      apple_touch_icon_url: setUploadingAppleTouch,
+      og_image_url: setUploadingOgImage,
+      twitter_image_url: setUploadingTwitterImage,
+    }
+    const setUploading = uploadMap[field] || setUploadingLogo
     setUploading(true)
     try {
       const media = await uploadMedia(file, `${field} upload`)
@@ -30,20 +69,57 @@ export function AdminBrandingPage() {
       toast.success('Image uploaded')
     } catch { toast.error('Upload failed') }
     finally { setUploading(false) }
-  }
+  }, [handleChange])
 
   const handleSave = async () => {
     setSaving(true)
     try {
       await upsertDesignSettings({ branding: form })
       await refreshTheme()
+      updateBrandingCache(form)
       toast.success('Branding saved! Use Publish to make live.')
     } catch { toast.error('Failed to save') }
     finally { setSaving(false) }
   }
 
+  function imageUploader(label: string, field: keyof DesignBranding, uploading: boolean, height = 'h-16') {
+    return (
+      <div>
+        <span className="text-sm font-medium text-[var(--color-text-primary)]">{label}</span>
+        <div className="mt-2 p-4 rounded-lg border-2 border-dashed border-[var(--color-border)]">
+          {form[field] ? (
+            <div className="space-y-2">
+              <img src={form[field] as string} alt={`${label} preview`} className={`${height} object-contain`} />
+              <button onClick={() => handleChange(field, null)} className="text-xs text-red-500">Remove</button>
+            </div>
+          ) : (
+            <label className="flex flex-col items-center gap-2 cursor-pointer text-[var(--color-text-muted)]">
+              <Upload className="w-8 h-8" />
+              <span className="text-sm">{uploading ? 'Uploading...' : `Click to upload ${label.toLowerCase()}`}</span>
+              <input type="file" accept="image/*" className="hidden" onChange={e => handleImageUpload(e, field)} />
+            </label>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  function textField(label: string, field: keyof DesignBranding, placeholder = '') {
+    return (
+      <label className="block">
+        <span className="text-sm font-medium text-[var(--color-text-primary)]">{label}</span>
+        <input
+          type="text" value={form[field] as string}
+          onChange={e => handleChange(field, e.target.value || null)}
+          placeholder={placeholder}
+          className="mt-1 w-full px-3 py-2 rounded-lg border border-[var(--color-border)] bg-white text-[var(--color-text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+        />
+      </label>
+    )
+  }
+
   return (
-    <div className="max-w-3xl space-y-8">
+    <div className="max-w-4xl space-y-8">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">Branding</h1>
@@ -55,87 +131,43 @@ export function AdminBrandingPage() {
       </div>
 
       <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 space-y-6">
+        <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">Identity</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {textField('Organization Name', 'organization_name')}
+          {textField('Browser Tab Title', 'browser_tab_title', 'Defaults to organization name')}
+          {textField('Tagline', 'tagline')}
+          {textField('Slogan', 'slogan')}
+          {textField('Theme Color (hex)', 'theme_color', '#f26b1d')}
+          {textField('Footer Branding', 'footer_branding')}
+          {textField('Email Branding', 'email_branding')}
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 space-y-6">
+        <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">Logos</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <label className="block">
-              <span className="text-sm font-medium text-[var(--color-text-primary)]">Organization Name</span>
-              <input
-                type="text" value={form.organization_name}
-                onChange={e => handleChange('organization_name', e.target.value)}
-                className="mt-1 w-full px-3 py-2 rounded-lg border border-[var(--color-border)] bg-white text-[var(--color-text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-              />
-            </label>
-            <label className="block">
-              <span className="text-sm font-medium text-[var(--color-text-primary)]">Tagline</span>
-              <input
-                type="text" value={form.tagline}
-                onChange={e => handleChange('tagline', e.target.value)}
-                className="mt-1 w-full px-3 py-2 rounded-lg border border-[var(--color-border)] bg-white text-[var(--color-text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-              />
-            </label>
-            <label className="block">
-              <span className="text-sm font-medium text-[var(--color-text-primary)]">Slogan</span>
-              <input
-                type="text" value={form.slogan}
-                onChange={e => handleChange('slogan', e.target.value)}
-                className="mt-1 w-full px-3 py-2 rounded-lg border border-[var(--color-border)] bg-white text-[var(--color-text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-              />
-            </label>
-            <label className="block">
-              <span className="text-sm font-medium text-[var(--color-text-primary)]">Footer Branding</span>
-              <input
-                type="text" value={form.footer_branding}
-                onChange={e => handleChange('footer_branding', e.target.value)}
-                className="mt-1 w-full px-3 py-2 rounded-lg border border-[var(--color-border)] bg-white text-[var(--color-text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-              />
-            </label>
-            <label className="block">
-              <span className="text-sm font-medium text-[var(--color-text-primary)]">Email Branding</span>
-              <input
-                type="text" value={form.email_branding}
-                onChange={e => handleChange('email_branding', e.target.value)}
-                className="mt-1 w-full px-3 py-2 rounded-lg border border-[var(--color-border)] bg-white text-[var(--color-text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-              />
-            </label>
-          </div>
+          {imageUploader('Primary Logo', 'logo_url', uploadingLogo)}
+          {imageUploader('Header Logo', 'header_logo_url', uploadingHeaderLogo)}
+          {imageUploader('Footer Logo', 'footer_logo_url', uploadingFooterLogo)}
+          {imageUploader('Secondary Logo', 'secondary_logo_url', uploadingLogo)}
+        </div>
+      </div>
 
-          <div className="space-y-6">
-            <div>
-              <span className="text-sm font-medium text-[var(--color-text-primary)]">Primary Logo</span>
-              <div className="mt-2 p-4 rounded-lg border-2 border-dashed border-[var(--color-border)]">
-                {form.logo_url ? (
-                  <div className="space-y-2">
-                    <img src={form.logo_url} alt="Logo preview" className="h-16 object-contain" />
-                    <button onClick={() => handleChange('logo_url', null)} className="text-xs text-red-500">Remove</button>
-                  </div>
-                ) : (
-                  <label className="flex flex-col items-center gap-2 cursor-pointer text-[var(--color-text-muted)]">
-                    <Upload className="w-8 h-8" />
-                    <span className="text-sm">{uploadingLogo ? 'Uploading...' : 'Click to upload logo'}</span>
-                    <input type="file" accept="image/*" className="hidden" onChange={e => handleImageUpload(e, 'logo_url')} />
-                  </label>
-                )}
-              </div>
-            </div>
+      <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 space-y-6">
+        <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">Icons</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {imageUploader('Favicon', 'favicon_url', uploadingFavicon, 'h-10')}
+          {imageUploader('App Icon', 'app_icon_url', uploadingAppIcon, 'h-12')}
+          {imageUploader('Apple Touch Icon', 'apple_touch_icon_url', uploadingAppleTouch, 'h-12')}
+        </div>
+      </div>
 
-            <div>
-              <span className="text-sm font-medium text-[var(--color-text-primary)]">Favicon</span>
-              <div className="mt-2 p-4 rounded-lg border-2 border-dashed border-[var(--color-border)]">
-                {form.favicon_url ? (
-                  <div className="space-y-2">
-                    <img src={form.favicon_url} alt="Favicon preview" className="h-10 object-contain" />
-                    <button onClick={() => handleChange('favicon_url', null)} className="text-xs text-red-500">Remove</button>
-                  </div>
-                ) : (
-                  <label className="flex flex-col items-center gap-2 cursor-pointer text-[var(--color-text-muted)]">
-                    <Upload className="w-8 h-8" />
-                    <span className="text-sm">{uploadingFavicon ? 'Uploading...' : 'Click to upload favicon'}</span>
-                    <input type="file" accept="image/*" className="hidden" onChange={e => handleImageUpload(e, 'favicon_url')} />
-                  </label>
-                )}
-              </div>
-            </div>
-          </div>
+      <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 space-y-6">
+        <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">Social Sharing</h2>
+        <p className="text-sm text-[var(--color-text-secondary)]">Default images for social media previews (Open Graph, Twitter Cards)</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {imageUploader('OG Image (1200x630)', 'og_image_url', uploadingOgImage)}
+          {imageUploader('Twitter Image', 'twitter_image_url', uploadingTwitterImage)}
         </div>
       </div>
     </div>

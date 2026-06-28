@@ -30,6 +30,7 @@ export function Footer() {
     }).catch(() => {})
   }, [])
 
+  const footerLogoSrc = branding.footer_logo_url || branding.logo_url || fallbackLogo
   const socialLinks = footerContent?.social_links || []
   const quickLinks = footerContent?.quick_links || []
   const contactInfo = footerContent?.contact_info
@@ -46,7 +47,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center space-x-3 mb-4">
-              <img src={branding.logo_url || fallbackLogo} alt={branding.organization_name || ''} className="h-14 w-auto" />
+              <img src={footerLogoSrc} alt={branding.organization_name || ''} className="h-14 w-auto" />
               <div>
                 {branding.organization_name && (
                   <div className="font-semibold text-[var(--color-footer-heading)]">{branding.organization_name}</div>
@@ -57,29 +58,16 @@ export function Footer() {
             {footerContent?.description && (
               <p className="text-sm mb-4 text-[var(--color-footer-text)]">{footerContent.description}</p>
             )}
-            <div className="flex space-x-4">
-              {socialLinks.length > 0 ? socialLinks.map((link, idx) => (
-                <a key={idx} href={link.url} aria-label={link.label} target="_blank" rel="noopener noreferrer"
-                  className="transition-colors hover:opacity-80 text-[var(--color-footer-text)]">
-                  {SOCIAL_ICONS[link.platform] || null}
-                </a>
-              )) : (
-                <>
-                  <a href="https://facebook.com" aria-label="Facebook" target="_blank" rel="noopener noreferrer"
+             {socialLinks.length > 0 && (
+              <div className="flex space-x-4">
+                {socialLinks.map((link, idx) => (
+                  <a key={idx} href={link.url} aria-label={link.label} target="_blank" rel="noopener noreferrer"
                     className="transition-colors hover:opacity-80 text-[var(--color-footer-text)]">
-                    <Facebook className="w-5 h-5" />
+                    {SOCIAL_ICONS[link.platform] || null}
                   </a>
-                  <a href="https://instagram.com" aria-label="Instagram" target="_blank" rel="noopener noreferrer"
-                    className="transition-colors hover:opacity-80 text-[var(--color-footer-text)]">
-                    <Instagram className="w-5 h-5" />
-                  </a>
-                  <a href="https://twitter.com" aria-label="Twitter" target="_blank" rel="noopener noreferrer"
-                    className="transition-colors hover:opacity-80 text-[var(--color-footer-text)]">
-                    <Twitter className="w-5 h-5" />
-                  </a>
-                </>
-              )}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div>
@@ -99,14 +87,6 @@ export function Footer() {
                   <Link to={link.url} className="transition-colors hover:opacity-80 text-inherit">{link.label}</Link>
                 </li>
               ))}
-              {quickLinks.length === 0 && (
-                <>
-                  <li><Link to="/about" className="transition-colors hover:opacity-80 text-inherit">{t('footer.aboutUs')}</Link></li>
-                  <li><Link to="/transparency" className="transition-colors hover:opacity-80 text-inherit">{t('footer.transparency')}</Link></li>
-                  <li><Link to="/privacy" className="transition-colors hover:opacity-80 text-inherit">{t('footer.privacy')}</Link></li>
-                  <li><Link to="/terms" className="transition-colors hover:opacity-80 text-inherit">{t('footer.terms')}</Link></li>
-                </>
-              )}
             </ul>
           </div>
 

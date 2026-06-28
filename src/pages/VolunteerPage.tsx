@@ -6,37 +6,10 @@ import { useCmsStrings } from '../context/CmsStringsContext'
 import type { VolunteerContent, PageHeader } from '../types/cms-content'
 import type { VolunteerEvent } from '../types/database'
 
-const fallbackHeader: Pick<PageHeader, 'title' | 'subtitle'> = {
-  title: 'Volunteer With Us',
-  subtitle: 'Your time and skills can make a lasting difference in the lives of children.',
-}
-
-const fallbackContent = {
-  hero_title: 'Volunteer With Us',
-  hero_subtitle: 'Your time and skills can make a lasting difference in the lives of children.',
-  section_title: 'Volunteer Opportunities',
-  section_description: 'We offer a variety of ways to get involved, both locally and remotely.',
-  opportunities: [
-    { title: 'Teaching Assistant', description: 'Help teachers in the classroom with daily lessons and activities.', icon: 'School' },
-    { title: 'Tutoring', description: 'Provide one-on-one academic support to students who need extra help.', icon: 'BookOpen' },
-    { title: 'Sports & Arts', description: 'Lead recreational activities, sports, and creative arts programs.', icon: 'Music' },
-    { title: 'Administrative Support', description: 'Assist with office tasks, communications, and event coordination.', icon: 'ClipboardList' },
-  ],
-  skill_options: [
-    { value: 'teaching', label: 'Teaching / Tutoring' },
-    { value: 'healthcare', label: 'Healthcare / Medical' },
-    { value: 'it', label: 'IT / Web Development' },
-    { value: 'fundraising', label: 'Fundraising / Events' },
-    { value: 'admin', label: 'Administrative' },
-    { value: 'other', label: 'Other' },
-  ],
-  success_message: 'Thank you for applying! We will review your application and get back to you within 5-7 business days.',
-} as VolunteerContent
-
 export function VolunteerPage() {
   const { t } = useCmsStrings()
-  const [content, setContent] = useState<VolunteerContent>(fallbackContent)
-  const [header, setHeader] = useState<Pick<PageHeader, 'title' | 'subtitle'>>(fallbackHeader)
+  const [content, setContent] = useState<VolunteerContent | null>(null)
+  const [header, setHeader] = useState<Pick<PageHeader, 'title' | 'subtitle'> | null>(null)
   const [events, setEvents] = useState<VolunteerEvent[]>([])
 
   const [formData, setFormData] = useState({
@@ -83,8 +56,8 @@ export function VolunteerPage() {
 
   const opportunities = content?.opportunities || []
   const skillOptions = content?.skill_options || []
-  const heroTitle = header?.title || content?.hero_title || ''
-  const heroSubtitle = header?.subtitle || content?.hero_subtitle || ''
+  const heroTitle = header?.title || ''
+  const heroSubtitle = header?.subtitle || ''
 
   return (
     <div>
@@ -146,7 +119,7 @@ export function VolunteerPage() {
                 <svg className="w-8 h-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">{t('volunteer_app_submitted_title')}</h3>
-              <p className="text-gray-600">{content?.success_message || t('volunteer_success_message')}</p>
+              <p className="text-gray-600">{content?.success_message}</p>
             </div>
           ) : (
             <>

@@ -4,7 +4,15 @@ export interface DesignBranding {
   slogan: string
   logo_url: string | null
   secondary_logo_url: string | null
+  header_logo_url: string | null
+  footer_logo_url: string | null
   favicon_url: string | null
+  app_icon_url: string | null
+  apple_touch_icon_url: string | null
+  og_image_url: string | null
+  twitter_image_url: string | null
+  theme_color: string
+  browser_tab_title: string
   footer_branding: string
   email_branding: string
 }
@@ -276,7 +284,15 @@ export const DEFAULT_BRANDING: DesignBranding = {
   slogan: 'Empowering Through Education',
   logo_url: null,
   secondary_logo_url: null,
+  header_logo_url: null,
+  footer_logo_url: null,
   favicon_url: null,
+  app_icon_url: null,
+  apple_touch_icon_url: null,
+  og_image_url: null,
+  twitter_image_url: null,
+  theme_color: '#f26b1d',
+  browser_tab_title: 'Buddha Academy',
   footer_branding: 'Buddha Academy',
   email_branding: 'Buddha Academy',
 }

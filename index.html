@@ -2,17 +2,49 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%23f59e0b'/><text x='16' y='22' text-anchor='middle' font-size='18' font-weight='bold' fill='white'>B</text></svg>" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Buddha Academy - Free Education for Underprivileged Children in Nepal</title>
-    <meta name="description" content="Buddha Academy is a nonprofit boarding school in Kathmandu, Nepal, providing free education to underprivileged children since 1977. Sponsor a child or make a donation today." />
-    <meta property="og:title" content="Buddha Academy - Empowering Nepal's Future" />
-    <meta property="og:description" content="Sponsor a child or make a donation to provide free education, meals, and healthcare to underprivileged children in Nepal." />
+    <title>Buddha Academy</title>
+    <meta name="description" content="Providing free education to underprivileged children in Nepal since 1977" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#f26b1d" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://translate.google.com https://*.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://translate.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co https://translate.googleapis.com; frame-src https://translate.google.com; object-src 'none'; base-uri 'self'; form-action 'self'" />
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <script>
+      (function(){
+        try {
+          var cached = JSON.parse(localStorage.getItem('ba_branding_cache') || 'null');
+          if (cached) {
+            if (cached.title) document.title = cached.title;
+            if (cached.favicon) {
+              var link = document.querySelector('link[rel="icon"]') || document.createElement('link');
+              link.rel = 'icon';
+              link.href = cached.favicon;
+              if (!link.parentNode) document.head.appendChild(link);
+            }
+            if (cached.themeColor) {
+              var meta = document.querySelector('meta[name="theme-color"]');
+              if (meta) meta.content = cached.themeColor;
+            }
+            if (cached.ogImage) {
+              var og = document.querySelector('meta[property="og:image"]') || document.createElement('meta');
+              og.setAttribute('property', 'og:image');
+              og.content = cached.ogImage;
+              if (!og.parentNode) document.head.appendChild(og);
+            }
+            if (cached.appleTouchIcon) {
+              var at = document.querySelector('link[rel="apple-touch-icon"]') || document.createElement('link');
+              at.rel = 'apple-touch-icon';
+              at.href = cached.appleTouchIcon;
+              if (!at.parentNode) document.head.appendChild(at);
+            }
+          }
+        } catch(e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

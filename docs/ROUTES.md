@@ -16,7 +16,6 @@ All routes defined in `src/routes.tsx` via `createBrowserRouter`.
 | `/news/:id` | NewsDetailPage |
 | `/contact` | ContactPage |
 | `/donate` | DonatePage |
-| `/donations` | DonationHistoryPage |
 | `/transparency` | TransparencyPage |
 | `/faq` | FAQPage |
 | `/volunteer` | VolunteerPage |
@@ -65,7 +64,8 @@ All routes defined in `src/routes.tsx` via `createBrowserRouter`.
 | Path | Component |
 |------|-----------|
 | `/admin/website` | WebsiteDashboard |
-| `/admin/website/homepage` | WebsiteBuilder (3-panel live preview) |
+| `/admin/website/builder` | WebsiteBuilder (3-panel live preview) |
+| `/admin/website/homepage` | Redirects to `/admin/website/builder` |
 | `/admin/website/about` | AboutPageEditor |
 | `/admin/website/contact` | ContactPageEditor |
 | `/admin/website/volunteer` | AdminVolunteerContent |

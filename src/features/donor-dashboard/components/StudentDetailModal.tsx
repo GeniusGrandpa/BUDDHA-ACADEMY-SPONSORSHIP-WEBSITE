@@ -1,14 +1,16 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
-import type { Student, Sponsorship } from '../../../types/database'
+import type { Student } from '../../../types/database'
+import type { ContributionWithStudent } from '../../../types/features'
+import { formatNPR } from '../../../utils/currency'
 
 interface StudentDetailModalProps {
   student: Student
-  sponsorship: Sponsorship
+  contribution: ContributionWithStudent
   onClose: () => void
 }
 
-export function StudentDetailModal({ student, sponsorship, onClose }: StudentDetailModalProps) {
+export function StudentDetailModal({ student, contribution, onClose }: StudentDetailModalProps) {
   return (
     <AnimatePresence>
       <motion.div
@@ -44,7 +46,16 @@ export function StudentDetailModal({ student, sponsorship, onClose }: StudentDet
           </div>
 
           <div className="pt-16 pb-6 px-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-1">{student.name}</h2>
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="text-2xl font-bold text-gray-900">{student.name}</h2>
+              <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+                contribution.type === 'sponsorship'
+                  ? 'bg-orange-100 text-orange-700'
+                  : 'bg-blue-100 text-blue-700'
+              }`}>
+                {contribution.type === 'sponsorship' ? 'Monthly Sponsorship' : 'One-time Donation'}
+              </span>
+            </div>
             <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 mb-4">
               <span>Grade {student.grade}</span>
               <span>Age {student.age}</span>
@@ -54,21 +65,23 @@ export function StudentDetailModal({ student, sponsorship, onClose }: StudentDet
 
             <div className="grid grid-cols-2 gap-3 mb-4">
               <div className="bg-orange-50 rounded-xl p-3 text-center">
-                <div className="text-xs text-orange-600 font-medium">Attendance</div>
-                <div className="text-lg font-bold text-orange-700">96%</div>
+                <div className="text-xs text-orange-600 font-medium">{contribution.type === 'sponsorship' ? 'Monthly' : 'Total'}</div>
+                <div className="text-lg font-bold text-orange-700">{formatNPR(contribution.amount)}</div>
               </div>
               <div className="bg-orange-50 rounded-xl p-3 text-center">
                 <div className="text-xs text-orange-600 font-medium">Since</div>
                 <div className="text-lg font-bold text-orange-700">
-                  {new Date(sponsorship.start_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                  {new Date(contribution.start_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
                 </div>
               </div>
             </div>
 
-            <div className="bg-orange-100 rounded-xl p-4">
-              <div className="text-sm font-semibold text-orange-800 mb-1">Recent Achievement</div>
-              <p className="text-sm text-orange-700">Won inter-school science quiz competition. Showing great dedication in mathematics and science.</p>
-            </div>
+            {contribution.type === 'sponsorship' && (
+              <div className="bg-orange-100 rounded-xl p-4">
+                <div className="text-sm font-semibold text-orange-800 mb-1">Recent Achievement</div>
+                <p className="text-sm text-orange-700">Won inter-school science quiz competition. Showing great dedication in mathematics and science.</p>
+              </div>
+            )}
           </div>
         </motion.div>
       </motion.div>

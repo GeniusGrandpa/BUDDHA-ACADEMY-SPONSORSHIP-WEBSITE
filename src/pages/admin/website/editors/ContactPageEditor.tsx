@@ -46,7 +46,7 @@ export function ContactPageEditor() {
     finally { setLoading(false) }
   }
 
-  useEffect(() => { load() }, [])
+  useEffect(() => { load() }, [load])
 
   const handleSave = async () => {
     setSaving(true)

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../../lib/supabase'
+import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 import type { Donation, Sponsorship, ImpactMetric, StudentProgress } from '../../../types/database'
 import type {
   DashboardData,
@@ -7,6 +8,7 @@ import type {
   DonorImpact,
   SponsorshipWithStudent,
   DonationWithStudent,
+  ContributionWithStudent,
   ActivityItem,
 } from '../../../types/features'
 
@@ -17,6 +19,7 @@ export interface EnhancedDashboardData extends Omit<DashboardData, 'donorStats'>
   studentProgress: StudentProgress[]
   notificationsCount: number
   activities: ActivityItem[]
+  contributedStudents: ContributionWithStudent[]
 }
 
 function computeDonorStats(donations: DonationWithStudent[], sponsorships: SponsorshipWithStudent[]): DonorStats {
@@ -73,6 +76,7 @@ export function useDashboardData(userId: string | undefined) {
     studentProgress: [],
     notificationsCount: 0,
     activities: [],
+    contributedStudents: [],
   })
 
   const fetchStudentsForSponsorships = useCallback(async (sponsorshipsData: Sponsorship[]): Promise<SponsorshipWithStudent[]> => {
@@ -193,6 +197,33 @@ export function useDashboardData(userId: string | undefined) {
 
       const activities = (activitiesResult.data || []) as ActivityItem[]
 
+      const seenStudentIds = new Set(sponsorshipsWithStudents.map(s => s.student.id))
+      const donationContributions: ContributionWithStudent[] = donationsWithStudents
+        .filter(d => d.student && !seenStudentIds.has(d.student.id))
+        .map(d => ({
+          id: `don-${d.id}`,
+          student: d.student!,
+          type: 'donation' as const,
+          amount: d.amount,
+          status: d.status,
+          frequency: d.frequency,
+          start_date: d.created_at,
+          end_date: null,
+          created_at: d.created_at,
+        }))
+      const sponsorshipContributions: ContributionWithStudent[] = sponsorshipsWithStudents.map(s => ({
+        id: `spon-${s.id}`,
+        student: s.student,
+        type: 'sponsorship' as const,
+        amount: s.amount,
+        status: s.status,
+        frequency: 'monthly',
+        start_date: s.start_date,
+        end_date: s.end_date,
+        created_at: s.created_at,
+      }))
+      const contributedStudents = [...sponsorshipContributions, ...donationContributions]
+
       setData({
         donations: donationsWithStudents,
         sponsorships: sponsorshipsWithStudents,
@@ -204,6 +235,7 @@ export function useDashboardData(userId: string | undefined) {
         studentProgress,
         notificationsCount,
         activities,
+        contributedStudents,
       })
     } catch {
       setData({
@@ -217,6 +249,7 @@ export function useDashboardData(userId: string | undefined) {
         studentProgress: [],
         notificationsCount: 0,
         activities: [],
+        contributedStudents: [],
       })
     }
   }, [userId, fetchStudentsForDonations, fetchStudentsForSponsorships])
@@ -224,6 +257,58 @@ export function useDashboardData(userId: string | undefined) {
   useEffect(() => {
     loadData()
   }, [loadData])
+
+  useEffect(() => {
+    if (!userId) return
+
+    const channel = supabase
+      .channel('donor-donations-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'donations',
+          filter: `donor_id=eq.${userId}`,
+        },
+        (payload: RealtimePostgresChangesPayload<Donation>) => {
+          const updated = payload.new as Donation
+          setData(prev => {
+            const donations = prev.donations.map(d =>
+              d.id === updated.id ? { ...d, ...updated, student: d.student } : d
+            )
+            const donorStats = computeDonorStats(donations, prev.sponsorships)
+            const donorImpact = computeDonorImpact(prev.sponsorships, donorStats.totalDonated)
+            return { ...prev, donations, donorStats, donorImpact }
+          })
+        },
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'donations',
+          filter: `donor_id=eq.${userId}`,
+        },
+        (payload: RealtimePostgresChangesPayload<Donation>) => {
+          const inserted = payload.new as Donation
+          setData(prev => {
+            const alreadyExists = prev.donations.some(d => d.id === inserted.id)
+            if (alreadyExists) return prev
+            const donations = [inserted as DonationWithStudent, ...prev.donations]
+            const donorStats = computeDonorStats(donations, prev.sponsorships)
+            const donorImpact = computeDonorImpact(prev.sponsorships, donorStats.totalDonated)
+            return { ...prev, donations, donorStats, donorImpact }
+          })
+        },
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [userId])
 
   return data
 }

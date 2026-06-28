@@ -9,16 +9,16 @@ export function CtaBanner() {
       <p className="text-lg sm:text-xl text-white/90 mb-8 max-w-2xl mx-auto">{t('cta_banner_subtitle')}</p>
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
         <Link
-          to="/sponsor"
+          to={t('cta_banner_primary_link')}
           className="bg-white text-amber-700 hover:bg-amber-50 px-8 py-3.5 rounded-full font-semibold transition-colors shadow-lg"
         >
-          {t('about_sponsor_button')}
+          {t('cta_banner_primary_text')}
         </Link>
         <Link
-          to="/donate"
+          to={t('cta_banner_secondary_link')}
           className="bg-white/10 hover:bg-white/20 border border-white/30 text-white px-8 py-3.5 rounded-full font-semibold transition-colors backdrop-blur-sm"
         >
-          {t('about_donate_button')}
+          {t('cta_banner_secondary_text')}
         </Link>
       </div>
     </div>

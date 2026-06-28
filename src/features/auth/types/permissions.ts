@@ -80,6 +80,7 @@ export interface UserProfile {
   email: string
   full_name: string
   phone: string | null
+  phone_code: string | null
   country: string
   role: Role
   avatar_url: string | null

@@ -3,40 +3,10 @@ import { getTransparencyContent, getPageHeader } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import type { TransparencyContent, PageHeader } from '../types/cms-content'
 
-const fallbackHeader: Pick<PageHeader, 'title' | 'subtitle'> = {
-  title: 'Transparency & Accountability',
-  subtitle: 'We believe in complete transparency. See exactly how your donations are used and the impact they create.',
-}
-
-const fallbackContent = {
-  allocation_title: 'How Your Donations Are Used',
-  allocation_description: 'Every dollar you donate goes directly to our programs. We maintain minimal administrative costs.',
-  allocation_data: [
-    { label: 'Education Programs', value: 65, color: '#f59e0b', description: 'Teaching materials, classroom support, and educational resources.' },
-    { label: 'Meals & Nutrition', value: 20, color: '#10b981', description: 'Daily nutritious meals for every student.' },
-    { label: 'Healthcare', value: 10, color: '#3b82f6', description: 'Regular health check-ups and medical care.' },
-    { label: 'Administration', value: 5, color: '#8b5cf6', description: 'Operational costs to keep the academy running.' },
-  ],
-  verification_title: 'How We Verify Impact',
-  verification_description: 'We use multiple layers of verification to ensure every donation creates real, measurable impact.',
-  verification_steps: [
-    'Monthly progress reports from teachers and staff.',
-    'Quarterly financial audits reviewed by our board.',
-    'Annual third-party impact assessments.',
-    'Regular feedback from students and families.',
-    'Photographic and video documentation of programs.',
-  ],
-  impact_report_title: 'Annual Impact Report',
-  receipt_policy_title: 'Receipt & Tax Policy',
-  receipt_policy_text: 'All donations are tax-deductible where applicable. You will receive a receipt for every contribution, and annual statements are provided for tax purposes.',
-  donor_privacy_title: 'Donor Privacy',
-  donor_privacy_text: 'We respect your privacy. Your personal information is never shared, sold, or traded. You can choose to remain anonymous in our donor recognition materials.',
-} as TransparencyContent
-
 export function TransparencyPage() {
   const { t } = useCmsStrings()
-  const [content, setContent] = useState<TransparencyContent>(fallbackContent)
-  const [header, setHeader] = useState<Pick<PageHeader, 'title' | 'subtitle'>>(fallbackHeader)
+  const [content, setContent] = useState<TransparencyContent | null>(null)
+  const [header, setHeader] = useState<Pick<PageHeader, 'title' | 'subtitle'> | null>(null)
 
   useEffect(() => {
     Promise.all([

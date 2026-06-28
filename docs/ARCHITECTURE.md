@@ -60,7 +60,7 @@ src/
   └── main.tsx        # Entry point with ErrorBoundary
 
 supabase/
-  ├── migrations/     # 50+ database migrations (applied in timestamp order)
+  ├── migrations/     # 54 database migrations (applied in timestamp order)
   └── config.toml     # Supabase project config (auth, storage, API, etc.)
 ```
 
