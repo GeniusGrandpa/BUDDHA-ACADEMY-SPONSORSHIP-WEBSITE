@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { formatNPR } from '../../utils/currency'
 import { getPendingVerifications, verifyPayment } from '../../services/payments'
@@ -30,8 +30,6 @@ interface SessionWithDonor extends Omit<PaymentSession, 'status'> {
   status: PaymentSessionStatus | 'rejected'
 }
 
-const LOAD_TIMEOUT = 15000
-
 export function AdminPaymentVerificationPage() {
   const [sessions, setSessions] = useState<SessionWithDonor[]>([])
   const [loading, setLoading] = useState(true)
@@ -39,50 +37,28 @@ export function AdminPaymentVerificationPage() {
   const [selectedSession, setSelectedSession] = useState<SessionWithDonor | null>(null)
   const [verificationNotes, setVerificationNotes] = useState('')
   const [verifying, setVerifying] = useState<Record<string, boolean>>({})
-  const [initialLoad, setInitialLoad] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
-  const mountedRef = useRef(true)
 
-  useEffect(() => {
-    return () => { mountedRef.current = false }
-  }, [])
-
-  const loadSessions = useCallback(async () => {
+  const loadSessions = async () => {
     setLoading(true)
     setLoadError(null)
-
-    const timeoutId = setTimeout(() => {
-      if (mountedRef.current) {
-        setLoading(false)
-        setInitialLoad(false)
-        setLoadError('Request timed out. Check your connection and try again.')
-      }
-    }, LOAD_TIMEOUT)
-
     try {
       const data = await getPendingVerifications()
-      clearTimeout(timeoutId)
-      if (mountedRef.current) setSessions(data as unknown as SessionWithDonor[])
-    } catch (err) {
-      clearTimeout(timeoutId)
-      if (mountedRef.current) {
-        setLoadError('Failed to load pending verifications. Please try again.')
-      }
+      setSessions(data as unknown as SessionWithDonor[])
+    } catch (error) {
+      console.error('Error loading payments:', error)
+      setLoadError('Failed to load pending verifications. Please try again.')
     } finally {
-      if (mountedRef.current) {
-        setLoading(false)
-        setInitialLoad(false)
-      }
+      setLoading(false)
     }
-  }, [])
+  }
 
   useEffect(() => {
     loadSessions()
-  }, [loadSessions])
+  }, [])
 
   const handleVerify = async (sessionId: string, status: 'verified' | 'rejected') => {
     if (verifying[sessionId]) return
-
     setVerifying(prev => ({ ...prev, [sessionId]: true }))
     const prevSelected = selectedSession
 
@@ -90,30 +66,21 @@ export function AdminPaymentVerificationPage() {
       setSessions(prev => prev.map(s =>
         s.id === sessionId ? { ...s, status: status === 'verified' ? 'completed' : 'rejected' } : s
       ))
-
       await verifyPayment(sessionId, status, verificationNotes || undefined)
-
       if (prevSelected?.id === sessionId) {
         setSelectedSession(null)
         setVerificationNotes('')
       }
-
-      toast.success(
-        status === 'verified' ? 'Payment verified successfully' : 'Payment rejected'
-      )
-
+      toast.success(status === 'verified' ? 'Payment verified successfully' : 'Payment rejected')
       await loadSessions()
-    } catch {
+    } catch (error) {
+      console.error('Error verifying payment:', error)
       setSessions(prev => prev.map(s =>
         s.id === sessionId ? { ...s, status: 'processing' } : s
       ))
-      toast.error(
-        status === 'verified' ? 'Failed to verify payment' : 'Failed to reject payment'
-      )
+      toast.error(status === 'verified' ? 'Failed to verify payment' : 'Failed to reject payment')
     } finally {
-      if (mountedRef.current) {
-        setVerifying(prev => ({ ...prev, [sessionId]: false }))
-      }
+      setVerifying(prev => ({ ...prev, [sessionId]: false }))
     }
   }
 
@@ -134,10 +101,6 @@ export function AdminPaymentVerificationPage() {
   const stats = {
     processing: sessions.filter(s => s.status === 'processing').length,
     total: sessions.length,
-  }
-
-  if (initialLoad && loading) {
-    return <TableSkeleton />
   }
 
   return (
@@ -179,7 +142,9 @@ export function AdminPaymentVerificationPage() {
           </div>
         </div>
 
-        {loadError ? (
+        {loading ? (
+          <TableSkeleton />
+        ) : loadError ? (
           <div className="text-center py-12">
             <AlertCircle className="w-12 h-12 mx-auto text-red-400 mb-3" />
             <p className="text-gray-700 font-medium">Unable to load payments</p>
