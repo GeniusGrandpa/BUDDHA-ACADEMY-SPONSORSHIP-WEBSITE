@@ -15,10 +15,20 @@ const STATUS_STYLES: Record<string, string> = {
   pending: 'bg-yellow-100 text-yellow-700 border-yellow-200',
   processing: 'bg-blue-100 text-blue-700 border-blue-200',
   verified: 'bg-purple-100 text-purple-700 border-purple-200',
-  completed: 'bg-green-100 text-green-700 border-green-200',
+  completed: 'bg-emerald-100 text-emerald-700 border-emerald-200',
   failed: 'bg-red-100 text-red-700 border-red-200',
   rejected: 'bg-red-100 text-red-700 border-red-200',
   cancelled: 'bg-gray-100 text-gray-700 border-gray-200',
+}
+
+const STATUS_LABELS: Record<string, string> = {
+  pending: 'Pending',
+  processing: 'Processing',
+  completed: 'Verified',
+  verified: 'Verified',
+  failed: 'Failed',
+  rejected: 'Rejected',
+  cancelled: 'Cancelled',
 }
 
 export function DonationHistoryPage() {
@@ -142,7 +152,7 @@ export function DonationHistoryPage() {
                 <option value="all">All Status</option>
                 <option value="pending">Pending</option>
                 <option value="processing">Processing</option>
-                <option value="completed">Completed</option>
+                <option value="completed">Verified</option>
                 <option value="failed">Failed</option>
                 <option value="rejected">Rejected</option>
               </select>
@@ -172,7 +182,7 @@ export function DonationHistoryPage() {
                           {formatNPR(donation.amount)}
                         </span>
                         <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${STATUS_STYLES[donation.status] || 'bg-gray-100 text-gray-700'}`}>
-                          {donation.status.charAt(0).toUpperCase() + donation.status.slice(1)}
+                          {STATUS_LABELS[donation.status] || donation.status.charAt(0).toUpperCase() + donation.status.slice(1)}
                         </span>
                       </div>
                       <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500">

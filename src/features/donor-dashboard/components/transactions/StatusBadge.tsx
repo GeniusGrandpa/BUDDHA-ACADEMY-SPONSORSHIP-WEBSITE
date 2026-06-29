@@ -1,3 +1,13 @@
+const STATUS_LABELS: Record<string, string> = {
+  pending: 'Pending',
+  processing: 'Processing',
+  completed: 'Verified',
+  verified: 'Verified',
+  failed: 'Failed',
+  rejected: 'Rejected',
+  cancelled: 'Cancelled',
+}
+
 export function StatusBadge({ status, size = 'sm' }: { status: string; size?: 'sm' | 'md' | 'lg' }) {
   const colors: Record<string, string> = {
     pending: 'bg-yellow-100 text-yellow-700',
@@ -11,7 +21,7 @@ export function StatusBadge({ status, size = 'sm' }: { status: string; size?: 's
   const sizeClass = size === 'sm' ? 'px-2 py-0.5 text-xs' : size === 'md' ? 'px-3 py-1 text-sm' : 'px-4 py-1.5 text-base'
   return (
     <span className={`inline-flex items-center font-medium rounded-full ${sizeClass} ${colors[status] || 'bg-gray-100 text-gray-700'}`}>
-      {status.charAt(0).toUpperCase() + status.slice(1)}
+      {STATUS_LABELS[status] || status.charAt(0).toUpperCase() + status.slice(1)}
     </span>
   )
 }

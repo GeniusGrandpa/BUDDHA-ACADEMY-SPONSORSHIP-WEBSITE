@@ -173,8 +173,8 @@ export function DashboardPage() {
                           {donation.frequency}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          <Badge variant={(donation.status === 'received' ? 'success' : 'default') as 'success' | 'default'}>
-                            {donation.status}
+                          <Badge variant={(donation.status === 'completed' || donation.status === 'verified' || donation.status === 'received' ? 'success' : 'default') as 'success' | 'default'}>
+                            {donation.status === 'completed' ? 'Verified' : donation.status}
                           </Badge>
                         </td>
                       </tr>

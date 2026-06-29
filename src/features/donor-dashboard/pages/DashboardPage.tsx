@@ -9,14 +9,14 @@ import { useDonorTransactions } from '../hooks/useDonorTransactions'
 import { useNotifications } from '../hooks/useNotifications'
 import { useSponsorshipTimeline } from '../hooks/useSponsorshipTimeline'
 import { useTeacherReports } from '../hooks/useTeacherReports'
-import { useAllocations } from '../hooks/useAllocations'
+
 import { DashboardLayout } from '../layouts/DashboardLayout'
 import { DashboardCard } from '../../../components/ui/DashboardCard'
 import { DashboardStatCard } from '../../../components/ui/DashboardStatCard'
 import { SponsoredStudents } from '../components/SponsoredStudents'
 import { SkeletonLoading } from '../components/SkeletonLoading'
 import { TransactionSection } from '../components/transactions/TransactionSection'
-import { AllocationBreakdown } from '../components/AllocationBreakdown'
+
 import { ImpactTransparency } from '../components/ImpactTransparency'
 import { StudentProgressUpdates } from '../components/StudentProgressUpdates'
 import { SponsorshipTimeline } from '../components/SponsorshipTimeline'
@@ -26,8 +26,6 @@ import { ActivityFeed } from '../../../components/activities/ActivityFeed'
 import { DonationChart } from '../charts/DonationChart'
 import { ImpactTimeline } from '../components/ImpactTimeline'
 import type { Section } from '../components/Sidebar'
-import type { AllocationSummary } from '../hooks/useAllocations'
-import type { DonationAllocation } from '../../../types/database'
 import type { Notification as NotifType } from '../../../types/features'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
@@ -61,7 +59,6 @@ export function DashboardPage() {
   } = useDashboardData(userId)
 
   const { transactions, loading: txLoading } = useDonorTransactions(userId)
-  const { summary: allocationSummary } = useAllocations(userId)
   const { notifications, unreadCount, markAsRead, markAllAsRead, loading: notifLoading } = useNotifications(userId)
 
   const { events } = useSponsorshipTimeline(userId)
@@ -74,7 +71,7 @@ export function DashboardPage() {
     const prev = prevDonationsRef.current
     for (const donation of donations) {
       const prevDonation = prev.find(d => d.id === donation.id)
-      if (prevDonation && prevDonation.status !== 'verified' && donation.status === 'verified') {
+      if (prevDonation && prevDonation.status !== 'completed' && donation.status === 'completed') {
         toast.success(
           `Donation of ${formatNPR(donation.amount)} verified! Thank you for your contribution.`,
           { duration: 5000 },
@@ -179,14 +176,6 @@ export function DashboardPage() {
     meals_funded: 0, books_donated: 0, students_supported: 0, uniforms_provided: 0, total_donated: totalDonated,
   }, [donorImpact, totalDonated])
 
-  const allAllocations = useMemo<DonationAllocation[]>(() => {
-    const allocs = transactions.flatMap(tx => tx.allocations || [])
-    if (allocs.length > 0) return allocs
-    return allocationSummary.map((s: AllocationSummary) => ({
-      id: '', donation_id: '', category: s.category, allocation_percentage: s.percentage, amount: s.totalAmount, created_at: '',
-    }))
-  }, [transactions, allocationSummary])
-
   if (loading) {
     return (
       <DashboardLayout section={section} onSectionChange={setSection}>
@@ -249,10 +238,6 @@ export function DashboardPage() {
                 </a>
               </div>
             </DashboardCard>
-          )}
-
-          {allAllocations.length > 0 && (
-            <AllocationBreakdown allocations={allAllocations} />
           )}
 
           {impactData.total_donated > 0 && (

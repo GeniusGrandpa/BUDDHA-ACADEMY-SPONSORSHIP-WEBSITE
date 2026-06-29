@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useMemo } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { Eye, EyeOff, Globe, FileText, ArrowLeft, Monitor, Tablet, Smartphone, Plus, GripVertical, Image, Palette, Layout as LayoutIcon, Code, Sparkles, CheckCircle2, AlertTriangle, RefreshCw, Upload, X, AlignLeft, AlignCenter, AlignRight, Type, HelpCircle, Home, Info, Heart, Users, BookOpen, Mail, Camera, Award, ArrowRight } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { useCmsPages } from '../../../hooks/useCmsPages'
 import { ToggleSwitch } from '../../../components/ui/ToggleSwitch'
 import { StatusBadge } from '../../../components/ui/StatusBadge'
@@ -14,18 +14,6 @@ import type { CmsStringMap } from '../../../types/cms-content'
 type ViewMode = 'pages' | 'editor' | 'seo' | 'settings'
 type PreviewDevice = 'desktop' | 'tablet' | 'mobile'
 type EditorTab = 'content' | 'design' | 'layout' | 'advanced'
-
-const PAGE_ICONS: Record<string, React.ReactNode> = {
-  home: <Home className="w-4 h-4" />,
-  about: <Info className="w-4 h-4" />,
-  sponsor: <Heart className="w-4 h-4" />,
-  students: <Users className="w-4 h-4" />,
-  donate: <Award className="w-4 h-4" />,
-  gallery: <Camera className="w-4 h-4" />,
-  news: <BookOpen className="w-4 h-4" />,
-  contact: <Mail className="w-4 h-4" />,
-  faq: <HelpCircle className="w-4 h-4" />,
-}
 
 const FRIENDLY_LABELS: Record<string, string> = {
   hero: 'Hero Banner',
@@ -193,9 +181,8 @@ export function WebsiteBuilder() {
               toast.dismiss()
               toast.success(`Found ${audit.totalSections} sections across ${audit.pages.length} pages`)
             }}
-            className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2"
+            className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
           >
-            <RefreshCw className="w-4 h-4" />
             Scan
           </button>
           <button
@@ -257,25 +244,15 @@ export function WebsiteBuilder() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-amber-50 border border-amber-200 rounded-xl px-5 py-4">
-          <div className="flex items-start gap-3">
-            <Globe className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900">Changes update immediately</h3>
-              <p className="text-sm text-gray-600 mt-0.5">
-                All edits save directly to your website. No technical skills needed.
-              </p>
-            </div>
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900">Changes update immediately</h3>
+            <p className="text-sm text-gray-600 mt-0.5">All edits save directly to your website. No technical skills needed.</p>
           </div>
         </div>
         <div className="bg-blue-50 border border-blue-200 rounded-xl px-5 py-4">
-          <div className="flex items-start gap-3">
-            <HelpCircle className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900">Need help?</h3>
-              <p className="text-sm text-gray-600 mt-0.5">
-                Click any page name to start editing. Use the section sidebar to navigate different parts of each page.
-              </p>
-            </div>
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900">Need help?</h3>
+            <p className="text-sm text-gray-600 mt-0.5">Click any page name to start editing. Use the section sidebar to navigate different parts of each page.</p>
           </div>
         </div>
       </div>
@@ -288,31 +265,28 @@ function ContentAuditBanner({ audit, onDismiss }: { audit: ContentAudit; onDismi
   return (
     <div className={`rounded-xl border px-5 py-4 ${missingCount > 0 ? 'bg-amber-50 border-amber-200' : 'bg-green-50 border-green-200'}`}>
       <div className="flex items-start justify-between">
-        <div className="flex items-start gap-3">
-          {missingCount > 0 ? <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" /> : <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 shrink-0" />}
-          <div>
-            <h3 className="text-sm font-semibold text-gray-900">
-              {missingCount > 0
-                ? `Found ${missingCount} section${missingCount > 1 ? 's' : ''} not in the builder`
-                : 'All website content is connected to the builder'}
-            </h3>
-            <div className="mt-2 space-y-1">
-              {audit.pages.filter(p => p.missingSections.length > 0).map(p => (
-                <div key={p.pageName} className="text-sm text-gray-600">
-                  <span className="font-medium">{p.pageName}:</span>{' '}
-                  {p.missingSections.map(s => s.friendlyName).join(', ')}
-                </div>
-              ))}
-            </div>
-            {missingCount > 0 && (
-              <button className="mt-3 text-sm font-medium text-amber-600 hover:text-amber-700">
-                Import missing content into builder
-              </button>
-            )}
+        <div>
+          <h3 className="text-sm font-semibold text-gray-900">
+            {missingCount > 0
+              ? `Found ${missingCount} section${missingCount > 1 ? 's' : ''} not in the builder`
+              : 'All website content is connected to the builder'}
+          </h3>
+          <div className="mt-2 space-y-1">
+            {audit.pages.filter(p => p.missingSections.length > 0).map(p => (
+              <div key={p.pageName} className="text-sm text-gray-600">
+                <span className="font-medium">{p.pageName}:</span>{' '}
+                {p.missingSections.map(s => s.friendlyName).join(', ')}
+              </div>
+            ))}
           </div>
+          {missingCount > 0 && (
+            <button className="mt-3 text-sm font-medium text-amber-600 hover:text-amber-700">
+              Import missing content into builder
+            </button>
+          )}
         </div>
-        <button onClick={onDismiss} className="p-1 hover:bg-black/5 rounded">
-          <X className="w-4 h-4 text-gray-400" />
+        <button onClick={onDismiss} className="text-xs text-gray-400 hover:text-gray-600">
+          Close
         </button>
       </div>
     </div>
@@ -379,7 +353,6 @@ function PageListItem({ page, onEdit, onToggleVisibility, onTogglePublished, onE
         <div className={`w-2 h-2 rounded-full shrink-0 ${page.isVisible ? 'bg-green-400' : 'bg-gray-300'}`} />
         <button onClick={onEdit} className="flex-1 text-left group/edit">
           <div className="flex items-center gap-2">
-            {PAGE_ICONS[page.slug] || <FileText className="w-4 h-4 text-gray-400" />}
             <span className="text-sm font-medium text-gray-900 group-hover/edit:text-amber-600 transition-colors">{page.name}</span>
             <span className="text-xs text-gray-400">/{page.slug}</span>
           </div>
@@ -395,11 +368,11 @@ function PageListItem({ page, onEdit, onToggleVisibility, onTogglePublished, onE
         <button onClick={onEditSeo} className="text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-100 px-2 py-1 rounded transition-colors opacity-0 group-hover:opacity-100">
           SEO
         </button>
-        <label className={`relative inline-flex h-5 w-9 items-center rounded-full cursor-pointer transition-colors ${page.isVisible ? 'bg-amber-500' : 'bg-gray-200'}`} title={page.isVisible ? 'Visible on website' : 'Hidden from website'}>
+        <label className={`relative inline-flex h-5 w-9 items-center rounded-full cursor-pointer transition-colors ${page.isVisible ? 'bg-amber-500' : 'bg-gray-200'}`}>
           <input type="checkbox" checked={page.isVisible} onChange={e => onToggleVisibility(e.target.checked)} className="sr-only" />
           <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm transition-transform ${page.isVisible ? 'translate-x-4' : 'translate-x-0.5'}`} />
         </label>
-        <label className={`relative inline-flex h-5 w-9 items-center rounded-full cursor-pointer transition-colors ${page.isPublished ? 'bg-amber-500' : 'bg-gray-200'}`} title={page.isPublished ? 'Published' : 'Not published'}>
+        <label className={`relative inline-flex h-5 w-9 items-center rounded-full cursor-pointer transition-colors ${page.isPublished ? 'bg-amber-500' : 'bg-gray-200'}`}>
           <input type="checkbox" checked={page.isPublished} onChange={e => onTogglePublished(e.target.checked)} className="sr-only" />
           <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm transition-transform ${page.isPublished ? 'translate-x-4' : 'translate-x-0.5'}`} />
         </label>
@@ -446,8 +419,8 @@ function VisualPageEditor({ page, pageData, selectedSectionKey, setSelectedSecti
     <div className="flex flex-col h-[calc(100vh-8rem)] -mx-6 -mb-6">
       <div className="flex items-center justify-between px-6 py-3 bg-white border-b border-gray-100 shrink-0">
         <div className="flex items-center gap-3">
-          <button onClick={onBack} className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors" title="Back to pages">
-            <ArrowLeft className="w-5 h-5" />
+          <button onClick={onBack} className="text-sm text-gray-400 hover:text-gray-600 transition-colors">
+            Back
           </button>
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-bold text-gray-900">{page.name}</h1>
@@ -457,23 +430,18 @@ function VisualPageEditor({ page, pageData, selectedSectionKey, setSelectedSecti
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center bg-gray-100 rounded-lg p-0.5">
-            <button onClick={() => setPreviewDevice('desktop')} className={`p-2 rounded-md transition-colors ${previewDevice === 'desktop' ? 'bg-white shadow-sm text-gray-700' : 'text-gray-400 hover:text-gray-600'}`} title="Desktop view">
-              <Monitor className="w-4 h-4" />
-            </button>
-            <button onClick={() => setPreviewDevice('tablet')} className={`p-2 rounded-md transition-colors ${previewDevice === 'tablet' ? 'bg-white shadow-sm text-gray-700' : 'text-gray-400 hover:text-gray-600'}`} title="Tablet view">
-              <Tablet className="w-4 h-4" />
-            </button>
-            <button onClick={() => setPreviewDevice('mobile')} className={`p-2 rounded-md transition-colors ${previewDevice === 'mobile' ? 'bg-white shadow-sm text-gray-700' : 'text-gray-400 hover:text-gray-600'}`} title="Mobile view">
-              <Smartphone className="w-4 h-4" />
-            </button>
+            {(['desktop', 'tablet', 'mobile'] as const).map(d => (
+              <button key={d} onClick={() => setPreviewDevice(d)} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${previewDevice === d ? 'bg-white shadow-sm text-gray-700' : 'text-gray-400 hover:text-gray-600'}`}>
+                {d.charAt(0).toUpperCase() + d.slice(1)}
+              </button>
+            ))}
           </div>
           <div className="w-px h-6 bg-gray-200" />
-          <label className={`relative inline-flex h-6 w-11 items-center rounded-full cursor-pointer transition-colors ${page.isPublished ? 'bg-amber-500' : 'bg-gray-200'}`} title={page.isPublished ? 'Published' : 'Not published'}>
+          <label className={`relative inline-flex h-6 w-11 items-center rounded-full cursor-pointer transition-colors ${page.isPublished ? 'bg-amber-500' : 'bg-gray-200'}`}>
             <input type="checkbox" checked={page.isPublished} onChange={e => togglePublishStatus(page.id, e.target.checked)} className="sr-only" />
             <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${page.isPublished ? 'translate-x-5' : 'translate-x-0.5'}`} />
           </label>
-          <RouterLink to={`/${page.slug}`} target="_blank" className="px-3 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center gap-1.5">
-            <Eye className="w-4 h-4" />
+          <RouterLink to={`/${page.slug}`} target="_blank" className="px-3 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
             View Live
           </RouterLink>
           <button onClick={onSave} disabled={saving} className="px-5 py-2 text-sm font-medium rounded-lg text-white bg-amber-500 hover:bg-amber-600 disabled:opacity-50 transition-colors">
@@ -487,8 +455,8 @@ function VisualPageEditor({ page, pageData, selectedSectionKey, setSelectedSecti
           <div className="p-3 space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Page Sections</h3>
-              <button className="p-1 hover:bg-gray-200 rounded text-gray-400 hover:text-gray-600" title="Add new section">
-                <Plus className="w-3.5 h-3.5" />
+              <button className="text-xs text-gray-400 hover:text-gray-600">
+                Add
               </button>
             </div>
             <div className="space-y-0.5">
@@ -497,24 +465,20 @@ function VisualPageEditor({ page, pageData, selectedSectionKey, setSelectedSecti
                 const isSelected = selectedSectionKey === section.key
                 const sectionName = FRIENDLY_LABELS[section.key] || section.name
                 return (
-                  <div key={section.id} className="group relative">
+                  <div key={section.id} className="flex items-center gap-2">
                     <button
                       onClick={() => setSelectedSectionKey(section.key)}
-                      className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition-all flex items-center gap-2.5 ${
+                      className={`flex-1 text-left px-3 py-2.5 rounded-lg text-sm transition-all ${
                         isSelected
                           ? 'bg-amber-50 text-amber-700 font-medium ring-1 ring-amber-200 shadow-sm'
                           : 'text-gray-600 hover:bg-white hover:shadow-sm'
                       } ${!isVisible ? 'opacity-60' : ''}`}
                     >
-                      <GripVertical className="w-3.5 h-3.5 text-gray-300 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <span className={`w-2 h-2 rounded-full shrink-0 ${isVisible ? 'bg-amber-500' : 'bg-gray-300'}`} />
-                      <span className="truncate">{sectionName}</span>
+                      {sectionName}
                     </button>
-                    <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => toggleLocalVisibility(section.key)} className="p-1 rounded hover:bg-white text-gray-400 hover:text-gray-600" title={isVisible ? 'Hide section' : 'Show section'}>
-                        {isVisible ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                      </button>
-                    </div>
+                    <button onClick={() => toggleLocalVisibility(section.key)} className="text-xs text-gray-400 hover:text-gray-600 shrink-0">
+                      {isVisible ? 'Hide' : 'Show'}
+                    </button>
                   </div>
                 )
               })}
@@ -524,16 +488,10 @@ function VisualPageEditor({ page, pageData, selectedSectionKey, setSelectedSecti
               <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Page Settings</h3>
               <div className="space-y-1">
                 <button className="w-full text-left px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-white hover:shadow-sm transition-all">
-                  <div className="flex items-center gap-2">
-                    <Image className="w-4 h-4 text-gray-400" />
-                    <span>Page Header Image</span>
-                  </div>
+                  Page Header Image
                 </button>
                 <button className="w-full text-left px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-white hover:shadow-sm transition-all">
-                  <div className="flex items-center gap-2">
-                    <Palette className="w-4 h-4 text-gray-400" />
-                    <span>Page Colors</span>
-                  </div>
+                  Page Colors
                 </button>
               </div>
             </div>
@@ -581,9 +539,6 @@ function VisualPageEditor({ page, pageData, selectedSectionKey, setSelectedSecti
             />
           ) : (
             <div className="p-6 text-center text-gray-400">
-              <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mx-auto mb-3">
-                <MousePointer className="w-6 h-6" />
-              </div>
               <p className="text-sm font-medium text-gray-500">Click a section to edit</p>
               <p className="text-xs mt-1">Select a section from the sidebar or click directly on the preview</p>
             </div>
@@ -591,14 +546,6 @@ function VisualPageEditor({ page, pageData, selectedSectionKey, setSelectedSecti
         </div>
       </div>
     </div>
-  )
-}
-
-function MousePointer({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z" />
-    </svg>
   )
 }
 
@@ -632,10 +579,9 @@ function PreviewContent({ page, pageData, localVisibility, selectedSectionKey, o
                   : 'border-dashed border-gray-200'
             } ${!isVisible ? 'opacity-30' : ''}`}
           >
-            <div className={`absolute top-2 right-2 z-10 flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium transition-opacity ${
+            <div className={`absolute top-2 right-2 z-10 px-2 py-1 rounded-md text-xs font-medium transition-opacity ${
               isSelected ? 'opacity-100 bg-amber-500 text-white' : 'opacity-0 group-hover:opacity-100 bg-white/90 text-gray-600 shadow-sm border'
             }`}>
-              <Eye className="w-3 h-3" />
               {sectionName}
             </div>
             <RenderSectionPreview
@@ -774,14 +720,17 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
         <div className="py-16 px-8">
           <div className="max-w-5xl mx-auto">
             <h2 className="text-3xl font-bold text-gray-900 text-center mb-4">{content?.title || 'Our Students'}</h2>
-            <p className="text-gray-500 text-center mb-8 max-w-xl mx-auto">{cmsStrings['home_students_description'] || 'Meet the students'}</p>
+            <p className="text-gray-500 text-center mb-8 max-w-xl mx-auto">{cmsStrings['home_students_description'] || 'Meet the students waiting for sponsorship'}</p>
             <div className="grid grid-cols-3 gap-6">
               {[1, 2, 3].map(i => (
-                <div key={i} className="border border-gray-100 rounded-xl overflow-hidden">
-                  <div className="h-40 bg-gray-100" />
+                <div key={i} className="border border-gray-100 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+                  <div className="h-40 bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center text-amber-400 text-4xl font-light">📸</div>
                   <div className="p-4">
-                    <div className="h-4 bg-gray-100 rounded w-24 mb-2" />
-                    <div className="h-3 bg-gray-50 rounded w-32" />
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-sm font-semibold text-gray-900">Student {i}</h3>
+                      <span className="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Available</span>
+                    </div>
+                    <p className="text-xs text-gray-500">Age {8 + i} &middot; Grade {1 + i}</p>
                   </div>
                 </div>
               ))}
@@ -806,16 +755,18 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
           <div className="max-w-4xl mx-auto">
             <h2 className="text-3xl font-bold text-gray-900 text-center mb-8">{content?.title || 'Testimonials'}</h2>
             <div className="grid grid-cols-2 gap-4">
-              {[1, 2].map(i => (
-                <div key={i} className="bg-white rounded-xl p-5 border border-gray-100">
+              {((content?.testimonials as any[])?.length ? content.testimonials : [1, 2]).map((t: any, i: number) => (
+                <div key={i} className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
                   <div className="flex items-center gap-2 mb-3">
-                    <div className="w-8 h-8 rounded-full bg-amber-100" />
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white text-xs font-bold">
+                      {t?.name?.charAt(0) || 'S'}
+                    </div>
                     <div>
-                      <div className="text-sm font-medium text-gray-700">Supporter</div>
-                      <div className="text-xs text-gray-400">Donor</div>
+                      <div className="text-sm font-medium text-gray-700">{t?.name || 'Supporter'}</div>
+                      <div className="text-xs text-gray-400">{t?.role || 'Donor'}</div>
                     </div>
                   </div>
-                  <p className="text-sm text-gray-600 italic">"Your support makes a real difference."</p>
+                  <p className="text-sm text-gray-600 italic">"{t?.text || 'Your support makes a real difference in these children\'s lives.'}"</p>
                 </div>
               ))}
             </div>
@@ -845,16 +796,33 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
       )
 
     case 'about_mission':
+    case 'about_values':
       return (
         <div className="py-16 px-8">
-          <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-8">
-            <div className="p-6 bg-white rounded-xl border border-gray-100">
-              <h3 className="text-lg font-bold text-gray-900 mb-2">{sectionContent?.title || 'Our Mission'}</h3>
-              <p className="text-gray-600 text-sm">{sectionContent?.description || 'Mission description'}</p>
-            </div>
-            <div className="p-6 bg-white rounded-xl border border-gray-100">
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Our Vision</h3>
-              <p className="text-gray-600 text-sm">{content?.vision || 'Vision description'}</p>
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">{sectionContent?.title || (section.type === 'about_values' ? 'Our Core Values' : 'Our Mission')}</h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              {((content?.values as any[])?.length ? content.values : [
+                { title: 'Education', desc: 'Quality education for every child' },
+                { title: 'Compassion', desc: 'Supporting with kindness and care' },
+              ]).map((v: any, i: number) => (
+                <div key={i} className="p-5 bg-white rounded-xl border border-gray-100">
+                  <h3 className="text-sm font-bold text-gray-900 mb-1">{v.title || 'Value'}</h3>
+                  <p className="text-xs text-gray-600">{v.desc || 'Description'}</p>
+                </div>
+              ))}
+              {section.type === 'about_mission' && !content?.values && (
+                <>
+                  <div className="p-5 bg-white rounded-xl border border-gray-100">
+                    <h3 className="text-sm font-bold text-gray-900 mb-1">{sectionContent?.title || 'Our Mission'}</h3>
+                    <p className="text-xs text-gray-600">{sectionContent?.description || 'Mission description goes here'}</p>
+                  </div>
+                  <div className="p-5 bg-white rounded-xl border border-gray-100">
+                    <h3 className="text-sm font-bold text-gray-900 mb-1">Our Vision</h3>
+                    <p className="text-xs text-gray-600">{content?.vision || 'Vision description goes here'}</p>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -866,7 +834,7 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
           <div className="max-w-3xl mx-auto">
             <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">Our Journey</h2>
             <div className="space-y-4">
-              {(content?.milestones as any[] || []).map((m: any, i: number) => (
+              {(content?.milestones as any[] || []).length > 0 ? content.milestones.map((m: any, i: number) => (
                 <div key={i} className="flex items-center gap-4">
                   <div className="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold">{i + 1}</div>
                   <div>
@@ -874,7 +842,9 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
                     <div className="text-gray-800">{m.event}</div>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <p className="text-center text-gray-300 italic">Add milestones to show your journey</p>
+              )}
             </div>
           </div>
         </div>
@@ -900,13 +870,340 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
         </div>
       )
 
+    case 'contact_form':
+      return (
+        <div className="py-12 px-8 bg-gray-50">
+          <div className="max-w-xl mx-auto">
+            <h2 className="text-xl font-bold text-gray-900 text-center mb-6">{content?.title || 'Get in Touch'}</h2>
+            <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-4">
+              <div className="h-8 bg-gray-50 rounded w-full" />
+              <div className="h-8 bg-gray-50 rounded w-full" />
+              <div className="h-20 bg-gray-50 rounded w-full" />
+              <div className="h-8 bg-amber-500 rounded w-24" />
+            </div>
+          </div>
+        </div>
+      )
+
+    case 'sponsor_hero':
+    case 'donate_hero':
+    case 'volunteer_hero':
+      return (
+        <div className="relative min-h-[250px] flex items-center bg-gradient-to-br from-stone-800 to-amber-900">
+          <div className="relative w-full px-8 py-12">
+            <div className="max-w-2xl mx-auto text-center">
+              <h1 className="text-3xl font-bold text-white mb-3">{sectionContent?.title || (section.type === 'donate_hero' ? 'Make a Donation' : section.type === 'volunteer_hero' ? 'Volunteer With Us' : 'Sponsorship Program')}</h1>
+              {sectionContent?.description && <p className="text-base text-gray-300">{sectionContent.description}</p>}
+              <div className="flex gap-3 justify-center mt-6">
+                <span className="px-5 py-2 rounded-lg bg-amber-500 text-white text-sm font-medium">Get Started</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+
+    case 'sponsor_steps':
+    case 'donate_process':
+      return (
+        <div className="py-12 px-8">
+          <div className="max-w-lg mx-auto">
+            <h2 className="text-xl font-bold text-gray-900 text-center mb-8">{content?.title || (section.type === 'donate_process' ? 'How It Works' : 'How to Sponsor')}</h2>
+            <div className="space-y-4">
+              {((content?.steps as any[])?.length ? content.steps : [
+                { title: 'Browse', desc: 'Find a child to sponsor' },
+                { title: 'Donate', desc: 'Set up your contribution' },
+                { title: 'Connect', desc: 'Build a relationship' },
+              ]).map((s: any, i: number) => (
+                <div key={i} className="flex items-center gap-4 bg-white rounded-lg border border-amber-100 p-4">
+                  <span className="w-7 h-7 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold shrink-0">{i + 1}</span>
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-900">{s.title}</h3>
+                    <p className="text-xs text-gray-500">{s.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )
+
+    case 'sponsor_benefits':
+      return (
+        <div className="py-12 px-8 bg-gray-50">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-xl font-bold text-gray-900 text-center mb-6">{content?.title || 'Sponsorship Benefits'}</h2>
+            <div className="grid md:grid-cols-2 gap-4">
+              {((content?.benefits as any[])?.length ? content.benefits : [
+                { text: 'Education support for a child' },
+                { text: 'Monthly progress updates' },
+              ]).map((b: any, i: number) => (
+                <div key={i} className="flex items-center gap-3 bg-white rounded-lg border border-gray-100 p-4">
+                  <span className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold">✓</span>
+                  <span className="text-sm text-gray-700">{b.text || 'Benefit description'}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )
+
+    case 'sponsor_cta':
+      return (
+        <div className="py-12 px-8 bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 text-center">
+          <div className="max-w-xl mx-auto">
+            <h2 className="text-2xl font-bold text-white mb-3">{content?.title || 'Make a Difference Today'}</h2>
+            <p className="text-white/90 text-sm mb-5">{content?.description || 'Sponsor a child and change a life'}</p>
+            <span className="inline-block px-5 py-2.5 rounded-lg bg-white text-amber-600 font-medium text-sm">{content?.button_text || 'Sponsor Now'}</span>
+          </div>
+        </div>
+      )
+
+    case 'donate_impact':
+      return (
+        <div className="py-12 px-8">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-xl font-bold text-gray-900 text-center mb-6">{content?.title || 'Your Impact'}</h2>
+            <div className="grid grid-cols-3 gap-4">
+              {(content?.impact_cards as any[])?.length > 0 ? content.impact_cards.slice(0, 3).map((c: any, i: number) => (
+                <div key={i} className="bg-white rounded-xl border border-amber-100 p-5 text-center shadow-sm">
+                  <div className="text-lg font-bold text-amber-600">${c.amount || '50'}</div>
+                  <p className="text-xs text-gray-500 mt-1">{c.description || 'Provides school supplies for a month'}</p>
+                </div>
+              )) : (
+                <>
+                  <div className="bg-white rounded-xl border border-amber-100 p-5 text-center shadow-sm">
+                    <div className="text-lg font-bold text-amber-600">$50</div>
+                    <p className="text-xs text-gray-500 mt-1">School supplies for a month</p>
+                  </div>
+                  <div className="bg-white rounded-xl border border-amber-100 p-5 text-center shadow-sm">
+                    <div className="text-lg font-bold text-amber-600">$100</div>
+                    <p className="text-xs text-gray-500 mt-1">Nutrition program</p>
+                  </div>
+                  <div className="bg-white rounded-xl border border-amber-100 p-5 text-center shadow-sm">
+                    <div className="text-lg font-bold text-amber-600">$200</div>
+                    <p className="text-xs text-gray-500 mt-1">Full sponsorship</p>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )
+
+    case 'faq_list':
+      return (
+        <div className="py-12 px-8">
+          <div className="max-w-2xl mx-auto">
+            <h2 className="text-xl font-bold text-gray-900 text-center mb-6">{content?.title || 'Frequently Asked Questions'}</h2>
+            <div className="space-y-2">
+              {((content?.faqs as any[])?.length ? content.faqs : [
+                { question: 'How does sponsorship work?', answer: 'You support a child\'s education through monthly donations.' },
+                { question: 'Can I choose my child?', answer: 'Yes, you can browse profiles and select a child to sponsor.' },
+              ]).map((f: any, i: number) => (
+                <div key={i} className="border border-gray-100 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-gray-900 mb-1">{f.question || 'Question?'}</h3>
+                  <p className="text-xs text-gray-500">{f.answer || 'Answer goes here'}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )
+
+    case 'gallery_grid':
+      return (
+        <div className="py-12 px-8">
+          <div className="max-w-5xl mx-auto">
+            <h2 className="text-xl font-bold text-gray-900 text-center mb-6">{content?.title || 'Photo Gallery'}</h2>
+            <div className="grid grid-cols-3 gap-3">
+              {[1, 2, 3, 4, 5, 6].map(i => (
+                <div key={i} className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center text-gray-300 text-2xl font-light">📷</div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )
+
+    case 'news_grid':
+      return (
+        <div className="py-12 px-8">
+          <div className="max-w-5xl mx-auto">
+            <h2 className="text-xl font-bold text-gray-900 text-center mb-6">{content?.title || 'Latest News'}</h2>
+            <div className="grid grid-cols-3 gap-6">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="border border-gray-100 rounded-xl overflow-hidden">
+                  <div className="h-32 bg-gradient-to-br from-amber-50 to-amber-100" />
+                  <div className="p-4">
+                    <span className="text-[10px] text-amber-600 font-medium">News</span>
+                    <h3 className="text-sm font-semibold text-gray-900 mt-1">News Article Title {i}</h3>
+                    <p className="text-xs text-gray-500 mt-1">Short description of the news article goes here...</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )
+
+    case 'students_grid':
+      return (
+        <div className="py-12 px-8">
+          <div className="max-w-5xl mx-auto">
+            <h2 className="text-xl font-bold text-gray-900 text-center mb-6">{content?.title || 'Our Students'}</h2>
+            <div className="grid grid-cols-3 gap-6">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="border border-gray-100 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+                  <div className="h-36 bg-gradient-to-br from-amber-100 to-amber-200" />
+                  <div className="p-4">
+                    <div className="flex items-center justify-between mb-1">
+                      <h3 className="text-sm font-semibold text-gray-900">Student {i}</h3>
+                      <span className="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Available</span>
+                    </div>
+                    <p className="text-xs text-gray-500">Age {8 + i} &middot; Class {1 + i}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )
+
+    case 'success_stories':
+      return (
+        <div className="py-12 px-8 bg-gray-50">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-xl font-bold text-gray-900 text-center mb-6">{content?.title || 'Success Stories'}</h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              {[1, 2].map(i => (
+                <div key={i} className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500" />
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-900">Student Name</h3>
+                      <p className="text-xs text-gray-400">Graduate {2024 - i}</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-600 leading-relaxed">Through sponsorship, this student was able to complete their education and pursue their dreams.</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )
+
+    case 'activity_feed':
+      return (
+        <div className="py-12 px-8">
+          <div className="max-w-xl mx-auto">
+            <h2 className="text-xl font-bold text-gray-900 text-center mb-6">{content?.title || 'Recent Activity'}</h2>
+            <div className="space-y-3">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="flex items-start gap-3 bg-white rounded-lg border border-gray-100 p-3">
+                  <div className="w-2 h-2 rounded-full bg-amber-500 mt-1.5 shrink-0" />
+                  <div>
+                    <p className="text-xs text-gray-700">Activity update {i} — someone performed an action</p>
+                    <p className="text-[10px] text-gray-400 mt-0.5">{i}h ago</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )
+
+    case 'volunteer_opps':
+      return (
+        <div className="py-12 px-8">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-xl font-bold text-gray-900 text-center mb-6">{content?.title || 'Volunteer Opportunities'}</h2>
+            <div className="grid md:grid-cols-2 gap-4">
+              {((content?.opportunities as any[])?.length ? content.opportunities : [
+                { title: 'Teaching Assistant', desc: 'Help in classrooms', location: 'Kathmandu' },
+                { title: 'Event Coordinator', desc: 'Organize fundraising events', location: 'Remote' },
+              ]).map((o: any, i: number) => (
+                <div key={i} className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
+                  <h3 className="text-sm font-semibold text-gray-900">{o.title || 'Opportunity'}</h3>
+                  <p className="text-xs text-gray-500 mt-1">{o.desc || 'Description'}</p>
+                  <span className="text-[10px] text-amber-600 font-medium mt-2 inline-block">{o.location || 'Various'}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )
+
+    case 'volunteer_form':
+      return (
+        <div className="py-12 px-8 bg-gray-50">
+          <div className="max-w-xl mx-auto">
+            <h2 className="text-xl font-bold text-gray-900 text-center mb-6">{content?.title || 'Apply to Volunteer'}</h2>
+            <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-4">
+              <div className="h-8 bg-gray-50 rounded w-full" />
+              <div className="h-8 bg-gray-50 rounded w-full" />
+              <div className="h-8 bg-gray-50 rounded w-full" />
+              <div className="h-20 bg-gray-50 rounded w-full" />
+              <div className="h-8 bg-amber-500 rounded w-32" />
+            </div>
+          </div>
+        </div>
+      )
+
+    case 'privacy_content':
+    case 'terms_content':
+    case 'transparency_content':
+      return (
+        <div className="py-12 px-8 max-w-3xl mx-auto">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">{sectionContent?.title || (section.type === 'privacy_content' ? 'Privacy Policy' : section.type === 'terms_content' ? 'Terms of Service' : 'Transparency')}</h1>
+          <div className="prose prose-sm text-gray-600 space-y-3">
+            <p>{sectionContent?.description || 'This section contains the full text content. Click to edit and add your content here.'}</p>
+            {content?.sections?.map?.((s: any, i: number) => (
+              <div key={i}>
+                <h3 className="text-base font-semibold text-gray-900">{s.heading}</h3>
+                <p className="text-sm">{s.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )
+
+    case 'campaigns_list':
+      return (
+        <div className="py-12 px-8">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-xl font-bold text-gray-900 text-center mb-6">{content?.title || 'Our Campaigns'}</h2>
+            <div className="grid md:grid-cols-2 gap-4">
+              {[1, 2].map(i => (
+                <div key={i} className="bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm">
+                  <div className="h-28 bg-gradient-to-br from-amber-100 to-orange-100" />
+                  <div className="p-4">
+                    <h3 className="text-sm font-semibold text-gray-900">Campaign {i}</h3>
+                    <div className="mt-2 bg-gray-100 rounded-full h-2">
+                      <div className="bg-amber-500 rounded-full h-2" style={{ width: `${40 + i * 20}%` }} />
+                    </div>
+                    <p className="text-[10px] text-gray-400 mt-1">{40 + i * 20}% funded</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )
+
     default:
       return (
         <div className="py-12 px-8">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-2xl font-bold text-gray-900 mb-3">{sectionContent?.title || section.name}</h2>
             {sectionContent?.description && <p className="text-gray-600">{sectionContent.description}</p>}
-            {!sectionContent?.title && !sectionContent?.description && (
+            {content && Object.keys(content).length > 0 && (
+              <div className="mt-3 text-xs text-gray-400">
+                {Object.entries(content).slice(0, 3).map(([k, v]) => (
+                  <div key={k} className="truncate"><span className="text-gray-500 capitalize">{k.replace(/_/g, ' ')}:</span> {typeof v === 'string' ? v : '...'}</div>
+                ))}
+                {Object.keys(content).length > 3 && <div className="text-gray-300">+{Object.keys(content).length - 3} more fields</div>}
+              </div>
+            )}
+            {!sectionContent?.title && !sectionContent?.description && (!content || Object.keys(content).length === 0) && (
               <p className="text-gray-300 italic">Click to edit this section</p>
             )}
           </div>
@@ -926,12 +1223,7 @@ function SectionSettingsPanel({ section, pageData, editorTab, setEditorTab, isVi
   const sectionContent = pageData.sections[section.key]
   const sectionName = FRIENDLY_LABELS[section.key] || section.name
 
-  const tabs: { id: EditorTab; label: string; icon: React.ReactNode }[] = [
-    { id: 'content', label: 'Content', icon: <FileText className="w-3.5 h-3.5" /> },
-    { id: 'design', label: 'Design', icon: <Palette className="w-3.5 h-3.5" /> },
-    { id: 'layout', label: 'Layout', icon: <LayoutIcon className="w-3.5 h-3.5" /> },
-    { id: 'advanced', label: 'Advanced', icon: <Code className="w-3.5 h-3.5" /> },
-  ]
+  const tabs: EditorTab[] = ['content', 'design', 'layout', 'advanced']
 
   return (
     <div className="flex flex-col h-full">
@@ -941,7 +1233,7 @@ function SectionSettingsPanel({ section, pageData, editorTab, setEditorTab, isVi
             <h3 className="text-sm font-semibold text-gray-900">{sectionName}</h3>
             <p className="text-xs text-gray-400 capitalize">{section.type.replace(/_/g, ' ')}</p>
           </div>
-          <label className={`relative inline-flex h-5 w-9 items-center rounded-full cursor-pointer transition-colors ${isVisible ? 'bg-amber-500' : 'bg-gray-200'}`} title={isVisible ? 'Visible on page' : 'Hidden from page'}>
+          <label className={`relative inline-flex h-5 w-9 items-center rounded-full cursor-pointer transition-colors ${isVisible ? 'bg-amber-500' : 'bg-gray-200'}`}>
             <input type="checkbox" checked={isVisible} onChange={onToggleVisibility} className="sr-only" />
             <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm transition-transform ${isVisible ? 'translate-x-4' : 'translate-x-0.5'}`} />
           </label>
@@ -949,14 +1241,13 @@ function SectionSettingsPanel({ section, pageData, editorTab, setEditorTab, isVi
         <div className="flex border-b border-gray-100">
           {tabs.map(tab => (
             <button
-              key={tab.id}
-              onClick={() => setEditorTab(tab.id)}
-              className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
-                editorTab === tab.id ? 'border-amber-500 text-amber-600' : 'border-transparent text-gray-400 hover:text-gray-600'
+              key={tab}
+              onClick={() => setEditorTab(tab)}
+              className={`px-3 py-2 text-xs font-medium capitalize border-b-2 transition-colors ${
+                editorTab === tab ? 'border-amber-500 text-amber-600' : 'border-transparent text-gray-400 hover:text-gray-600'
               }`}
             >
-              {tab.icon}
-              {tab.label}
+              {tab}
             </button>
           ))}
         </div>
@@ -1013,11 +1304,8 @@ function ContentEditorPanel({ sectionContent }: {
           <label className="block text-xs font-medium text-gray-500 mb-1.5">Images</label>
           <div className="grid grid-cols-2 gap-2">
             {sectionContent.images.map((img: any, i: number) => (
-              <div key={i} className="relative group">
+              <div key={i}>
                 <img src={img.url} alt={img.alt} className="w-full h-16 object-cover rounded-lg" />
-                <button className="absolute top-1 right-1 p-1 bg-black/50 rounded text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Upload className="w-3 h-3" />
-                </button>
               </div>
             ))}
           </div>
@@ -1050,25 +1338,15 @@ function ContentEditorPanel({ sectionContent }: {
       <div className="pt-3">
         <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">Quick Actions</h4>
         <div className="grid grid-cols-2 gap-2">
-          <button className="flex items-center gap-1.5 px-3 py-2 bg-gray-50 rounded-lg text-xs text-gray-600 hover:bg-gray-100 transition-colors">
-            <Image className="w-3.5 h-3.5" />
+          <button className="px-3 py-2 bg-gray-50 rounded-lg text-xs text-gray-600 hover:bg-gray-100 transition-colors">
             Change Image
           </button>
-          <button className="flex items-center gap-1.5 px-3 py-2 bg-gray-50 rounded-lg text-xs text-gray-600 hover:bg-gray-100 transition-colors">
-            <LinkIcon className="w-3.5 h-3.5" />
+          <button className="px-3 py-2 bg-gray-50 rounded-lg text-xs text-gray-600 hover:bg-gray-100 transition-colors">
             Edit Links
           </button>
         </div>
       </div>
     </div>
-  )
-}
-
-function LinkIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-    </svg>
   )
 }
 
@@ -1093,10 +1371,8 @@ function DesignEditorPanel({}: { section: CmsSection; sectionContent: any }) {
       <div>
         <label className="block text-xs font-medium text-gray-500 mb-1.5">Text Alignment</label>
         <div className="flex gap-1">
-          {[AlignLeft, AlignCenter, AlignRight].map((Icon, i) => (
-            <button key={i} className="flex-1 p-2 bg-gray-50 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors">
-              <Icon className="w-4 h-4 mx-auto" />
-            </button>
+          {['Left', 'Center', 'Right'].map(a => (
+            <button key={a} className="flex-1 px-3 py-2 bg-gray-50 rounded-lg text-xs text-gray-600 hover:bg-gray-100 transition-colors">{a}</button>
           ))}
         </div>
       </div>
@@ -1163,10 +1439,7 @@ function AdvancedEditorPanel({}: { section: CmsSection; sectionContent: any }) {
   return (
     <div className="space-y-5">
       <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-        <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-amber-600" />
-          <p className="text-xs text-amber-800">Advanced options for experienced users</p>
-        </div>
+        <p className="text-xs text-amber-800">Advanced options for experienced users</p>
       </div>
       <div>
         <div className="flex items-center justify-between">
@@ -1214,19 +1487,14 @@ function SiteSettingsView({ onBack, cmsStrings }: {
 }) {
   const [activeTab, setActiveTab] = useState<'branding' | 'theme' | 'typography' | 'footer' | 'seo'>('branding')
 
-  const tabs = [
-    { id: 'branding' as const, label: 'Branding', icon: <Palette className="w-4 h-4" /> },
-    { id: 'theme' as const, label: 'Theme Colors', icon: <Palette className="w-4 h-4" /> },
-    { id: 'typography' as const, label: 'Fonts', icon: <Type className="w-4 h-4" /> },
-    { id: 'footer' as const, label: 'Footer', icon: <FileText className="w-4 h-4" /> },
-    { id: 'seo' as const, label: 'SEO', icon: <Globe className="w-4 h-4" /> },
-  ]
+  const tabs = ['branding', 'theme', 'typography', 'footer', 'seo'] as const
+  const tabLabels: Record<string, string> = { branding: 'Branding', theme: 'Theme Colors', typography: 'Fonts', footer: 'Footer', seo: 'SEO' }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <button onClick={onBack} className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-          <ArrowLeft className="w-5 h-5" />
+        <button onClick={onBack} className="text-sm text-gray-400 hover:text-gray-600 transition-colors">
+          Back
         </button>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Global Site Settings</h1>
@@ -1237,14 +1505,13 @@ function SiteSettingsView({ onBack, cmsStrings }: {
       <div className="flex gap-2 border-b border-gray-200">
         {tabs.map(tab => (
           <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === tab.id ? 'border-amber-500 text-amber-600' : 'border-transparent text-gray-500 hover:text-gray-700'
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === tab ? 'border-amber-500 text-amber-600' : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
           >
-            {tab.icon}
-            {tab.label}
+            {tabLabels[tab]}
           </button>
         ))}
       </div>
@@ -1259,9 +1526,7 @@ function SiteSettingsView({ onBack, cmsStrings }: {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Logo</label>
               <div className="flex items-center gap-4">
-                <div className="w-20 h-20 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400">
-                  <Image className="w-8 h-8" />
-                </div>
+                <div className="w-20 h-20 bg-gray-100 rounded-xl" />
                 <button className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Upload Logo</button>
                 <button className="px-4 py-2 text-sm text-red-500 hover:bg-red-50 rounded-lg">Remove</button>
               </div>
@@ -1269,9 +1534,7 @@ function SiteSettingsView({ onBack, cmsStrings }: {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Favicon (browser tab icon)</label>
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
-                  <Image className="w-5 h-5" />
-                </div>
+                <div className="w-10 h-10 bg-gray-100 rounded-lg" />
                 <button className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Upload Favicon</button>
               </div>
             </div>
@@ -1457,8 +1720,8 @@ function SeoEditorView({ page, onSave, onBack }: {
   return (
     <div className="max-w-2xl space-y-6">
       <div className="flex items-center gap-3">
-        <button onClick={onBack} className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600">
-          <ArrowLeft className="w-5 h-5" />
+        <button onClick={onBack} className="text-sm text-gray-400 hover:text-gray-600">
+          Back
         </button>
         <div>
           <h1 className="text-xl font-bold text-gray-900">SEO Settings for {page.name}</h1>
