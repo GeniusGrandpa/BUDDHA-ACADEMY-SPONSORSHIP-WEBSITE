@@ -34,6 +34,7 @@ export type PermissionCode =
   | 'content.navigation' | 'content.settings' | 'content.announcements'
   | 'content.partners' | 'content.blocks' | 'content.seo'
   | 'content.media.folders' | 'content.scheduling'
+  | 'content.legal'
 
 export const ROLE_NAMES: Record<Role, string> = {
   super_admin: 'Super Admin',
@@ -120,6 +121,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, PermissionCode[]> = {
     'content.navigation', 'content.settings', 'content.announcements',
     'content.partners', 'content.blocks', 'content.seo',
     'content.media.folders', 'content.scheduling',
+    'content.legal',
   ],
   admin: [
     'users.read',
@@ -148,6 +150,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, PermissionCode[]> = {
     'content.navigation', 'content.settings', 'content.announcements',
     'content.partners', 'content.blocks', 'content.seo',
     'content.media.folders', 'content.scheduling',
+    'content.legal',
   ],
   finance_manager: [
     'users.read',
@@ -270,6 +273,7 @@ export const ALL_PERMISSIONS: PermissionGroup[] = [
       { code: 'content.blocks', name: 'Manage Page Blocks', description: 'Manage page builder blocks and layout' },
       { code: 'content.seo', name: 'Manage SEO', description: 'Edit SEO metadata for pages' },
       { code: 'content.scheduling', name: 'Content Scheduling', description: 'Schedule content publishing and unpublishing' },
+      { code: 'content.legal', name: 'Manage Legal Pages', description: 'Edit Privacy Policy and Terms & Conditions pages' },
     ],
   },
   {

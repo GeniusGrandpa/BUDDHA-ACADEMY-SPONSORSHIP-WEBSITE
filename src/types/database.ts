@@ -2659,6 +2659,150 @@ export interface Database {
           },
         ]
       }
+      legal_pages: {
+        Row: {
+          id: string
+          type: 'privacy_policy' | 'terms_conditions' | 'cookie_policy' | 'donation_policy'
+          title: string
+          slug: string
+          meta_title: string
+          meta_description: string
+          status: 'draft' | 'published' | 'hidden'
+          effective_date: string | null
+          last_reviewed_at: string | null
+          published_at: string | null
+          created_by: string | null
+          updated_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          type: 'privacy_policy' | 'terms_conditions' | 'cookie_policy' | 'donation_policy'
+          title: string
+          slug: string
+          meta_title?: string
+          meta_description?: string
+          status?: 'draft' | 'published' | 'hidden'
+          effective_date?: string | null
+          last_reviewed_at?: string | null
+          published_at?: string | null
+          created_by?: string | null
+          updated_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          type?: 'privacy_policy' | 'terms_conditions' | 'cookie_policy' | 'donation_policy'
+          title?: string
+          slug?: string
+          meta_title?: string
+          meta_description?: string
+          status?: 'draft' | 'published' | 'hidden'
+          effective_date?: string | null
+          last_reviewed_at?: string | null
+          published_at?: string | null
+          created_by?: string | null
+          updated_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'legal_pages_created_by_fkey',
+            columns: ['created_by'],
+            referencedRelation: 'profiles',
+            referencedColumns: ['id'],
+          },
+          {
+            foreignKeyName: 'legal_pages_updated_by_fkey',
+            columns: ['updated_by'],
+            referencedRelation: 'profiles',
+            referencedColumns: ['id'],
+          },
+        ]
+      }
+      legal_page_sections: {
+        Row: {
+          id: string
+          legal_page_id: string
+          heading: string
+          content: string
+          sort_order: number
+          is_visible: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          legal_page_id: string
+          heading: string
+          content?: string
+          sort_order?: number
+          is_visible?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          legal_page_id?: string
+          heading?: string
+          content?: string
+          sort_order?: number
+          is_visible?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'legal_page_sections_legal_page_id_fkey',
+            columns: ['legal_page_id'],
+            referencedRelation: 'legal_pages',
+            referencedColumns: ['id'],
+          },
+        ]
+      }
+      legal_page_versions: {
+        Row: {
+          id: string
+          legal_page_id: string
+          version_number: number
+          snapshot: Json
+          created_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          legal_page_id: string
+          version_number: number
+          snapshot: Json
+          created_by?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          legal_page_id?: string
+          version_number?: number
+          snapshot?: Json
+          created_by?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'legal_page_versions_legal_page_id_fkey',
+            columns: ['legal_page_id'],
+            referencedRelation: 'legal_pages',
+            referencedColumns: ['id'],
+          },
+          {
+            foreignKeyName: 'legal_page_versions_created_by_fkey',
+            columns: ['created_by'],
+            referencedRelation: 'profiles',
+            referencedColumns: ['id'],
+          },
+        ]
+      }
     }
     Views: Record<string, never>
     Functions: {
@@ -2835,3 +2979,6 @@ export type EmailLog = Database['public']['Tables']['email_logs']['Row']
 export type VolunteerEvent = Database['public']['Tables']['volunteer_events']['Row']
 export type VolunteerEventSignup = Database['public']['Tables']['volunteer_event_signups']['Row']
 export type ContentVersion = Database['public']['Tables']['content_versions']['Row']
+export type LegalPage = Database['public']['Tables']['legal_pages']['Row']
+export type LegalPageSection = Database['public']['Tables']['legal_page_sections']['Row']
+export type LegalPageVersion = Database['public']['Tables']['legal_page_versions']['Row']

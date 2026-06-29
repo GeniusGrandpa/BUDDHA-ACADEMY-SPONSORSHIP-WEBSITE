@@ -1,169 +1,136 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
-interface NavItem {
+interface QuickLink {
   name: string
   href: string
   desc: string
+  color: string
 }
 
-interface SectionGroup {
+const quickLinks: QuickLink[] = [
+  { name: 'Visual Builder', href: '/admin/website/builder', desc: 'Manage all website pages visually', color: 'bg-amber-500' },
+  { name: 'Media Library', href: '/admin/website/media', desc: 'Upload and manage images and files', color: 'bg-blue-500' },
+  { name: 'Navigation', href: '/admin/website/navigation', desc: 'Manage header and footer menus', color: 'bg-purple-500' },
+  { name: 'News & Updates', href: '/admin/website/news', desc: 'Create and publish news articles', color: 'bg-green-500' },
+  { name: 'Gallery', href: '/admin/website/gallery', desc: 'Manage photo albums and galleries', color: 'bg-pink-500' },
+  { name: 'Testimonials', href: '/admin/website/testimonials', desc: 'Manage donor and student testimonials', color: 'bg-indigo-500' },
+  { name: 'SEO', href: '/admin/website/seo', desc: 'Manage meta titles and descriptions', color: 'bg-teal-500' },
+  { name: 'Site Settings', href: '/admin/website/settings', desc: 'Configure global site settings', color: 'bg-orange-500' },
+  { name: 'FAQ', href: '/admin/website/faqs', desc: 'Manage frequently asked questions', color: 'bg-cyan-500' },
+  { name: 'Footer', href: '/admin/website/footer', desc: 'Manage footer content and links', color: 'bg-rose-500' },
+  { name: 'Branding', href: '/admin/website/branding', desc: 'Manage logo, colors, and typography', color: 'bg-violet-500' },
+  { name: 'Donation Content', href: '/admin/website/donation', desc: 'Manage donation page content', color: 'bg-emerald-500' },
+  { name: 'Sponsorship Content', href: '/admin/website/sponsorship', desc: 'Manage sponsorship page content', color: 'bg-yellow-500' },
+  { name: 'Volunteer Content', href: '/admin/website/volunteer', desc: 'Manage volunteer page content', color: 'bg-sky-500' },
+  { name: 'Transparency', href: '/admin/website/transparency', desc: 'Manage transparency and allocation data', color: 'bg-lime-500' },
+  { name: 'Announcements', href: '/admin/website/announcements', desc: 'Manage site-wide announcements', color: 'bg-red-500' },
+  { name: 'Partners', href: '/admin/website/partners', desc: 'Manage partner organizations', color: 'bg-fuchsia-500' },
+  { name: 'Section Visibility', href: '/admin/website/sections', desc: 'Show/hide sections across pages', color: 'bg-gray-500' },
+  { name: 'Version History', href: '/admin/website/versions', desc: 'Track and restore content changes', color: 'bg-stone-500' },
+  { name: 'Site Images', href: '/admin/website/images', desc: 'Manage site-wide image assets', color: 'bg-amber-500' },
+]
+
+interface PageGroup {
   title: string
   subtitle: string
-  icon: string
-  items: NavItem[]
+  pages: { name: string; href: string; desc: string }[]
 }
 
-const groups: SectionGroup[] = [
+const pageGroups: PageGroup[] = [
   {
-    title: 'Home Page',
-    subtitle: 'Every section of your homepage',
-    icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
-    items: [
-      { name: 'Hero Banner', href: '/admin/website/builder', desc: 'Headline, description, CTAs, background image' },
-      { name: 'Welcome Section', href: '/admin/website/homepage', desc: 'About preview, mission introduction' },
-      { name: 'Statistics', href: '/admin/website/homepage', desc: 'Key numbers and impact metrics' },
-      { name: 'Featured Students', href: '/admin/website/homepage', desc: 'Student preview cards on homepage' },
-      { name: 'Donation CTA', href: '/admin/website/homepage', desc: 'Call-to-action banner for donations' },
-      { name: 'Section Visibility', href: '/admin/website/sections', desc: 'Show/hide sections on homepage' },
+    title: 'Main Pages',
+    subtitle: 'Core website pages',
+    pages: [
+      { name: 'Home', href: '/admin/website/builder', desc: 'Hero, welcome, stats, featured students, testimonials, donation CTA' },
+      { name: 'About Us', href: '/admin/website/builder', desc: 'Mission, vision, values, timeline, statistics' },
+      { name: 'Sponsorship', href: '/admin/website/builder', desc: 'Hero, how it works, benefits, CTA' },
+      { name: 'Donations', href: '/admin/website/builder', desc: 'Hero, impact cards, process steps' },
+      { name: 'Contact', href: '/admin/website/builder', desc: 'Header, contact details, contact form' },
     ],
   },
   {
-    title: 'About Page',
-    subtitle: 'Tell your story',
-    icon: 'M13 16h-1v-4h-2m4 0h-6 M17 20H7a2 2 0 01-2-2V6a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V18a2 2 0 01-2 2z',
-    items: [
-      { name: 'Page Header', href: '/admin/website/about', desc: 'Title, subtitle for about page' },
-      { name: 'Mission & Vision', href: '/admin/website/about', desc: 'School mission, vision and description' },
-      { name: 'Statistics', href: '/admin/website/about', desc: 'Years of service, students educated, etc.' },
-      { name: 'Core Values', href: '/admin/website/about', desc: 'Compassion, Education, Community, Integrity' },
-      { name: 'Timeline', href: '/admin/website/about', desc: 'Historical journey milestones' },
-      { name: 'About Images', href: '/admin/website/about', desc: 'Photos displayed on the about page' },
+    title: 'Content Pages',
+    subtitle: 'Dynamic content pages',
+    pages: [
+      { name: 'Students', href: '/admin/website/builder', desc: 'Student profiles, filtering, sponsorship status' },
+      { name: 'Gallery', href: '/admin/website/builder', desc: 'Photo albums, videos, testimonials grid' },
+      { name: 'News/Blog', href: '/admin/website/builder', desc: 'News articles, categories, filtering' },
+      { name: 'FAQ', href: '/admin/website/builder', desc: 'FAQ accordion list' },
+      { name: 'Volunteer', href: '/admin/website/builder', desc: 'Opportunities, events, application form' },
+      { name: 'Campaigns', href: '/admin/website/builder', desc: 'Fundraising goals and progress' },
+      { name: 'Success Stories', href: '/admin/website/builder', desc: 'Student success stories carousel and grid' },
+      { name: 'Activity', href: '/admin/website/builder', desc: 'Recent activity feed' },
+      { name: 'Transparency', href: '/admin/website/builder', desc: 'Allocation chart, verification, impact report' },
     ],
   },
   {
-    title: 'Sponsorship Page',
-    subtitle: 'How sponsorship works',
-    icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z',
-    items: [
-      { name: 'Hero & Header', href: '/admin/website/sponsorship', desc: 'Title, subtitle for sponsorship page' },
-      { name: 'Steps', href: '/admin/website/sponsorship', desc: 'How sponsorship works step by step' },
-      { name: 'Benefits', href: '/admin/website/sponsorship', desc: 'What sponsors provide' },
-      { name: 'CTA Section', href: '/admin/website/sponsorship', desc: 'Call-to-action button and text' },
-    ],
-  },
-  {
-    title: 'Donation Page',
-    subtitle: 'Donation options and impact',
-    icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
-    items: [
-      { name: 'Hero & Header', href: '/admin/website/donation', desc: 'Title, subtitle for donation page' },
-      { name: 'Impact Cards', href: '/admin/website/donation', desc: 'Donation amount cards with descriptions' },
-      { name: 'Process Steps', href: '/admin/website/donation', desc: 'How donation works' },
-      { name: 'Campaigns', href: '/admin/website/campaigns', desc: 'Fundraising goals and progress' },
-    ],
-  },
-  {
-    title: 'Contact Page',
-    subtitle: 'How visitors reach you',
-    icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
-    items: [
-      { name: 'Page Header', href: '/admin/website/contact', desc: 'Title, subtitle for contact page' },
-      { name: 'Contact Details', href: '/admin/website/contact', desc: 'Email, phone, address' },
-      { name: 'Form Labels', href: '/admin/website/contact', desc: 'All form field text and labels' },
-    ],
-  },
-  {
-    title: 'Student Sections',
-    subtitle: 'Student content across the website',
-    icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z',
-    items: [
-      { name: 'Student Stories', href: '/admin/website/stories', desc: 'Success stories and achievements' },
-      { name: 'Featured Students', href: '/admin/website/homepage', desc: 'Students showcased on homepage' },
-      { name: 'Student Profiles', href: '/admin/students', desc: 'Individual student data and profiles' },
-      { name: 'Student Gallery', href: '/admin/website/gallery', desc: 'Photos featuring students' },
-    ],
-  },
-  {
-    title: 'Content Collections',
-    subtitle: 'Dynamic content across your site',
-    icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10',
-    items: [
-      { name: 'Testimonials', href: '/admin/website/testimonials', desc: 'Donor, teacher, and student testimonials' },
-      { name: 'Gallery', href: '/admin/website/gallery', desc: 'Photo albums, event images, captions' },
-      { name: 'News & Updates', href: '/admin/website/news', desc: 'Articles, announcements, organization news' },
-      { name: 'Videos', href: '/admin/website/videos', desc: 'Video gallery and featured media' },
-      { name: 'Partners & Supporters', href: '/admin/website/partners', desc: 'Partner organization logos' },
-      { name: 'FAQ', href: '/admin/website/faqs', desc: 'Frequently asked questions' },
-      { name: 'Announcements', href: '/admin/website/announcements', desc: 'Site-wide announcement banners' },
-      { name: 'Success Stories', href: '/admin/website/stories', desc: 'Full success stories page' },
-    ],
-  },
-  {
-    title: 'Global Settings',
-    subtitle: 'Configure the entire website',
-    icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z',
-    items: [
-      { name: 'Navigation Menu', href: '/admin/website/navigation', desc: 'Header menu, dropdowns, footer menu' },
-      { name: 'Footer', href: '/admin/website/footer', desc: 'Footer columns, links, copyright' },
-      { name: 'Branding', href: '/admin/website/branding', desc: 'Logo, favicon, colors, contact info' },
-      { name: 'SEO', href: '/admin/website/seo', desc: 'Meta titles, descriptions for all pages' },
-      { name: 'Media Library', href: '/admin/website/media', desc: 'Images, videos, document uploads' },
-      { name: 'Site Images', href: '/admin/website/images', desc: 'Site-wide image assets and fallbacks' },
-      { name: 'Site Settings', href: '/admin/website/settings', desc: 'General site configuration' },
-      { name: 'Transparency', href: '/admin/website/transparency', desc: 'Allocation, verification, impact report' },
-      { name: 'Version History', href: '/admin/website/versions', desc: 'Track and restore content changes' },
-    ],
-  },
-  {
-    title: 'Other Pages',
-    subtitle: 'Additional content pages',
-    icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
-    items: [
-      { name: 'Privacy Policy', href: '/admin/website/privacy', desc: 'Privacy policy page content' },
-      { name: 'Terms of Service', href: '/admin/website/terms', desc: 'Terms of service page content' },
-      { name: 'Volunteer Page', href: '/admin/website/volunteer', desc: 'Volunteer opportunities and form' },
+    title: 'Legal Pages',
+    subtitle: 'Policy and legal content',
+    pages: [
+      { name: 'Privacy Policy', href: '/admin/website/builder', desc: 'Privacy policy content and header' },
+      { name: 'Terms of Service', href: '/admin/website/builder', desc: 'Terms of service content and header' },
     ],
   },
 ]
 
 export function WebsiteDashboard() {
+  const navigate = useNavigate()
+
   return (
-    <div className="space-y-10">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Website Management</h1>
-        <p className="text-gray-500 mt-1">Manage your entire website from one place — no coding required</p>
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Website Management</h1>
+          <p className="text-gray-500 mt-1">Manage your entire website from one place</p>
+        </div>
+        <Link
+          to="/admin/website/builder"
+          className="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-lg transition-colors"
+        >
+          Open Visual Builder
+        </Link>
       </div>
 
-      {groups.map((section) => (
-        <div key={section.title}>
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-lg bg-amber-100 text-amber-600">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={section.icon} />
-              </svg>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+        {quickLinks.map(link => (
+          <Link
+            key={link.href}
+            to={link.href}
+            className="group block bg-white border border-gray-100 rounded-xl p-4 hover:border-amber-500/30 hover:shadow-md transition-all"
+          >
+            <div className={`w-8 h-8 rounded-lg ${link.color} bg-opacity-20 flex items-center justify-center mb-2`}>
+              <div className={`w-3 h-3 rounded ${link.color}`} />
             </div>
+            <h3 className="text-sm font-semibold text-gray-900 group-hover:text-amber-600 transition-colors">{link.name}</h3>
+            <p className="text-xs text-gray-400 mt-0.5 leading-relaxed">{link.desc}</p>
+          </Link>
+        ))}
+      </div>
+
+      {pageGroups.map(group => (
+        <div key={group.title}>
+          <div className="flex items-center gap-3 mb-4">
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">{section.title}</h2>
-              <p className="text-sm text-gray-500">{section.subtitle}</p>
+              <h2 className="text-lg font-semibold text-gray-900">{group.title}</h2>
+              <p className="text-sm text-gray-500">{group.subtitle}</p>
             </div>
           </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-            {section.items.map((item) => (
-              <Link
-                key={item.href + item.name}
-                to={item.href}
-                className="group block bg-white border border-gray-100 rounded-xl px-4 py-3.5 hover:border-amber-500/30 hover:shadow-md hover:shadow-amber-500/5 transition-all duration-200"
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {group.pages.map(p => (
+              <button
+                key={p.href + p.name}
+                onClick={() => navigate(p.href)}
+                className="group block bg-white border border-gray-100 rounded-xl px-4 py-3.5 hover:border-amber-500/30 hover:shadow-md hover:shadow-amber-500/5 transition-all text-left"
               >
-                <h3 className="text-sm font-semibold text-gray-900 group-hover:text-amber-600 transition-colors leading-snug">{item.name}</h3>
-                <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{item.desc}</p>
-              </Link>
+                <h3 className="text-sm font-semibold text-gray-900 group-hover:text-amber-600 transition-colors leading-snug">{p.name}</h3>
+                <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{p.desc}</p>
+              </button>
             ))}
           </div>
         </div>
       ))}
 
-      <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl px-6 py-4">
+      <div className="bg-amber-50 border border-amber-200 rounded-xl px-5 py-4">
         <div className="flex items-start gap-3">
           <svg className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-2m4 0h-6" />
@@ -171,7 +138,7 @@ export function WebsiteDashboard() {
           <div>
             <h3 className="text-sm font-semibold text-gray-900">Everything updates instantly</h3>
             <p className="text-sm text-gray-600 mt-0.5">
-              All changes are saved directly to your website. Changes to pages, collections, and settings appear immediately after publishing.
+              All changes are saved directly to the database. Content updates appear on the public website immediately after saving.
             </p>
           </div>
         </div>

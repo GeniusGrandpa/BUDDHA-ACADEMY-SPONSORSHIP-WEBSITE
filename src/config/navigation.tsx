@@ -66,51 +66,6 @@ export const navigationConfig: NavSection[] = [
         href: '/admin/website/builder',
         permission: 'content.homepage',
       },
-      {
-        label: 'Home Page',
-        href: '/admin/website/homepage',
-        permission: 'content.homepage',
-      },
-      {
-        label: 'About Page',
-        href: '/admin/website/about',
-        permission: 'content.homepage',
-      },
-      {
-        label: 'Sponsorship',
-        href: '/admin/website/sponsorship',
-        permission: 'content.homepage',
-      },
-      {
-        label: 'Donations',
-        href: '/admin/website/donation',
-        permission: 'content.homepage',
-      },
-      {
-        label: 'Contact Page',
-        href: '/admin/website/contact',
-        permission: 'content.homepage',
-      },
-      {
-        label: 'Campaigns',
-        href: '/admin/website/campaigns',
-        permission: 'content.homepage',
-      },
-      {
-        label: 'Volunteer Page',
-        href: '/admin/website/volunteer',
-        permission: 'content.settings',
-      },
-      {
-        label: 'Privacy Policy',
-        href: '/admin/website/privacy',
-        permission: 'content.pages',
-      },
-      {
-        label: 'Terms of Service',
-        href: '/admin/website/terms',
-        permission: 'content.pages',
-      },
     ],
   },
   {
@@ -200,6 +155,11 @@ export const navigationConfig: NavSection[] = [
         label: 'Site Settings',
         href: '/admin/website/settings',
         permission: 'content.settings',
+      },
+      {
+        label: 'Legal Pages',
+        href: '/admin/website/privacy',
+        permission: 'content.legal',
       },
       {
         label: 'Section Visibility',
