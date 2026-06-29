@@ -55,11 +55,16 @@ export type SectionType =
   | 'privacy_content'
   | 'terms_content'
   | 'news_grid'
+  | 'cta_banner'
+  | 'donation_form'
+  | 'student_story'
+  | 'map_location'
   | 'students_grid'
   | 'activity_feed'
   | 'success_stories'
   | 'transparency_content'
   | 'campaigns_list'
+  | 'cta_banner'
   | 'custom_content'
 
 export interface ToggleState {
@@ -92,13 +97,14 @@ export const ALL_PUBLIC_PAGES: CmsPage[] = [
     updatedAt: '',
     sections: [
       { id: 'hero', key: 'hero', name: 'Hero Banner', type: 'hero', isVisible: true, isEnabled: true, displayOrder: 1, parentPageId: 'home' },
-      { id: 'welcome', key: 'welcome', name: 'Welcome Section', type: 'welcome', isVisible: true, isEnabled: true, displayOrder: 2, parentPageId: 'home' },
-      { id: 'about_preview', key: 'about_preview', name: 'About Preview', type: 'about_preview', isVisible: true, isEnabled: true, displayOrder: 3, parentPageId: 'home' },
-      { id: 'stats', key: 'stats', name: 'Statistics Bar', type: 'stats', isVisible: true, isEnabled: true, displayOrder: 4, parentPageId: 'home' },
+      { id: 'stats', key: 'stats', name: 'Statistics Bar', type: 'stats', isVisible: true, isEnabled: true, displayOrder: 2, parentPageId: 'home' },
+      { id: 'welcome', key: 'welcome', name: 'Welcome Section', type: 'welcome', isVisible: true, isEnabled: true, displayOrder: 3, parentPageId: 'home' },
+      { id: 'about_preview', key: 'about_preview', name: 'About Preview', type: 'about_preview', isVisible: true, isEnabled: true, displayOrder: 4, parentPageId: 'home' },
       { id: 'featured_students', key: 'featured_students', name: 'Featured Students', type: 'featured_students', isVisible: true, isEnabled: true, displayOrder: 5, parentPageId: 'home' },
       { id: 'sponsorship_steps', key: 'sponsorship_steps', name: 'Sponsorship Steps', type: 'sponsorship_steps', isVisible: true, isEnabled: true, displayOrder: 6, parentPageId: 'home' },
       { id: 'testimonials', key: 'testimonials', name: 'Testimonials', type: 'testimonials', isVisible: true, isEnabled: true, displayOrder: 7, parentPageId: 'home' },
       { id: 'donation_cta', key: 'donation_cta', name: 'Donation CTA', type: 'donation_cta', isVisible: true, isEnabled: true, displayOrder: 8, parentPageId: 'home' },
+      { id: 'cta_banner', key: 'cta_banner', name: 'CTA Banner', type: 'cta_banner', isVisible: true, isEnabled: true, displayOrder: 9, parentPageId: 'home' },
     ],
   },
   {
@@ -120,6 +126,7 @@ export const ALL_PUBLIC_PAGES: CmsPage[] = [
       { id: 'about_stats', key: 'about_stats', name: 'Statistics', type: 'stats', isVisible: true, isEnabled: true, displayOrder: 3, parentPageId: 'about' },
       { id: 'about_values', key: 'about_values', name: 'Core Values', type: 'about_values', isVisible: true, isEnabled: true, displayOrder: 4, parentPageId: 'about' },
       { id: 'about_timeline', key: 'about_timeline', name: 'Timeline', type: 'about_timeline', isVisible: true, isEnabled: true, displayOrder: 5, parentPageId: 'about' },
+      { id: 'about_cta', key: 'about_cta', name: 'CTA Banner', type: 'cta_banner', isVisible: true, isEnabled: true, displayOrder: 6, parentPageId: 'about' },
     ],
   },
   {
@@ -177,6 +184,8 @@ export const ALL_PUBLIC_PAGES: CmsPage[] = [
       { id: 'donate_hero', key: 'donate_hero', name: 'Hero', type: 'donate_hero', isVisible: true, isEnabled: true, displayOrder: 1, parentPageId: 'donations' },
       { id: 'donate_impact', key: 'donate_impact', name: 'Impact Cards', type: 'donate_impact', isVisible: true, isEnabled: true, displayOrder: 2, parentPageId: 'donations' },
       { id: 'donate_process', key: 'donate_process', name: 'How It Works', type: 'donate_process', isVisible: true, isEnabled: true, displayOrder: 3, parentPageId: 'donations' },
+      { id: 'donation_form', key: 'donation_form', name: 'Donation Form', type: 'custom_content', isVisible: true, isEnabled: true, displayOrder: 4, parentPageId: 'donations' },
+      { id: 'student_story', key: 'student_story', name: 'Student Story', type: 'custom_content', isVisible: true, isEnabled: true, displayOrder: 5, parentPageId: 'donations' },
     ],
   },
   {
@@ -250,6 +259,7 @@ export const ALL_PUBLIC_PAGES: CmsPage[] = [
       { id: 'contact_header', key: 'page_header', name: 'Page Header', type: 'page_header', isVisible: true, isEnabled: true, displayOrder: 1, parentPageId: 'contact' },
       { id: 'contact_details', key: 'contact_details', name: 'Contact Details', type: 'contact_details', isVisible: true, isEnabled: true, displayOrder: 2, parentPageId: 'contact' },
       { id: 'contact_form', key: 'contact_form', name: 'Contact Form', type: 'contact_form', isVisible: true, isEnabled: true, displayOrder: 3, parentPageId: 'contact' },
+      { id: 'map_location', key: 'map_location', name: 'Map Location', type: 'custom_content', isVisible: true, isEnabled: true, displayOrder: 4, parentPageId: 'contact' },
     ],
   },
   {

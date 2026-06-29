@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useMemo } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { ArrowRight, FileText, ChevronRight, Globe, Eye, Layers, Home, Info, GraduationCap, Image, Newspaper, Mail, Heart, Users, BookOpen, Megaphone, HelpCircle, Activity, Award, Shield, FileText as FileTextIcon, Settings, Layout, CalendarDays } from 'lucide-react'
+import { ArrowRight, FileText, Globe, Eye, Layers } from 'lucide-react'
 import { useCmsPages } from '../../../hooks/useCmsPages'
 import { ToggleSwitch } from '../../../components/ui/ToggleSwitch'
 import { StatusBadge } from '../../../components/ui/StatusBadge'
@@ -14,29 +14,6 @@ import type { CmsStringMap } from '../../../types/cms-content'
 type ViewMode = 'pages' | 'editor' | 'seo' | 'settings'
 type PreviewDevice = 'desktop' | 'tablet' | 'mobile'
 type EditorTab = 'content' | 'design' | 'layout' | 'advanced'
-
-const PAGE_ICONS: Record<string, any> = {
-  home: Home,
-  about: Info,
-  sponsorship: Heart,
-  students: GraduationCap,
-  donations: Heart,
-  gallery: Image,
-  events: CalendarDays,
-  news: Newspaper,
-  contact: Mail,
-  faq: HelpCircle,
-  volunteer_page: Users,
-  privacy: Shield,
-  terms: FileTextIcon,
-  'success-stories': Award,
-  transparency: Activity,
-  campaigns: Megaphone,
-  activity: Activity,
-  impact: Layout,
-  team: Users,
-  testimonials_page: Award,
-}
 
 const PAGE_CATEGORIES: { label: string; pageIds: string[] }[] = [
   { label: 'Main Pages', pageIds: ['home', 'about', 'sponsorship', 'students', 'donations'] },
@@ -81,12 +58,16 @@ const FRIENDLY_LABELS: Record<string, string> = {
   success_stories: 'Success Stories',
   transparency_content: 'Transparency Content',
   campaigns_list: 'Campaigns',
+  cta_banner: 'CTA Banner',
   custom_content: 'Custom Content',
   events_grid: 'Events',
   impact_content: 'Impact Content',
   team_grid: 'Team Members',
   testimonials_list: 'Testimonials List',
   stories_grid: 'Stories Grid',
+  donation_form: 'Donation Form',
+  student_story: 'Student Story',
+  map_location: 'Map Location',
 }
 
 export function WebsiteBuilder() {
@@ -262,9 +243,7 @@ export function WebsiteBuilder() {
                 return (
                   <div key={cat.label}>
                     <div className="px-3 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{cat.label}</div>
-                    {catPages.map(page => {
-                      const Icon = PAGE_ICONS[page.id] || FileText
-                      return (
+                    {catPages.map(page => (
                         <button
                           key={page.id}
                           onClick={() => {
@@ -275,12 +254,11 @@ export function WebsiteBuilder() {
                             activePage?.id === page.id ? 'bg-amber-50 text-amber-700 font-medium ring-1 ring-amber-200' : 'text-gray-600 hover:bg-gray-50'
                           }`}
                         >
-                          <Icon className="w-4 h-4 shrink-0 opacity-60" />
                           <span className="flex-1 text-left truncate">{page.name}</span>
                           <span className={`w-2 h-2 rounded-full shrink-0 ${page.isVisible ? 'bg-green-400' : 'bg-gray-300'}`} />
                         </button>
                       )
-                    })}
+                    )}
                   </div>
                 )
               })}
@@ -416,18 +394,19 @@ async function scanWebsiteContent(): Promise<ContentAudit> {
     'donate_hero', 'donate_impact', 'donate_process', 'contact_details', 'contact_form',
     'faq_list', 'gallery_grid', 'volunteer_hero', 'volunteer_opps', 'volunteer_form',
     'privacy_content', 'terms_content', 'news_grid', 'students_grid', 'activity_feed',
-    'success_stories', 'transparency_content', 'campaigns_list',
+    'success_stories', 'transparency_content', 'campaigns_list', 'cta_banner',
+    'donation_form', 'student_story', 'map_location',
   ])
 
   const allPageRoutes = [
-    { name: 'Home', slug: 'home', sections: ['hero', 'welcome', 'about_preview', 'stats', 'featured_students', 'sponsorship_steps', 'testimonials', 'donation_cta'] },
-    { name: 'About Us', slug: 'about', sections: ['about_mission', 'about_values', 'about_stats', 'about_timeline'] },
+    { name: 'Home', slug: 'home', sections: ['hero', 'stats', 'welcome', 'about_preview', 'featured_students', 'sponsorship_steps', 'testimonials', 'donation_cta', 'cta_banner'] },
+    { name: 'About Us', slug: 'about', sections: ['about_mission', 'about_values', 'about_stats', 'about_timeline', 'about_cta'] },
     { name: 'Sponsorship', slug: 'sponsor', sections: ['sponsor_hero', 'sponsor_steps', 'sponsor_benefits', 'sponsor_cta'] },
     { name: 'Students', slug: 'students', sections: ['students_grid'] },
-    { name: 'Donations', slug: 'donate', sections: ['donate_hero', 'donate_impact', 'donate_process'] },
+    { name: 'Donations', slug: 'donate', sections: ['donate_hero', 'donate_impact', 'donate_process', 'donation_form', 'student_story'] },
     { name: 'Gallery', slug: 'gallery', sections: ['gallery_grid'] },
     { name: 'News', slug: 'news', sections: ['news_grid'] },
-    { name: 'Contact', slug: 'contact', sections: ['contact_details', 'contact_form'] },
+    { name: 'Contact', slug: 'contact', sections: ['contact_details', 'contact_form', 'map_location'] },
     { name: 'FAQ', slug: 'faq', sections: ['faq_list'] },
     { name: 'Volunteer', slug: 'volunteer', sections: ['volunteer_hero', 'volunteer_opps', 'volunteer_form'] },
     { name: 'Privacy Policy', slug: 'privacy', sections: ['privacy_content'] },
@@ -813,12 +792,13 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
       )
 
     case 'stats':
+      const stats = (content?.stats as any[]) || (pageData.hero?.statistics as any[]) || []
       return (
         <div className="bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 py-12 px-8">
           <div className="max-w-5xl mx-auto">
             {content?.title && <h2 className="text-2xl font-bold text-white text-center mb-8">{content.title}</h2>}
             <div className="grid grid-cols-4 gap-6 text-center">
-              {(pageData.hero?.statistics as any[] || []).map((stat: any, i: number) => (
+              {stats.map((stat: any, i: number) => (
                 <div key={i}>
                   <div className="text-3xl font-bold text-white">{stat.value}</div>
                   <div className="text-white/80 text-sm">{stat.label}</div>
@@ -868,7 +848,7 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
                   {student.photo_url ? (
                     <img src={student.photo_url} alt={student.name} className="h-40 w-full object-cover" />
                   ) : (
-                    <div className="h-40 bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center text-amber-400 text-4xl font-light">📸</div>
+                    <div className="h-40 bg-gradient-to-br from-amber-100 to-amber-200" />
                   )}
                   <div className="p-4">
                     <div className="flex items-center justify-between mb-2">
@@ -941,65 +921,90 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
 
     case 'page_header':
       return (
-        <div className="bg-gradient-to-r from-stone-800 to-stone-700 py-12 px-8">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl font-bold text-white">{pageData.pageHeader?.title || 'Page Title'}</h1>
-            {pageData.pageHeader?.subtitle && <p className="text-gray-300 mt-2">{pageData.pageHeader.subtitle}</p>}
+        <div className="bg-gradient-to-br from-amber-50 to-orange-50 py-12 px-8">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-3xl font-bold text-gray-900">{pageData.pageHeader?.title || 'Page Title'}</h1>
+            {pageData.pageHeader?.subtitle && <p className="text-gray-500 mt-2">{pageData.pageHeader.subtitle}</p>}
           </div>
         </div>
       )
 
     case 'about_mission':
-    case 'about_values':
       return (
         <div className="py-16 px-8">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">{sectionContent?.title || (section.type === 'about_values' ? 'Our Core Values' : 'Our Mission')}</h2>
-            <div className="grid md:grid-cols-2 gap-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">{cmsStrings['about_mission_heading'] || 'Our Mission'}</h2>
+                <p className="text-sm text-gray-600 mb-4 leading-relaxed">{sectionContent?.description || content?.mission || 'Mission description goes here'}</p>
+                {content?.vision && <p className="text-sm text-gray-600 mb-4 leading-relaxed">{content.vision}</p>}
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="h-48 rounded-lg bg-gradient-to-br from-amber-100 to-amber-200" />
+                <div className="h-48 rounded-lg bg-gradient-to-br from-amber-100 to-amber-200 mt-4" />
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+
+    case 'about_values':
+      return (
+        <div className="py-16 px-8 bg-gray-50">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">{cmsStrings['about_values_heading'] || 'Our Core Values'}</h2>
+              <p className="text-sm text-gray-500 max-w-2xl mx-auto">{cmsStrings['about_values_description'] || 'The principles that guide our work'}</p>
+            </div>
+            <div className="grid md:grid-cols-4 gap-4">
               {((content?.values as any[])?.length ? content!.values : [
                 { title: 'Education', desc: 'Quality education for every child' },
                 { title: 'Compassion', desc: 'Supporting with kindness and care' },
+                { title: 'Integrity', desc: 'Transparent and accountable' },
+                { title: 'Community', desc: 'Building strong communities' },
               ]).map((v: any, i: number) => (
-                <div key={i} className="p-5 bg-white rounded-xl border border-gray-100">
+                <div key={i} className="p-5 bg-white rounded-xl border border-gray-100 text-center shadow-sm">
                   <h3 className="text-sm font-bold text-gray-900 mb-1">{v.title || 'Value'}</h3>
-                  <p className="text-xs text-gray-600">{v.desc || 'Description'}</p>
+                  <p className="text-xs text-gray-500">{v.desc || 'Description'}</p>
                 </div>
               ))}
-              {section.type === 'about_mission' && !content?.values && (
-                <>
-                  <div className="p-5 bg-white rounded-xl border border-gray-100">
-                    <h3 className="text-sm font-bold text-gray-900 mb-1">{sectionContent?.title || 'Our Mission'}</h3>
-                    <p className="text-xs text-gray-600">{sectionContent?.description || 'Mission description goes here'}</p>
-                  </div>
-                  <div className="p-5 bg-white rounded-xl border border-gray-100">
-                    <h3 className="text-sm font-bold text-gray-900 mb-1">Our Vision</h3>
-                    <p className="text-xs text-gray-600">{content?.vision || 'Vision description goes here'}</p>
-                  </div>
-                </>
-              )}
             </div>
           </div>
         </div>
       )
 
     case 'about_timeline': {
-      const milestones = (content?.milestones as any[]) || []
+      const items = ((content?.timeline || content?.milestones) as any[]) || []
       return (
-        <div className="py-16 px-8 bg-gray-50">
-          <div className="max-w-3xl mx-auto">
+        <div className="py-16 px-8 bg-gradient-to-br from-amber-50 to-orange-50">
+          <div className="max-w-5xl mx-auto">
             <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">Our Journey</h2>
-            <div className="space-y-4">
-              {milestones.length > 0 ? milestones.map((m: any, i: number) => (
-                <div key={i} className="flex items-center gap-4">
-                  <div className="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold">{i + 1}</div>
-                  <div>
-                    <div className="text-sm font-semibold text-amber-600">{m.year}</div>
-                    <div className="text-gray-800">{m.event}</div>
-                  </div>
-                </div>
-              )) : (
-                <p className="text-center text-gray-300 italic">Add milestones to show your journey</p>
-              )}
+            <div className="relative">
+              <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-amber-200 to-amber-300 -translate-x-1/2 hidden md:block" />
+              <div className="space-y-6">
+                {items.length > 0 ? items.map((m: any, i: number) => {
+                  const isLeft = i % 2 === 0
+                  const title = m.title || m.event || ''
+                  const desc = m.desc || m.description || ''
+                  return (
+                    <div key={i} className={`relative md:flex md:items-start ${!isLeft ? 'md:flex-row-reverse' : ''}`}>
+                      <div className={`flex-1 ${isLeft ? 'md:pr-12 md:text-right' : 'md:pl-12'}`}>
+                        <div className="bg-white rounded-xl p-4 shadow-sm border border-amber-100">
+                          <span className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold uppercase tracking-wider mb-2">{m.year}</span>
+                          {title && <h3 className="text-gray-900 text-sm font-semibold mb-1">{title}</h3>}
+                          {desc && <p className="text-gray-500 text-xs leading-relaxed">{desc}</p>}
+                        </div>
+                      </div>
+                      <div className="hidden md:flex items-center justify-center w-12 shrink-0 relative z-10">
+                        <div className="w-4 h-4 rounded-full bg-amber-500 border-3 border-white shadow" />
+                      </div>
+                      <div className="hidden md:block flex-1" />
+                    </div>
+                  )
+                }) : (
+                  <p className="text-center text-gray-300 italic">Add timeline milestones to show your journey</p>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -1011,14 +1016,17 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
         <div className="py-12 px-8">
           <div className="max-w-4xl mx-auto grid grid-cols-3 gap-6">
             <div className="text-center p-4">
+              <div className="w-10 h-10 rounded-full bg-amber-100 mx-auto mb-3 flex items-center justify-center text-amber-600 font-bold text-sm">@</div>
               <div className="text-sm font-semibold text-gray-900">Email</div>
               <div className="text-sm text-gray-500">{pageData.footer?.contact_info?.email || 'info@example.org'}</div>
             </div>
             <div className="text-center p-4">
+              <div className="w-10 h-10 rounded-full bg-amber-100 mx-auto mb-3 flex items-center justify-center text-amber-600 font-bold text-sm">P</div>
               <div className="text-sm font-semibold text-gray-900">Phone</div>
               <div className="text-sm text-gray-500">{pageData.footer?.contact_info?.phone || '+977 1 234 567'}</div>
             </div>
             <div className="text-center p-4">
+              <div className="w-10 h-10 rounded-full bg-amber-100 mx-auto mb-3 flex items-center justify-center text-amber-600 font-bold text-sm">A</div>
               <div className="text-sm font-semibold text-gray-900">Address</div>
               <div className="text-sm text-gray-500">{pageData.footer?.contact_info?.address || 'Kathmandu, Nepal'}</div>
             </div>
@@ -1032,10 +1040,30 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
           <div className="max-w-xl mx-auto">
             <h2 className="text-xl font-bold text-gray-900 text-center mb-6">{content?.title || 'Get in Touch'}</h2>
             <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-4">
-              <div className="h-10 bg-gray-50 rounded-lg w-full" />
-              <div className="h-10 bg-gray-50 rounded-lg w-full" />
-              <div className="h-24 bg-gray-50 rounded-lg w-full" />
-              <div className="h-10 bg-amber-500 rounded-lg w-32" />
+              <div className="space-y-1">
+                <div className="text-xs font-medium text-gray-600">Name</div>
+                <div className="h-9 bg-gray-50 rounded-lg border border-gray-200 w-full" />
+              </div>
+              <div className="space-y-1">
+                <div className="text-xs font-medium text-gray-600">Email</div>
+                <div className="h-9 bg-gray-50 rounded-lg border border-gray-200 w-full" />
+              </div>
+              <div className="space-y-1">
+                <div className="text-xs font-medium text-gray-600">Phone</div>
+                <div className="flex gap-2">
+                  <div className="h-9 bg-gray-50 rounded-lg border border-gray-200 w-24" />
+                  <div className="h-9 bg-gray-50 rounded-lg border border-gray-200 flex-1" />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-xs font-medium text-gray-600">Subject</div>
+                <div className="h-9 bg-gray-50 rounded-lg border border-gray-200 w-full" />
+              </div>
+              <div className="space-y-1">
+                <div className="text-xs font-medium text-gray-600">Message</div>
+                <div className="h-20 bg-gray-50 rounded-lg border border-gray-200 w-full" />
+              </div>
+              <div className="h-9 bg-amber-500 rounded-lg w-28" />
             </div>
           </div>
         </div>
@@ -1060,16 +1088,18 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
 
     case 'sponsor_steps':
     case 'donate_process':
+      const stepsData = (content?.process_steps || content?.steps || []) as any[]
+      const steps = stepsData.length > 0 ? stepsData : [
+        { title: 'Browse', desc: 'Find a child to sponsor' },
+        { title: 'Donate', desc: 'Set up your contribution' },
+        { title: 'Connect', desc: 'Build a relationship' },
+      ]
       return (
         <div className="py-12 px-8">
           <div className="max-w-lg mx-auto">
             <h2 className="text-xl font-bold text-gray-900 text-center mb-8">{content?.title || (section.type === 'donate_process' ? 'How It Works' : 'How to Sponsor')}</h2>
             <div className="space-y-4">
-              {((content?.steps as any[])?.length ? content!.steps : [
-                { title: 'Browse', desc: 'Find a child to sponsor' },
-                { title: 'Donate', desc: 'Set up your contribution' },
-                { title: 'Connect', desc: 'Build a relationship' },
-              ]).map((s: any, i: number) => (
+              {steps.map((s: any, i: number) => (
                 <div key={i} className="flex items-center gap-4 bg-white rounded-lg border border-amber-100 p-4">
                   <span className="w-7 h-7 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold shrink-0">{i + 1}</span>
                   <div>
@@ -1083,21 +1113,78 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
         </div>
       )
 
+    case 'donation_form':
+      return (
+        <div className="py-12 px-8 bg-gray-50">
+          <div className="max-w-xl mx-auto">
+            <h2 className="text-xl font-bold text-gray-900 text-center mb-6">{content?.title || 'Make a Donation'}</h2>
+            <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-4">
+              <div className="flex gap-3">
+                {['$25', '$50', '$100', '$250'].map((amt) => (
+                  <div key={amt} className="flex-1 h-10 border border-amber-200 rounded-lg flex items-center justify-center text-sm font-medium text-amber-700 bg-amber-50">{amt}</div>
+                ))}
+              </div>
+              <div className="space-y-1">
+                <div className="text-xs font-medium text-gray-600">Custom Amount</div>
+                <div className="h-9 bg-gray-50 rounded-lg border border-gray-200 w-full" />
+              </div>
+              <div className="space-y-1">
+                <div className="text-xs font-medium text-gray-600">Name</div>
+                <div className="h-9 bg-gray-50 rounded-lg border border-gray-200 w-full" />
+              </div>
+              <div className="space-y-1">
+                <div className="text-xs font-medium text-gray-600">Email</div>
+                <div className="h-9 bg-gray-50 rounded-lg border border-gray-200 w-full" />
+              </div>
+              <div className="h-9 bg-amber-500 rounded-lg w-full" />
+            </div>
+          </div>
+        </div>
+      )
+
+    case 'student_story':
+      return (
+        <div className="py-12 px-8">
+          <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-8 items-center">
+            <div className="h-56 rounded-xl bg-gradient-to-br from-amber-100 to-amber-200" />
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 mb-3">{content?.title || 'Student Success Story'}</h2>
+              <p className="text-sm text-gray-500 mb-4">{content?.description || 'Read how sponsorship has transformed the life of a student at Buddha Academy.'}</p>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-300 to-amber-400" />
+                <div>
+                  <div className="text-sm font-semibold text-gray-900">{content?.student_name || 'Student Name'}</div>
+                  <div className="text-xs text-gray-400">{content?.student_grade || 'Grade 5'}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+
     case 'sponsor_benefits':
       return (
         <div className="py-12 px-8 bg-gray-50">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-xl font-bold text-gray-900 text-center mb-6">{content?.title || 'Sponsorship Benefits'}</h2>
-            <div className="grid md:grid-cols-2 gap-4">
-              {((content?.benefits as any[])?.length ? content!.benefits : [
-                { text: 'Education support for a child' },
-                { text: 'Monthly progress updates' },
-              ]).map((b: any, i: number) => (
-                <div key={i} className="flex items-center gap-3 bg-white rounded-lg border border-gray-100 p-4">
-                  <span className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold">✓</span>
-                  <span className="text-sm text-gray-700">{b.text || 'Benefit description'}</span>
+          <div className="max-w-5xl mx-auto">
+            <h2 className="text-xl font-bold text-gray-900 text-center mb-6">{sectionContent?.title || content?.title || 'Sponsorship Benefits'}</h2>
+            <div className="grid lg:grid-cols-2 gap-8 items-center">
+              <div>
+                <p className="text-sm text-gray-600 mb-4">{sectionContent?.description || content?.description || 'When you sponsor a child, you provide them with the resources they need to thrive.'}</p>
+                <div className="space-y-3">
+                  {((content?.benefits as any[])?.length ? content!.benefits : [
+                    { text: 'Education support for a child' },
+                    { text: 'Monthly progress updates' },
+                    { text: 'Direct connection with your sponsored child' },
+                    { text: 'Tax-deductible contributions' },
+                  ]).map((b: any, i: number) => (
+                    <div key={i} className="flex items-center gap-3 bg-white rounded-lg border border-gray-100 p-3">
+                      <span className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                      <span className="text-sm text-gray-700">{b.text || b.title || 'Benefit description'}</span>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+              <div className="h-64 rounded-xl bg-gradient-to-br from-amber-100 to-amber-200 hidden lg:block" />
             </div>
           </div>
         </div>
@@ -1110,6 +1197,32 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
             <h2 className="text-2xl font-bold text-white mb-3">{content?.title || 'Make a Difference Today'}</h2>
             <p className="text-white/90 text-sm mb-5">{content?.description || 'Sponsor a child and change a life'}</p>
             <span className="inline-block px-5 py-2.5 rounded-lg bg-white text-amber-600 font-medium text-sm">{content?.button_text || 'Sponsor Now'}</span>
+          </div>
+        </div>
+      )
+
+    case 'cta_banner':
+      return (
+        <div className="bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 py-16 px-8 text-center">
+          <div className="max-w-2xl mx-auto">
+            <h3 className="text-3xl sm:text-4xl font-bold text-white mb-4">{cmsStrings['cta_banner_title'] || 'Make a Difference Today'}</h3>
+            <p className="text-lg text-white/90 mb-8 max-w-2xl mx-auto">{cmsStrings['cta_banner_subtitle'] || 'Your support provides education, meals, and hope to children in Nepal.'}</p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <span className="bg-white text-amber-700 px-8 py-3.5 rounded-full font-semibold shadow-lg">{cmsStrings['cta_banner_primary_text'] || 'Sponsor a Child'}</span>
+              <span className="bg-white/10 border border-white/30 text-white px-8 py-3.5 rounded-full font-semibold backdrop-blur-sm">{cmsStrings['cta_banner_secondary_text'] || 'Donate Now'}</span>
+            </div>
+          </div>
+        </div>
+      )
+
+    case 'map_location':
+      return (
+        <div className="py-12 px-8 bg-orange-50 text-center">
+          <div className="max-w-2xl mx-auto">
+            <div className="w-10 h-10 rounded-full bg-orange-100 mx-auto mb-3 flex items-center justify-center text-orange-500 font-bold text-sm">M</div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Our Location</h2>
+            <p className="text-gray-600 mb-6">{pageData.footer?.contact_info?.address || 'Kathmandu, Nepal'}</p>
+            <span className="inline-flex items-center gap-2 bg-orange-500 text-white px-5 py-3 rounded-full font-semibold text-sm">View on Map</span>
           </div>
         </div>
       )
@@ -1183,7 +1296,7 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
                 </div>
               )) : (
                 [1, 2, 3, 4, 5, 6].map(i => (
-                  <div key={i} className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center text-gray-300 text-2xl font-light">📷</div>
+                  <div key={i} className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg" />
                 ))
               )}
             </div>
@@ -1236,24 +1349,38 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
           <div className="max-w-5xl mx-auto">
             <h2 className="text-xl font-bold text-gray-900 text-center mb-6">{content?.title || 'Our Students'}</h2>
             <div className="grid grid-cols-3 gap-6">
-              {students.length > 0 ? students.slice(0, 6).map((student: any) => (
-                <div key={student.id} className="border border-gray-100 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
-                  {student.photo_url ? (
-                    <img src={student.photo_url} alt={student.name} className="h-36 w-full object-cover" />
-                  ) : (
-                    <div className="h-36 bg-gradient-to-br from-amber-100 to-amber-200" />
-                  )}
-                  <div className="p-4">
-                    <div className="flex items-center justify-between mb-1">
-                      <h3 className="text-sm font-semibold text-gray-900">{student.name}</h3>
-                      <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full text-white ${sponsorshipVariant(student.sponsorship_status)}`}>
-                        {student.sponsorship_status?.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()) || 'Available'}
-                      </span>
+              {students.length > 0 ? students.slice(0, 6).map((student: any) => {
+                const raised = student.current_sponsorship || 0
+                const goal = student.sponsorship_amount || 1
+                const progress = Math.min((raised / goal) * 100, 100)
+                return (
+                  <div key={student.id} className="border border-gray-100 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+                    {student.photo_url ? (
+                      <img src={student.photo_url} alt={student.name} className="h-36 w-full object-cover" />
+                    ) : (
+                      <div className="h-36 bg-gradient-to-br from-amber-100 to-amber-200" />
+                    )}
+                    <div className="p-4">
+                      <div className="flex items-center justify-between mb-1">
+                        <h3 className="text-sm font-semibold text-gray-900">{student.name}</h3>
+                        <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full text-white ${sponsorshipVariant(student.sponsorship_status)}`}>
+                          {student.sponsorship_status?.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()) || 'Available'}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500">{student.age ? `Age ${student.age}` : ''}{student.grade ? ` · Class ${student.grade}` : ''}</p>
+                      {student.bio && <p className="text-xs text-gray-400 mt-1 line-clamp-2">{student.bio}</p>}
+                      <div className="mt-2 flex items-center justify-between text-[10px] text-gray-500">
+                        <span>${goal}/mo</span>
+                        <span>${raised} raised</span>
+                      </div>
+                      <div className="mt-1 bg-gray-100 rounded-full h-1.5">
+                        <div className="bg-amber-500 rounded-full h-1.5" style={{ width: `${progress}%` }} />
+                      </div>
+                      <span className="mt-2 inline-block text-[10px] font-medium text-amber-600">View Profile →</span>
                     </div>
-                    <p className="text-xs text-gray-500">{student.age ? `Age ${student.age}` : ''}{student.grade ? ` · Class ${student.grade}` : ''}</p>
                   </div>
-                </div>
-              )) : (
+                )
+              }) : (
                 [1, 2, 3].map(i => (
                   <div key={i} className="border border-gray-100 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
                     <div className="h-36 bg-gradient-to-br from-amber-100 to-amber-200" />
@@ -1261,6 +1388,14 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
                       <h3 className="text-sm font-semibold text-gray-900">Student {i}</h3>
                       <span className="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Available</span>
                       <p className="text-xs text-gray-500 mt-1">Age {8 + i} · Class {1 + i}</p>
+                      <p className="text-xs text-gray-400 mt-1 line-clamp-2">Student bio and background information would appear here.</p>
+                      <div className="mt-2 flex items-center justify-between text-[10px] text-gray-500">
+                        <span>$50/mo</span>
+                        <span>$0 raised</span>
+                      </div>
+                      <div className="mt-1 bg-gray-100 rounded-full h-1.5">
+                        <div className="bg-amber-500 rounded-full h-1.5" style={{ width: '0%' }} />
+                      </div>
                     </div>
                   </div>
                 ))
