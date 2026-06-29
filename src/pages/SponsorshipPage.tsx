@@ -18,7 +18,7 @@ const TREE_STEPS = [
 ]
 
 function SponsorshipTree({ steps }: { steps: { title: string; desc: string }[] }) {
-  const items = steps.length >= 8 ? steps : TREE_STEPS
+  const items = steps.length > 0 ? steps : TREE_STEPS
 
   return (
     <div className="relative flex flex-col items-center">
@@ -58,35 +58,54 @@ export function SponsorshipPage() {
     ])
   }, [])
 
-  const steps = content?.steps || []
-  const benefits = content?.benefits || []
+  const DEFAULT_STEPS = [
+    { num: '1', title: 'Browse Profiles', desc: 'Review children waiting for sponsors and learn about their stories.' },
+    { num: '2', title: 'Choose a Child', desc: 'Select a student whose story resonates with you.' },
+    { num: '3', title: 'Make Your Pledge', desc: 'Complete the donation form securely online.' },
+    { num: '4', title: 'We Connect', desc: 'We link you with your sponsored child and share their profile.' },
+    { num: '5', title: 'Receive Updates', desc: 'Get progress reports, photos, and letters from your child.' },
+    { num: '6', title: 'Track Impact', desc: 'See how your contribution is making a difference.' },
+  ]
+
+  const DEFAULT_BENEFITS = [
+    { text: 'Direct, life-changing impact on a child\'s education' },
+    { text: 'Regular updates with photos, letters, and progress reports' },
+    { text: 'Opportunity to build a meaningful connection across cultures' },
+    { text: 'Transparent reporting on how your funds are used' },
+    { text: 'Tax-deductible donations with annual receipts' },
+  ]
+
+  const DEFAULT_HERO_TITLE = 'Sponsor a Child\'s Education'
+  const DEFAULT_HERO_SUBTITLE = 'For just a small monthly contribution, you can transform a child\'s life through the power of education.'
+  const DEFAULT_SECTION_TITLE = 'How Sponsorship Works'
+  const DEFAULT_SECTION_DESC = 'Our sponsorship program connects you directly with a child, creating a personal bond while funding their education.'
+  const DEFAULT_CTA_TITLE = 'Ready to Change a Life?'
+  const DEFAULT_CTA_DESC = 'Choose a child to sponsor and begin your journey of impact today.'
+  const DEFAULT_CTA_BUTTON = 'Sponsor a Child'
+
+  const steps = content?.steps && content.steps.length > 0 ? content.steps : DEFAULT_STEPS
+  const benefits = content?.benefits && content.benefits.length > 0 ? content.benefits : DEFAULT_BENEFITS
 
   return (
     <div>
-      {content?.hero_title && (
-        <section className="relative py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-amber-50 to-orange-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-3xl mx-auto">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">{content.hero_title}</h1>
-              {content?.hero_subtitle && <p className="text-base sm:text-lg md:text-xl text-gray-600">{content.hero_subtitle}</p>}
-            </div>
+      <section className="relative py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-amber-50 to-orange-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">{content?.hero_title || DEFAULT_HERO_TITLE}</h1>
+            <p className="text-base sm:text-lg md:text-xl text-gray-600">{content?.hero_subtitle || DEFAULT_HERO_SUBTITLE}</p>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
-      {steps.length > 0 && (
-        <section className="py-12 sm:py-16 lg:py-24">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            {(content?.section_title || content?.section_description) && (
-              <div className="text-center mb-10 sm:mb-14">
-                {content?.section_title && <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">{content.section_title}</h2>}
-                {content?.section_description && <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">{content.section_description}</p>}
-              </div>
-            )}
+      <section className="py-12 sm:py-16 lg:py-24">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10 sm:mb-14">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">{content?.section_title || DEFAULT_SECTION_TITLE}</h2>
+            <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">{content?.section_description || DEFAULT_SECTION_DESC}</p>
+          </div>
             <SponsorshipTree steps={steps} />
           </div>
         </section>
-      )}
 
       {benefits.length > 0 && (
         <section className="py-12 sm:py-16 lg:py-24 bg-gray-50">
@@ -125,19 +144,15 @@ export function SponsorshipPage() {
         </section>
       )}
 
-      {content?.cta_title && (
-        <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 sm:mb-6">{content.cta_title}</h2>
-            {content?.cta_description && (
-              <p className="text-white/80 max-w-2xl mx-auto mb-6 sm:mb-8 text-sm sm:text-base">{content.cta_description}</p>
-            )}
-            <Link to={content?.cta_button_link || '/students'}>
-              <Button size="lg" className="w-full sm:w-auto">{content?.cta_button_text || t('sponsorship_browse_button')} <ArrowRight className="w-4 h-4 ml-2" /></Button>
-            </Link>
-          </div>
-        </section>
-      )}
+      <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 sm:mb-6">{content?.cta_title || DEFAULT_CTA_TITLE}</h2>
+          <p className="text-white/80 max-w-2xl mx-auto mb-6 sm:mb-8 text-sm sm:text-base">{content?.cta_description || DEFAULT_CTA_DESC}</p>
+          <Link to={content?.cta_button_link || '/students'}>
+            <Button size="lg" className="w-full sm:w-auto">{content?.cta_button_text || DEFAULT_CTA_BUTTON} <ArrowRight className="w-4 h-4 ml-2" /></Button>
+          </Link>
+        </div>
+      </section>
     </div>
   )
 }

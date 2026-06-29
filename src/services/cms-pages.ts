@@ -3,6 +3,8 @@ import { ALL_PUBLIC_PAGES } from '../types/cms-pages'
 import type { CmsPage, ToggleState } from '../types/cms-pages'
 import type { HeroContent, SponsorshipContent, DonationContent, VolunteerContent, PageHeader, SectionContent, SectionVisibility, FooterContent, SeoContent, SiteImage, CmsStringMap, TransparencyContent } from '../types/cms-content'
 import type { Page, Student, GalleryItem, News, Testimonial, StudentStory, Faq, ActivityRow, Video } from '../types/database'
+import type { LegalPageWithSections } from './legal-pages'
+import { getPublishedLegalPageByType } from './legal-pages'
 import { getStudents } from './students'
 import { getGalleryItems } from './gallery'
 import { getNews } from './news'
@@ -31,6 +33,7 @@ export interface CmsPageData {
   faqs: Faq[]
   activities: ActivityRow[]
   videos: Video[]
+  legalPages: LegalPageWithSections[]
 }
 
 export interface CmsDataset {
@@ -122,6 +125,10 @@ export async function fetchCmsPageData(page: CmsPage): Promise<CmsPageData> {
     getPublicActivities(20).catch(() => []),
     fetchVideos(),
   ])
+  const [privacyPage, termsPage] = await Promise.all([
+    getPublishedLegalPageByType('privacy_policy').catch(() => null),
+    getPublishedLegalPageByType('terms_conditions').catch(() => null),
+  ])
 
   const sections: Record<string, SectionContent | null> = {}
   ;(sectionContentList as (SectionContent | null)[]).forEach(sc => {
@@ -151,6 +158,7 @@ export async function fetchCmsPageData(page: CmsPage): Promise<CmsPageData> {
     faqs,
     activities,
     videos,
+    legalPages: [privacyPage, termsPage].filter(Boolean) as LegalPageWithSections[],
   }
 }
 

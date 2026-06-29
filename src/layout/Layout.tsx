@@ -2,9 +2,12 @@ import { Outlet, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Header } from './Header'
 import { Footer } from './Footer'
+import { AdminPageToolbar } from '../components/AdminPageToolbar'
 
 export function Layout() {
   const location = useLocation()
+  const pageSlug = location.pathname === '/' ? 'home' : location.pathname.replace(/^\//, '').split('/')[0]
+  const isAdminRoute = location.pathname.startsWith('/admin') || location.pathname.startsWith('/super-admin') || location.pathname.startsWith('/teacher')
   return (
     <div className="min-h-screen flex flex-col bg-[var(--color-background)] text-[var(--color-text-primary)] overflow-x-hidden">
       <Header />
@@ -22,6 +25,7 @@ export function Layout() {
         </AnimatePresence>
       </main>
       <Footer />
+      {!isAdminRoute && <AdminPageToolbar pageSlug={pageSlug} />}
     </div>
   )
 }

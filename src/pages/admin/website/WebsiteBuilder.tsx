@@ -920,35 +920,60 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
       )
 
     case 'page_header':
+      const pageSlug = pageData.page.slug
+      const headerGradient = pageSlug === 'campaigns' ? 'from-emerald-900 via-emerald-800 to-amber-900' :
+        pageSlug === 'success-stories' || pageSlug === 'success_stories' ? 'from-purple-900 via-purple-800 to-emerald-900' :
+        'from-amber-50 to-orange-50'
+      const isDark = pageSlug === 'campaigns' || pageSlug === 'success-stories' || pageSlug === 'success_stories'
       return (
-        <div className="bg-gradient-to-br from-amber-50 to-orange-50 py-12 px-8">
+        <div className={`bg-gradient-to-br ${headerGradient} py-12 px-8`}>
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-3xl font-bold text-gray-900">{pageData.pageHeader?.title || 'Page Title'}</h1>
-            {pageData.pageHeader?.subtitle && <p className="text-gray-500 mt-2">{pageData.pageHeader.subtitle}</p>}
+            <h1 className={`text-3xl font-bold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>{pageData.pageHeader?.title || 'Page Title'}</h1>
+            {pageData.pageHeader?.subtitle && <p className={`mt-2 ${isDark ? 'text-gray-300' : 'text-gray-500'}`}>{pageData.pageHeader.subtitle}</p>}
           </div>
         </div>
       )
 
-    case 'about_mission':
+    case 'about_mission': {
+      const pc = pageData.pageContent?.content as any
+      const mission = sectionContent?.description || pc?.mission || content?.mission || 'Mission description goes here'
+      const vision = content?.vision || pc?.vision || ''
+      const aboutImages = pageData.images?.filter((img: any) => img.section === 'about') || []
       return (
         <div className="py-16 px-8">
           <div className="max-w-7xl mx-auto">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">{cmsStrings['about_mission_heading'] || 'Our Mission'}</h2>
-                <p className="text-sm text-gray-600 mb-4 leading-relaxed">{sectionContent?.description || content?.mission || 'Mission description goes here'}</p>
-                {content?.vision && <p className="text-sm text-gray-600 mb-4 leading-relaxed">{content.vision}</p>}
+                <p className="text-sm text-gray-600 mb-4 leading-relaxed">{mission}</p>
+                {vision && <p className="text-sm text-gray-600 mb-4 leading-relaxed">{vision}</p>}
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div className="h-48 rounded-lg bg-gradient-to-br from-amber-100 to-amber-200" />
-                <div className="h-48 rounded-lg bg-gradient-to-br from-amber-100 to-amber-200 mt-4" />
+                {aboutImages.length >= 2 ? aboutImages.slice(0, 2).map((img: any, idx: number) => (
+                  <div key={idx} className={`h-48 rounded-lg overflow-hidden ${idx === 1 ? 'mt-4' : ''}`}>
+                    <img src={img.image_url} alt="" className="w-full h-full object-cover" />
+                  </div>
+                )) : (
+                  <>
+                    <div className="h-48 rounded-lg bg-gradient-to-br from-amber-100 to-amber-200" />
+                    <div className="h-48 rounded-lg bg-gradient-to-br from-amber-100 to-amber-200 mt-4" />
+                  </>
+                )}
               </div>
             </div>
           </div>
         </div>
       )
+    }
 
-    case 'about_values':
+    case 'about_values': {
+      const pc = pageData.pageContent?.content as any
+      const valuesList = (content?.values as any[])?.length ? content!.values : (pc?.values as any[])?.length ? pc!.values : [
+        { title: 'Education', desc: 'Quality education for every child' },
+        { title: 'Compassion', desc: 'Supporting with kindness and care' },
+        { title: 'Integrity', desc: 'Transparent and accountable' },
+        { title: 'Community', desc: 'Building strong communities' },
+      ]
       return (
         <div className="py-16 px-8 bg-gray-50">
           <div className="max-w-7xl mx-auto">
@@ -957,12 +982,7 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
               <p className="text-sm text-gray-500 max-w-2xl mx-auto">{cmsStrings['about_values_description'] || 'The principles that guide our work'}</p>
             </div>
             <div className="grid md:grid-cols-4 gap-4">
-              {((content?.values as any[])?.length ? content!.values : [
-                { title: 'Education', desc: 'Quality education for every child' },
-                { title: 'Compassion', desc: 'Supporting with kindness and care' },
-                { title: 'Integrity', desc: 'Transparent and accountable' },
-                { title: 'Community', desc: 'Building strong communities' },
-              ]).map((v: any, i: number) => (
+              {valuesList.map((v: any, i: number) => (
                 <div key={i} className="p-5 bg-white rounded-xl border border-gray-100 text-center shadow-sm">
                   <h3 className="text-sm font-bold text-gray-900 mb-1">{v.title || 'Value'}</h3>
                   <p className="text-xs text-gray-500">{v.desc || 'Description'}</p>
@@ -972,9 +992,11 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
           </div>
         </div>
       )
+    }
 
     case 'about_timeline': {
-      const items = ((content?.timeline || content?.milestones) as any[]) || []
+      const pc = pageData.pageContent?.content as any
+      const items = ((content?.timeline || content?.milestones || pc?.timeline || pc?.milestones) as any[]) || []
       return (
         <div className="py-16 px-8 bg-gradient-to-br from-amber-50 to-orange-50">
           <div className="max-w-5xl mx-auto">
@@ -1070,16 +1092,36 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
       )
 
     case 'sponsor_hero':
-    case 'donate_hero':
     case 'volunteer_hero':
       return (
-        <div className="relative min-h-[250px] flex items-center bg-gradient-to-br from-stone-800 to-amber-900">
+        <div className="relative min-h-[250px] flex items-center bg-gradient-to-br from-amber-50 to-orange-50">
           <div className="relative w-full px-8 py-12">
             <div className="max-w-2xl mx-auto text-center">
-              <h1 className="text-3xl font-bold text-white mb-3">{sectionContent?.title || (section.type === 'donate_hero' ? 'Make a Donation' : section.type === 'volunteer_hero' ? 'Volunteer With Us' : 'Sponsorship Program')}</h1>
-              {sectionContent?.description && <p className="text-base text-gray-300">{sectionContent.description}</p>}
+              <h1 className="text-3xl font-bold text-gray-900 mb-3">{sectionContent?.title || (section.type === 'volunteer_hero' ? 'Volunteer With Us' : 'Sponsorship Program')}</h1>
+              {sectionContent?.description && <p className="text-base text-gray-600">{sectionContent.description}</p>}
               <div className="flex gap-3 justify-center mt-6">
                 <span className="px-5 py-2 rounded-lg bg-amber-500 text-white text-sm font-medium">Get Started</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+
+    case 'donate_hero':
+      return (
+        <div className="relative min-h-[250px] flex items-center bg-gradient-to-br from-[#d97706] via-[#f59e0b] to-[#b45309]">
+          <div className="absolute inset-0 opacity-10">
+            <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <defs><pattern id="donate-grid" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M 8 0 L 0 0 0 8" fill="none" stroke="white" strokeWidth="0.5" /></pattern></defs>
+              <rect width="100" height="100" fill="url(#donate-grid)" />
+            </svg>
+          </div>
+          <div className="relative w-full px-8 py-12">
+            <div className="max-w-2xl mx-auto text-center">
+              <h1 className="text-3xl font-bold text-white mb-3">{sectionContent?.title || 'Make a Donation'}</h1>
+              {sectionContent?.description && <p className="text-base text-white/80">{sectionContent.description}</p>}
+              <div className="flex gap-3 justify-center mt-6">
+                <span className="px-5 py-2 rounded-lg bg-white text-amber-700 text-sm font-medium">Donate Now</span>
               </div>
             </div>
           </div>
@@ -1515,23 +1557,101 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
         </div>
       )
 
+    case 'transparency_content': {
+      const allocationData = (content?.allocationData as any[]) || []
+      const impactStats = (content?.impactStats as any[]) || []
+      return (
+        <div className="py-12 px-8">
+          <div className="max-w-4xl mx-auto">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">{sectionContent?.title || 'Transparency & Accountability'}</h1>
+            {sectionContent?.description && <p className="text-sm text-gray-600 mb-8">{sectionContent.description}</p>}
+            {allocationData.length > 0 && (
+              <div className="mb-8">
+                <h2 className="text-lg font-bold text-gray-900 mb-4">Donation Allocation</h2>
+                <div className="flex items-center gap-6">
+                  <div className="relative w-32 h-32 shrink-0">
+                    <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+                      {allocationData.map((item: any, idx: number) => {
+                        const total = allocationData.reduce((s: number, i: any) => s + i.value, 0)
+                        const offset = allocationData.slice(0, idx).reduce((s: number, i: any) => s + i.value, 0)
+                        const circumference = 2 * Math.PI * 40
+                        const dashLength = (item.value / total) * circumference
+                        const colors = ['#f26b1d', '#c49a4e', '#10b981', '#3b82f6', '#8b5cf6']
+                        return (
+                          <circle key={idx} cx="50" cy="50" r="40" fill="none"
+                            stroke={colors[idx % colors.length]} strokeWidth="15"
+                            strokeDasharray={`${dashLength} ${circumference - dashLength}`}
+                            strokeDashoffset={-offset / 100 * circumference} />
+                        )
+                      })}
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-lg font-bold text-gray-900">100%</span>
+                    </div>
+                  </div>
+                  <div className="space-y-2 flex-1">
+                    {allocationData.map((item: any, idx: number) => {
+                      const colors = ['#f26b1d', '#c49a4e', '#10b981', '#3b82f6', '#8b5cf6']
+                      return (
+                        <div key={idx} className="flex items-center justify-between bg-gray-50 rounded-lg p-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: colors[idx % colors.length] }} />
+                            <span className="text-xs font-medium text-gray-700">{item.name}</span>
+                          </div>
+                          <span className="text-sm font-bold text-gray-900">{item.value}%</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+            {impactStats.length > 0 && (
+              <div className="grid grid-cols-4 gap-3">
+                {impactStats.map((stat: any, idx: number) => (
+                  <div key={idx} className="bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 rounded-lg p-4 text-center">
+                    <div className="text-xl font-bold text-white">{stat.value}</div>
+                    <div className="text-xs text-white/80">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )
+    }
+
     case 'privacy_content':
-    case 'terms_content':
-    case 'transparency_content':
+    case 'terms_content': {
+      const legalPage = pageData.legalPages?.find((lp: any) =>
+        section.type === 'privacy_content' ? lp.type === 'privacy_policy' : lp.type === 'terms_conditions'
+      )
+      const pc = pageData.pageContent?.content as any
+      const title = sectionContent?.title || pc?.title || legalPage?.title || (section.type === 'privacy_content' ? 'Privacy Policy' : 'Terms of Service')
+      const desc = sectionContent?.description || pc?.description || legalPage?.meta_description || ''
+      const legalSects = legalPage?.sections || []
       return (
         <div className="py-12 px-8 max-w-3xl mx-auto">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">{sectionContent?.title || (section.type === 'privacy_content' ? 'Privacy Policy' : section.type === 'terms_content' ? 'Terms of Service' : 'Transparency')}</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">{title}</h1>
           <div className="prose prose-sm text-gray-600 space-y-3">
-            <p>{sectionContent?.description || 'This section contains the full text content. Click to edit and add your content here.'}</p>
-            {content?.sections?.map?.((s: any, i: number) => (
+            {desc && <p>{desc}</p>}
+            {(content?.sections as any[])?.length ? (content!.sections as any[]).map((s: any, i: number) => (
               <div key={i}>
                 <h3 className="text-base font-semibold text-gray-900">{s.heading}</h3>
                 <p className="text-sm">{s.body}</p>
               </div>
-            ))}
+            )) : legalSects.length > 0 ? legalSects.map((s: any, i: number) => (
+              <div key={i}>
+                <h3 className="text-base font-semibold text-gray-900">{s.heading}</h3>
+                <p className="text-sm">{s.content || s.body}</p>
+              </div>
+            )) : (
+              <p className="text-gray-300 italic">Click to edit this section</p>
+            )}
           </div>
         </div>
       )
+    }
 
     case 'campaigns_list':
       return (

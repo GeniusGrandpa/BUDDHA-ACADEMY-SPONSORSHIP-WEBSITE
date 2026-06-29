@@ -8,8 +8,9 @@ import { StudentCardSkeleton } from '../components/ui/LoadingSkeleton'
 import { CtaBanner } from '../components/CtaBanner'
 import { getStudents } from '../services/students'
 import { getHeroContent, getSectionContent, getSectionVisibility, getSiteImage } from '../services/cms-content'
+import { getTestimonialsWithType } from '../services/content'
 import { useCmsStrings } from '../context/CmsStringsContext'
-import type { Student } from '../types/database'
+import type { Student, Testimonial } from '../types/database'
 import type { HeroContent, SectionContent } from '../types/cms-content'
 
 
@@ -297,26 +298,31 @@ function SponsorshipStepsSection({ sponsorshipSteps, visible }: { sponsorshipSte
   )
 }
 
-function TestimonialsSection({ testimonials, visible }: { testimonials: SectionContent; visible: boolean }) {
+function TestimonialsSection({ testimonials, testimonialList, visible }: { testimonials: SectionContent; testimonialList: Testimonial[]; visible: boolean }) {
   if (!visible) return null
   const content = testimonials.content as { title?: string }
+  const items = testimonialList.length > 0 ? testimonialList.slice(0, 4) : []
   return (
     <section className="py-12 sm:py-16 lg:py-24 bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {content?.title && <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-8 sm:mb-12 text-center">{content.title}</h2>}
         <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
-          {[1, 2].map(i => (
-            <div key={i} className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+          {items.length > 0 ? items.map((t) => (
+            <div key={t.id} className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-10 h-10 rounded-full bg-amber-100" />
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white text-sm font-bold">
+                  {(t.author_name || 'S').charAt(0)}
+                </div>
                 <div>
-                  <div className="text-sm font-medium text-gray-700">Supporter</div>
-                  <div className="text-xs text-gray-400">Donor</div>
+                  <div className="text-sm font-medium text-gray-700">{t.author_name}</div>
+                  {t.author_role && <div className="text-xs text-gray-400">{t.author_role}</div>}
                 </div>
               </div>
-              <p className="text-sm text-gray-600 italic">Your support makes a real difference in these children's lives.</p>
+              <p className="text-sm text-gray-600 italic">"{t.content || t.quote}"</p>
             </div>
-          ))}
+          )) : (
+            <div className="col-span-2 text-center py-8 text-gray-400 text-sm">Testimonials will appear here once added.</div>
+          )}
         </div>
       </div>
     </section>
@@ -353,6 +359,7 @@ export function HomePage() {
   const [featuredStudentsSection, setFeaturedStudentsSection] = useState<SectionContent | null>(null)
   const [sponsorshipSteps, setSponsorshipSteps] = useState<SectionContent | null>(null)
   const [testimonialsSection, setTestimonialsSection] = useState<SectionContent | null>(null)
+  const [testimonialItems, setTestimonialItems] = useState<Testimonial[]>([])
   const [donationCtaSection, setDonationCtaSection] = useState<SectionContent | null>(null)
   const [sectionsVisible, setSectionsVisible] = useState<Record<string, boolean>>({})
   const [brokenStudentPhotos, setBrokenStudentPhotos] = useState<Set<string>>(new Set())
@@ -367,6 +374,7 @@ export function HomePage() {
       getSectionContent('featured_students').then(d => { if (d) setFeaturedStudentsSection(d) }).catch(() => {}),
       getSectionContent('sponsorship_steps').then(d => { if (d) setSponsorshipSteps(d) }).catch(() => {}),
       getSectionContent('testimonials').then(d => { if (d) setTestimonialsSection(d) }).catch(() => {}),
+      getTestimonialsWithType('testimonial').then(d => { if (d && d.length > 0) setTestimonialItems(d) }).catch(() => {}),
       getSectionContent('donation_cta').then(d => { if (d) setDonationCtaSection(d) }).catch(() => {}),
       getSectionVisibility().then(sections => {
         const map: Record<string, boolean> = {}
@@ -401,7 +409,7 @@ export function HomePage() {
         featuredContent={featuredStudentsSection}
       />
       {sponsorshipSteps && <SponsorshipStepsSection sponsorshipSteps={sponsorshipSteps} visible={sectionsVisible.sponsorship_steps !== false} />}
-      {testimonialsSection && <TestimonialsSection testimonials={testimonialsSection} visible={sectionsVisible.testimonials !== false} />}
+      {testimonialsSection && <TestimonialsSection testimonials={testimonialsSection} testimonialList={testimonialItems} visible={sectionsVisible.testimonials !== false} />}
       {donationCtaSection && <DonationCtaSection donationCta={donationCtaSection} visible={sectionsVisible.donation_cta !== false} />}
       <section><CtaBanner /></section>
     </div>
