@@ -1,8 +1,12 @@
 import { supabase } from '../lib/supabase'
 import { ALL_PUBLIC_PAGES } from '../types/cms-pages'
 import type { CmsPage, ToggleState } from '../types/cms-pages'
-import type { HeroContent, SponsorshipContent, DonationContent, VolunteerContent, PageHeader, SectionContent, SectionVisibility, FooterContent, SeoContent, SiteImage, CmsStringMap } from '../types/cms-content'
-import type { Page } from '../types/database'
+import type { HeroContent, SponsorshipContent, DonationContent, VolunteerContent, PageHeader, SectionContent, SectionVisibility, FooterContent, SeoContent, SiteImage, CmsStringMap, TransparencyContent } from '../types/cms-content'
+import type { Page, Student, GalleryItem, News, Testimonial, StudentStory, Faq, ActivityRow, Video } from '../types/database'
+import { getStudents } from './students'
+import { getGalleryItems } from './gallery'
+import { getNews } from './news'
+import { getPublicActivities } from './activities'
 
 export interface CmsPageData {
   page: CmsPage
@@ -13,11 +17,20 @@ export interface CmsPageData {
   sponsorship: SponsorshipContent | null
   donation: DonationContent | null
   volunteer: VolunteerContent | null
+  transparency: TransparencyContent | null
   footer: FooterContent | null
   seo: SeoContent | null
   images: SiteImage[]
   visibility: Record<string, boolean>
   cmsStrings: CmsStringMap
+  students: Student[]
+  galleryItems: GalleryItem[]
+  news: News[]
+  testimonials: Testimonial[]
+  studentStories: StudentStory[]
+  faqs: Faq[]
+  activities: ActivityRow[]
+  videos: Video[]
 }
 
 export interface CmsDataset {
@@ -87,18 +100,27 @@ export async function fetchCmsPageData(page: CmsPage): Promise<CmsPageData> {
     !managedPrefixes.includes(k) && !managedPrefixes.some(p => k.startsWith(p))
   ))]
 
-  const [hero, pageHeader, sponsorship, donation, volunteer, footerContent, seo, pageContent, sectionContentList, siteImages, cmsStringsData] = await Promise.all([
+  const [hero, pageHeader, sponsorship, donation, volunteer, transparency, footerContent, seo, pageContent, sectionContentList, siteImages, cmsStringsData, students, galleryItems, news, testimonials, studentStories, faqs, activities, videos] = await Promise.all([
     fetchHeroContent(),
     fetchPageHeader(page.slug),
     fetchSponsorshipContent(),
     fetchDonationContent(),
     fetchVolunteerContent(),
+    fetchTransparencyContent(),
     fetchFooterContent(),
     fetchSeoContent(page.slug),
     fetchPageBySlug(page.slug),
     uniqueSectionKeys.length > 0 ? Promise.all(uniqueSectionKeys.map(k => fetchSectionContent(k))) : Promise.resolve([]),
     fetchSiteImagesBySection(page.slug),
     fetchAllCmsStrings(),
+    getStudents(undefined, { limit: 50 }).catch(() => []),
+    getGalleryItems({ publishedOnly: true }).catch(() => []),
+    getNews().catch(() => []),
+    fetchTestimonials(),
+    fetchStudentStories(),
+    fetchFaqs(),
+    getPublicActivities(20).catch(() => []),
+    fetchVideos(),
   ])
 
   const sections: Record<string, SectionContent | null> = {}
@@ -115,11 +137,20 @@ export async function fetchCmsPageData(page: CmsPage): Promise<CmsPageData> {
     sponsorship: sponsorship || null,
     donation: donation || null,
     volunteer: volunteer || null,
+    transparency: transparency || null,
     footer: footerContent || null,
     seo: seo || null,
     images: siteImages || [],
     visibility: {},
     cmsStrings: cmsStringsData,
+    students,
+    galleryItems,
+    news,
+    testimonials,
+    studentStories,
+    faqs,
+    activities,
+    videos,
   }
 }
 
@@ -236,6 +267,45 @@ async function fetchSiteImagesBySection(section: string): Promise<SiteImage[]> {
     .select('*')
     .eq('section', section)
   return (data || []) as SiteImage[]
+}
+
+async function fetchTransparencyContent(): Promise<TransparencyContent | null> {
+  const { data } = await db('transparency_content')
+    .select('*')
+    .eq('is_published', true)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  return data as TransparencyContent | null
+}
+
+async function fetchTestimonials(): Promise<Testimonial[]> {
+  const { data } = await supabase.from('testimonials')
+    .select('*')
+    .order('sort_order', { ascending: true })
+  return (data || []) as Testimonial[]
+}
+
+async function fetchStudentStories(): Promise<StudentStory[]> {
+  const { data } = await supabase.from('student_stories')
+    .select('*')
+    .order('created_at', { ascending: false })
+  return (data || []) as StudentStory[]
+}
+
+async function fetchFaqs(): Promise<Faq[]> {
+  const { data } = await supabase.from('faqs')
+    .select('*')
+    .eq('is_published', true)
+    .order('sort_order', { ascending: true })
+  return (data || []) as Faq[]
+}
+
+async function fetchVideos(): Promise<Video[]> {
+  const { data } = await supabase.from('videos')
+    .select('*')
+    .order('created_at', { ascending: false })
+  return (data || []) as Video[]
 }
 
 async function fetchAllCmsStrings(): Promise<CmsStringMap> {

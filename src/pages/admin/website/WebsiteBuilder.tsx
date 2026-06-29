@@ -1,12 +1,12 @@
 import { useState, useCallback, useEffect, useMemo } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, FileText, ChevronRight, Globe, Eye, Layers, Home, Info, GraduationCap, Image, Newspaper, Mail, Heart, Users, BookOpen, Megaphone, HelpCircle, Activity, Award, Shield, FileText as FileTextIcon, Settings, Layout, CalendarDays } from 'lucide-react'
 import { useCmsPages } from '../../../hooks/useCmsPages'
 import { ToggleSwitch } from '../../../components/ui/ToggleSwitch'
 import { StatusBadge } from '../../../components/ui/StatusBadge'
 import { FormSkeleton } from '../../../components/ui/LoadingSkeleton'
-import { getAllCmsStrings, upsertCmsString } from '../../../services/cms-content'
+import { getAllCmsStrings, upsertCmsString, upsertSectionContent, upsertHeroContent, upsertPageHeader } from '../../../services/cms-content'
 import type { CmsPage, CmsSection } from '../../../types/cms-pages'
 import type { CmsPageData } from '../../../services/cms-pages'
 import type { CmsStringMap } from '../../../types/cms-content'
@@ -14,6 +14,37 @@ import type { CmsStringMap } from '../../../types/cms-content'
 type ViewMode = 'pages' | 'editor' | 'seo' | 'settings'
 type PreviewDevice = 'desktop' | 'tablet' | 'mobile'
 type EditorTab = 'content' | 'design' | 'layout' | 'advanced'
+
+const PAGE_ICONS: Record<string, any> = {
+  home: Home,
+  about: Info,
+  sponsorship: Heart,
+  students: GraduationCap,
+  donations: Heart,
+  gallery: Image,
+  events: CalendarDays,
+  news: Newspaper,
+  contact: Mail,
+  faq: HelpCircle,
+  volunteer_page: Users,
+  privacy: Shield,
+  terms: FileTextIcon,
+  'success-stories': Award,
+  transparency: Activity,
+  campaigns: Megaphone,
+  activity: Activity,
+  impact: Layout,
+  team: Users,
+  testimonials_page: Award,
+}
+
+const PAGE_CATEGORIES: { label: string; pageIds: string[] }[] = [
+  { label: 'Main Pages', pageIds: ['home', 'about', 'sponsorship', 'students', 'donations'] },
+  { label: 'Content', pageIds: ['gallery', 'news', 'success-stories', 'testimonials_page', 'activity'] },
+  { label: 'Engagement', pageIds: ['contact', 'faq', 'volunteer', 'campaigns'] },
+  { label: 'Legal & Info', pageIds: ['privacy', 'terms', 'transparency'] },
+  { label: 'Additional', pageIds: ['events', 'impact', 'team'] },
+]
 
 const FRIENDLY_LABELS: Record<string, string> = {
   hero: 'Hero Banner',
@@ -92,14 +123,30 @@ export function WebsiteBuilder() {
   const handleSave = useCallback(async () => {
     setSaving(true)
     try {
-      await new Promise(r => setTimeout(r, 300))
+      if (activePage && activePageData) {
+        for (const section of activePage.sections) {
+          const sectionContent = activePageData.sections[section.key]
+          if (sectionContent) {
+            const content = sectionContent.content as Record<string, any> | undefined
+            if (content && Object.keys(content).length > 0) {
+              await upsertSectionContent({
+                section_key: section.key,
+                title: sectionContent.title,
+                subtitle: sectionContent.subtitle,
+                description: sectionContent.description,
+                content,
+              }).catch(() => {})
+            }
+          }
+        }
+      }
       toast.success('All changes saved')
     } catch {
       toast.error('Failed to save')
     } finally {
       setSaving(false)
     }
-  }, [])
+  }, [activePage, activePageData])
 
   const handleUpdateString = useCallback(async (key: string, value: string) => {
     setCmsStrings(prev => ({ ...prev, [key]: value }))
@@ -202,57 +249,120 @@ export function WebsiteBuilder() {
 
       {contentAudit && <ContentAuditBanner audit={contentAudit} onDismiss={() => setContentAudit(null)} />}
 
-      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-        <div className="grid grid-cols-[1fr_auto] gap-4 p-4 bg-gray-50 border-b border-gray-100 text-xs font-medium text-gray-500 uppercase tracking-wider">
-          <div className="flex items-center gap-4">
-            <span className="w-8" />
-            <span className="flex-1">Page</span>
-            <span className="w-24 text-center">Status</span>
-            <span className="w-16 text-center">Sections</span>
-          </div>
-          <div className="flex items-center gap-4 pr-2">
-            <span className="w-14 text-center">Show</span>
-            <span className="w-14 text-center">Publish</span>
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+        <div className="xl:col-span-1">
+          <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+            <div className="p-4 bg-gray-50 border-b border-gray-100">
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Page Navigator</h3>
+            </div>
+            <div className="p-2 space-y-1 max-h-[500px] overflow-y-auto">
+              {PAGE_CATEGORIES.map(cat => {
+                const catPages = filteredPages.filter(p => cat.pageIds.includes(p.id))
+                if (catPages.length === 0) return null
+                return (
+                  <div key={cat.label}>
+                    <div className="px-3 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{cat.label}</div>
+                    {catPages.map(page => {
+                      const Icon = PAGE_ICONS[page.id] || FileText
+                      return (
+                        <button
+                          key={page.id}
+                          onClick={() => {
+                            setActivePage(page.id)
+                            setView('editor')
+                          }}
+                          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
+                            activePage?.id === page.id ? 'bg-amber-50 text-amber-700 font-medium ring-1 ring-amber-200' : 'text-gray-600 hover:bg-gray-50'
+                          }`}
+                        >
+                          <Icon className="w-4 h-4 shrink-0 opacity-60" />
+                          <span className="flex-1 text-left truncate">{page.name}</span>
+                          <span className={`w-2 h-2 rounded-full shrink-0 ${page.isVisible ? 'bg-green-400' : 'bg-gray-300'}`} />
+                        </button>
+                      )
+                    })}
+                  </div>
+                )
+              })}
+            </div>
           </div>
         </div>
-        <div className="divide-y divide-gray-50">
-          {filteredPages.length === 0 ? (
-            <div className="p-8 text-center text-gray-400">
-              <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">No pages found</p>
+
+        <div className="xl:col-span-3">
+          <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+            <div className="grid grid-cols-[1fr_auto] gap-4 p-4 bg-gray-50 border-b border-gray-100 text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <div className="flex items-center gap-4">
+                <span className="w-8" />
+                <span className="flex-1">Page</span>
+                <span className="w-24 text-center">Status</span>
+                <span className="w-16 text-center">Sections</span>
+              </div>
+              <div className="flex items-center gap-4 pr-2">
+                <span className="w-14 text-center">Show</span>
+                <span className="w-14 text-center">Publish</span>
+              </div>
             </div>
-          ) : (
-            filteredPages.map(page => (
-              <PageListItem
-                key={page.id}
-                page={page}
-                onEdit={() => {
-                  setActivePage(page.id)
-                  setView('editor')
-                }}
-                onToggleVisibility={(v) => togglePageVisibility(page.id, v)}
-                onTogglePublished={(v) => togglePublishStatus(page.id, v)}
-                onEditSeo={() => {
-                  setActivePage(page.id)
-                  setView('seo')
-                }}
-              />
-            ))
-          )}
+            <div className="divide-y divide-gray-50">
+              {filteredPages.length === 0 ? (
+                <div className="p-8 text-center text-gray-400">
+                  <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">No pages found</p>
+                </div>
+              ) : (
+                filteredPages.map(page => (
+                  <PageListItem
+                    key={page.id}
+                    page={page}
+                    onEdit={() => {
+                      setActivePage(page.id)
+                      setView('editor')
+                    }}
+                    onToggleVisibility={(v) => togglePageVisibility(page.id, v)}
+                    onTogglePublished={(v) => togglePublishStatus(page.id, v)}
+                    onEditSeo={() => {
+                      setActivePage(page.id)
+                      setView('seo')
+                    }}
+                  />
+                ))
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-amber-50 border border-amber-200 rounded-xl px-5 py-4">
-          <div>
-            <h3 className="text-sm font-semibold text-gray-900">Changes update immediately</h3>
-            <p className="text-sm text-gray-600 mt-0.5">All edits save directly to your website. No technical skills needed.</p>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
+              <Globe className="w-5 h-5 text-amber-600" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900">Live Preview</h3>
+              <p className="text-sm text-gray-600 mt-0.5">{dataset?.pages.filter(p => p.isPublished).length || 0} published pages</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-green-50 border border-green-200 rounded-xl px-5 py-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
+              <Eye className="w-5 h-5 text-green-600" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900">Real Data</h3>
+              <p className="text-sm text-gray-600 mt-0.5">{dataset?.pages.reduce((s, p) => s + p.sections.length, 0) || 0} editable sections</p>
+            </div>
           </div>
         </div>
         <div className="bg-blue-50 border border-blue-200 rounded-xl px-5 py-4">
-          <div>
-            <h3 className="text-sm font-semibold text-gray-900">Need help?</h3>
-            <p className="text-sm text-gray-600 mt-0.5">Click any page name to start editing. Use the section sidebar to navigate different parts of each page.</p>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+              <Layers className="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900">Click & Edit</h3>
+              <p className="text-sm text-gray-600 mt-0.5">Select a page from the navigator to start editing</p>
+            </div>
           </div>
         </div>
       </div>
@@ -328,16 +438,16 @@ async function scanWebsiteContent(): Promise<ContentAudit> {
     { name: 'Activity', slug: 'activity', sections: ['activity_feed'] },
   ]
 
-  const pages = allPageRoutes.map(page => ({
-    pageName: page.name,
-    slug: page.slug,
-    sections: page.sections,
-    missingSections: page.sections
+  const pages = allPageRoutes.map(page => {
+    const missingSections = page.sections
       .filter(s => !knownSections.has(s))
-      .map(s => ({ key: s, friendlyName: FRIENDLY_LABELS[s] || s.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()) })),
-  }))
+      .map(s => ({ key: s, friendlyName: FRIENDLY_LABELS[s] || s.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()) }))
+    return { pageName: page.name, slug: page.slug, sections: page.sections, missingSections }
+  })
 
-  return { pages, totalSections: allPageRoutes.reduce((sum, p) => sum + p.sections.length, 0) }
+  const totalSections = allPageRoutes.reduce((sum, p) => sum + p.sections.length, 0)
+  const totalMissing = pages.reduce((sum, p) => sum + p.missingSections.length, 0)
+  return { pages, totalSections }
 }
 
 function PageListItem({ page, onEdit, onToggleVisibility, onTogglePublished, onEditSeo }: {
@@ -464,6 +574,16 @@ function VisualPageEditor({ page, pageData, selectedSectionKey, setSelectedSecti
                 const isVisible = localVisibility[section.key] !== false
                 const isSelected = selectedSectionKey === section.key
                 const sectionName = FRIENDLY_LABELS[section.key] || section.name
+                const sectionContent = pageData.sections[section.key]
+                const hasRealContent = sectionContent?.title || sectionContent?.description || sectionContent?.content
+                const dynamicCount = section.key === 'featured_students' || section.key === 'students_grid' ? pageData.students?.length
+                  : section.key === 'gallery_grid' ? pageData.galleryItems?.length
+                  : section.key === 'news_grid' ? pageData.news?.length
+                  : section.key === 'testimonials' ? pageData.testimonials?.length
+                  : section.key === 'faq_list' ? pageData.faqs?.length
+                  : section.key === 'success_stories' ? pageData.studentStories?.length
+                  : section.key === 'activity_feed' ? pageData.activities?.length
+                  : null
                 return (
                   <div key={section.id} className="flex items-center gap-2">
                     <button
@@ -474,7 +594,17 @@ function VisualPageEditor({ page, pageData, selectedSectionKey, setSelectedSecti
                           : 'text-gray-600 hover:bg-white hover:shadow-sm'
                       } ${!isVisible ? 'opacity-60' : ''}`}
                     >
-                      {sectionName}
+                      <div className="flex items-center gap-2">
+                        <span>{sectionName}</span>
+                        {dynamicCount !== null && dynamicCount !== undefined && (
+                          <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${dynamicCount > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-50 text-gray-400'}`}>
+                            {dynamicCount}
+                          </span>
+                        )}
+                        {!hasRealContent && dynamicCount === null && (
+                          <span className="text-[10px] text-gray-300">empty</span>
+                        )}
+                      </div>
                     </button>
                     <button onClick={() => toggleLocalVisibility(section.key)} className="text-xs text-gray-400 hover:text-gray-600 shrink-0">
                       {isVisible ? 'Hide' : 'Show'}
@@ -506,12 +636,17 @@ function VisualPageEditor({ page, pageData, selectedSectionKey, setSelectedSecti
             >
               <div className="p-4 border-b border-gray-100 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-400">Preview</span>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 uppercase font-medium">{previewDevice}</span>
+                  <Eye className="w-3.5 h-3.5 text-amber-500" />
+                  <span className="text-xs font-medium text-gray-700">Live Preview</span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-600 uppercase font-medium">{previewDevice}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-gray-400">
                     {sectionOrder.filter(s => localVisibility[s.key] !== false).length} of {sectionOrder.length} sections visible
+                  </span>
+                  <div className="w-px h-4 bg-gray-200" />
+                  <span className="text-xs text-gray-400">
+                    {pageData.students?.length || 0} students · {pageData.news?.length || 0} news · {pageData.galleryItems?.length || 0} gallery
                   </span>
                 </div>
               </div>
@@ -636,6 +771,11 @@ function SponsorshipTreePreview({ steps }: { steps: { title: string; desc: strin
   )
 }
 
+function sponsorshipVariant(status: string) {
+  const map: Record<string, string> = { available: 'bg-emerald-500', partially_sponsored: 'bg-amber-500', fully_sponsored: 'bg-blue-500' }
+  return map[status] || 'bg-gray-400'
+}
+
 function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cmsStrings }: {
   section: CmsSection
   sectionContent: any
@@ -715,29 +855,39 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
         </div>
       )
 
-    case 'featured_students':
+    case 'featured_students': {
+      const students = pageData.students || []
       return (
         <div className="py-16 px-8">
           <div className="max-w-5xl mx-auto">
             <h2 className="text-3xl font-bold text-gray-900 text-center mb-4">{content?.title || 'Our Students'}</h2>
             <p className="text-gray-500 text-center mb-8 max-w-xl mx-auto">{cmsStrings['home_students_description'] || 'Meet the students waiting for sponsorship'}</p>
             <div className="grid grid-cols-3 gap-6">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="border border-gray-100 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
-                  <div className="h-40 bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center text-amber-400 text-4xl font-light">📸</div>
+              {students.length > 0 ? students.slice(0, 3).map((student: any) => (
+                <div key={student.id} className="border border-gray-100 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+                  {student.photo_url ? (
+                    <img src={student.photo_url} alt={student.name} className="h-40 w-full object-cover" />
+                  ) : (
+                    <div className="h-40 bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center text-amber-400 text-4xl font-light">📸</div>
+                  )}
                   <div className="p-4">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-sm font-semibold text-gray-900">Student {i}</h3>
-                      <span className="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Available</span>
+                      <h3 className="text-sm font-semibold text-gray-900">{student.name}</h3>
+                      <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full text-white ${sponsorshipVariant(student.sponsorship_status)}`}>
+                        {student.sponsorship_status?.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()) || 'Available'}
+                      </span>
                     </div>
-                    <p className="text-xs text-gray-500">Age {8 + i} &middot; Grade {1 + i}</p>
+                    <p className="text-xs text-gray-500">{student.age ? `Age ${student.age}` : ''} {student.grade ? `· ${student.grade}` : ''}</p>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <div className="col-span-3 text-center py-12 text-sm text-gray-400">Add students to display here</div>
+              )}
             </div>
           </div>
         </div>
       )
+    }
 
     case 'sponsorship_steps':
       return (
@@ -749,30 +899,34 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
         </div>
       )
 
-    case 'testimonials':
+    case 'testimonials': {
+      const testimonials = pageData.testimonials || []
       return (
         <div className="py-16 px-8 bg-gray-50">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-3xl font-bold text-gray-900 text-center mb-8">{content?.title || 'Testimonials'}</h2>
             <div className="grid grid-cols-2 gap-4">
-              {((content?.testimonials as any[])?.length ? content.testimonials : [1, 2]).map((t: any, i: number) => (
-                <div key={i} className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+              {testimonials.length > 0 ? testimonials.slice(0, 4).map((t: any) => (
+                <div key={t.id} className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white text-xs font-bold">
-                      {t?.name?.charAt(0) || 'S'}
+                      {(t.author_name || t.name || 'S').charAt(0)}
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-gray-700">{t?.name || 'Supporter'}</div>
-                      <div className="text-xs text-gray-400">{t?.role || 'Donor'}</div>
+                      <div className="text-sm font-medium text-gray-700">{t.author_name || t.name || 'Supporter'}</div>
+                      <div className="text-xs text-gray-400">{t.role || t.author_role || 'Donor'}</div>
                     </div>
                   </div>
-                  <p className="text-sm text-gray-600 italic">"{t?.text || 'Your support makes a real difference in these children\'s lives.'}"</p>
+                  <p className="text-sm text-gray-600 italic">"{t.content || t.text || t.quote || 'Testimonial text'}"</p>
                 </div>
-              ))}
+              )) : (
+                <div className="col-span-2 text-center py-12 text-sm text-gray-400">Add testimonials to display here</div>
+              )}
             </div>
           </div>
         </div>
       )
+    }
 
     case 'donation_cta':
       return (
@@ -802,7 +956,7 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
           <div className="max-w-4xl mx-auto">
             <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">{sectionContent?.title || (section.type === 'about_values' ? 'Our Core Values' : 'Our Mission')}</h2>
             <div className="grid md:grid-cols-2 gap-6">
-              {((content?.values as any[])?.length ? content.values : [
+              {((content?.values as any[])?.length ? content!.values : [
                 { title: 'Education', desc: 'Quality education for every child' },
                 { title: 'Compassion', desc: 'Supporting with kindness and care' },
               ]).map((v: any, i: number) => (
@@ -828,13 +982,14 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
         </div>
       )
 
-    case 'about_timeline':
+    case 'about_timeline': {
+      const milestones = (content?.milestones as any[]) || []
       return (
         <div className="py-16 px-8 bg-gray-50">
           <div className="max-w-3xl mx-auto">
             <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">Our Journey</h2>
             <div className="space-y-4">
-              {(content?.milestones as any[] || []).length > 0 ? content.milestones.map((m: any, i: number) => (
+              {milestones.length > 0 ? milestones.map((m: any, i: number) => (
                 <div key={i} className="flex items-center gap-4">
                   <div className="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold">{i + 1}</div>
                   <div>
@@ -849,6 +1004,7 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
           </div>
         </div>
       )
+    }
 
     case 'contact_details':
       return (
@@ -876,10 +1032,10 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
           <div className="max-w-xl mx-auto">
             <h2 className="text-xl font-bold text-gray-900 text-center mb-6">{content?.title || 'Get in Touch'}</h2>
             <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-4">
-              <div className="h-8 bg-gray-50 rounded w-full" />
-              <div className="h-8 bg-gray-50 rounded w-full" />
-              <div className="h-20 bg-gray-50 rounded w-full" />
-              <div className="h-8 bg-amber-500 rounded w-24" />
+              <div className="h-10 bg-gray-50 rounded-lg w-full" />
+              <div className="h-10 bg-gray-50 rounded-lg w-full" />
+              <div className="h-24 bg-gray-50 rounded-lg w-full" />
+              <div className="h-10 bg-amber-500 rounded-lg w-32" />
             </div>
           </div>
         </div>
@@ -909,7 +1065,7 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
           <div className="max-w-lg mx-auto">
             <h2 className="text-xl font-bold text-gray-900 text-center mb-8">{content?.title || (section.type === 'donate_process' ? 'How It Works' : 'How to Sponsor')}</h2>
             <div className="space-y-4">
-              {((content?.steps as any[])?.length ? content.steps : [
+              {((content?.steps as any[])?.length ? content!.steps : [
                 { title: 'Browse', desc: 'Find a child to sponsor' },
                 { title: 'Donate', desc: 'Set up your contribution' },
                 { title: 'Connect', desc: 'Build a relationship' },
@@ -933,7 +1089,7 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
           <div className="max-w-3xl mx-auto">
             <h2 className="text-xl font-bold text-gray-900 text-center mb-6">{content?.title || 'Sponsorship Benefits'}</h2>
             <div className="grid md:grid-cols-2 gap-4">
-              {((content?.benefits as any[])?.length ? content.benefits : [
+              {((content?.benefits as any[])?.length ? content!.benefits : [
                 { text: 'Education support for a child' },
                 { text: 'Monthly progress updates' },
               ]).map((b: any, i: number) => (
@@ -958,16 +1114,18 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
         </div>
       )
 
-    case 'donate_impact':
+    case 'donate_impact': {
+      const donation = pageData.donation
+      const impactCards = content?.impact_cards as any[] || (donation?.impact_cards as any[])
       return (
         <div className="py-12 px-8">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-xl font-bold text-gray-900 text-center mb-6">{content?.title || 'Your Impact'}</h2>
             <div className="grid grid-cols-3 gap-4">
-              {(content?.impact_cards as any[])?.length > 0 ? content.impact_cards.slice(0, 3).map((c: any, i: number) => (
+              {impactCards?.length > 0 ? impactCards.slice(0, 3).map((c: any, i: number) => (
                 <div key={i} className="bg-white rounded-xl border border-amber-100 p-5 text-center shadow-sm">
-                  <div className="text-lg font-bold text-amber-600">${c.amount || '50'}</div>
-                  <p className="text-xs text-gray-500 mt-1">{c.description || 'Provides school supplies for a month'}</p>
+                  <div className="text-lg font-bold text-amber-600">${c.amount || c.label || '50'}</div>
+                  <p className="text-xs text-gray-500 mt-1">{c.description || c.label || 'Provides school supplies for a month'}</p>
                 </div>
               )) : (
                 <>
@@ -989,127 +1147,201 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
           </div>
         </div>
       )
+    }
 
-    case 'faq_list':
+    case 'faq_list': {
+      const faqs = pageData.faqs || []
       return (
         <div className="py-12 px-8">
           <div className="max-w-2xl mx-auto">
             <h2 className="text-xl font-bold text-gray-900 text-center mb-6">{content?.title || 'Frequently Asked Questions'}</h2>
             <div className="space-y-2">
-              {((content?.faqs as any[])?.length ? content.faqs : [
-                { question: 'How does sponsorship work?', answer: 'You support a child\'s education through monthly donations.' },
-                { question: 'Can I choose my child?', answer: 'Yes, you can browse profiles and select a child to sponsor.' },
-              ]).map((f: any, i: number) => (
-                <div key={i} className="border border-gray-100 rounded-lg p-4">
+              {faqs.length > 0 ? faqs.slice(0, 6).map((f: any) => (
+                <div key={f.id} className="border border-gray-100 rounded-lg p-4">
                   <h3 className="text-sm font-medium text-gray-900 mb-1">{f.question || 'Question?'}</h3>
                   <p className="text-xs text-gray-500">{f.answer || 'Answer goes here'}</p>
                 </div>
-              ))}
+              )) : (
+                <div className="text-center py-12 text-sm text-gray-400">Add FAQs to display here</div>
+              )}
             </div>
           </div>
         </div>
       )
+    }
 
-    case 'gallery_grid':
+    case 'gallery_grid': {
+      const galleryItems = pageData.galleryItems || []
       return (
         <div className="py-12 px-8">
           <div className="max-w-5xl mx-auto">
             <h2 className="text-xl font-bold text-gray-900 text-center mb-6">{content?.title || 'Photo Gallery'}</h2>
             <div className="grid grid-cols-3 gap-3">
-              {[1, 2, 3, 4, 5, 6].map(i => (
-                <div key={i} className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center text-gray-300 text-2xl font-light">📷</div>
-              ))}
+              {galleryItems.length > 0 ? galleryItems.slice(0, 9).filter((item: any) => item.type === 'photo').map((item: any) => (
+                <div key={item.id} className="aspect-square rounded-lg overflow-hidden">
+                  <img src={item.url || item.thumbnail_url} alt={item.title} className="w-full h-full object-cover" />
+                </div>
+              )) : (
+                [1, 2, 3, 4, 5, 6].map(i => (
+                  <div key={i} className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center text-gray-300 text-2xl font-light">📷</div>
+                ))
+              )}
             </div>
+            {galleryItems.length > 0 && <p className="text-xs text-gray-400 text-center mt-3">{galleryItems.filter((i: any) => i.type === 'photo').length} photos</p>}
           </div>
         </div>
       )
+    }
 
-    case 'news_grid':
+    case 'news_grid': {
+      const news = pageData.news || []
       return (
         <div className="py-12 px-8">
           <div className="max-w-5xl mx-auto">
             <h2 className="text-xl font-bold text-gray-900 text-center mb-6">{content?.title || 'Latest News'}</h2>
             <div className="grid grid-cols-3 gap-6">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="border border-gray-100 rounded-xl overflow-hidden">
-                  <div className="h-32 bg-gradient-to-br from-amber-50 to-amber-100" />
+              {news.length > 0 ? news.slice(0, 6).map((article: any) => (
+                <div key={article.id} className="border border-gray-100 rounded-xl overflow-hidden">
+                  <div className={`h-32 ${article.featured_image ? '' : 'bg-gradient-to-br from-amber-50 to-amber-100'}`}>
+                    {article.featured_image && <img src={article.featured_image} alt={article.title} className="w-full h-full object-cover" />}
+                  </div>
                   <div className="p-4">
-                    <span className="text-[10px] text-amber-600 font-medium">News</span>
-                    <h3 className="text-sm font-semibold text-gray-900 mt-1">News Article Title {i}</h3>
-                    <p className="text-xs text-gray-500 mt-1">Short description of the news article goes here...</p>
+                    <span className="text-[10px] text-amber-600 font-medium capitalize">{article.category || 'News'}</span>
+                    <h3 className="text-sm font-semibold text-gray-900 mt-1 line-clamp-2">{article.title}</h3>
+                    <p className="text-xs text-gray-500 mt-1 line-clamp-2">{article.excerpt || article.content?.substring(0, 80) || ''}</p>
                   </div>
                 </div>
-              ))}
+              )) : (
+                [1, 2, 3].map(i => (
+                  <div key={i} className="border border-gray-100 rounded-xl overflow-hidden">
+                    <div className="h-32 bg-gradient-to-br from-amber-50 to-amber-100" />
+                    <div className="p-4">
+                      <span className="text-[10px] text-amber-600 font-medium">News</span>
+                      <h3 className="text-sm font-semibold text-gray-900 mt-1">News Article Title {i}</h3>
+                      <p className="text-xs text-gray-500 mt-1">Short description of the news article...</p>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
       )
+    }
 
-    case 'students_grid':
+    case 'students_grid': {
+      const students = pageData.students || []
       return (
         <div className="py-12 px-8">
           <div className="max-w-5xl mx-auto">
             <h2 className="text-xl font-bold text-gray-900 text-center mb-6">{content?.title || 'Our Students'}</h2>
             <div className="grid grid-cols-3 gap-6">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="border border-gray-100 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
-                  <div className="h-36 bg-gradient-to-br from-amber-100 to-amber-200" />
+              {students.length > 0 ? students.slice(0, 6).map((student: any) => (
+                <div key={student.id} className="border border-gray-100 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+                  {student.photo_url ? (
+                    <img src={student.photo_url} alt={student.name} className="h-36 w-full object-cover" />
+                  ) : (
+                    <div className="h-36 bg-gradient-to-br from-amber-100 to-amber-200" />
+                  )}
                   <div className="p-4">
                     <div className="flex items-center justify-between mb-1">
-                      <h3 className="text-sm font-semibold text-gray-900">Student {i}</h3>
-                      <span className="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Available</span>
+                      <h3 className="text-sm font-semibold text-gray-900">{student.name}</h3>
+                      <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full text-white ${sponsorshipVariant(student.sponsorship_status)}`}>
+                        {student.sponsorship_status?.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()) || 'Available'}
+                      </span>
                     </div>
-                    <p className="text-xs text-gray-500">Age {8 + i} &middot; Class {1 + i}</p>
+                    <p className="text-xs text-gray-500">{student.age ? `Age ${student.age}` : ''}{student.grade ? ` · Class ${student.grade}` : ''}</p>
                   </div>
                 </div>
-              ))}
+              )) : (
+                [1, 2, 3].map(i => (
+                  <div key={i} className="border border-gray-100 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+                    <div className="h-36 bg-gradient-to-br from-amber-100 to-amber-200" />
+                    <div className="p-4">
+                      <h3 className="text-sm font-semibold text-gray-900">Student {i}</h3>
+                      <span className="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Available</span>
+                      <p className="text-xs text-gray-500 mt-1">Age {8 + i} · Class {1 + i}</p>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
       )
+    }
 
-    case 'success_stories':
+    case 'success_stories': {
+      const stories = pageData.studentStories || []
       return (
         <div className="py-12 px-8 bg-gray-50">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-xl font-bold text-gray-900 text-center mb-6">{content?.title || 'Success Stories'}</h2>
             <div className="grid md:grid-cols-2 gap-6">
-              {[1, 2].map(i => (
-                <div key={i} className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+              {stories.length > 0 ? stories.slice(0, 4).map((story: any) => (
+                <div key={story.id} className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500" />
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white text-xs font-bold">
+                      {(story.student_name || story.title || 'S').charAt(0)}
+                    </div>
                     <div>
-                      <h3 className="text-sm font-semibold text-gray-900">Student Name</h3>
-                      <p className="text-xs text-gray-400">Graduate {2024 - i}</p>
+                      <h3 className="text-sm font-semibold text-gray-900">{story.student_name || story.title || 'Student'}</h3>
+                      <p className="text-xs text-gray-400">{story.graduation_year || story.year || 'Graduate'}</p>
                     </div>
                   </div>
-                  <p className="text-xs text-gray-600 leading-relaxed">Through sponsorship, this student was able to complete their education and pursue their dreams.</p>
+                  <p className="text-xs text-gray-600 leading-relaxed line-clamp-3">{story.content || story.story || story.description || 'Success story text'}</p>
                 </div>
-              ))}
+              )) : (
+                [1, 2].map(i => (
+                  <div key={i} className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500" />
+                      <div>
+                        <h3 className="text-sm font-semibold text-gray-900">Student Name</h3>
+                        <p className="text-xs text-gray-400">Graduate {2024 - i}</p>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 leading-relaxed">Through sponsorship, this student was able to complete their education and pursue their dreams.</p>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
       )
+    }
 
-    case 'activity_feed':
+    case 'activity_feed': {
+      const activities = pageData.activities || []
       return (
         <div className="py-12 px-8">
           <div className="max-w-xl mx-auto">
             <h2 className="text-xl font-bold text-gray-900 text-center mb-6">{content?.title || 'Recent Activity'}</h2>
             <div className="space-y-3">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="flex items-start gap-3 bg-white rounded-lg border border-gray-100 p-3">
+              {activities.length > 0 ? activities.slice(0, 10).map((a: any) => (
+                <div key={a.id} className="flex items-start gap-3 bg-white rounded-lg border border-gray-100 p-3">
                   <div className="w-2 h-2 rounded-full bg-amber-500 mt-1.5 shrink-0" />
                   <div>
-                    <p className="text-xs text-gray-700">Activity update {i} — someone performed an action</p>
-                    <p className="text-[10px] text-gray-400 mt-0.5">{i}h ago</p>
+                    <p className="text-xs text-gray-700">{a.title || 'Activity'}</p>
+                    <p className="text-[10px] text-gray-400 mt-0.5">{new Date(a.created_at).toLocaleDateString()}</p>
                   </div>
                 </div>
-              ))}
+              )) : (
+                [1, 2, 3].map(i => (
+                  <div key={i} className="flex items-start gap-3 bg-white rounded-lg border border-gray-100 p-3">
+                    <div className="w-2 h-2 rounded-full bg-amber-500 mt-1.5 shrink-0" />
+                    <div>
+                      <p className="text-xs text-gray-700">Activity update {i}</p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">{i}h ago</p>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
       )
+    }
 
     case 'volunteer_opps':
       return (
@@ -1117,7 +1349,7 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
           <div className="max-w-4xl mx-auto">
             <h2 className="text-xl font-bold text-gray-900 text-center mb-6">{content?.title || 'Volunteer Opportunities'}</h2>
             <div className="grid md:grid-cols-2 gap-4">
-              {((content?.opportunities as any[])?.length ? content.opportunities : [
+              {((content?.opportunities as any[])?.length ? content!.opportunities : [
                 { title: 'Teaching Assistant', desc: 'Help in classrooms', location: 'Kathmandu' },
                 { title: 'Event Coordinator', desc: 'Organize fundraising events', location: 'Remote' },
               ]).map((o: any, i: number) => (
@@ -1138,11 +1370,11 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
           <div className="max-w-xl mx-auto">
             <h2 className="text-xl font-bold text-gray-900 text-center mb-6">{content?.title || 'Apply to Volunteer'}</h2>
             <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-4">
-              <div className="h-8 bg-gray-50 rounded w-full" />
-              <div className="h-8 bg-gray-50 rounded w-full" />
-              <div className="h-8 bg-gray-50 rounded w-full" />
-              <div className="h-20 bg-gray-50 rounded w-full" />
-              <div className="h-8 bg-amber-500 rounded w-32" />
+              <div className="h-10 bg-gray-50 rounded-lg w-full" />
+              <div className="h-10 bg-gray-50 rounded-lg w-full" />
+              <div className="h-10 bg-gray-50 rounded-lg w-full" />
+              <div className="h-24 bg-gray-50 rounded-lg w-full" />
+              <div className="h-10 bg-amber-500 rounded-lg w-32" />
             </div>
           </div>
         </div>
@@ -1197,10 +1429,10 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
             {sectionContent?.description && <p className="text-gray-600">{sectionContent.description}</p>}
             {content && Object.keys(content).length > 0 && (
               <div className="mt-3 text-xs text-gray-400">
-                {Object.entries(content).slice(0, 3).map(([k, v]) => (
-                  <div key={k} className="truncate"><span className="text-gray-500 capitalize">{k.replace(/_/g, ' ')}:</span> {typeof v === 'string' ? v : '...'}</div>
+                {Object.entries(content).slice(0, 5).map(([k, v]) => (
+                  <div key={k} className="truncate"><span className="text-gray-500 capitalize">{k.replace(/_/g, ' ')}:</span> {typeof v === 'string' ? v : Array.isArray(v) ? `${v.length} items` : '...'}</div>
                 ))}
-                {Object.keys(content).length > 3 && <div className="text-gray-300">+{Object.keys(content).length - 3} more fields</div>}
+                {Object.keys(content).length > 5 && <div className="text-gray-300">+{Object.keys(content).length - 5} more fields</div>}
               </div>
             )}
             {!sectionContent?.title && !sectionContent?.description && (!content || Object.keys(content).length === 0) && (
@@ -1231,7 +1463,10 @@ function SectionSettingsPanel({ section, pageData, editorTab, setEditorTab, isVi
         <div className="flex items-center justify-between mb-3">
           <div>
             <h3 className="text-sm font-semibold text-gray-900">{sectionName}</h3>
-            <p className="text-xs text-gray-400 capitalize">{section.type.replace(/_/g, ' ')}</p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <p className="text-xs text-gray-400 capitalize">{section.type.replace(/_/g, ' ')}</p>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-50 text-blue-600">Editor</span>
+            </div>
           </div>
           <label className={`relative inline-flex h-5 w-9 items-center rounded-full cursor-pointer transition-colors ${isVisible ? 'bg-amber-500' : 'bg-gray-200'}`}>
             <input type="checkbox" checked={isVisible} onChange={onToggleVisibility} className="sr-only" />
@@ -1271,12 +1506,13 @@ function SectionSettingsPanel({ section, pageData, editorTab, setEditorTab, isVi
   )
 }
 
-function ContentEditorPanel({ sectionContent }: {
+function ContentEditorPanel({ section, sectionContent, pageData }: {
   section: CmsSection
   sectionContent: any
   pageData: CmsPageData
 }) {
   const [localContent, setLocalContent] = useState<Record<string, string>>({})
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     const fields: Record<string, string> = {}
@@ -1294,32 +1530,87 @@ function ContentEditorPanel({ sectionContent }: {
 
   const fields = Object.keys(localContent).length > 0
     ? Object.entries(localContent)
-    : [['content', '']]
+    : [['title', sectionContent?.title || section.name], ['description', '']]
+
+  const handleChange = useCallback((key: string, value: string) => {
+    setLocalContent(prev => ({ ...prev, [key]: value }))
+  }, [])
+
+  const handleSave = useCallback(async () => {
+    setSaving(true)
+    try {
+      const sectionKey = section.key
+      const content = sectionContent?.content as Record<string, any> | undefined
+
+      const stringFields: Record<string, string> = {}
+      const nonStringContent: Record<string, any> = {}
+      if (content) {
+        Object.entries(content).forEach(([k, v]) => {
+          if (typeof v === 'string' && localContent[k] !== undefined) {
+            stringFields[k] = v
+          } else {
+            nonStringContent[k] = v
+          }
+        })
+      }
+
+      const payload: Record<string, any> = {}
+      if (localContent.title) payload.title = localContent.title
+      if (localContent.subtitle) payload.subtitle = localContent.subtitle
+      if (localContent.description) payload.description = localContent.description
+
+      const mergedContent = {
+        ...nonStringContent,
+        ...Object.fromEntries(
+          Object.entries(localContent).filter(([k]) => k !== 'title' && k !== 'subtitle' && k !== 'description')
+        ),
+      }
+
+      if (Object.keys(mergedContent).length > 0) {
+        payload.content = mergedContent
+      }
+
+      payload.section_key = sectionKey
+
+      await upsertSectionContent(payload)
+      toast.success('Section content saved')
+    } catch {
+      toast.error('Failed to save section content')
+    } finally {
+      setSaving(false)
+    }
+  }, [section.key, sectionContent, localContent])
 
   return (
     <div className="space-y-4">
       <p className="text-xs text-gray-400 mb-2">Edit the text and media shown in this section</p>
+
       {sectionContent?.images && sectionContent.images.length > 0 && (
         <div>
           <label className="block text-xs font-medium text-gray-500 mb-1.5">Images</label>
           <div className="grid grid-cols-2 gap-2">
             {sectionContent.images.map((img: any, i: number) => (
-              <div key={i}>
+              <div key={i} className="relative group">
                 <img src={img.url} alt={img.alt} className="w-full h-16 object-cover rounded-lg" />
+                <button className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center text-[10px] text-white font-medium">
+                  Replace
+                </button>
               </div>
             ))}
           </div>
         </div>
       )}
+
       {fields.map(([key, value]) => {
         const label = key.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())
-        const isLongText = value && value.length > 100
+        const isLongText = (value && value.length > 100) || key === 'description' || key === 'content'
         return (
           <div key={key}>
             <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
             {isLongText ? (
               <textarea
-                defaultValue={value}
+                value={localContent[key] || value || ''}
+                onChange={e => handleChange(key, e.target.value)}
                 rows={3}
                 className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 resize-none"
                 placeholder={`Enter ${label.toLowerCase()}...`}
@@ -1327,7 +1618,8 @@ function ContentEditorPanel({ sectionContent }: {
             ) : (
               <input
                 type="text"
-                defaultValue={value}
+                value={localContent[key] || value || ''}
+                onChange={e => handleChange(key, e.target.value)}
                 className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20"
                 placeholder={`Enter ${label.toLowerCase()}...`}
               />
@@ -1335,7 +1627,16 @@ function ContentEditorPanel({ sectionContent }: {
           </div>
         )
       })}
-      <div className="pt-3">
+
+      <button
+        onClick={handleSave}
+        disabled={saving}
+        className="w-full px-4 py-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+      >
+        {saving ? 'Saving...' : 'Save Changes'}
+      </button>
+
+      <div className="pt-3 border-t border-gray-100">
         <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">Quick Actions</h4>
         <div className="grid grid-cols-2 gap-2">
           <button className="px-3 py-2 bg-gray-50 rounded-lg text-xs text-gray-600 hover:bg-gray-100 transition-colors">
