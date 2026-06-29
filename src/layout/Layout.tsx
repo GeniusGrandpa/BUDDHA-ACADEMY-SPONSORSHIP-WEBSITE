@@ -6,9 +6,9 @@ import { Footer } from './Footer'
 export function Layout() {
   const location = useLocation()
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--color-background)] text-[var(--color-text-primary)]">
+    <div className="min-h-screen flex flex-col bg-[var(--color-background)] text-[var(--color-text-primary)] overflow-x-hidden">
       <Header />
-      <main className="flex-grow">
+      <main className="flex-grow w-full max-w-[100vw]">
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}

@@ -64,14 +64,14 @@ export function NewsPage() {
   return (
     <div>
       {pageHeader && (
-        <section className="relative py-24 bg-gradient-to-br from-amber-50 to-orange-50">
+        <section className="relative py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-amber-50 to-orange-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto">
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">
                 {pageHeader.title}
               </h1>
               {pageHeader.subtitle && (
-                <p className="text-xl text-gray-600">
+                <p className="text-base sm:text-lg md:text-xl text-gray-600">
                   {pageHeader.subtitle}
                 </p>
               )}
@@ -80,16 +80,16 @@ export function NewsPage() {
         </section>
       )}
 
-      <section className="py-16">
+      <section className="py-12 sm:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} className="mb-8" />
+          <Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} className="mb-6 sm:mb-8" />
 
           {loading ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
               {Array.from({ length: 6 }).map((_, i) => <NewsCardSkeleton key={i} />)}
             </div>
           ) : filteredNews.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
               {filteredNews.map((article) => (
                 <Card key={article.id} variant="bordered" className="overflow-hidden hover:shadow-lg transition-shadow">
                   {article.image_url && (

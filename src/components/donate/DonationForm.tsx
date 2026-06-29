@@ -53,7 +53,7 @@ export function DonationForm({
             <label className="block text-sm font-medium text-[#0f172a] mb-3">
               {t('donate_frequency_label')}
             </label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {[
                 { value: 'one-time' as const, label: t('donate_frequency_one_time'), description: t('donate_frequency_one_time_desc') },
                 { value: 'monthly' as const, label: t('donate_frequency_monthly'), description: t('donate_frequency_monthly_desc') },
@@ -86,7 +86,7 @@ export function DonationForm({
             <label className="block text-sm font-medium text-[#0f172a] mb-3">
               {t('donate_amount_label')}
             </label>
-            <div className="grid grid-cols-5 gap-2 mb-3">
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-3">
               {[1000, 2500, 5000, 10000, 25000].map((preset) => {
                 const isActive = amount === preset && !customAmount
                 return (
@@ -123,7 +123,7 @@ export function DonationForm({
               {t('donate_student_label')}
             </label>
             {students.length > 0 ? (
-              <div className="grid gap-2 max-h-64 overflow-y-auto pr-1">
+              <div className="grid gap-2 max-h-48 sm:max-h-64 overflow-y-auto pr-1">
                 <button
                   type="button"
                   onClick={() => onStudentChange('')}

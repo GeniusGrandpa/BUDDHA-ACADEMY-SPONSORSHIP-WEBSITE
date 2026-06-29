@@ -116,20 +116,20 @@ export function Header() {
             </Link>
           </div>
 
-          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="lg:hidden p-2 text-[var(--color-navbar-text)]">
+          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="lg:hidden p-3 touch-target text-[var(--color-navbar-text)]" aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}>
             {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
 
         {isMenuOpen && (
-          <div className="lg:hidden py-4 border-t border-[var(--color-border)]">
-            <nav className="space-y-2">
+          <div className="lg:hidden py-4 border-t border-[var(--color-border)] max-h-[80vh] overflow-y-auto">
+            <nav className="space-y-1 px-2">
               {navigation.map((item) => (
                 <Link
                   key={item.href}
                   to={item.href}
                   onClick={() => setIsMenuOpen(false)}
-                  className={`block px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
                     isActive(item.href) ? 'bg-[var(--color-navbar-hover)] text-[var(--color-navbar-active)]' : 'bg-transparent text-[var(--color-navbar-text)]'
                   }`}
                 >
@@ -137,33 +137,37 @@ export function Header() {
                 </Link>
               ))}
               <Link to="/donate" onClick={() => setIsMenuOpen(false)}
-                className="block px-4 py-2 rounded-lg text-sm font-medium text-center bg-[var(--color-button-primary-bg)] text-[var(--color-button-primary-text)]">
+                className="block px-4 py-3 rounded-lg text-sm font-medium text-center bg-[var(--color-button-primary-bg)] text-[var(--color-button-primary-text)]">
                 {t('header_donate')}
               </Link>
-              <LanguageSwitcher mobile />
+              <div className="pt-2 pb-1">
+                <LanguageSwitcher mobile />
+              </div>
               {user ? (
-                <>
+                <div className="space-y-1 pt-2 border-t border-[var(--color-border)]">
                   {(profile?.role === 'admin' || profile?.role === 'super_admin') && (
                     <Link to={profile?.role === 'super_admin' ? '/super-admin' : '/admin'}
                       onClick={() => setIsMenuOpen(false)}
-                      className="block px-4 py-2 rounded-lg text-sm font-medium text-[var(--color-navbar-text)]">
+                      className="block px-4 py-3 rounded-lg text-sm font-medium text-[var(--color-navbar-text)]">
                       {t('header_admin')}
                     </Link>
                   )}
                   <Link to="/dashboard" onClick={() => setIsMenuOpen(false)}
-                    className="block px-4 py-2 rounded-lg text-sm font-medium text-[var(--color-navbar-text)]">
+                    className="block px-4 py-3 rounded-lg text-sm font-medium text-[var(--color-navbar-text)]">
                     {t('header_dashboard')}
                   </Link>
                   <button onClick={() => { handleSignOut(); setIsMenuOpen(false) }}
-                    className="block w-full text-left px-4 py-2 rounded-lg text-sm font-medium text-[var(--color-navbar-text)]">
+                    className="block w-full text-left px-4 py-3 rounded-lg text-sm font-medium text-[var(--color-navbar-text)]">
                     {t('header_sign_out')}
                   </button>
-                </>
+                </div>
               ) : (
-                <Link to="/login" onClick={() => setIsMenuOpen(false)}
-                  className="block px-4 py-2 rounded-lg text-sm font-medium text-[var(--color-navbar-text)]">
-                  {t('header_sign_in')}
-                </Link>
+                <div className="pt-2 border-t border-[var(--color-border)]">
+                  <Link to="/login" onClick={() => setIsMenuOpen(false)}
+                    className="block px-4 py-3 rounded-lg text-sm font-medium text-[var(--color-navbar-text)]">
+                    {t('header_sign_in')}
+                  </Link>
+                </div>
               )}
             </nav>
           </div>

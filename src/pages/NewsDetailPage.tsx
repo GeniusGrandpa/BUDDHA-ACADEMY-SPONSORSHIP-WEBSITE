@@ -64,22 +64,22 @@ export function NewsDetailPage() {
         </section>
       )}
 
-      <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <Link to="/news" className="inline-flex items-center text-amber-600 hover:text-amber-700 mb-8">
+      <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+        <Link to="/news" className="inline-flex items-center text-amber-600 hover:text-amber-700 mb-6 sm:mb-8 text-sm sm:text-base">
           <ArrowLeft className="w-4 h-4 mr-2" />Back to News
         </Link>
 
         {!heroBg && (
           <>
-            {heroTitle && <h1 className="text-4xl font-bold text-gray-900 mb-4">{heroTitle}</h1>}
+            {heroTitle && <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">{heroTitle}</h1>}
             {article.published_at && (
-              <p className="text-sm text-gray-500 mb-8">{new Date(article.published_at).toLocaleDateString()}</p>
+              <p className="text-sm text-gray-500 mb-6 sm:mb-8">{new Date(article.published_at).toLocaleDateString()}</p>
             )}
           </>
         )}
 
         {article.content && (
-          <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
+          <div className="prose prose-sm sm:prose-base lg:prose-lg max-w-none text-gray-700 leading-relaxed">
             {typeof article.content === 'string' ? (
               <p>{article.content}</p>
             ) : (

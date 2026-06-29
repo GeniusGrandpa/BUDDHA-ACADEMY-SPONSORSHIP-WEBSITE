@@ -24,10 +24,10 @@ export function StudentStory({ student }: StudentStoryProps) {
           className="max-w-3xl mx-auto"
         >
           <div className="rounded-xl border border-amber-200 bg-warm-50 overflow-hidden">
-            <div className="p-8 sm:p-10">
+            <div className="p-6 sm:p-8 lg:p-10">
               <div className="flex items-start gap-4 mb-6">
-                <div className="w-14 h-14 rounded-full bg-amber-50 flex items-center justify-center flex-shrink-0">
-                  <span className="text-xl font-medium text-amber-700">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-amber-50 flex items-center justify-center flex-shrink-0">
+                  <span className="text-lg sm:text-xl font-medium text-amber-700">
                     {student.name.charAt(0)}
                   </span>
                 </div>
@@ -35,26 +35,26 @@ export function StudentStory({ student }: StudentStoryProps) {
                   <p className="text-xs text-gray-600 uppercase tracking-wider mb-1">
                     {t('student_story_meet')}
                   </p>
-                  <h3 className="text-xl font-medium text-[#0f172a]">
+                  <h3 className="text-lg sm:text-xl font-medium text-[#0f172a]">
                     {student.name}
                   </h3>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-xs sm:text-sm text-gray-600">
                     {t('student_story_grade_age', { grade: student.grade, age: student.age })}
                   </p>
                 </div>
               </div>
 
               <div>
-                <blockquote className="pl-4 border-l-2 border-amber-200">
-                  <p className="text-gray-600 leading-relaxed italic">
+                <blockquote className="pl-3 sm:pl-4 border-l-2 border-amber-200">
+                  <p className="text-gray-600 leading-relaxed italic text-sm sm:text-base">
                     {student.bio}
                   </p>
                 </blockquote>
               </div>
 
               {student.dream_career && (
-                <div className="mt-6 flex items-center gap-3 px-4 py-3 rounded-lg bg-amber-50 border border-amber-100">
-                  <span className="text-sm text-gray-600">{t('student_story_dreams')}</span>
+                <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 px-4 py-3 rounded-lg bg-amber-50 border border-amber-100">
+                  <span className="text-xs sm:text-sm text-gray-600">{t('student_story_dreams')}</span>
                   <span className="text-sm font-medium text-[#0f172a]">
                     {student.dream_career}
                   </span>
@@ -62,7 +62,7 @@ export function StudentStory({ student }: StudentStoryProps) {
               )}
 
               <div className="mt-6 pt-6 border-t border-gray-100">
-                <p className="text-sm text-gray-600 leading-relaxed">
+                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
                   {t('student_story_sponsorship_text', { name: student.name })}
                 </p>
               </div>

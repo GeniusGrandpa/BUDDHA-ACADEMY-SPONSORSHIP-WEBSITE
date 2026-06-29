@@ -36,7 +36,7 @@ export function SuccessStoriesPage() {
   return (
     <div>
       {pageHeader && (
-        <section className="relative py-20 lg:py-28 bg-gradient-to-br from-purple-900 via-purple-800 to-emerald-900 overflow-hidden">
+        <section className="relative py-16 sm:py-20 lg:py-28 bg-gradient-to-br from-purple-900 via-purple-800 to-emerald-900 overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-emerald-500/10 via-transparent to-transparent" />
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
@@ -44,11 +44,11 @@ export function SuccessStoriesPage() {
               animate={{ opacity: 1, y: 0 }}
               className="text-center max-w-3xl mx-auto"
             >
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 sm:mb-6 leading-tight">
                 {pageHeader.title}
               </h1>
               {pageHeader.subtitle && (
-                <p className="text-lg md:text-xl text-gray-300 leading-relaxed">
+                <p className="text-base sm:text-lg md:text-xl text-gray-300 leading-relaxed">
                   {pageHeader.subtitle}
                 </p>
               )}
@@ -63,10 +63,10 @@ export function SuccessStoriesPage() {
         </div>
       </section>
 
-      <section className="py-16 bg-warm-50">
+      <section className="py-12 sm:py-16 bg-warm-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               {Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="bg-gray-50 rounded-xl p-6 animate-pulse">
                   <div className="h-40 bg-gray-200 rounded-lg mb-4" />
@@ -76,7 +76,7 @@ export function SuccessStoriesPage() {
               ))}
             </div>
           ) : stories.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               {stories.map((story, index) => (
                 <motion.div
                   key={story.id}

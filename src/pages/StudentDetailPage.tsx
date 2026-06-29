@@ -97,38 +97,38 @@ export function StudentDetailPage() {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6"
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 sm:mb-6"
         >
           <ArrowLeft className="w-5 h-5" />
           <span>{t('student_back')}</span>
         </button>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-6 sm:gap-8">
           <div className="lg:col-span-1">
             <Card variant="bordered" className="overflow-hidden">
               <img
                 src={student.photo_url || studentFallback || ''}
                 alt={student.name}
-                className="w-full h-80 object-cover"
+                className="w-full h-64 sm:h-80 object-cover"
               />
-              <div className="p-6">
+              <div className="p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h1 className="text-2xl font-bold text-gray-900">{student.name}</h1>
+                  <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{student.name}</h1>
                   <Badge variant={student.sponsorship_status as 'success' | 'warning' | 'default'}>{student.sponsorship_status}</Badge>
                 </div>
 
-                <div className="space-y-2 text-gray-600">
+                <div className="space-y-2 text-sm sm:text-base text-gray-600">
                   <div>{t('student_age_label', { age: student.age })}</div>
                   <div>{t('student_grade_label', { grade: student.grade })}</div>
                 </div>
 
                 <div className="mt-6 pt-6 border-t border-gray-200">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-gray-600">{t('student_sponsorship_goal')}</span>
-                    <span className="font-semibold text-gray-900">{formatNPR(student.sponsorship_amount)}/month</span>
+                    <span className="text-sm sm:text-base text-gray-600">{t('student_sponsorship_goal')}</span>
+                    <span className="font-semibold text-gray-900 text-sm sm:text-base">{formatNPR(student.sponsorship_amount)}/month</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
                     <div
@@ -137,7 +137,7 @@ export function StudentDetailPage() {
                     />
 
                   </div>
-                  <div className="text-sm text-gray-500 text-right">
+                  <div className="text-xs sm:text-sm text-gray-500 text-right">
                     {t('student_raised_of', {
                       current: formatNPR(student.current_sponsorship),
                       goal: formatNPR(student.sponsorship_amount),
@@ -156,18 +156,18 @@ export function StudentDetailPage() {
             </Card>
           </div>
 
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             <Card variant="bordered" padding="lg">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('student_about_heading', { name: student.name })}</h2>
-              <p className="text-gray-600 leading-relaxed whitespace-pre-line">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">{t('student_about_heading', { name: student.name })}</h2>
+              <p className="text-gray-600 leading-relaxed whitespace-pre-line text-sm sm:text-base">
                 {student.bio}
               </p>
             </Card>
 
             {student.family_background && (
               <Card variant="bordered" padding="lg">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('student_family_heading')}</h2>
-                <p className="text-gray-600 leading-relaxed whitespace-pre-line">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">{t('student_family_heading')}</h2>
+                <p className="text-gray-600 leading-relaxed whitespace-pre-line text-sm sm:text-base">
                   {student.family_background}
                 </p>
               </Card>
@@ -175,20 +175,20 @@ export function StudentDetailPage() {
 
             <Card variant="bordered" padding="lg">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-900">{t('student_education_heading')}</h2>
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">{t('student_education_heading')}</h2>
               </div>
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid sm:grid-cols-2 gap-4">
                 <div className="bg-amber-50 rounded-lg p-4">
                   <div className="mb-2">
-                    <span className="font-medium text-gray-900">{t('student_monthly_sponsorship')}</span>
+                    <span className="font-medium text-gray-900 text-sm sm:text-base">{t('student_monthly_sponsorship')}</span>
                   </div>
-                  <p className="text-2xl font-bold text-amber-600">{formatNPR(student.sponsorship_amount)}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-amber-600">{formatNPR(student.sponsorship_amount)}</p>
                 </div>
                 <div className="bg-emerald-50 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="font-medium text-gray-900">{t('student_current_support')}</span>
+                    <span className="font-medium text-gray-900 text-sm sm:text-base">{t('student_current_support')}</span>
                   </div>
-                  <p className="text-2xl font-bold text-emerald-600">{formatNPR(student.current_sponsorship)}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-emerald-600">{formatNPR(student.current_sponsorship)}</p>
                 </div>
               </div>
             </Card>

@@ -5,17 +5,17 @@ import { ActivityFeed } from '../components/activities/ActivityFeed'
 export function ActivityPage() {
   return (
     <div>
-      <section className="relative py-20 bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-900 overflow-hidden">
+      <section className="relative py-16 sm:py-20 lg:py-28 bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-900 overflow-hidden">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 sm:mb-6 leading-tight">
               Recent Activity
             </h1>
-            <p className="text-lg md:text-xl text-gray-300 leading-relaxed">
+            <p className="text-base sm:text-lg md:text-xl text-gray-300 leading-relaxed">
               Stay connected with the latest happenings at Buddha Academy — from donations and sponsorships to student achievements.
             </p>
           </motion.div>

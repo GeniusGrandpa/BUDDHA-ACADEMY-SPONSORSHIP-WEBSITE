@@ -144,3 +144,49 @@
     animation: none;
   }
 }
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  img, video, iframe {
+    max-width: 100%;
+    height: auto;
+  }
+
+  button, a, input, select, textarea {
+    font-family: inherit;
+  }
+
+  input, button, select, textarea {
+    font-size: 16px;
+  }
+}
+
+@layer utilities {
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  .container-padding {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+
+  .section-padding {
+    @apply py-12 sm:py-16 lg:py-24;
+  }
+
+  .section-padding-sm {
+    @apply py-10 sm:py-14 lg:py-20;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .break-words-safe {
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+}

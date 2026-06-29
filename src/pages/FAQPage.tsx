@@ -36,14 +36,14 @@ export function FAQPage() {
   return (
     <div>
       {pageHeader && (
-        <section className="relative py-20 bg-gradient-to-br from-amber-50 to-orange-50">
+        <section className="relative py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-amber-50 to-orange-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto">
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">
                 {pageHeader.title}
               </h1>
               {pageHeader.subtitle && (
-                <p className="text-xl text-gray-600">
+                <p className="text-base sm:text-lg md:text-xl text-gray-600">
                   {pageHeader.subtitle}
                 </p>
               )}
@@ -52,7 +52,7 @@ export function FAQPage() {
         </section>
       )}
 
-      <section className="py-16">
+      <section className="py-12 sm:py-16">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <Card variant="bordered" padding="lg">
             {loading ? (

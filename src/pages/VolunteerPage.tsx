@@ -62,27 +62,27 @@ export function VolunteerPage() {
   return (
     <div>
       {(heroTitle || heroSubtitle) && (
-        <section className="relative py-24 bg-gradient-to-br from-amber-50 to-orange-50">
+        <section className="relative py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-amber-50 to-orange-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto">
-              {heroTitle && <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">{heroTitle}</h1>}
-              {heroSubtitle && <p className="text-xl text-gray-600">{heroSubtitle}</p>}
+              {heroTitle && <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">{heroTitle}</h1>}
+              {heroSubtitle && <p className="text-base sm:text-lg md:text-xl text-gray-600">{heroSubtitle}</p>}
             </div>
           </div>
         </section>
       )}
 
       {opportunities.length > 0 && (
-        <section className="py-24 bg-white">
+        <section className="py-12 sm:py-16 lg:py-24 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {(content?.section_title || content?.section_description) && (
-              <div className="text-center mb-16">
-                {content.section_title && <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{content.section_title}</h2>}
-                {content.section_description && <p className="text-gray-600 max-w-2xl mx-auto">{content.section_description}</p>}
+              <div className="text-center mb-10 sm:mb-16">
+                {content.section_title && <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">{content.section_title}</h2>}
+                {content.section_description && <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">{content.section_description}</p>}
               </div>
             )}
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
               {opportunities.map((opp, idx) => (
                 <div key={idx} className="bg-gray-50 rounded-xl p-6 hover:shadow-lg transition-shadow">
                   <h3 className="font-semibold text-gray-900 mb-2">{opp.title}</h3>
@@ -95,11 +95,11 @@ export function VolunteerPage() {
       )}
 
       {events.length > 0 && (
-        <section className="py-24 bg-gray-50">
+        <section className="py-12 sm:py-16 lg:py-24 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{t('volunteer_events_heading')}</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto mb-12">{t('volunteer_events_description')}</p>
-            <div className="grid md:grid-cols-3 gap-8">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">{t('volunteer_events_heading')}</h2>
+            <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto mb-8 sm:mb-12">{t('volunteer_events_description')}</p>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
               {events.map((event) => (
                 <div key={event.id} className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
                   <h3 className="font-semibold text-gray-900 mb-2">{event.title}</h3>
@@ -111,19 +111,19 @@ export function VolunteerPage() {
         </section>
       )}
 
-      <section className="py-24 bg-white">
+      <section className="py-12 sm:py-16 lg:py-24 bg-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           {submitted ? (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+            <div className="text-center py-8 sm:py-12">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
+                <svg className="w-7 h-7 sm:w-8 sm:h-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">{t('volunteer_app_submitted_title')}</h3>
-              <p className="text-gray-600">{content?.success_message}</p>
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">{t('volunteer_app_submitted_title')}</h3>
+              <p className="text-sm sm:text-base text-gray-600">{content?.success_message}</p>
             </div>
           ) : (
             <>
-              <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">{t('volunteer_app_heading')}</h2>
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8 text-center">{t('volunteer_app_heading')}</h2>
               {submitError && (
                 <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
                   {submitError}

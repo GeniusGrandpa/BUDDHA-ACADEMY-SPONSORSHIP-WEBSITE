@@ -80,19 +80,19 @@ export function ContactPage() {
   return (
     <div>
       {header && (
-        <section className="relative py-24 bg-gradient-to-br from-amber-50 to-orange-50">
+        <section className="relative py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-amber-50 to-orange-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto">
-              {header.title && <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">{header.title}</h1>}
-              {header.subtitle && <p className="text-xl text-gray-600">{header.subtitle}</p>}
+              {header.title && <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">{header.title}</h1>}
+              {header.subtitle && <p className="text-base sm:text-lg md:text-xl text-gray-600">{header.subtitle}</p>}
             </div>
           </div>
         </section>
       )}
 
-      <section className="py-16">
+      <section className="py-12 sm:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-16">
+          <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16">
             <div>
               <Card variant="bordered" padding="lg" className="h-full">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('contact_form_title')}</h2>
@@ -161,10 +161,10 @@ export function ContactPage() {
 
                     <div className="space-y-1">
                       <label className="block text-sm font-medium text-gray-700">{t('contact_phone_label_form')} <span className="text-red-500 ml-1">*</span></label>
-                      <div className="flex gap-2">
+                      <div className="flex flex-col sm:flex-row gap-2">
                         <select value={formData.countryCode}
                           onChange={(e) => setFormData({ ...formData, countryCode: e.target.value })}
-                          className="px-3 py-2.5 rounded-lg border border-gray-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 focus:outline-none bg-white text-gray-900 text-sm flex-shrink-0 w-[140px]">
+                          className="px-3 py-2.5 rounded-lg border border-gray-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 focus:outline-none bg-white text-gray-900 text-sm flex-shrink-0 sm:w-[140px]">
                           <option value="+977">{t('contact_country_nepal')}</option>
                           <option value="+1">{t('contact_country_usa')}</option>
                           <option value="+44">{t('contact_country_uk')}</option>
@@ -199,14 +199,14 @@ export function ContactPage() {
       </section>
 
       {settings.contact_address && (
-        <section className="py-24 bg-orange-50">
+        <section className="py-12 sm:py-16 lg:py-24 bg-orange-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto">
-              <MapPin className="w-12 h-12 text-orange-500 mx-auto mb-4" />
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">{t('contact_location_heading')}</h2>
-              <p className="text-gray-600 mb-8">{settings.contact_address}</p>
+              <MapPin className="w-10 h-10 sm:w-12 sm:h-12 text-orange-500 mx-auto mb-4" />
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">{t('contact_location_heading')}</h2>
+              <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8">{settings.contact_address}</p>
               <a href={t('contact_map_link')} target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-full font-semibold transition-colors shadow-lg">
+                className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 sm:px-6 py-3 rounded-full font-semibold transition-colors shadow-lg">
                 <MapPin className="w-5 h-5" />
                 {t('contact_map_button')}
               </a>

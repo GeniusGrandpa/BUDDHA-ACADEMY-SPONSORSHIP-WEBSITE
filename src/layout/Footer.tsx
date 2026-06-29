@@ -42,8 +42,8 @@ export function Footer() {
     <footer className="bg-[var(--color-footer-bg)] border-t border-[var(--color-border)]">
       <div className="h-px bg-gradient-to-r from-transparent via-[var(--color-primary-light)] to-transparent opacity-30" />
 
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           <div>
             <div className="flex items-center space-x-3 mb-4">
               <img src={footerLogoSrc} alt={branding.organization_name || ''} className="h-14 w-auto" />

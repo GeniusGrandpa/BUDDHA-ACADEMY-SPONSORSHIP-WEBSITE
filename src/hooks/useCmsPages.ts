@@ -177,6 +177,24 @@ export function useCmsPages() {
     }
   }, [state.dataset])
 
+  const refreshDataset = useCallback(async () => {
+    setState(prev => ({ ...prev, loading: true }))
+    try {
+      const dataset = await fetchCmsDataset()
+      setState(prev => ({
+        loading: false,
+        dataset,
+        activePageId: prev.activePageId || dataset.pages[0]?.id || null,
+        activePageData: prev.activePageId
+          ? dataset.pageData[prev.activePageId] || dataset.pageData[dataset.pages[0]?.id] || null
+          : dataset.pageData[dataset.pages[0]?.id] || null,
+      }))
+    } catch {
+      toast.error('Failed to refresh')
+      setState(prev => ({ ...prev, loading: false }))
+    }
+  }, [])
+
   return {
     ...state,
     setActivePage,
@@ -185,6 +203,7 @@ export function useCmsPages() {
     togglePublishStatus,
     updateSeo,
     reloadPageData,
+    refreshDataset,
     activePage: state.dataset?.pages.find(p => p.id === state.activePageId) || null,
   }
 }

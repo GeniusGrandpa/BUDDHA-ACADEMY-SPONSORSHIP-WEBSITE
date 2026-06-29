@@ -30,7 +30,7 @@ export function ImpactCards({ amounts, selectedAmount, onSelect }: ImpactCardsPr
           </p>
         </motion.div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
           {amounts.map((item, index) => {
             const isSelected = selectedAmount === item.amount
 

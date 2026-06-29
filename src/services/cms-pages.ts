@@ -123,7 +123,7 @@ export async function fetchCmsPageData(page: CmsPage): Promise<CmsPageData> {
   }
 }
 
-function buildToggleState(pages: CmsPage[], visibility: SectionVisibility[]): ToggleState {
+function buildToggleState(_pages: CmsPage[], visibility: SectionVisibility[]): ToggleState {
   const sectionVisible: Record<string, boolean> = {}
   visibility.forEach(v => { sectionVisible[v.section_key] = v.is_visible })
 

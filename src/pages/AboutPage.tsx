@@ -59,33 +59,33 @@ export function AboutPage() {
   return (
     <div>
       {header && (
-        <section className="relative py-24 bg-gradient-to-br from-amber-50 to-orange-50">
+        <section className="relative py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-amber-50 to-orange-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto">
-              {header.title && <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">{header.title}</h1>}
-              {header.subtitle && <p className="text-xl text-gray-600 leading-relaxed">{header.subtitle}</p>}
+              {header.title && <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">{header.title}</h1>}
+              {header.subtitle && <p className="text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed">{header.subtitle}</p>}
             </div>
           </div>
         </section>
       )}
 
-      <section className="py-24">
+      <section className="py-12 sm:py-16 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">{t('about_mission_heading')}</h2>
-              {content?.mission && <p className="text-gray-600 mb-6 leading-relaxed">{content.mission}</p>}
-              {content?.vision && <p className="text-gray-600 mb-6 leading-relaxed">{content.vision}</p>}
-              {content?.description && <p className="text-gray-600 leading-relaxed">{content.description}</p>}
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">{t('about_mission_heading')}</h2>
+              {content?.mission && <p className="text-gray-600 mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">{content.mission}</p>}
+              {content?.vision && <p className="text-gray-600 mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">{content.vision}</p>}
+              {content?.description && <p className="text-gray-600 leading-relaxed text-sm sm:text-base">{content.description}</p>}
             </div>
             {images.length > 0 && (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 {images.map((img, idx) => (
                   <img
                     key={img.id}
                     src={img.image_url}
                     alt={img.alt_text || 'About image'}
-                    className={`rounded-lg shadow-lg object-cover w-full ${idx % 2 === 1 ? 'h-64 mt-8' : 'h-64'}`}
+                    className={`rounded-lg shadow-lg object-cover w-full ${idx % 2 === 1 ? 'h-48 sm:h-64 mt-4 sm:mt-8' : 'h-48 sm:h-64'}`}
                   />
                 ))}
               </div>
@@ -95,13 +95,13 @@ export function AboutPage() {
       </section>
 
       {stats.length > 0 && (
-        <section className="py-20 bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500">
+        <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-8 text-center">
               {stats.map((stat, idx) => (
                 <div key={idx}>
-                  <div className="text-4xl md:text-5xl font-bold text-white mb-2">{stat.value}</div>
-                  <div className="text-white/80 text-sm">{stat.label}</div>
+                  <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2">{stat.value}</div>
+                  <div className="text-white/80 text-xs sm:text-sm">{stat.label}</div>
                 </div>
               ))}
             </div>
@@ -110,13 +110,13 @@ export function AboutPage() {
       )}
 
       {values.length > 0 && (
-        <section className="py-24 bg-gray-50">
+        <section className="py-12 sm:py-16 lg:py-24 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{t('about_values_heading')}</h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">{t('about_values_description')}</p>
+            <div className="text-center mb-10 sm:mb-16">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">{t('about_values_heading')}</h2>
+              <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">{t('about_values_description')}</p>
             </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
               {values.map((value, idx) => (
                 <Card key={idx} variant="bordered" className="text-center hover:shadow-lg transition-shadow">
                   <h3 className="font-semibold text-gray-900 mb-2">{value.title}</h3>
@@ -129,20 +129,20 @@ export function AboutPage() {
       )}
 
       {timeline.length > 0 && (
-        <section className="py-24 bg-gradient-to-br from-amber-50 to-orange-50">
+        <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-amber-50 to-orange-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-center mb-16"
+              className="text-center mb-10 sm:mb-16"
             >
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{t('about_journey_heading')}</h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">{t('about_journey_description')}</p>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">{t('about_journey_heading')}</h2>
+              <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">{t('about_journey_description')}</p>
             </motion.div>
             <div className="relative max-w-5xl mx-auto">
               <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-amber-200 to-amber-300 -translate-x-1/2 hidden md:block" />
-              <div className="space-y-10 md:space-y-16">
+              <div className="space-y-6 sm:space-y-10 md:space-y-16">
                 {timeline.map((item, idx) => {
                   const isLeft = idx % 2 === 0
                   return (
@@ -176,15 +176,15 @@ export function AboutPage() {
         </section>
       )}
 
-      <section className="py-24 bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500">
+      <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">{t('about_cta_heading')}</h2>
-          <p className="text-white/80 max-w-2xl mx-auto mb-8">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 sm:mb-6">{t('about_cta_heading')}</h2>
+          <p className="text-white/80 max-w-2xl mx-auto mb-6 sm:mb-8 text-sm sm:text-base">
             {t('about_cta_description')}
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/students"><Button size="lg">{t('about_sponsor_button')}</Button></Link>
-            <Link to="/donate"><Button size="lg" variant="glass">{t('about_donate_button')}</Button></Link>
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+            <Link to="/students"><Button size="lg" className="w-full sm:w-auto">{t('about_sponsor_button')}</Button></Link>
+            <Link to="/donate"><Button size="lg" variant="glass" className="w-full sm:w-auto">{t('about_donate_button')}</Button></Link>
           </div>
         </div>
       </section>

@@ -55,10 +55,10 @@ export function CampaignsPage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-warm-50 rounded-xl p-6 border border-amber-200 mb-8"
+              className="bg-warm-50 rounded-xl p-4 sm:p-6 border border-amber-200 mb-6 sm:mb-8"
             >
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('campaigns_overall_progress')}</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">{t('campaigns_overall_progress')}</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4">
                 <div>
                   <p className="text-sm text-gray-500">{t('campaigns_total_raised')}</p>
                   <p className="text-2xl font-bold text-gray-900">NPR {totalRaised.toLocaleString()}</p>
@@ -94,7 +94,7 @@ export function CampaignsPage() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {goals.map((goal) => (
                 <DonationCampaignCard key={goal.id} goal={goal} />
               ))}

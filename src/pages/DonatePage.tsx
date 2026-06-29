@@ -105,10 +105,10 @@ export function DonatePage() {
                 <span className="w-1.5 h-1.5 rounded-full bg-[#fde68a]" />
                 {pageHeader?.title || 'Donation Program'}
               </span>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-light text-white leading-tight tracking-tight mb-6">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-white leading-tight tracking-tight mb-4 sm:mb-6">
                 {content?.hero_title || 'Make a Donation'}
               </h1>
-              <p className="text-lg sm:text-xl text-white/90 font-light leading-relaxed max-w-2xl mb-10">
+              <p className="text-base sm:text-lg lg:text-xl text-white/90 font-light leading-relaxed max-w-2xl mb-8 sm:mb-10">
                 {content?.hero_subtitle}
               </p>
             </motion.div>
@@ -162,9 +162,9 @@ export function DonatePage() {
         </section>
       )}
 
-      <section className="py-16 sm:py-20 bg-warm-50">
+      <section className="py-12 sm:py-16 lg:py-20 bg-warm-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-3 gap-8 lg:gap-10">
+          <div className="grid lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10">
             <div className="lg:col-span-2 space-y-6">
               <p className="text-xs text-gray-400">{t('donate_currency_label')}</p>
               {!user && <AuthPrompt />}

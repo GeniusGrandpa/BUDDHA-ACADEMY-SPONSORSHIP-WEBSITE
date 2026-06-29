@@ -31,7 +31,7 @@ function sponsorshipLabel(status: string) {
 function HeroSection({ hero, visible }: { hero: HeroContent; visible: boolean }) {
   if (!visible) return null
   return (
-    <section className="relative min-h-[600px] flex items-center overflow-hidden bg-gradient-to-br from-stone-900 via-stone-800 to-amber-900">
+    <section className="relative min-h-[500px] sm:min-h-[600px] flex items-center overflow-hidden bg-gradient-to-br from-stone-900 via-stone-800 to-amber-900">
       {hero.background_image && (
         <img
           src={hero.background_image}
@@ -43,13 +43,13 @@ function HeroSection({ hero, visible }: { hero: HeroContent; visible: boolean })
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className={`max-w-2xl ${hero.layout === 'center' ? 'mx-auto text-center' : ''}`}>
           {hero.title && (
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight animate-fade-in">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6 leading-tight animate-fade-in text-balance">
               {hero.title}
               {hero.highlight && <><br /><span className="text-amber-400">{hero.highlight}</span></>}
             </h1>
           )}
           {hero.description && (
-            <p className="text-xl text-gray-300 mb-8 leading-relaxed">{hero.description}</p>
+            <p className="text-base sm:text-lg md:text-xl text-gray-300 mb-6 sm:mb-8 leading-relaxed">{hero.description}</p>
           )}
           {(hero.cta_primary_text || hero.cta_secondary_text) && (
             <div className="flex flex-col sm:flex-row gap-4">
@@ -66,9 +66,9 @@ function HeroSection({ hero, visible }: { hero: HeroContent; visible: boolean })
             </div>
           )}
           {hero.badges && (hero.badges as { text: string }[]).length > 0 && (
-            <div className="flex items-center gap-6 mt-10 pt-8 border-t border-white/20">
+            <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-white/20">
               {(hero.badges as { text: string }[]).map((badge, idx) => (
-                <span key={idx} className="text-sm text-gray-300">{badge.text}</span>
+                <span key={idx} className="text-xs sm:text-sm text-gray-300">{badge.text}</span>
               ))}
             </div>
           )}
@@ -83,14 +83,14 @@ function StatsSection({ hero, statsSection, visible }: { hero: HeroContent; stat
   if (!visible || stats.length === 0) return null
   const content = statsSection?.content as { title?: string }
   return (
-    <section className="bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 py-16">
+    <section className="bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 py-12 sm:py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {content?.title && <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-12">{content.title}</h2>}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-white text-center">
+        {content?.title && <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white text-center mb-8 sm:mb-12">{content.title}</h2>}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-8 text-white text-center">
           {stats.map((stat, idx) => (
             <div key={idx}>
-              <div className="text-4xl font-bold mb-1">{stat.value}</div>
-              <div className="text-white/90 text-sm">{stat.label}</div>
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold mb-1">{stat.value}</div>
+              <div className="text-white/80 sm:text-white/90 text-xs sm:text-sm">{stat.label}</div>
             </div>
           ))}
         </div>
@@ -104,10 +104,10 @@ function WelcomeSection({ welcome, visible }: { welcome: SectionContent; visible
   const content = welcome.content as { title?: string; content?: string }
   if (!content?.title && !content?.content) return null
   return (
-    <section className="py-24">
+    <section className="py-12 sm:py-16 lg:py-24">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        {content.title && <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">{content.title}</h2>}
-        {content.content && <p className="text-lg text-gray-600 leading-relaxed">{content.content}</p>}
+        {content.title && <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">{content.title}</h2>}
+        {content.content && <p className="text-base sm:text-lg text-gray-600 leading-relaxed">{content.content}</p>}
       </div>
     </section>
   )
@@ -120,18 +120,18 @@ function AboutSection({ about, visible, t }: { about: SectionContent; visible: b
   const content = about.content as { title?: string; description?: string }
   if (!about.title && !about.description && !content.title && !content.description && milestones.length === 0) return null
   return (
-    <section className="py-24 bg-gray-50">
-      <div className="px-4 sm:px-8 lg:px-12">
-        <div className="grid lg:grid-cols-2 gap-16 items-center max-w-7xl mx-auto">
+    <section className="py-12 sm:py-16 lg:py-24 bg-gray-50">
+      <div className="px-4 sm:px-6 lg:px-12">
+        <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center max-w-7xl mx-auto">
           <div>
             {about.title || content.title ? (
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">{about.title || content.title}</h2>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">{about.title || content.title}</h2>
             ) : null}
             {about.description || content.description ? (
-              <p className="text-gray-600 mb-6 leading-relaxed">{about.description || content.description}</p>
+              <p className="text-gray-600 mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">{about.description || content.description}</p>
             ) : null}
             {about.content && (about.content as Record<string, string>).mission_description && (
-              <p className="text-gray-600 mb-8 leading-relaxed">{(about.content as Record<string, string>).mission_description}</p>
+              <p className="text-gray-600 mb-6 sm:mb-8 leading-relaxed text-sm sm:text-base">{(about.content as Record<string, string>).mission_description}</p>
             )}
             <Link to="/about">
               <Button variant="outline">
@@ -142,15 +142,15 @@ function AboutSection({ about, visible, t }: { about: SectionContent; visible: b
           {milestones.length > 0 && (
             <div>
               <div className="relative">
-                <div className="absolute left-10 top-0 bottom-0 w-0.5 bg-amber-200" />
-                <div className="space-y-8">
+                <div className="absolute left-8 sm:left-10 top-0 bottom-0 w-0.5 bg-amber-200" />
+                <div className="space-y-6 sm:space-y-8">
                   {milestones.map((milestone, idx) => (
-                    <div key={idx} className="relative pl-20">
-                      <div className="absolute left-0 w-9 h-9 rounded-full bg-amber-500 flex items-center justify-center">
+                    <div key={idx} className="relative pl-16 sm:pl-20">
+                      <div className="absolute left-0 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-amber-500 flex items-center justify-center">
                         <span className="text-white text-xs font-bold">{idx + 1}</span>
                       </div>
-                      <div className="text-sm text-amber-600 font-semibold mb-1">{milestone.year}</div>
-                      <div className="text-gray-900 font-medium">{milestone.event}</div>
+                      <div className="text-xs sm:text-sm text-amber-600 font-semibold mb-1">{milestone.year}</div>
+                      <div className="text-sm sm:text-base text-gray-900 font-medium">{milestone.event}</div>
                     </div>
                   ))}
                 </div>
@@ -176,17 +176,17 @@ function StudentsSection({ students, brokenPhotos, fallbackImage, setBrokenPhoto
   if (!visible) return null
   const content = featuredContent?.content as { title?: string }
   return (
-    <section className="py-24">
+    <section className="py-12 sm:py-16 lg:py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             {content?.title || t('home_students_heading')}
           </h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">
             {t('home_students_description')}
           </p>
         </div>
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {loading ? (
             <>
               <StudentCardSkeleton />
@@ -243,25 +243,25 @@ function SponsorshipStepsSection({ sponsorshipSteps, visible }: { sponsorshipSte
   const content = sponsorshipSteps.content as { title?: string; description?: string; steps?: Array<{ title: string; desc: string }> }
   const steps = content?.steps || []
   return (
-    <section className="py-24 bg-gradient-to-br from-amber-50 via-white to-orange-50">
+    <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-amber-50 via-white to-orange-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {content?.title && (
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{content.title}</h2>
+          <div className="text-center mb-10 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">{content.title}</h2>
             {content.description && (
-              <p className="text-gray-600 max-w-2xl mx-auto">{content.description}</p>
+              <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">{content.description}</p>
             )}
           </div>
         )}
-        <div className="grid md:grid-cols-3 gap-6 mt-8">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
           {(steps.length ? steps : [
             { title: 'Choose', desc: 'Select a student to sponsor' },
             { title: 'Contribute', desc: 'Set up your monthly donation' },
             { title: 'Connect', desc: 'Exchange letters and updates' },
           ]).map((step, i) => (
-            <div key={i} className="text-center p-5 rounded-xl border border-amber-200">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-3 font-bold text-sm bg-amber-500 text-white">{i + 1}</div>
-              <h3 className="text-base font-semibold text-gray-800">{step.title}</h3>
+            <div key={i} className="text-center p-4 sm:p-5 rounded-xl border border-amber-200 h-full">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center mx-auto mb-3 font-bold text-sm bg-amber-500 text-white">{i + 1}</div>
+              <h3 className="text-sm sm:text-base font-semibold text-gray-800">{step.title}</h3>
               <p className="text-xs text-gray-500 mt-1">{step.desc}</p>
             </div>
           ))}
@@ -275,10 +275,10 @@ function TestimonialsSection({ testimonials, visible }: { testimonials: SectionC
   if (!visible) return null
   const content = testimonials.content as { title?: string }
   return (
-    <section className="py-24 bg-gray-50">
+    <section className="py-12 sm:py-16 lg:py-24 bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {content?.title && <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-12 text-center">{content.title}</h2>}
-        <div className="grid md:grid-cols-2 gap-6">
+        {content?.title && <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-8 sm:mb-12 text-center">{content.title}</h2>}
+        <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
           {[1, 2].map(i => (
             <div key={i} className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
               <div className="flex items-center gap-2 mb-3">
@@ -301,15 +301,15 @@ function DonationCtaSection({ donationCta, visible }: { donationCta: SectionCont
   if (!visible) return null
   const content = donationCta.content as { title?: string; description?: string; button_text?: string; button_link?: string }
   return (
-    <section className="py-24 bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500">
+    <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        {content?.title && <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">{content.title}</h2>}
+        {content?.title && <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 sm:mb-6">{content.title}</h2>}
         {content?.description && (
-          <p className="text-lg text-white/90 mb-8 leading-relaxed">{content.description}</p>
+          <p className="text-base sm:text-lg text-white/90 mb-6 sm:mb-8 leading-relaxed">{content.description}</p>
         )}
         {content?.button_text && (
           <Link to={content.button_link || '/donate'}>
-            <Button size="lg" className="bg-white text-amber-600 hover:bg-gray-100">{content.button_text}</Button>
+            <Button size="lg" className="bg-white text-amber-600 hover:bg-gray-100 w-full sm:w-auto">{content.button_text}</Button>
           </Link>
         )}
       </div>
