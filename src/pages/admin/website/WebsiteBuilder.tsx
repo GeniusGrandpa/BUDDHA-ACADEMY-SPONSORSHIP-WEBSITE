@@ -116,7 +116,92 @@ export function WebsiteBuilder() {
                 subtitle: sectionContent.subtitle,
                 description: sectionContent.description,
                 content,
+                is_visible: true,
               }).catch(() => {})
+            }
+          }
+        }
+        if (activePage.id === 'home') {
+          const heroSection = activePageData.sections['hero']
+          if (heroSection?.content) {
+            const c = heroSection.content as Record<string, any>
+            const { upsertHeroContent } = await import('../../../services/cms-content')
+            await upsertHeroContent({
+              title: heroSection.title || c.title || '',
+              highlight: c.highlight || '',
+              description: heroSection.description || c.description || '',
+              cta_primary_text: c.cta_primary_text || '',
+              cta_primary_link: c.cta_primary_link || '',
+              cta_secondary_text: c.cta_secondary_text || '',
+              cta_secondary_link: c.cta_secondary_link || '',
+              statistics: c.statistics || [],
+              badges: c.badges || [],
+              is_visible: true,
+            } as any).catch(() => {})
+          }
+        } else if (activePage.id === 'donations') {
+          const hero = activePageData.sections['donate_hero']
+          const impact = activePageData.sections['donate_impact']
+          const process = activePageData.sections['donate_process']
+          const { upsertDonationContent } = await import('../../../services/cms-content')
+          await upsertDonationContent({
+            hero_title: hero?.title || '',
+            hero_subtitle: hero?.description || '',
+            impact_cards: (impact?.content as { cards?: any[] })?.cards || [],
+            process_steps: (process?.content as { steps?: any[] })?.steps || [],
+            is_published: true,
+          } as any).catch(() => {})
+        } else if (activePage.id === 'sponsorship') {
+          const hero = activePageData.sections['sponsor_hero']
+          const steps = activePageData.sections['sponsor_steps']
+          const benefits = activePageData.sections['sponsor_benefits']
+          const cta = activePageData.sections['sponsor_cta']
+          const { upsertSponsorshipContent } = await import('../../../services/cms-content')
+          await upsertSponsorshipContent({
+            hero_title: hero?.title || '',
+            hero_subtitle: hero?.description || '',
+            steps: (steps?.content as { steps?: any[] })?.steps || [],
+            benefits: (benefits?.content as { benefits?: any[] })?.benefits || [],
+            cta_title: cta?.title || '',
+            cta_description: cta?.description || '',
+            cta_button_text: (cta?.content as { button_text?: string })?.button_text || '',
+            cta_button_link: (cta?.content as { button_link?: string })?.button_link || '',
+            is_published: true,
+          } as any).catch(() => {})
+        } else if (activePage.id === 'privacy') {
+          const content = activePageData.sections['privacy_content']
+          const { upsertLegalPage, upsertLegalPageSections } = await import('../../../services/legal-pages')
+          const page = await upsertLegalPage('privacy_policy', {
+            title: content?.title || 'Privacy Policy',
+            slug: 'privacy',
+            status: 'published',
+          }).catch(() => null)
+          if (page) {
+            const sections = (content?.content as { sections?: { heading: string; content: string }[] })?.sections
+            if (sections && sections.length > 0) {
+              await upsertLegalPageSections(page.id, sections.map((s, i) => ({
+                heading: s.heading,
+                content: s.content,
+                sort_order: i,
+              })))
+            }
+          }
+        } else if (activePage.id === 'terms') {
+          const content = activePageData.sections['terms_content']
+          const { upsertLegalPage, upsertLegalPageSections } = await import('../../../services/legal-pages')
+          const page = await upsertLegalPage('terms_conditions', {
+            title: content?.title || 'Terms & Conditions',
+            slug: 'terms',
+            status: 'published',
+          }).catch(() => null)
+          if (page) {
+            const sections = (content?.content as { sections?: { heading: string; content: string }[] })?.sections
+            if (sections && sections.length > 0) {
+              await upsertLegalPageSections(page.id, sections.map((s, i) => ({
+                heading: s.heading,
+                content: s.content,
+                sort_order: i,
+              })))
             }
           }
         }

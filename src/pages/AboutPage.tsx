@@ -87,11 +87,11 @@ export function AboutPage() {
   return (
     <div>
       {header && (
-        <section className="relative py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-amber-50 to-orange-50">
+        <section className="relative py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-[var(--color-primary-light)]/20 to-[var(--color-secondary-light)]/20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto">
-              {header.title && <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">{header.title}</h1>}
-              {header.subtitle && <p className="text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed">{header.subtitle}</p>}
+              {header.title && <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[var(--color-text-primary)] mb-4 sm:mb-6">{header.title}</h1>}
+              {header.subtitle && <p className="text-base sm:text-lg md:text-xl text-[var(--color-text-secondary)] leading-relaxed">{header.subtitle}</p>}
             </div>
           </div>
         </section>
@@ -101,10 +101,10 @@ export function AboutPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
             <div>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">{t('about_mission_heading')}</h2>
-              <p className="text-gray-600 mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">{content?.mission || DEFAULT_MISSION}</p>
-              <p className="text-gray-600 mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">{content?.vision || DEFAULT_VISION}</p>
-              <p className="text-gray-600 leading-relaxed text-sm sm:text-base">{content?.description || DEFAULT_DESCRIPTION}</p>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text-primary)] mb-4 sm:mb-6">{t('about_mission_heading')}</h2>
+              <p className="text-[var(--color-text-secondary)] mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">{content?.mission || DEFAULT_MISSION}</p>
+              <p className="text-[var(--color-text-secondary)] mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">{content?.vision || DEFAULT_VISION}</p>
+              <p className="text-[var(--color-text-secondary)] leading-relaxed text-sm sm:text-base">{content?.description || DEFAULT_DESCRIPTION}</p>
             </div>
             {images.length > 0 && (
               <div className="grid grid-cols-2 gap-3 sm:gap-4">
@@ -123,7 +123,7 @@ export function AboutPage() {
       </section>
 
       {stats.length > 0 && (
-        <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500">
+        <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-[var(--color-primary)] via-[var(--color-accent)] to-[var(--color-secondary)]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-8 text-center">
               {stats.map((stat, idx) => (
@@ -138,17 +138,17 @@ export function AboutPage() {
       )}
 
       {values.length > 0 && (
-        <section className="py-12 sm:py-16 lg:py-24 bg-gray-50">
+        <section className="py-12 sm:py-16 lg:py-24 bg-[var(--color-background)]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-10 sm:mb-16">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">{t('about_values_heading')}</h2>
-              <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">{t('about_values_description')}</p>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text-primary)] mb-4">{t('about_values_heading')}</h2>
+              <p className="text-sm sm:text-base text-[var(--color-text-secondary)] max-w-2xl mx-auto">{t('about_values_description')}</p>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
               {values.map((value, idx) => (
                 <Card key={idx} variant="bordered" className="text-center hover:shadow-lg transition-shadow">
-                  <h3 className="font-semibold text-gray-900 mb-2">{value.title}</h3>
-                  <p className="text-gray-600 text-sm">{value.desc}</p>
+                  <h3 className="font-semibold text-[var(--color-text-primary)] mb-2">{value.title}</h3>
+                  <p className="text-[var(--color-text-secondary)] text-sm">{value.desc}</p>
                 </Card>
               ))}
             </div>
@@ -157,7 +157,7 @@ export function AboutPage() {
       )}
 
       {timeline.length > 0 && (
-        <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-amber-50 to-orange-50">
+        <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-[var(--color-primary-light)]/20 to-[var(--color-secondary-light)]/20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
               initial={{ opacity: 0, y: 24 }}
@@ -165,11 +165,11 @@ export function AboutPage() {
               viewport={{ once: true }}
               className="text-center mb-10 sm:mb-16"
             >
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">{t('about_journey_heading')}</h2>
-              <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">{t('about_journey_description')}</p>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text-primary)] mb-4">{t('about_journey_heading')}</h2>
+              <p className="text-sm sm:text-base text-[var(--color-text-secondary)] max-w-2xl mx-auto">{t('about_journey_description')}</p>
             </motion.div>
             <div className="relative max-w-5xl mx-auto">
-              <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-amber-200 to-amber-300 -translate-x-1/2 hidden md:block" />
+              <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-[var(--color-primary-light)] to-[var(--color-primary-light)]/60 -translate-x-1/2 hidden md:block" />
               <div className="space-y-6 sm:space-y-10 md:space-y-16">
                 {timeline.map((item, idx) => {
                   const isLeft = idx % 2 === 0
@@ -183,16 +183,16 @@ export function AboutPage() {
                       className={`relative md:flex md:items-start ${!isLeft ? 'md:flex-row-reverse' : ''}`}
                     >
                       <div className={`flex-1 ${isLeft ? 'md:pr-12 md:text-right' : 'md:pl-12'}`}>
-                        <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all border border-amber-100">
-                          <span className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold uppercase tracking-wider mb-3">
+                        <div className="bg-[var(--color-surface)] rounded-xl p-6 shadow-sm hover:shadow-md transition-all border border-[var(--color-primary-light)]/20">
+                          <span className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)] text-white text-xs font-bold uppercase tracking-wider mb-3">
                             {item.year}
                           </span>
-                          <h3 className="text-gray-900 text-lg font-semibold mb-2">{item.title}</h3>
-                          <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
+                          <h3 className="text-[var(--color-text-primary)] text-lg font-semibold mb-2">{item.title}</h3>
+                          <p className="text-[var(--color-text-muted)] text-sm leading-relaxed">{item.desc}</p>
                         </div>
                       </div>
                       <div className="hidden md:flex items-center justify-center w-12 shrink-0 relative z-10">
-                        <div className="w-4 h-4 rounded-full bg-amber-500 border-3 border-white shadow" />
+                        <div className="w-4 h-4 rounded-full bg-[var(--color-primary)] border-3 border-white shadow" />
                       </div>
                       <div className="hidden md:block flex-1" />
                     </motion.div>
@@ -204,7 +204,7 @@ export function AboutPage() {
         </section>
       )}
 
-      <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500">
+      <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-[var(--color-primary)] via-[var(--color-accent)] to-[var(--color-secondary)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 sm:mb-6">{t('about_cta_heading')}</h2>
           <p className="text-white/80 max-w-2xl mx-auto mb-6 sm:mb-8 text-sm sm:text-base">

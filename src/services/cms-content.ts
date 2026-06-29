@@ -187,7 +187,6 @@ export async function getSectionContent(sectionKey: string): Promise<SectionCont
   const { data } = await db('section_content')
     .select('*')
     .eq('section_key', sectionKey)
-    .eq('is_visible', true)
     .maybeSingle()
   return data as SectionContent | null
 }

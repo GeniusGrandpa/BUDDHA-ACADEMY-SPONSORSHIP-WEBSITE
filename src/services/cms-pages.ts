@@ -94,10 +94,7 @@ export async function fetchAllCmsPages(): Promise<CmsPage[]> {
 export async function fetchCmsPageData(page: CmsPage): Promise<CmsPageData> {
   const sectionKeys = page.sections.map(s => s.key)
   const managedPrefixes = [
-    'page_header', 'hero', 'about_', 'sponsor_', 'donate_', 'volunteer_',
-    'contact_', 'faq_', 'gallery_', 'privacy_', 'terms_', 'students_',
-    'news_', 'activity_', 'stories_', 'transparency_', 'campaigns_',
-    'impact_', 'team_', 'testimonials_', 'events_',
+    'hero', 'sponsor_', 'donate_', 'volunteer_', 'transparency_',
   ]
   const uniqueSectionKeys = [...new Set(sectionKeys.filter(k =>
     !managedPrefixes.includes(k) && !managedPrefixes.some(p => k.startsWith(p))

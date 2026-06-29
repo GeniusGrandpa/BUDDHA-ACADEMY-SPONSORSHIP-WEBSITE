@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Card } from '../components/ui/Card'
-import { getPublishedLegalPageByType } from '../services/legal-pages'
+import { getPublishedLegalPageByType, type LegalPageWithSections } from '../services/legal-pages'
+import { getSectionContent } from '../services/cms-content'
 import { DetailPageSkeleton } from '../components/ui/LoadingSkeleton'
-import type { LegalPageWithSections } from '../services/legal-pages'
 
 const FALLBACK_SECTIONS = [
   {
@@ -70,7 +70,31 @@ export function PrivacyPage() {
   const loadContent = async () => {
     try {
       const page = await getPublishedLegalPageByType('privacy_policy')
-      setLegalPage(page)
+      if (page) {
+        setLegalPage(page)
+      } else {
+        const section = await getSectionContent('privacy_content')
+        if (section?.content) {
+          const c = section.content as { sections?: { heading: string; content: string }[]; title?: string }
+          setLegalPage({
+            id: '',
+            title: c.title || section.title || 'Privacy Policy',
+            slug: 'privacy',
+            type: 'privacy_policy',
+            meta_title: '',
+            meta_description: '',
+            status: 'published',
+            effective_date: null,
+            last_reviewed_at: null,
+            published_at: null,
+            created_by: null,
+            updated_by: null,
+            created_at: '',
+            updated_at: '',
+            sections: c.sections || [],
+          })
+        }
+      }
     } catch {
     } finally {
       setLoading(false)
@@ -86,15 +110,15 @@ export function PrivacyPage() {
   const lastUpdated = legalPage?.updated_at || legalPage?.published_at
 
   return (
-    <div className="bg-gray-50 min-h-screen">
-      <section className="relative py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-amber-50 to-orange-50">
+    <div className="bg-[var(--color-background)] min-h-screen">
+      <section className="relative py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-[var(--color-primary-light)]/20 to-[var(--color-secondary-light)]/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[var(--color-text-primary)] mb-4 sm:mb-6">
               {legalPage?.title || 'Privacy Policy'}
             </h1>
             {lastUpdated && (
-              <p className="text-xs sm:text-sm text-gray-500">
+              <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">
                 Last updated: {new Date(lastUpdated).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
               </p>
             )}
@@ -105,11 +129,11 @@ export function PrivacyPage() {
       <section className="py-12 sm:py-16">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
           {sections.map((section, idx) => (
-            <Card key={idx} variant="bordered" padding="lg" className="prose prose-amber max-w-none">
+            <Card key={idx} variant="bordered" padding="lg" className="max-w-none">
               {section.heading && (
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">{section.heading}</h2>
+                <h2 className="text-xl font-semibold text-[var(--color-text-primary)] mb-4">{section.heading}</h2>
               )}
-              <div className="text-gray-600 leading-relaxed whitespace-pre-line">
+              <div className="text-[var(--color-text-secondary)] leading-relaxed whitespace-pre-line">
                 {section.content}
               </div>
             </Card>

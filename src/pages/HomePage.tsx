@@ -46,11 +46,11 @@ function HeroSection({ hero, visible }: { hero: HeroContent; visible: boolean })
           {hero.title && (
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6 leading-tight animate-fade-in text-balance">
               {hero.title}
-              {hero.highlight && <><br /><span className="text-amber-400">{hero.highlight}</span></>}
+              {hero.highlight && <><br /><span className="text-[var(--color-accent)]">{hero.highlight}</span></>}
             </h1>
           )}
           {hero.description && (
-            <p className="text-base sm:text-lg md:text-xl text-gray-300 mb-6 sm:mb-8 leading-relaxed">{hero.description}</p>
+            <p className="text-base sm:text-lg md:text-xl text-[var(--color-text-muted)] mb-6 sm:mb-8 leading-relaxed">{hero.description}</p>
           )}
           {(hero.cta_primary_text || hero.cta_secondary_text) && (
             <div className="flex flex-col sm:flex-row gap-4">
@@ -69,7 +69,7 @@ function HeroSection({ hero, visible }: { hero: HeroContent; visible: boolean })
           {hero.badges && (hero.badges as { text: string }[]).length > 0 && (
             <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-white/20">
               {(hero.badges as { text: string }[]).map((badge, idx) => (
-                <span key={idx} className="text-xs sm:text-sm text-gray-300">{badge.text}</span>
+                <span key={idx} className="text-xs sm:text-sm text-[var(--color-text-muted)]">{badge.text}</span>
               ))}
             </div>
           )}
@@ -84,7 +84,7 @@ function StatsSection({ hero, statsSection, visible }: { hero: HeroContent; stat
   if (!visible || stats.length === 0) return null
   const content = statsSection?.content as { title?: string }
   return (
-    <section className="bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 py-12 sm:py-16">
+    <section className="bg-gradient-to-br from-[var(--color-primary)] via-[var(--color-accent)] to-[var(--color-secondary)] py-12 sm:py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {content?.title && <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white text-center mb-8 sm:mb-12">{content.title}</h2>}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-8 text-white text-center">
@@ -107,8 +107,8 @@ function WelcomeSection({ welcome, visible }: { welcome: SectionContent; visible
   return (
     <section className="py-12 sm:py-16 lg:py-24">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        {content.title && <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">{content.title}</h2>}
-        {content.content && <p className="text-base sm:text-lg text-gray-600 leading-relaxed">{content.content}</p>}
+        {content.title && <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text-primary)] mb-4 sm:mb-6">{content.title}</h2>}
+        {content.content && <p className="text-base sm:text-lg text-[var(--color-text-secondary)] leading-relaxed">{content.content}</p>}
       </div>
     </section>
   )
@@ -121,18 +121,18 @@ function AboutSection({ about, visible, t }: { about: SectionContent; visible: b
   const content = about.content as { title?: string; description?: string }
   if (!about.title && !about.description && !content.title && !content.description && milestones.length === 0) return null
   return (
-    <section className="py-12 sm:py-16 lg:py-24 bg-gray-50">
+    <section className="py-12 sm:py-16 lg:py-24 bg-[var(--color-background)]">
       <div className="px-4 sm:px-6 lg:px-12">
         <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center max-w-7xl mx-auto">
           <div>
             {about.title || content.title ? (
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">{about.title || content.title}</h2>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text-primary)] mb-4 sm:mb-6">{about.title || content.title}</h2>
             ) : null}
             {about.description || content.description ? (
-              <p className="text-gray-600 mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">{about.description || content.description}</p>
+              <p className="text-[var(--color-text-secondary)] mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">{about.description || content.description}</p>
             ) : null}
             {about.content && (about.content as Record<string, string>).mission_description && (
-              <p className="text-gray-600 mb-6 sm:mb-8 leading-relaxed text-sm sm:text-base">{(about.content as Record<string, string>).mission_description}</p>
+              <p className="text-[var(--color-text-secondary)] mb-6 sm:mb-8 leading-relaxed text-sm sm:text-base">{(about.content as Record<string, string>).mission_description}</p>
             )}
             <Link to="/about">
               <Button variant="outline">
@@ -143,15 +143,15 @@ function AboutSection({ about, visible, t }: { about: SectionContent; visible: b
           {milestones.length > 0 && (
             <div>
               <div className="relative">
-                <div className="absolute left-8 sm:left-10 top-0 bottom-0 w-0.5 bg-amber-200" />
+                <div className="absolute left-8 sm:left-10 top-0 bottom-0 w-0.5 bg-[var(--color-primary-light)]" />
                 <div className="space-y-6 sm:space-y-8">
                   {milestones.map((milestone, idx) => (
                     <div key={idx} className="relative pl-16 sm:pl-20">
-                      <div className="absolute left-0 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-amber-500 flex items-center justify-center">
+                      <div className="absolute left-0 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[var(--color-primary)] flex items-center justify-center">
                         <span className="text-white text-xs font-bold">{idx + 1}</span>
                       </div>
-                      <div className="text-xs sm:text-sm text-amber-600 font-semibold mb-1">{milestone.year}</div>
-                      <div className="text-sm sm:text-base text-gray-900 font-medium">{milestone.event}</div>
+                      <div className="text-xs sm:text-sm text-[var(--color-primary-dark)] font-semibold mb-1">{milestone.year}</div>
+                      <div className="text-sm sm:text-base text-[var(--color-text-primary)] font-medium">{milestone.event}</div>
                     </div>
                   ))}
                 </div>
@@ -180,10 +180,10 @@ function StudentsSection({ students, brokenPhotos, fallbackImage, setBrokenPhoto
     <section className="py-12 sm:py-16 lg:py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8 sm:mb-12">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text-primary)] mb-4">
             {content?.title || t('home_students_heading')}
           </h2>
-          <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base text-[var(--color-text-secondary)] max-w-2xl mx-auto">
             {t('home_students_description')}
           </p>
         </div>
@@ -195,7 +195,7 @@ function StudentsSection({ students, brokenPhotos, fallbackImage, setBrokenPhoto
               <StudentCardSkeleton />
             </>
           ) : students.length === 0 ? (
-            <div className="col-span-3 text-center py-12 text-gray-500">
+            <div className="col-span-3 text-center py-12 text-[var(--color-text-muted)]">
               No students available at the moment.
             </div>
           ) : (
@@ -211,14 +211,14 @@ function StudentsSection({ students, brokenPhotos, fallbackImage, setBrokenPhoto
                 </div>
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-lg font-semibold text-gray-900">{student.name}</h3>
+                    <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">{student.name}</h3>
                     <Badge variant={sponsorshipVariant(student.sponsorship_status)}>{sponsorshipLabel(student.sponsorship_status)}</Badge>
                   </div>
-                  <div className="flex gap-4 text-sm text-gray-600 mb-3">
+                  <div className="flex gap-4 text-sm text-[var(--color-text-secondary)] mb-3">
                     <span>{t('home_age_label', { age: student.age })}</span>
                     <span>{t('home_grade_label', { grade: student.grade })}</span>
                   </div>
-                  {student.bio && <p className="text-gray-600 text-sm mb-4 line-clamp-2">{student.bio}</p>}
+                  {student.bio && <p className="text-[var(--color-text-secondary)] text-sm mb-4 line-clamp-2">{student.bio}</p>}
                   <Link to={`/students/${student.id}`}>
                     <Button variant="outline" className="w-full">{t('home_view_profile')}</Button>
                   </Link>
@@ -253,21 +253,21 @@ function SponsorshipTree({ steps }: { steps: { title: string; desc: string }[] }
 
   return (
     <div className="relative flex flex-col items-center">
-      <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-amber-300 -translate-x-1/2 hidden md:block" />
+      <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-[var(--color-primary-light)] -translate-x-1/2 hidden md:block" />
       {items.map((item, i) => {
         const isLeft = i % 2 === 0
         return (
           <div key={i} className="relative flex items-center w-full max-w-3xl mb-4 sm:mb-5 last:mb-0">
             <div className="hidden md:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-              <div className="w-3 h-3 rounded-full bg-amber-500 border-2 border-amber-100" />
+              <div className="w-3 h-3 rounded-full bg-[var(--color-primary)] border-2 border-[var(--color-primary-light)]/30" />
             </div>
             <div className={`w-full md:w-[calc(50%-1.5rem)] ${isLeft ? 'md:pr-6 md:text-right' : 'md:ml-auto md:pl-6'}`}>
-              <div className="bg-white rounded-xl border border-amber-200 p-3 sm:p-4 shadow-sm hover:shadow-md hover:border-amber-300 transition-all">
+              <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border-accent)]/30 p-3 sm:p-4 shadow-sm hover:shadow-md hover:border-[var(--color-primary-light)]/60 transition-all">
                 <div className={`flex items-center gap-2 mb-1.5 ${isLeft ? 'md:flex-row-reverse' : ''}`}>
-                  <span className="inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-amber-500 text-white text-xs sm:text-sm font-bold shrink-0">{i + 1}</span>
-                  <h3 className="text-sm sm:text-base font-bold text-gray-900">{item.title}</h3>
+                  <span className="inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[var(--color-primary)] text-white text-xs sm:text-sm font-bold shrink-0">{i + 1}</span>
+                  <h3 className="text-sm sm:text-base font-bold text-[var(--color-text-primary)]">{item.title}</h3>
                 </div>
-                <p className={`text-xs sm:text-sm text-gray-600 leading-relaxed ${isLeft ? 'md:text-right' : ''}`}>{item.desc}</p>
+                <p className={`text-xs sm:text-sm text-[var(--color-text-secondary)] leading-relaxed ${isLeft ? 'md:text-right' : ''}`}>{item.desc}</p>
               </div>
             </div>
           </div>
@@ -282,13 +282,13 @@ function SponsorshipStepsSection({ sponsorshipSteps, visible }: { sponsorshipSte
   const content = sponsorshipSteps.content as { title?: string; description?: string; steps?: Array<{ title: string; desc: string }> }
   const steps = content?.steps || []
   return (
-    <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-amber-50 via-white to-orange-50">
+    <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-[var(--color-primary-light)]/10 via-[var(--color-surface)] to-[var(--color-secondary-light)]/10">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {content?.title && (
           <div className="text-center mb-10 sm:mb-14">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">{content.title}</h2>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text-primary)] mb-4">{content.title}</h2>
             {content.description && (
-              <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">{content.description}</p>
+              <p className="text-sm sm:text-base text-[var(--color-text-secondary)] max-w-2xl mx-auto">{content.description}</p>
             )}
           </div>
         )}
@@ -303,25 +303,25 @@ function TestimonialsSection({ testimonials, testimonialList, visible }: { testi
   const content = testimonials.content as { title?: string }
   const items = testimonialList.length > 0 ? testimonialList.slice(0, 4) : []
   return (
-    <section className="py-12 sm:py-16 lg:py-24 bg-gray-50">
+    <section className="py-12 sm:py-16 lg:py-24 bg-[var(--color-background)]">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {content?.title && <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-8 sm:mb-12 text-center">{content.title}</h2>}
+        {content?.title && <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text-primary)] mb-8 sm:mb-12 text-center">{content.title}</h2>}
         <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
           {items.length > 0 ? items.map((t) => (
-            <div key={t.id} className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+            <div key={t.id} className="bg-[var(--color-surface)] rounded-xl p-6 border border-[var(--color-border)] shadow-sm">
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white text-sm font-bold">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-accent)] flex items-center justify-center text-white text-sm font-bold">
                   {(t.author_name || 'S').charAt(0)}
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-gray-700">{t.author_name}</div>
-                  {t.author_role && <div className="text-xs text-gray-400">{t.author_role}</div>}
+                  <div className="text-sm font-medium text-[var(--color-text-secondary)]">{t.author_name}</div>
+                  {t.author_role && <div className="text-xs text-[var(--color-text-muted)]">{t.author_role}</div>}
                 </div>
               </div>
-              <p className="text-sm text-gray-600 italic">"{t.content || t.quote}"</p>
+              <p className="text-sm text-[var(--color-text-secondary)] italic">"{t.content || t.quote}"</p>
             </div>
           )) : (
-            <div className="col-span-2 text-center py-8 text-gray-400 text-sm">Testimonials will appear here once added.</div>
+            <div className="col-span-2 text-center py-8 text-[var(--color-text-muted)] text-sm">Testimonials will appear here once added.</div>
           )}
         </div>
       </div>
@@ -333,7 +333,7 @@ function DonationCtaSection({ donationCta, visible }: { donationCta: SectionCont
   if (!visible) return null
   const content = donationCta.content as { title?: string; description?: string; button_text?: string; button_link?: string }
   return (
-    <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500">
+    <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-[var(--color-primary)] via-[var(--color-accent)] to-[var(--color-secondary)]">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         {content?.title && <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 sm:mb-6">{content.title}</h2>}
         {content?.description && (
@@ -341,7 +341,7 @@ function DonationCtaSection({ donationCta, visible }: { donationCta: SectionCont
         )}
         {content?.button_text && (
           <Link to={content.button_link || '/donate'}>
-            <Button size="lg" className="bg-white text-amber-600 hover:bg-gray-100 w-full sm:w-auto">{content.button_text}</Button>
+            <Button size="lg" className="bg-white text-[var(--color-primary)] hover:bg-gray-100 w-full sm:w-auto">{content.button_text}</Button>
           </Link>
         )}
       </div>
@@ -367,7 +367,35 @@ export function HomePage() {
   const [studentsLoading, setStudentsLoading] = useState(true)
   useEffect(() => {
     Promise.all([
-      getHeroContent().then(d => { if (d) setHero(d) }).catch(() => {}),
+      getHeroContent().then(d => {
+        if (d) {
+          setHero(d)
+        } else {
+          getSectionContent('hero').then(heroSection => {
+            if (heroSection) {
+              const c = heroSection.content as {
+                title?: string; highlight?: string; description?: string;
+                cta_primary_text?: string; cta_primary_link?: string;
+                cta_secondary_text?: string; cta_secondary_link?: string;
+                statistics?: { value: string; label: string }[];
+                badges?: { text: string }[];
+              }
+              setHero({
+                title: heroSection.title || c?.title || '',
+                highlight: c?.highlight || '',
+                description: heroSection.description || c?.description || '',
+                background_image: '',
+                cta_primary_text: c?.cta_primary_text || '',
+                cta_primary_link: c?.cta_primary_link || '',
+                cta_secondary_text: c?.cta_secondary_text || '',
+                cta_secondary_link: c?.cta_secondary_link || '',
+                statistics: c?.statistics || [],
+                badges: c?.badges || [],
+              } as unknown as HeroContent)
+            }
+          }).catch(() => {})
+        }
+      }).catch(() => {}),
       getSectionContent('welcome').then(d => { if (d) setWelcomeSection(d) }).catch(() => {}),
       getSectionContent('about_preview').then(d => { if (d) setAboutSection(d) }).catch(() => {}),
       getSectionContent('stats').then(d => { if (d) setStatsSection(d) }).catch(() => {}),
