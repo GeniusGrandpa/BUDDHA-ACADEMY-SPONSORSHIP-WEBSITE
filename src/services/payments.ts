@@ -136,7 +136,11 @@ export async function getDonorDonationsWithPayment(donorId: string): Promise<Don
     .order('created_at', { ascending: false })
 
   if (error) throw error
-  return (data || []) as unknown as DonationWithPayment[]
+  const donations = (data || []) as unknown as DonationWithPayment[]
+  return donations.map((d) => ({
+    ...d,
+    status: d.payment_session?.status === 'completed' && d.status === 'pending' ? 'completed' : d.status,
+  }))
 }
 
 export async function getDonorPaymentSessions(donorId: string): Promise<PaymentSession[]> {

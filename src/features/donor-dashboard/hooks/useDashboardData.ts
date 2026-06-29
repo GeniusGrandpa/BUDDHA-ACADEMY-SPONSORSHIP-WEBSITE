@@ -23,7 +23,7 @@ export interface EnhancedDashboardData extends Omit<DashboardData, 'donorStats'>
 }
 
 function computeDonorStats(donations: DonationWithStudent[], sponsorships: SponsorshipWithStudent[]): DonorStats {
-  const receivedDonations = donations.filter(d => d.status === 'received' || d.status === 'completed' || d.status === 'verified')
+  const receivedDonations = donations.filter(d => d.status === 'received' || d.status === 'completed' || d.status === 'verified' || (d.status === 'pending' && d.verified_at))
   const totalDonated = receivedDonations.reduce((sum, d) => sum + d.amount, 0)
   const activeSponsorships = sponsorships.filter(s => s.status === 'active')
   const monthlyRecurring = activeSponsorships.reduce((sum, s) => sum + s.amount, 0)

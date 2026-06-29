@@ -15,7 +15,11 @@ export async function getDonationsByDonor(donorId: string): Promise<Donation[]> 
     .order('created_at', { ascending: false })
 
   if (error) throw error
-  return data as unknown as Donation[]
+  const donations = data as unknown as Donation[]
+  return donations.map((d) => ({
+    ...d,
+    status: d.verified_at && d.status === 'pending' ? 'completed' : d.status,
+  }))
 }
 
 export async function getAllDonations(): Promise<Donation[]> {

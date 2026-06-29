@@ -81,6 +81,7 @@ export function useDonorTransactions(donorId: string | undefined): UseDonorTrans
 
       const transactionsWithAllocs = donations.map((d) => ({
         ...d,
+        status: d.payment_session?.status === 'completed' && d.status === 'pending' ? 'completed' : d.status,
         allocations: allocationsMap.get(d.id) || [],
       }))
 
