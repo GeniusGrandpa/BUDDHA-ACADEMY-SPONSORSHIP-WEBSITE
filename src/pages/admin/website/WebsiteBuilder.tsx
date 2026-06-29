@@ -36,6 +36,8 @@ const FRIENDLY_LABELS: Record<string, string> = {
   about_mission: 'Mission & Vision',
   about_values: 'Core Values',
   about_timeline: 'History Timeline',
+  about_stats: 'About Statistics',
+  about_cta: 'About CTA',
   sponsor_hero: 'Sponsorship Banner',
   sponsor_steps: 'How to Sponsor',
   sponsor_benefits: 'Sponsorship Benefits',
@@ -912,7 +914,7 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
               <h2 className="text-3xl font-bold text-gray-900 mb-4">{sectionContent?.title || 'About Us'}</h2>
               <p className="text-gray-600 mb-4">{sectionContent?.description || 'About description goes here'}</p>
               <span className="inline-flex items-center gap-2 text-amber-600 text-sm font-medium">
-                Learn more <ArrowRight className="w-4 h-4" />
+                {content?.button_text || 'Learn more'} <ArrowRight className="w-4 h-4" />
               </span>
             </div>
             <div className="text-gray-400 text-center py-12 border-2 border-dashed border-gray-200 rounded-xl">About Image</div>
@@ -1085,7 +1087,7 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
       return (
         <div className="py-16 px-8 bg-gradient-to-br from-amber-50 to-orange-50">
           <div className="max-w-5xl mx-auto">
-            <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">Our Journey</h2>
+            <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">{content?.title || 'Our Journey'}</h2>
             <div className="relative">
               <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-amber-200 to-amber-300 -translate-x-1/2 hidden md:block" />
               <div className="space-y-6">
@@ -1124,17 +1126,17 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
           <div className="max-w-4xl mx-auto grid grid-cols-3 gap-6">
             <div className="text-center p-4">
               <div className="w-10 h-10 rounded-full bg-amber-100 mx-auto mb-3 flex items-center justify-center text-amber-600 font-bold text-sm">@</div>
-              <div className="text-sm font-semibold text-gray-900">Email</div>
+              <div className="text-sm font-semibold text-gray-900">{content?.email_label || 'Email'}</div>
               <div className="text-sm text-gray-500">{pageData.footer?.contact_info?.email || 'info@example.org'}</div>
             </div>
             <div className="text-center p-4">
               <div className="w-10 h-10 rounded-full bg-amber-100 mx-auto mb-3 flex items-center justify-center text-amber-600 font-bold text-sm">P</div>
-              <div className="text-sm font-semibold text-gray-900">Phone</div>
+              <div className="text-sm font-semibold text-gray-900">{content?.phone_label || 'Phone'}</div>
               <div className="text-sm text-gray-500">{pageData.footer?.contact_info?.phone || '+977 1 234 567'}</div>
             </div>
             <div className="text-center p-4">
               <div className="w-10 h-10 rounded-full bg-amber-100 mx-auto mb-3 flex items-center justify-center text-amber-600 font-bold text-sm">A</div>
-              <div className="text-sm font-semibold text-gray-900">Address</div>
+              <div className="text-sm font-semibold text-gray-900">{content?.address_label || 'Address'}</div>
               <div className="text-sm text-gray-500">{pageData.footer?.contact_info?.address || 'Kathmandu, Nepal'}</div>
             </div>
           </div>
@@ -1148,26 +1150,26 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
             <h2 className="text-xl font-bold text-gray-900 text-center mb-6">{content?.title || 'Get in Touch'}</h2>
             <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-4">
               <div className="space-y-1">
-                <div className="text-xs font-medium text-gray-600">Name</div>
+                <div className="text-xs font-medium text-gray-600">{content?.name_label || 'Name'}</div>
                 <div className="h-9 bg-gray-50 rounded-lg border border-gray-200 w-full" />
               </div>
               <div className="space-y-1">
-                <div className="text-xs font-medium text-gray-600">Email</div>
+                <div className="text-xs font-medium text-gray-600">{content?.email_label || 'Email'}</div>
                 <div className="h-9 bg-gray-50 rounded-lg border border-gray-200 w-full" />
               </div>
               <div className="space-y-1">
-                <div className="text-xs font-medium text-gray-600">Phone</div>
+                <div className="text-xs font-medium text-gray-600">{content?.phone_label || 'Phone'}</div>
                 <div className="flex gap-2">
                   <div className="h-9 bg-gray-50 rounded-lg border border-gray-200 w-24" />
                   <div className="h-9 bg-gray-50 rounded-lg border border-gray-200 flex-1" />
                 </div>
               </div>
               <div className="space-y-1">
-                <div className="text-xs font-medium text-gray-600">Subject</div>
+                <div className="text-xs font-medium text-gray-600">{content?.subject_label || 'Subject'}</div>
                 <div className="h-9 bg-gray-50 rounded-lg border border-gray-200 w-full" />
               </div>
               <div className="space-y-1">
-                <div className="text-xs font-medium text-gray-600">Message</div>
+                <div className="text-xs font-medium text-gray-600">{content?.message_label || 'Message'}</div>
                 <div className="h-20 bg-gray-50 rounded-lg border border-gray-200 w-full" />
               </div>
               <div className="h-9 bg-amber-500 rounded-lg w-28" />
@@ -1185,7 +1187,7 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
               <h1 className="text-3xl font-bold text-gray-900 mb-3">{sectionContent?.title || (section.type === 'volunteer_hero' ? 'Volunteer With Us' : 'Sponsorship Program')}</h1>
               {sectionContent?.description && <p className="text-base text-gray-600">{sectionContent.description}</p>}
               <div className="flex gap-3 justify-center mt-6">
-                <span className="px-5 py-2 rounded-lg bg-amber-500 text-white text-sm font-medium">Get Started</span>
+                <span className="px-5 py-2 rounded-lg bg-amber-500 text-white text-sm font-medium">{content?.button_text || 'Get Started'}</span>
               </div>
             </div>
           </div>
@@ -1194,7 +1196,7 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
 
     case 'donate_hero':
       return (
-        <div className="relative min-h-[250px] flex items-center bg-gradient-to-br from-[#d97706] via-[#f59e0b] to-[#b45309]">
+        <div className="relative min-h-[250px] flex items-center bg-gradient-to-br from-amber-600 via-amber-500 to-orange-600">
           <div className="absolute inset-0 opacity-10">
             <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
               <defs><pattern id="donate-grid" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M 8 0 L 0 0 0 8" fill="none" stroke="white" strokeWidth="0.5" /></pattern></defs>
@@ -1206,7 +1208,7 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
               <h1 className="text-3xl font-bold text-white mb-3">{sectionContent?.title || 'Make a Donation'}</h1>
               {sectionContent?.description && <p className="text-base text-white/80">{sectionContent.description}</p>}
               <div className="flex gap-3 justify-center mt-6">
-                <span className="px-5 py-2 rounded-lg bg-white text-amber-700 text-sm font-medium">Donate Now</span>
+                <span className="px-5 py-2 rounded-lg bg-white text-amber-700 text-sm font-medium">{content?.button_text || 'Donate Now'}</span>
               </div>
             </div>
           </div>
@@ -1241,26 +1243,27 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
       )
 
     case 'donation_form':
+      const presetAmounts = (content?.preset_amounts as string[])?.length ? content.preset_amounts : ['$25', '$50', '$100', '$250']
       return (
         <div className="py-12 px-8 bg-gray-50">
           <div className="max-w-xl mx-auto">
             <h2 className="text-xl font-bold text-gray-900 text-center mb-6">{content?.title || 'Make a Donation'}</h2>
             <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-4">
               <div className="flex gap-3">
-                {['$25', '$50', '$100', '$250'].map((amt) => (
+                {presetAmounts.map((amt: string) => (
                   <div key={amt} className="flex-1 h-10 border border-amber-200 rounded-lg flex items-center justify-center text-sm font-medium text-amber-700 bg-amber-50">{amt}</div>
                 ))}
               </div>
               <div className="space-y-1">
-                <div className="text-xs font-medium text-gray-600">Custom Amount</div>
+                <div className="text-xs font-medium text-gray-600">{content?.custom_amount_label || 'Custom Amount'}</div>
                 <div className="h-9 bg-gray-50 rounded-lg border border-gray-200 w-full" />
               </div>
               <div className="space-y-1">
-                <div className="text-xs font-medium text-gray-600">Name</div>
+                <div className="text-xs font-medium text-gray-600">{content?.name_label || 'Name'}</div>
                 <div className="h-9 bg-gray-50 rounded-lg border border-gray-200 w-full" />
               </div>
               <div className="space-y-1">
-                <div className="text-xs font-medium text-gray-600">Email</div>
+                <div className="text-xs font-medium text-gray-600">{content?.email_label || 'Email'}</div>
                 <div className="h-9 bg-gray-50 rounded-lg border border-gray-200 w-full" />
               </div>
               <div className="h-9 bg-amber-500 rounded-lg w-full" />
@@ -1347,9 +1350,9 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
         <div className="py-12 px-8 bg-orange-50 text-center">
           <div className="max-w-2xl mx-auto">
             <div className="w-10 h-10 rounded-full bg-orange-100 mx-auto mb-3 flex items-center justify-center text-orange-500 font-bold text-sm">M</div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Our Location</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">{content?.title || 'Our Location'}</h2>
             <p className="text-gray-600 mb-6">{pageData.footer?.contact_info?.address || 'Kathmandu, Nepal'}</p>
-            <span className="inline-flex items-center gap-2 bg-orange-500 text-white px-5 py-3 rounded-full font-semibold text-sm">View on Map</span>
+            <span className="inline-flex items-center gap-2 bg-orange-500 text-white px-5 py-3 rounded-full font-semibold text-sm">{content?.button_text || 'View on Map'}</span>
           </div>
         </div>
       )
@@ -1846,6 +1849,152 @@ function SectionSettingsPanel({ section, pageData, editorTab, setEditorTab, isVi
   )
 }
 
+const SECTION_FIELDS: Record<string, { key: string; label: string; hint: string; long?: boolean; group?: string }[]> = {
+  hero: [
+    { key: 'title', label: 'Heading', hint: 'Main headline for the hero banner', group: 'Text' },
+    { key: 'highlight', label: 'Highlight', hint: 'Emphasized word or phrase', group: 'Text' },
+    { key: 'description', label: 'Description', hint: 'Supporting text below the heading', long: true, group: 'Text' },
+    { key: 'cta_primary_text', label: 'Primary Button', hint: 'Main call-to-action button text', group: 'Buttons' },
+    { key: 'cta_secondary_text', label: 'Secondary Button', hint: 'Alternative action button text', group: 'Buttons' },
+  ],
+  stats: [
+    { key: 'title', label: 'Section Title', hint: 'Heading displayed above the statistics', group: 'Text' },
+  ],
+  welcome: [
+    { key: 'title', label: 'Heading', hint: 'Section heading', group: 'Text' },
+    { key: 'content', label: 'Content', hint: 'Main welcome message text', long: true, group: 'Text' },
+  ],
+  about_preview: [
+    { key: 'title', label: 'Title', hint: 'Section heading', group: 'Text' },
+    { key: 'description', label: 'Description', hint: 'About summary text', long: true, group: 'Text' },
+    { key: 'button_text', label: 'Link Text', hint: '"Learn more" link label', group: 'Buttons' },
+  ],
+  sponsorship_steps: [
+    { key: 'title', label: 'Section Title', hint: 'Heading above the sponsorship steps', group: 'Text' },
+    { key: 'description', label: 'Description', hint: 'Subtitle text below heading', long: true, group: 'Text' },
+  ],
+  testimonials: [
+    { key: 'title', label: 'Section Title', hint: 'Heading above testimonials', group: 'Text' },
+  ],
+  donation_cta: [
+    { key: 'title', label: 'Title', hint: 'Call-to-action heading', group: 'Text' },
+    { key: 'description', label: 'Description', hint: 'Supporting text', long: true, group: 'Text' },
+    { key: 'button_text', label: 'Button Text', hint: 'Donate button label', group: 'Buttons' },
+  ],
+  about_mission: [
+    { key: 'title', label: 'Heading', hint: 'Mission section heading', group: 'Text' },
+    { key: 'description', label: 'Mission Description', hint: 'The mission statement', long: true, group: 'Text' },
+    { key: 'vision', label: 'Vision', hint: 'Vision statement', long: true, group: 'Text' },
+  ],
+  about_values: [
+    { key: 'title', label: 'Section Title', hint: 'Heading above values', group: 'Text' },
+    { key: 'description', label: 'Description', hint: 'Subtitle text', long: true, group: 'Text' },
+  ],
+  about_timeline: [
+    { key: 'title', label: 'Section Title', hint: 'Heading above timeline', group: 'Text' },
+  ],
+  sponsor_hero: [
+    { key: 'title', label: 'Heading', hint: 'Main headline', group: 'Text' },
+    { key: 'description', label: 'Description', hint: 'Supporting text', long: true, group: 'Text' },
+    { key: 'button_text', label: 'Button Text', hint: 'Call-to-action button', group: 'Buttons' },
+  ],
+  volunteer_hero: [
+    { key: 'title', label: 'Heading', hint: 'Main headline', group: 'Text' },
+    { key: 'description', label: 'Description', hint: 'Supporting text', long: true, group: 'Text' },
+    { key: 'button_text', label: 'Button Text', hint: 'Call-to-action button', group: 'Buttons' },
+  ],
+  donate_hero: [
+    { key: 'title', label: 'Heading', hint: 'Main headline', group: 'Text' },
+    { key: 'description', label: 'Description', hint: 'Supporting text', long: true, group: 'Text' },
+    { key: 'button_text', label: 'Button Text', hint: 'Donate button label', group: 'Buttons' },
+  ],
+  sponsor_steps: [
+    { key: 'title', label: 'Section Title', hint: 'Heading above the steps', group: 'Text' },
+    { key: 'description', label: 'Description', hint: 'Subtitle text', long: true, group: 'Text' },
+  ],
+  donate_process: [
+    { key: 'title', label: 'Section Title', hint: 'Heading above the process', group: 'Text' },
+    { key: 'description', label: 'Description', hint: 'Subtitle text', long: true, group: 'Text' },
+  ],
+  sponsor_benefits: [
+    { key: 'title', label: 'Section Title', hint: 'Heading above benefits', group: 'Text' },
+    { key: 'description', label: 'Description', hint: 'Introductory text', long: true, group: 'Text' },
+  ],
+  sponsor_cta: [
+    { key: 'title', label: 'Title', hint: 'Call-to-action heading', group: 'Text' },
+    { key: 'description', label: 'Description', hint: 'Supporting text', long: true, group: 'Text' },
+    { key: 'button_text', label: 'Button Text', hint: 'CTA button label', group: 'Buttons' },
+  ],
+  cta_banner: [
+    { key: 'title', label: 'Title', hint: 'Banner heading (edit in Site Settings)', group: 'Text' },
+    { key: 'subtitle', label: 'Subtitle', hint: 'Supporting text (edit in Site Settings)', group: 'Text' },
+  ],
+  contact_details: [
+    { key: 'email_label', label: 'Email Label', hint: 'Label text for email', group: 'Labels' },
+    { key: 'phone_label', label: 'Phone Label', hint: 'Label text for phone', group: 'Labels' },
+    { key: 'address_label', label: 'Address Label', hint: 'Label text for address', group: 'Labels' },
+  ],
+  contact_form: [
+    { key: 'title', label: 'Heading', hint: 'Form section heading', group: 'Text' },
+    { key: 'name_label', label: 'Name Label', hint: 'Name field label', group: 'Form Fields' },
+    { key: 'email_label', label: 'Email Label', hint: 'Email field label', group: 'Form Fields' },
+    { key: 'phone_label', label: 'Phone Label', hint: 'Phone field label', group: 'Form Fields' },
+    { key: 'subject_label', label: 'Subject Label', hint: 'Subject field label', group: 'Form Fields' },
+    { key: 'message_label', label: 'Message Label', hint: 'Message field label', group: 'Form Fields' },
+  ],
+  donation_form: [
+    { key: 'title', label: 'Heading', hint: 'Form section heading', group: 'Text' },
+    { key: 'custom_amount_label', label: 'Custom Amount Label', hint: 'Label for custom amount field', group: 'Form Fields' },
+    { key: 'name_label', label: 'Name Label', hint: 'Name field label', group: 'Form Fields' },
+    { key: 'email_label', label: 'Email Label', hint: 'Email field label', group: 'Form Fields' },
+  ],
+  map_location: [
+    { key: 'title', label: 'Heading', hint: 'Section heading', group: 'Text' },
+    { key: 'button_text', label: 'Button Text', hint: 'Map link button label', group: 'Buttons' },
+  ],
+  faq_list: [
+    { key: 'title', label: 'Section Title', hint: 'Heading above FAQs', group: 'Text' },
+  ],
+  gallery_grid: [
+    { key: 'title', label: 'Section Title', hint: 'Heading above gallery', group: 'Text' },
+  ],
+  news_grid: [
+    { key: 'title', label: 'Section Title', hint: 'Heading above news', group: 'Text' },
+  ],
+  students_grid: [
+    { key: 'title', label: 'Section Title', hint: 'Heading above student profiles', group: 'Text' },
+  ],
+  featured_students: [
+    { key: 'title', label: 'Section Title', hint: 'Heading above featured students', group: 'Text' },
+  ],
+  activity_feed: [
+    { key: 'title', label: 'Section Title', hint: 'Heading above activity feed', group: 'Text' },
+  ],
+  success_stories: [
+    { key: 'title', label: 'Section Title', hint: 'Heading above stories', group: 'Text' },
+  ],
+  transparency_content: [
+    { key: 'title', label: 'Title', hint: 'Section heading', group: 'Text' },
+    { key: 'description', label: 'Description', hint: 'Introductory text', long: true, group: 'Text' },
+  ],
+  volunteer_opps: [
+    { key: 'title', label: 'Section Title', hint: 'Heading above opportunities', group: 'Text' },
+    { key: 'description', label: 'Description', hint: 'Introductory text', long: true, group: 'Text' },
+  ],
+  volunteer_form: [
+    { key: 'title', label: 'Section Title', hint: 'Form section heading', group: 'Text' },
+  ],
+  student_story: [
+    { key: 'title', label: 'Heading', hint: 'Story section heading', group: 'Text' },
+    { key: 'description', label: 'Description', hint: 'Story summary text', long: true, group: 'Text' },
+    { key: 'student_name', label: 'Student Name', hint: 'Featured student name', group: 'Details' },
+    { key: 'student_grade', label: 'Student Grade', hint: 'Student grade/class', group: 'Details' },
+  ],
+  donate_impact: [
+    { key: 'title', label: 'Section Title', hint: 'Heading above impact cards', group: 'Text' },
+  ],
+}
+
 function ContentEditorPanel({ section, sectionContent, pageData }: {
   section: CmsSection
   sectionContent: any
@@ -1853,6 +2002,7 @@ function ContentEditorPanel({ section, sectionContent, pageData }: {
 }) {
   const [localContent, setLocalContent] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState(false)
+  const sectionFields = SECTION_FIELDS[section.type] || []
 
   useEffect(() => {
     const fields: Record<string, string> = {}
@@ -1868,10 +2018,6 @@ function ContentEditorPanel({ section, sectionContent, pageData }: {
     setLocalContent(fields)
   }, [sectionContent])
 
-  const fields = Object.keys(localContent).length > 0
-    ? Object.entries(localContent)
-    : [['title', sectionContent?.title || section.name], ['description', '']]
-
   const handleChange = useCallback((key: string, value: string) => {
     setLocalContent(prev => ({ ...prev, [key]: value }))
   }, [])
@@ -1882,13 +2028,10 @@ function ContentEditorPanel({ section, sectionContent, pageData }: {
       const sectionKey = section.key
       const content = sectionContent?.content as Record<string, any> | undefined
 
-      const stringFields: Record<string, string> = {}
       const nonStringContent: Record<string, any> = {}
       if (content) {
         Object.entries(content).forEach(([k, v]) => {
-          if (typeof v === 'string' && localContent[k] !== undefined) {
-            stringFields[k] = v
-          } else {
+          if (typeof v !== 'string' || !(k in localContent)) {
             nonStringContent[k] = v
           }
         })
@@ -1921,10 +2064,15 @@ function ContentEditorPanel({ section, sectionContent, pageData }: {
     }
   }, [section.key, sectionContent, localContent])
 
+  const groupedFields = sectionFields.reduce((acc, f) => {
+    const g = f.group || 'Content'
+    if (!acc[g]) acc[g] = []
+    acc[g].push(f)
+    return acc
+  }, {} as Record<string, typeof sectionFields>)
+
   return (
     <div className="space-y-4">
-      <p className="text-xs text-gray-400 mb-2">Edit the text and media shown in this section</p>
-
       {sectionContent?.images && sectionContent.images.length > 0 && (
         <div>
           <label className="block text-xs font-medium text-gray-500 mb-1.5">Images</label>
@@ -1941,52 +2089,56 @@ function ContentEditorPanel({ section, sectionContent, pageData }: {
         </div>
       )}
 
-      {fields.map(([key, value]) => {
-        const label = key.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())
-        const isLongText = (value && value.length > 100) || key === 'description' || key === 'content'
-        return (
-          <div key={key}>
-            <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
-            {isLongText ? (
-              <textarea
-                value={localContent[key] || value || ''}
-                onChange={e => handleChange(key, e.target.value)}
-                rows={3}
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 resize-none"
-                placeholder={`Enter ${label.toLowerCase()}...`}
-              />
-            ) : (
-              <input
-                type="text"
-                value={localContent[key] || value || ''}
-                onChange={e => handleChange(key, e.target.value)}
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20"
-                placeholder={`Enter ${label.toLowerCase()}...`}
-              />
-            )}
+      {sectionFields.length === 0 && (
+        <div className="py-4 text-center">
+          <p className="text-xs text-gray-400">This section has no editable text fields.</p>
+          <p className="text-xs text-gray-300 mt-1">Content is managed in a separate editor.</p>
+        </div>
+      )}
+
+      {Object.entries(groupedFields).map(([group, fields]) => (
+        <div key={group}>
+          {Object.keys(groupedFields).length > 1 && (
+            <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2 mt-4 first:mt-0">{group}</h4>
+          )}
+          <div className="space-y-3">
+            {fields.map(field => {
+              const value = localContent[field.key] || ''
+              return (
+                <div key={field.key}>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">{field.label}</label>
+                  {field.long ? (
+                    <textarea
+                      value={value}
+                      onChange={e => handleChange(field.key, e.target.value)}
+                      rows={3}
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 resize-none"
+                      placeholder={`Enter ${field.label.toLowerCase()}...`}
+                    />
+                  ) : (
+                    <input
+                      type="text"
+                      value={value}
+                      onChange={e => handleChange(field.key, e.target.value)}
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20"
+                      placeholder={`Enter ${field.label.toLowerCase()}...`}
+                    />
+                  )}
+                  <p className="text-[10px] text-gray-400 mt-0.5">{field.hint}</p>
+                </div>
+              )
+            })}
           </div>
-        )
-      })}
+        </div>
+      ))}
 
       <button
         onClick={handleSave}
         disabled={saving}
-        className="w-full px-4 py-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+        className="w-full px-4 py-2.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-all shadow-sm hover:shadow-md active:scale-[0.98]"
       >
         {saving ? 'Saving...' : 'Save Changes'}
       </button>
-
-      <div className="pt-3 border-t border-gray-100">
-        <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">Quick Actions</h4>
-        <div className="grid grid-cols-2 gap-2">
-          <button className="px-3 py-2 bg-gray-50 rounded-lg text-xs text-gray-600 hover:bg-gray-100 transition-colors">
-            Change Image
-          </button>
-          <button className="px-3 py-2 bg-gray-50 rounded-lg text-xs text-gray-600 hover:bg-gray-100 transition-colors">
-            Edit Links
-          </button>
-        </div>
-      </div>
     </div>
   )
 }
@@ -1994,50 +2146,10 @@ function ContentEditorPanel({ section, sectionContent, pageData }: {
 function DesignEditorPanel({}: { section: CmsSection; sectionContent: any }) {
   return (
     <div className="space-y-5">
-      <p className="text-xs text-gray-400">Customize the look and feel of this section</p>
-      <div>
-        <label className="block text-xs font-medium text-gray-500 mb-1.5">Background Color</label>
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg border border-gray-200 bg-white" />
-          <input type="text" defaultValue="#ffffff" className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500" />
-        </div>
-      </div>
-      <div>
-        <label className="block text-xs font-medium text-gray-500 mb-1.5">Text Color</label>
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg border border-gray-200 bg-gray-900" />
-          <input type="text" defaultValue="#111827" className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500" />
-        </div>
-      </div>
-      <div>
-        <label className="block text-xs font-medium text-gray-500 mb-1.5">Text Alignment</label>
-        <div className="flex gap-1">
-          {['Left', 'Center', 'Right'].map(a => (
-            <button key={a} className="flex-1 px-3 py-2 bg-gray-50 rounded-lg text-xs text-gray-600 hover:bg-gray-100 transition-colors">{a}</button>
-          ))}
-        </div>
-      </div>
-      <div>
-        <label className="block text-xs font-medium text-gray-500 mb-1.5">Font Size</label>
-        <select className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500">
-          <option>Small</option>
-          <option selected>Normal</option>
-          <option>Large</option>
-          <option>Extra Large</option>
-        </select>
-      </div>
-      <div>
-        <label className="block text-xs font-medium text-gray-500 mb-1.5">Padding</label>
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <span className="text-[10px] text-gray-400">Top</span>
-            <input type="text" defaultValue="24" className="w-full px-2 py-1.5 bg-gray-50 border border-gray-200 rounded text-sm" />
-          </div>
-          <div>
-            <span className="text-[10px] text-gray-400">Bottom</span>
-            <input type="text" defaultValue="24" className="w-full px-2 py-1.5 bg-gray-50 border border-gray-200 rounded text-sm" />
-          </div>
-        </div>
+      <p className="text-xs text-gray-400">Styles are managed in Global Site Settings &gt; Theme Colors.</p>
+      <div className="bg-amber-50 border border-amber-100 rounded-lg p-4">
+        <p className="text-xs text-amber-700 font-medium mb-1">Section: {section.name}</p>
+        <p className="text-[11px] text-amber-600/70">Colors, fonts, and spacing use the site-wide theme. Edit the Content tab to change text for this section.</p>
       </div>
     </div>
   )
@@ -2046,31 +2158,10 @@ function DesignEditorPanel({}: { section: CmsSection; sectionContent: any }) {
 function LayoutEditorPanel({}: { section: CmsSection; sectionContent: any }) {
   return (
     <div className="space-y-5">
-      <p className="text-xs text-gray-400">Change how content is arranged in this section</p>
-      <div>
-        <label className="block text-xs font-medium text-gray-500 mb-1.5">Layout</label>
-        <div className="grid grid-cols-2 gap-2">
-          <button className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs font-medium text-amber-700">Single Column</button>
-          <button className="p-3 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-600 hover:bg-gray-100">Two Columns</button>
-          <button className="p-3 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-600 hover:bg-gray-100">Three Columns</button>
-          <button className="p-3 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-600 hover:bg-gray-100">Grid</button>
-        </div>
-      </div>
-      <div>
-        <label className="block text-xs font-medium text-gray-500 mb-1.5">Content Width</label>
-        <select className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500">
-          <option>Full Width</option>
-          <option selected>Contained (Max 1280px)</option>
-          <option>Narrow (Max 768px)</option>
-        </select>
-      </div>
-      <div>
-        <label className="block text-xs font-medium text-gray-500 mb-1.5">Image Position</label>
-        <div className="flex gap-1">
-          {['Left', 'Right', 'Top', 'Background'].map(pos => (
-            <button key={pos} className="flex-1 px-2 py-1.5 bg-gray-50 rounded text-xs text-gray-600 hover:bg-gray-100">{pos}</button>
-          ))}
-        </div>
+      <p className="text-xs text-gray-400">Layout is determined by the section type and page template.</p>
+      <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
+        <p className="text-xs text-blue-700 font-medium mb-1">Section type: {section.type}</p>
+        <p className="text-[11px] text-blue-600/70">This section uses a fixed layout. Use the Content tab to edit the text shown in this section.</p>
       </div>
     </div>
   )
@@ -2079,44 +2170,10 @@ function LayoutEditorPanel({}: { section: CmsSection; sectionContent: any }) {
 function AdvancedEditorPanel({}: { section: CmsSection; sectionContent: any }) {
   return (
     <div className="space-y-5">
-      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-        <p className="text-xs text-amber-800">Advanced options for experienced users</p>
-      </div>
-      <div>
-        <div className="flex items-center justify-between">
-          <label className="text-xs font-medium text-gray-500">Animation</label>
-          <ToggleSwitch checked={true} onChange={() => {}} size="sm" />
-        </div>
-        <select className="w-full mt-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700">
-          <option>Fade In</option>
-          <option>Slide Up</option>
-          <option>Slide In Left</option>
-          <option>Zoom In</option>
-          <option>None</option>
-        </select>
-      </div>
-      <div>
-        <div className="flex items-center justify-between">
-          <label className="text-xs font-medium text-gray-500">Show on Desktop</label>
-          <ToggleSwitch checked={true} onChange={() => {}} size="sm" />
-        </div>
-      </div>
-      <div>
-        <div className="flex items-center justify-between">
-          <label className="text-xs font-medium text-gray-500">Show on Tablet</label>
-          <ToggleSwitch checked={true} onChange={() => {}} size="sm" />
-        </div>
-      </div>
-      <div>
-        <div className="flex items-center justify-between">
-          <label className="text-xs font-medium text-gray-500">Show on Mobile</label>
-          <ToggleSwitch checked={true} onChange={() => {}} size="sm" />
-        </div>
-      </div>
-      <div className="pt-3 border-t border-gray-100">
-        <label className="block text-xs font-medium text-gray-500 mb-1">Custom CSS Class</label>
-        <input type="text" className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 font-mono" placeholder=".my-custom-class" />
-        <p className="text-[10px] text-gray-400 mt-1">Super Admin only</p>
+      <p className="text-xs text-gray-400">Advanced options are under development.</p>
+      <div className="bg-purple-50 border border-purple-100 rounded-lg p-4">
+        <p className="text-xs text-purple-700 font-medium mb-1">Coming Soon</p>
+        <p className="text-[11px] text-purple-600/70">Animation effects, responsive visibility, and custom CSS will be available in a future update.</p>
       </div>
     </div>
   )
