@@ -664,56 +664,28 @@ function SponsorshipTreePreview({ steps }: { steps: { title: string; desc: strin
     { title: 'Join Community', desc: 'Connect with other sponsors' },
   ]
 
-  function Node({ item, idx }: { item: { title: string; desc: string }; idx: number }) {
-    return (
-      <div className="flex flex-col items-center">
-        <div className="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold shadow-sm ring-2 ring-amber-100 mb-1">
-          {idx + 1}
-        </div>
-        <h3 className="text-[11px] font-semibold text-gray-800 text-center">{item.title}</h3>
-        <p className="text-[9px] text-gray-500 text-center mt-0.5 leading-relaxed max-w-[100px]">{item.desc}</p>
-      </div>
-    )
-  }
-
-  function VLine() {
-    return <div className="w-0.5 h-5 bg-gradient-to-b from-amber-300 to-amber-400/60" />
-  }
-
   return (
-    <div className="flex flex-col items-center">
-      <Node item={items[0]} idx={0} />
-      <VLine />
-      <Node item={items[1]} idx={1} />
-      <VLine />
-      <Node item={items[2]} idx={2} />
-      <VLine />
-      <Node item={items[3]} idx={3} />
-
-      <div className="w-full max-w-[220px]">
-        <svg className="w-full h-6" viewBox="0 0 300 30" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round">
-          <line x1="150" y1="0" x2="150" y2="12" />
-          <line x1="75" y1="12" x2="225" y2="12" />
-          <line x1="75" y1="12" x2="75" y2="30" />
-          <line x1="225" y1="12" x2="225" y2="30" />
-        </svg>
-
-        <div className="flex gap-3 justify-center">
-          <div className="flex-1"><Node item={items[4]} idx={4} /></div>
-          <div className="flex-1"><Node item={items[5]} idx={5} /></div>
-        </div>
-
-        <svg className="w-full h-6" viewBox="0 0 300 30" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round">
-          <line x1="75" y1="0" x2="75" y2="18" />
-          <line x1="225" y1="0" x2="225" y2="18" />
-          <line x1="75" y1="18" x2="225" y2="18" />
-          <line x1="150" y1="18" x2="150" y2="30" />
-        </svg>
-      </div>
-
-      <Node item={items[6]} idx={6} />
-      <VLine />
-      <Node item={items[7]} idx={7} />
+    <div className="relative flex flex-col items-center">
+      <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-amber-300 -translate-x-1/2 hidden md:block" />
+      {items.map((item, i) => {
+        const isLeft = i % 2 === 0
+        return (
+          <div key={i} className="relative flex items-center w-full max-w-md mb-3 last:mb-0">
+            <div className="hidden md:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+              <div className="w-2 h-2 rounded-full bg-amber-500 border-2 border-amber-100" />
+            </div>
+            <div className={`w-full md:w-[calc(50%-1rem)] ${isLeft ? 'md:pr-4 md:text-right' : 'md:ml-auto md:pl-4'}`}>
+              <div className="bg-white rounded-lg border border-amber-200 p-2.5 shadow-sm">
+                <div className={`flex items-center gap-1.5 mb-1 ${isLeft ? 'md:flex-row-reverse' : ''}`}>
+                  <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-500 text-white text-[10px] font-bold shrink-0">{i + 1}</span>
+                  <h3 className="text-xs font-bold text-gray-900">{item.title}</h3>
+                </div>
+                <p className={`text-[10px] text-gray-600 leading-relaxed ${isLeft ? 'md:text-right' : ''}`}>{item.desc}</p>
+              </div>
+            </div>
+          </div>
+        )
+      })}
     </div>
   )
 }

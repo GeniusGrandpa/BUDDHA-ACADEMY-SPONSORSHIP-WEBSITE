@@ -20,56 +20,28 @@ const TREE_STEPS = [
 function SponsorshipTree({ steps }: { steps: { title: string; desc: string }[] }) {
   const items = steps.length >= 8 ? steps : TREE_STEPS
 
-  function Node({ item, idx }: { item: { title: string; desc: string }; idx: number }) {
-    return (
-      <div className="flex flex-col items-center">
-        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-white flex items-center justify-center text-sm sm:text-base font-bold shadow-md ring-4 ring-amber-100 mb-2">
-          {idx + 1}
-        </div>
-        <h3 className="text-xs sm:text-sm font-semibold text-gray-900 text-center">{item.title}</h3>
-        <p className="text-[10px] sm:text-xs text-gray-500 text-center mt-0.5 leading-relaxed max-w-[120px] sm:max-w-[140px]">{item.desc}</p>
-      </div>
-    )
-  }
-
-  function VLine() {
-    return <div className="w-0.5 h-6 sm:h-8 bg-gradient-to-b from-amber-300 to-amber-400/60" />
-  }
-
   return (
-    <div className="flex flex-col items-center">
-      <Node item={items[0]} idx={0} />
-      <VLine />
-      <Node item={items[1]} idx={1} />
-      <VLine />
-      <Node item={items[2]} idx={2} />
-      <VLine />
-      <Node item={items[3]} idx={3} />
-
-      <div className="w-full max-w-[280px] sm:max-w-sm">
-        <svg className="w-full h-8 sm:h-10" viewBox="0 0 300 40" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round">
-          <line x1="150" y1="0" x2="150" y2="15" />
-          <line x1="75" y1="15" x2="225" y2="15" />
-          <line x1="75" y1="15" x2="75" y2="40" />
-          <line x1="225" y1="15" x2="225" y2="40" />
-        </svg>
-
-        <div className="flex gap-4 sm:gap-8 justify-center">
-          <div className="flex-1"><Node item={items[4]} idx={4} /></div>
-          <div className="flex-1"><Node item={items[5]} idx={5} /></div>
-        </div>
-
-        <svg className="w-full h-8 sm:h-10" viewBox="0 0 300 40" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round">
-          <line x1="75" y1="0" x2="75" y2="25" />
-          <line x1="225" y1="0" x2="225" y2="25" />
-          <line x1="75" y1="25" x2="225" y2="25" />
-          <line x1="150" y1="25" x2="150" y2="40" />
-        </svg>
-      </div>
-
-      <Node item={items[6]} idx={6} />
-      <VLine />
-      <Node item={items[7]} idx={7} />
+    <div className="relative flex flex-col items-center">
+      <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-amber-300 -translate-x-1/2 hidden md:block" />
+      {items.map((item, i) => {
+        const isLeft = i % 2 === 0
+        return (
+          <div key={i} className="relative flex items-center w-full max-w-3xl mb-4 sm:mb-5 last:mb-0">
+            <div className="hidden md:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+              <div className="w-3 h-3 rounded-full bg-amber-500 border-2 border-amber-100" />
+            </div>
+            <div className={`w-full md:w-[calc(50%-1.5rem)] ${isLeft ? 'md:pr-6 md:text-right' : 'md:ml-auto md:pl-6'}`}>
+              <div className="bg-white rounded-xl border border-amber-200 p-3 sm:p-4 shadow-sm hover:shadow-md hover:border-amber-300 transition-all">
+                <div className={`flex items-center gap-2 mb-1.5 ${isLeft ? 'md:flex-row-reverse' : ''}`}>
+                  <span className="inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-white text-xs sm:text-sm font-bold shrink-0">{i + 1}</span>
+                  <h3 className="text-sm sm:text-base font-bold text-gray-900">{item.title}</h3>
+                </div>
+                <p className={`text-xs sm:text-sm text-gray-600 leading-relaxed ${isLeft ? 'md:text-right' : ''}`}>{item.desc}</p>
+              </div>
+            </div>
+          </div>
+        )
+      })}
     </div>
   )
 }
