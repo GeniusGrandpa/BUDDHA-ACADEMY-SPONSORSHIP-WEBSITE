@@ -543,7 +543,7 @@ function VisualPageEditor({ page, pageData, selectedSectionKey, setSelectedSecti
         <div className="flex-1 flex flex-col overflow-hidden bg-gray-100">
           <div className="flex-1 overflow-y-auto p-6 flex justify-center">
             <div
-              className="bg-white shadow-lg rounded-lg overflow-hidden transition-all duration-300"
+              className="bg-white shadow-lg rounded-lg overflow-visible transition-all duration-300"
               style={{ width: previewWidths[previewDevice], maxWidth: '100%' }}
             >
               <div className="p-4 border-b border-gray-100 flex items-center justify-between">
@@ -652,6 +652,72 @@ function PreviewContent({ page, pageData, localVisibility, selectedSectionKey, o
   )
 }
 
+function SponsorshipTreePreview({ steps }: { steps: { title: string; desc: string }[] }) {
+  const items = steps.length >= 8 ? steps : [
+    { title: 'Browse Profiles', desc: 'Review children waiting for sponsors' },
+    { title: 'Choose a Child', desc: 'Select a student to sponsor' },
+    { title: 'Make Your Pledge', desc: 'Complete donation form securely' },
+    { title: 'We Connect', desc: 'Link you with your sponsored child' },
+    { title: 'Receive Updates', desc: 'Get progress reports & photos' },
+    { title: 'Build Connection', desc: 'Exchange letters & messages' },
+    { title: 'Track Impact', desc: 'See your contribution at work' },
+    { title: 'Join Community', desc: 'Connect with other sponsors' },
+  ]
+
+  function Node({ item, idx }: { item: { title: string; desc: string }; idx: number }) {
+    return (
+      <div className="flex flex-col items-center">
+        <div className="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold shadow-sm ring-2 ring-amber-100 mb-1">
+          {idx + 1}
+        </div>
+        <h3 className="text-[11px] font-semibold text-gray-800 text-center">{item.title}</h3>
+        <p className="text-[9px] text-gray-500 text-center mt-0.5 leading-relaxed max-w-[100px]">{item.desc}</p>
+      </div>
+    )
+  }
+
+  function VLine() {
+    return <div className="w-0.5 h-5 bg-gradient-to-b from-amber-300 to-amber-400/60" />
+  }
+
+  return (
+    <div className="flex flex-col items-center">
+      <Node item={items[0]} idx={0} />
+      <VLine />
+      <Node item={items[1]} idx={1} />
+      <VLine />
+      <Node item={items[2]} idx={2} />
+      <VLine />
+      <Node item={items[3]} idx={3} />
+
+      <div className="w-full max-w-[220px]">
+        <svg className="w-full h-6" viewBox="0 0 300 30" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round">
+          <line x1="150" y1="0" x2="150" y2="12" />
+          <line x1="75" y1="12" x2="225" y2="12" />
+          <line x1="75" y1="12" x2="75" y2="30" />
+          <line x1="225" y1="12" x2="225" y2="30" />
+        </svg>
+
+        <div className="flex gap-3 justify-center">
+          <div className="flex-1"><Node item={items[4]} idx={4} /></div>
+          <div className="flex-1"><Node item={items[5]} idx={5} /></div>
+        </div>
+
+        <svg className="w-full h-6" viewBox="0 0 300 30" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round">
+          <line x1="75" y1="0" x2="75" y2="18" />
+          <line x1="225" y1="0" x2="225" y2="18" />
+          <line x1="75" y1="18" x2="225" y2="18" />
+          <line x1="150" y1="18" x2="150" y2="30" />
+        </svg>
+      </div>
+
+      <Node item={items[6]} idx={6} />
+      <VLine />
+      <Node item={items[7]} idx={7} />
+    </div>
+  )
+}
+
 function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cmsStrings }: {
   section: CmsSection
   sectionContent: any
@@ -754,18 +820,10 @@ function RenderSectionPreview({ section, sectionContent, isVisible, pageData, cm
 
     case 'sponsorship_steps':
       return (
-        <div className="py-16 px-8 bg-gradient-to-br from-amber-50 via-white to-orange-50">
-          <div className="max-w-5xl mx-auto">
-            <h2 className="text-3xl font-bold text-gray-900 text-center mb-8">{content?.title || 'How Sponsorship Works'}</h2>
-            <div className="grid grid-cols-3 gap-4">
-              {(content?.steps as any[] || []).map((step: any, i: number) => (
-                <div key={i} className="text-center p-4 rounded-lg border border-amber-200">
-                  <div className="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center mx-auto mb-2 text-sm font-bold">{i + 1}</div>
-                  <h3 className="font-semibold text-gray-800 text-sm">{step.title}</h3>
-                  <p className="text-xs text-gray-500 mt-1">{step.desc}</p>
-                </div>
-              ))}
-            </div>
+        <div className="py-12 px-8 bg-gradient-to-br from-amber-50 via-white to-orange-50">
+          <div className="max-w-lg mx-auto">
+            <h2 className="text-xl font-bold text-gray-900 text-center mb-8">{content?.title || 'How Sponsorship Works'}</h2>
+            <SponsorshipTreePreview steps={(content?.steps as any[]) || []} />
           </div>
         </div>
       )
