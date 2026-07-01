@@ -53,7 +53,7 @@ export function Header() {
       <div className="w-full px-6 sm:px-10 lg:px-16 xl:px-24">
         <div className="flex justify-between items-center h-24">
           <Link to="/" className="flex items-center space-x-4">
-            <img src={headerLogoSrc} alt={siteName || branding.organization_name || ''} className="h-14 w-auto drop-shadow-sm" loading="eager" fetchpriority="high" decoding="async" width="56" height="56" />
+            <img src={headerLogoSrc} alt={siteName || branding.organization_name || ''} className="h-14 w-auto drop-shadow-sm" loading="eager" decoding="async" width="56" height="56" {...{'fetchpriority': 'high'}} />
             <div className="hidden sm:block">
               <div className="font-semibold text-[var(--color-navbar-text)]">{siteName || branding.organization_name || ''}</div>
               {branding.tagline && <div className="text-xs text-[var(--color-text-muted)]">{branding.tagline}</div>}

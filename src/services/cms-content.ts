@@ -20,7 +20,7 @@ export function db(table: string) {
 
 export async function getDonationContent(): Promise<DonationContent | null> {
   const { data } = await db('donation_content')
-    .select('id, heading, description, options, is_published, created_at')
+    .select('id, hero_title, hero_subtitle, hero_background_image, currency_label, impact_cards, impact_stories, process_steps, sections, is_published, created_at')
     .eq('is_published', true)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -35,7 +35,7 @@ export async function upsertDonationContent(content: Partial<DonationContent>): 
 
 export async function getSponsorshipContent(): Promise<SponsorshipContent | null> {
   const { data } = await db('sponsorship_content')
-    .select('id, heading, description, impact_stats, steps, is_published, created_at')
+    .select('id, hero_title, hero_subtitle, hero_background_image, hero_image, section_title, section_description, steps, benefits, cta_title, cta_description, cta_button_text, cta_button_link, is_published, created_at')
     .eq('is_published', true)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -50,7 +50,7 @@ export async function upsertSponsorshipContent(content: Partial<SponsorshipConte
 
 export async function getVolunteerContent(): Promise<VolunteerContent | null> {
   const { data } = await db('volunteer_content')
-    .select('id, heading, description, opportunities, is_published, created_at')
+    .select('id, hero_title, hero_subtitle, hero_background_image, section_title, section_description, opportunities, skill_options, form_fields, success_message, is_published, created_at')
     .eq('is_published', true)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -65,7 +65,7 @@ export async function upsertVolunteerContent(content: Partial<VolunteerContent>)
 
 export async function getTransparencyContent(): Promise<TransparencyContent | null> {
   const { data } = await db('transparency_content')
-    .select('id, heading, description, programs, reports, is_published, created_at')
+    .select('id, hero_title, hero_subtitle, allocation_title, allocation_description, allocation_data, verification_title, verification_description, verification_steps, impact_report_title, impact_report_items, receipt_policy_title, receipt_policy_text, donor_privacy_title, donor_privacy_text, is_published, created_at')
     .eq('is_published', true)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -80,7 +80,7 @@ export async function upsertTransparencyContent(content: Partial<TransparencyCon
 
 export async function getHeroContent(): Promise<HeroContent | null> {
   const { data } = await db('hero_content')
-    .select('id, title, subtitle, description, image_url, button_text, button_link, is_visible, display_order')
+    .select('id, title, highlight, description, background_image, overlay_color, overlay_opacity, cta_primary_text, cta_primary_link, cta_secondary_text, cta_secondary_link, statistics, badges, layout, display_order, is_visible, animation_enabled')
     .eq('is_visible', true)
     .order('display_order', { ascending: true })
     .limit(1)
@@ -142,7 +142,7 @@ export async function deleteSiteImage(id: string): Promise<void> {
 
 export async function getFooterContent(): Promise<FooterContent | null> {
   const { data } = await db('footer_content')
-    .select('id, description, copyright_text, social_links, quick_links, contact_info, is_published, created_at')
+    .select('id, description, copyright_text, nonprofit_text, social_links, quick_links, contact_info, is_published, created_at')
     .eq('is_published', true)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -185,7 +185,7 @@ export async function upsertPageHeader(header: Partial<PageHeader>): Promise<voi
 
 export async function getSectionContent(sectionKey: string): Promise<SectionContent | null> {
   const { data } = await db('section_content')
-    .select('id, section_key, title, content')
+    .select('id, section_key, title, subtitle, description, content, images, is_visible, sort_order')
     .eq('section_key', sectionKey)
     .maybeSingle()
   return data as SectionContent | null
