@@ -38,7 +38,7 @@ function HeroSection({ hero, visible }: { hero: HeroContent; visible: boolean })
           src={hero.background_image}
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
-          loading="eager" fetchPriority="high" decoding="async"
+          loading="eager" fetchpriority="high" decoding="async"
           onError={e => { (e.target as HTMLImageElement).style.opacity = '0' }}
         />
       )}
