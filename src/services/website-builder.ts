@@ -336,3 +336,116 @@ export async function fetchAllFullPages(): Promise<PageWithSections[]> {
   }
   return result
 }
+
+const DEFAULT_SECTIONS: Record<string, { section_key: string; section_type: string; title: string; subtitle?: string }[]> = {
+  home: [
+    { section_key: 'hero', section_type: 'hero', title: 'Hero Banner' },
+    { section_key: 'welcome', section_type: 'welcome', title: 'Welcome', subtitle: 'Welcome to Buddha Academy' },
+    { section_key: 'stats', section_type: 'stats', title: 'Statistics' },
+    { section_key: 'featured_students', section_type: 'featured_students', title: 'Featured Students' },
+    { section_key: 'testimonials', section_type: 'testimonials', title: 'Testimonials' },
+    { section_key: 'donation_cta', section_type: 'donation_cta', title: 'Donation Call to Action' },
+  ],
+  about: [
+    { section_key: 'page_header', section_type: 'page_header', title: 'Page Header' },
+    { section_key: 'about_mission', section_type: 'about_mission', title: 'Mission & Vision' },
+    { section_key: 'about_values', section_type: 'about_values', title: 'Core Values' },
+    { section_key: 'about_timeline', section_type: 'about_timeline', title: 'History Timeline' },
+    { section_key: 'about_stats', section_type: 'about_stats', title: 'About Statistics' },
+    { section_key: 'about_cta', section_type: 'about_cta', title: 'About CTA' },
+  ],
+  sponsor: [
+    { section_key: 'sponsor_hero', section_type: 'sponsor_hero', title: 'Sponsorship Banner' },
+    { section_key: 'sponsor_steps', section_type: 'sponsor_steps', title: 'How to Sponsor' },
+    { section_key: 'sponsor_benefits', section_type: 'sponsor_benefits', title: 'Sponsorship Benefits' },
+    { section_key: 'sponsor_cta', section_type: 'sponsor_cta', title: 'Sponsorship CTA' },
+  ],
+  students: [
+    { section_key: 'page_header', section_type: 'page_header', title: 'Page Header' },
+    { section_key: 'students_grid', section_type: 'students_grid', title: 'Student Profiles' },
+  ],
+  donate: [
+    { section_key: 'donate_hero', section_type: 'donate_hero', title: 'Donation Banner' },
+    { section_key: 'donate_impact', section_type: 'donate_impact', title: 'Impact Cards' },
+    { section_key: 'donate_process', section_type: 'donate_process', title: 'Donation Process' },
+    { section_key: 'donation_form', section_type: 'donation_form', title: 'Donation Form' },
+  ],
+  gallery: [
+    { section_key: 'page_header', section_type: 'page_header', title: 'Page Header' },
+    { section_key: 'gallery_grid', section_type: 'gallery_grid', title: 'Photo Gallery' },
+  ],
+  news: [
+    { section_key: 'page_header', section_type: 'page_header', title: 'Page Header' },
+    { section_key: 'news_grid', section_type: 'news_grid', title: 'News Articles' },
+  ],
+  contact: [
+    { section_key: 'page_header', section_type: 'page_header', title: 'Page Header' },
+    { section_key: 'contact_details', section_type: 'contact_details', title: 'Contact Information' },
+    { section_key: 'contact_form', section_type: 'contact_form', title: 'Contact Form' },
+  ],
+  faq: [
+    { section_key: 'page_header', section_type: 'page_header', title: 'Page Header' },
+    { section_key: 'faq_list', section_type: 'faq_list', title: 'FAQ List' },
+  ],
+  volunteer: [
+    { section_key: 'volunteer_hero', section_type: 'volunteer_hero', title: 'Volunteer Banner' },
+    { section_key: 'volunteer_opps', section_type: 'volunteer_opps', title: 'Opportunities' },
+    { section_key: 'volunteer_form', section_type: 'volunteer_form', title: 'Application Form' },
+  ],
+  campaigns: [
+    { section_key: 'page_header', section_type: 'page_header', title: 'Page Header' },
+    { section_key: 'campaigns_list', section_type: 'campaigns_list', title: 'Campaigns' },
+  ],
+  'success-stories': [
+    { section_key: 'page_header', section_type: 'page_header', title: 'Page Header' },
+    { section_key: 'success_stories', section_type: 'success_stories', title: 'Success Stories' },
+  ],
+  activity: [
+    { section_key: 'page_header', section_type: 'page_header', title: 'Page Header' },
+    { section_key: 'activity_feed', section_type: 'activity_feed', title: 'Activity Feed' },
+  ],
+  transparency: [
+    { section_key: 'page_header', section_type: 'page_header', title: 'Page Header' },
+    { section_key: 'transparency_content', section_type: 'transparency_content', title: 'Transparency Content' },
+  ],
+  privacy: [
+    { section_key: 'page_header', section_type: 'page_header', title: 'Page Header' },
+    { section_key: 'privacy_content', section_type: 'privacy_content', title: 'Privacy Policy Text' },
+  ],
+  terms: [
+    { section_key: 'page_header', section_type: 'page_header', title: 'Page Header' },
+    { section_key: 'terms_content', section_type: 'terms_content', title: 'Terms of Service Text' },
+  ],
+}
+
+export async function createDefaultSections(pageId: string, slug: string): Promise<WebsiteSection[]> {
+  const configs = DEFAULT_SECTIONS[slug] || [
+    { section_key: 'page_header', section_type: 'page_header', title: 'Page Header' },
+    { section_key: 'custom_content', section_type: 'custom_content', title: 'Content' },
+  ]
+
+  const sections: WebsiteSection[] = []
+  for (let i = 0; i < configs.length; i++) {
+    const cfg = configs[i]
+    const { data, error } = await db('website_sections')
+      .insert({
+        page_id: pageId,
+        section_key: cfg.section_key,
+        section_type: cfg.section_type,
+        title: cfg.title,
+        subtitle: cfg.subtitle || null,
+        sort_order: i,
+        is_visible: true,
+        settings: {} as never,
+      } as never)
+      .select(SECTION_COLUMNS)
+      .single() as any
+
+    if (!error && data) {
+      data.blocks = []
+      sections.push(data as unknown as WebsiteSection)
+    }
+  }
+
+  return sections
+}

@@ -361,7 +361,7 @@ function PageEditorView({ page, sections, selectedSection, selectedSectionId, on
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        <div className="hidden md:flex md:flex-col w-60 lg:w-72 bg-gray-50 border-r border-gray-200 shrink-0">
+        <div className="hidden md:flex md:flex-col w-64 lg:w-80 bg-gray-50 border-r border-gray-200 shrink-0">
           <div className="p-3 border-b border-gray-200">
             <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Sections</h3>
             <p className="text-xs text-gray-400 mt-0.5">{sectionOrder.filter(s => s.is_visible).length} visible · {sectionOrder.length} total</p>
@@ -440,7 +440,7 @@ function PageEditorView({ page, sections, selectedSection, selectedSectionId, on
           </div>
         </div>
 
-        <div className="hidden lg:flex lg:flex-col w-80 bg-white border-l border-gray-200 shrink-0">
+        <div className="hidden lg:flex lg:flex-col w-96 bg-white border-l border-gray-200 shrink-0">
           {selectedSection ? (
             <>
               <div className="flex border-b border-gray-200">

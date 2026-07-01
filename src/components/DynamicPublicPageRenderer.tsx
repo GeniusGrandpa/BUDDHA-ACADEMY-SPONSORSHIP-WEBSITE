@@ -45,7 +45,7 @@ export function DynamicPublicPageRenderer({ slug, fallback, children }: DynamicP
   }
 
   if (error || !sections) {
-    return null
+    return fallback || null
   }
 
   if (children) {

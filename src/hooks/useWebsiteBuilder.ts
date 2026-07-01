@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import toast from 'react-hot-toast'
-import { fetchAllPages, fetchFullPageById, updatePage, updatePageStatus, updateSection, updateSectionSettings, updateSectionVisibility, reorderSections, publishPage, createVersion } from '../services/website-builder'
+import { fetchAllPages, fetchFullPageById, updatePage, updatePageStatus, updateSection, updateSectionSettings, updateSectionVisibility, reorderSections, publishPage, createVersion, createDefaultSections } from '../services/website-builder'
 import type { WebsitePage, WebsiteSection, PageStatus, SectionSettings } from '../types/website-builder'
 
 export function useWebsiteBuilder() {
@@ -31,7 +31,13 @@ export function useWebsiteBuilder() {
     try {
       const full = await fetchFullPageById(pageId)
       if (full) {
-        setActiveSections(full.sections)
+        if (full.sections.length === 0) {
+          const slug = full.page.slug
+          const sections = await createDefaultSections(pageId, slug)
+          setActiveSections(sections)
+        } else {
+          setActiveSections(full.sections)
+        }
       }
     } catch {
       toast.error('Failed to load page data')

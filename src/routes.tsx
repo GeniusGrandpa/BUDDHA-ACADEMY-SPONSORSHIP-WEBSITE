@@ -5,6 +5,7 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 import { Layout } from './layout/Layout'
 import { useAuth } from './context/AuthContext'
 import { DashboardSkeleton } from './components/ui/LoadingSkeleton'
+import { DynamicPublicPageRenderer } from './components/DynamicPublicPageRenderer'
 import { getRedirectPath } from './features/auth/utils/redirectByRole'
 import type { Role } from './features/auth/types/permissions'
 
@@ -198,19 +199,19 @@ export const router = createBrowserRouter([
     element: <Layout />,
     errorElement: <LazyPage Component={NotFoundPage} />,
     children: [
-      { index: true, element: <LazyPage Component={HomePage} /> },
-      { path: 'about', element: <LazyPage Component={AboutPage} /> },
-      { path: 'sponsor', element: <LazyPage Component={SponsorshipPage} /> },
-      { path: 'students', element: <LazyPage Component={StudentsPage} /> },
+      { index: true, element: <DynamicPublicPageRenderer slug="home" fallback={<LazyPage Component={HomePage} />} /> },
+      { path: 'about', element: <DynamicPublicPageRenderer slug="about" fallback={<LazyPage Component={AboutPage} />} /> },
+      { path: 'sponsor', element: <DynamicPublicPageRenderer slug="sponsor" fallback={<LazyPage Component={SponsorshipPage} />} /> },
+      { path: 'students', element: <DynamicPublicPageRenderer slug="students" fallback={<LazyPage Component={StudentsPage} />} /> },
       { path: 'students/:id', element: <LazyPage Component={StudentDetailPage} /> },
-      { path: 'gallery', element: <LazyPage Component={GalleryPage} /> },
-      { path: 'news', element: <LazyPage Component={NewsPage} /> },
+      { path: 'gallery', element: <DynamicPublicPageRenderer slug="gallery" fallback={<LazyPage Component={GalleryPage} />} /> },
+      { path: 'news', element: <DynamicPublicPageRenderer slug="news" fallback={<LazyPage Component={NewsPage} />} /> },
       { path: 'news/:id', element: <LazyPage Component={NewsDetailPage} /> },
-      { path: 'contact', element: <LazyPage Component={ContactPage} /> },
-      { path: 'donate', element: <LazyPage Component={DonatePage} /> },
-      { path: 'transparency', element: <LazyPage Component={TransparencyPage} /> },
-      { path: 'faq', element: <LazyPage Component={FAQPage} /> },
-      { path: 'volunteer', element: <LazyPage Component={VolunteerPage} /> },
+      { path: 'contact', element: <DynamicPublicPageRenderer slug="contact" fallback={<LazyPage Component={ContactPage} />} /> },
+      { path: 'donate', element: <DynamicPublicPageRenderer slug="donate" fallback={<LazyPage Component={DonatePage} />} /> },
+      { path: 'transparency', element: <DynamicPublicPageRenderer slug="transparency" fallback={<LazyPage Component={TransparencyPage} />} /> },
+      { path: 'faq', element: <DynamicPublicPageRenderer slug="faq" fallback={<LazyPage Component={FAQPage} />} /> },
+      { path: 'volunteer', element: <DynamicPublicPageRenderer slug="volunteer" fallback={<LazyPage Component={VolunteerPage} />} /> },
       { path: 'campaigns', element: <LazyPage Component={CampaignsPage} /> },
       { path: 'success-stories', element: <LazyPage Component={SuccessStoriesPage} /> },
       { path: 'activity', element: <LazyPage Component={ActivityPage} /> },
