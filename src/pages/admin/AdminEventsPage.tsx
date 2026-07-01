@@ -21,8 +21,7 @@ export function AdminEventsPage() {
         .select('*')
         .order('date', { ascending: false })
       if (data) setEvents(data)
-    } catch (error) {
-      console.error('Error loading events:', error)
+    } catch {
     } finally {
       setLoading(false)
     }
@@ -33,8 +32,7 @@ export function AdminEventsPage() {
     try {
       await supabase.from('events').delete().eq('id', id)
       setEvents(events.filter(e => e.id !== id))
-    } catch (error) {
-      console.error('Error deleting event:', error)
+    } catch {
     }
   }
 

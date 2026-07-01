@@ -120,7 +120,7 @@ function DynamicSectionRenderer({ section }: { section: WebsiteSection }) {
               <div key={block.id} className="p-4 rounded-lg border" style={{ backgroundColor: s.background_color ? String(s.background_color) : '#fff', borderColor: s.text_color ? `${String(s.text_color)}20` : '#e5e7eb' }}>
                 {block.title && <h4 className="font-semibold mb-1">{block.title}</h4>}
                 {block.block_type === 'image' && !!content.src && (
-                  <img src={String(content.src)} alt={content.alt ? String(content.alt) : block.title || ''} className="w-full h-48 object-cover rounded-lg" />
+                  <img src={String(content.src)} alt={content.alt ? String(content.alt) : block.title || ''} className="w-full h-48 object-cover rounded-lg" loading="lazy" decoding="async" />
                 )}
                 {block.block_type === 'text' && !!content.text && (
                   <p className="text-sm opacity-80">{String(content.text)}</p>

@@ -27,7 +27,6 @@ function sanitizeError(input: string): string {
   const lower = input.toLowerCase()
 
   if (SENSITIVE_KEYWORDS.some(kw => lower.includes(kw))) {
-    console.error('[AuthCallback] Suppressed sensitive error:', input)
     return 'Verification failed. The link may be invalid or expired.'
   }
 

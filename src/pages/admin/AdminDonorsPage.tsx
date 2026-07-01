@@ -23,8 +23,7 @@ export function AdminDonorsPage() {
 
       if (error) throw error
       setDonors(data || [])
-    } catch (error) {
-      console.error('Error loading donors:', error)
+    } catch {
     } finally {
       setLoading(false)
     }
@@ -46,8 +45,7 @@ export function AdminDonorsPage() {
 
       if (error) throw error
       setDonors(prev => prev.map(d => d.id === donor.id ? { ...d, role: newRole } : d))
-    } catch (error) {
-      console.error('Error updating role:', error)
+    } catch {
     } finally {
       setUpdating(null)
     }

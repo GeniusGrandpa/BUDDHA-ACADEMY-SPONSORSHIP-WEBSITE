@@ -19,8 +19,7 @@ export function AdminDonationsPage() {
     try {
       const data = await getAllDonations()
       setDonations(data)
-    } catch (error) {
-      console.error('Error loading donations:', error)
+    } catch {
     } finally {
       setLoading(false)
     }
@@ -35,8 +34,7 @@ export function AdminDonationsPage() {
       await updateDonationStatus(id, status)
       setDonations(donations.map(d => d.id === id ? { ...d, status } : d))
       toast.success(status === 'completed' ? 'Donation approved' : status === 'rejected' ? 'Donation rejected' : `Status set to ${status}`)
-    } catch (error) {
-      console.error('Error updating donation:', error)
+    } catch {
       toast.error('Failed to update donation status')
     } finally {
       setUpdating(prev => ({ ...prev, [id]: false }))

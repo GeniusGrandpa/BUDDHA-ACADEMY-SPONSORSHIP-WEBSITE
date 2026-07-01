@@ -41,6 +41,7 @@ export function StudentDetailModal({ student, contribution, onClose }: StudentDe
                 src={student.photo_url || 'https://images.pexels.com/photos/1171086/pexels-photo-1171086.jpeg?auto=compress&cs=tinysrgb&w=200'}
                 alt={student.name}
                 className="w-24 h-24 rounded-xl object-cover border-4 border-white shadow-lg"
+                loading="lazy" decoding="async"
               />
             </div>
           </div>

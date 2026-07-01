@@ -160,6 +160,7 @@ export function SponsorshipPage() {
                     src={heroImage}
                     alt="Buddha Academy students"
                     className="rounded-2xl shadow-xl w-full object-cover h-64 sm:h-80 lg:h-[500px]"
+                    loading="lazy" decoding="async"
                   />
                 </div>
               )}

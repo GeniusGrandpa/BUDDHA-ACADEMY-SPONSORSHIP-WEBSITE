@@ -102,7 +102,7 @@ export function AdminBrandingPage() {
         <div className="mt-2 p-4 rounded-lg border-2 border-dashed border-[var(--color-border)]">
           {form[field] ? (
             <div className="space-y-2">
-              <img src={form[field] as string} alt={`${label} preview`} className={`${height} object-contain`} />
+              <img src={form[field] as string} alt={`${label} preview`} className={`${height} object-contain`} loading="eager" decoding="async" />
               <button onClick={() => handleChange(field, null)} className="text-xs text-red-500">Remove</button>
             </div>
           ) : (

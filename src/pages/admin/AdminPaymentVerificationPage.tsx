@@ -45,8 +45,7 @@ export function AdminPaymentVerificationPage() {
     try {
       const data = await getPendingVerifications()
       setSessions(data as unknown as SessionWithDonor[])
-    } catch (error) {
-      console.error('Error loading payments:', error)
+    } catch {
       setLoadError('Failed to load pending verifications. Please try again.')
     } finally {
       setLoading(false)
@@ -73,8 +72,7 @@ export function AdminPaymentVerificationPage() {
       }
       toast.success(status === 'verified' ? 'Payment verified successfully' : 'Payment rejected')
       await loadSessions()
-    } catch (error) {
-      console.error('Error verifying payment:', error)
+    } catch {
       setSessions(prev => prev.map(s =>
         s.id === sessionId ? { ...s, status: 'processing' } : s
       ))
@@ -305,7 +303,7 @@ export function AdminPaymentVerificationPage() {
                             rel="noopener noreferrer"
                             className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden group"
                           >
-                            <img src={url} alt={`Screenshot ${idx + 1}`} className="w-full h-full object-cover" />
+                            <img src={url} alt={`Screenshot ${idx + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                             <div className="absolute inset-0 bg-stone-900/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             </div>
                           </a>

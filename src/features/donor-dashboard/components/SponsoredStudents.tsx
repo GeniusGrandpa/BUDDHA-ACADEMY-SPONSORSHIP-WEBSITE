@@ -39,6 +39,7 @@ export function SponsoredStudents({ contributions }: SponsoredStudentsProps) {
                     src={student.photo_url || ''}
                     alt={student.name}
                     className="w-14 h-14 rounded-xl object-cover"
+                    loading="lazy" decoding="async"
                   />
                 </div>
                 <div className="flex-1 min-w-0">

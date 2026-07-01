@@ -8,14 +8,25 @@ import type { ContentVersion } from '../types/database'
 import type { PageBlock, SeoMetadata } from '../types/cms'
 const supabase = getSupabaseClient()
 
+const PAGE_COLS = 'id, slug, title, content, published, blocks, seo, created_at, updated_at, updated_by'
+const HOMEPAGE_COLS = 'id, section_key, title, subtitle, content, is_active, sort_order, updated_by, created_at, updated_at'
+const VIDEO_COLS = 'id, title, url, video_type, thumbnail_url, description, category, is_featured, uploaded_by, created_at, updated_at'
+const FAQ_COLS = 'id, question, answer, category, sort_order, is_published, created_at, updated_at'
+const STORY_COLS = 'id, title, student_name, content, image_url, quote, achievements, is_published, featured, published_at, created_at, updated_at'
+const MEDIA_COLS = 'id, url, file_name, file_size, mime_type, alt_text, folder, is_published, uploaded_by, created_at'
+const GALLERY_COLS = 'id, type, title, caption, url, thumbnail_url, author, category, is_featured, is_published, uploaded_by, created_at, updated_at'
+const NEWS_COLS = 'id, slug, title, excerpt, content, image_url, category, tags, published, published_at, updated_by, created_at, updated_at'
+const TESTIMONIAL_COLS = 'id, author_name, author_role, content, quote, avatar_url, is_published, is_featured, testimonial_type, sort_order, created_at, updated_at'
+const VERSION_COLS = 'id, entity_type, entity_id, entity_slug, version_number, title, content, published, created_by, created_at, restored_at, restore_notes'
+
 export async function getPages(): Promise<Page[]> {
-  const { data, error } = await supabase.from('pages').select('*').order('created_at', { ascending: false })
+  const { data, error } = await supabase.from('pages').select(PAGE_COLS).order('created_at', { ascending: false })
   if (error) throw error
   return data || []
 }
 
 export async function getPageBySlug(slug: string): Promise<Page | null> {
-  const { data, error } = await supabase.from('pages').select('*').eq('slug', slug).maybeSingle()
+  const { data, error } = await supabase.from('pages').select(PAGE_COLS).eq('slug', slug).maybeSingle()
   if (error) throw error
   return data
 }
@@ -43,7 +54,7 @@ export async function upsertPage(page: {
         ...(page.seo ? { seo: page.seo as unknown as Json } : {}),
       })
       .eq('id', existing.id)
-      .select()
+      .select(PAGE_COLS)
       .single()
     if (error) throw error
     await logAuditEvent({ action: `Updated page: ${page.slug}`, entityType: 'pages', entityId: existing.id })
@@ -61,7 +72,7 @@ export async function upsertPage(page: {
       ...(page.blocks ? { blocks: page.blocks as unknown as Json } : {}),
       ...(page.seo ? { seo: page.seo as unknown as Json } : {}),
     })
-    .select()
+    .select(PAGE_COLS)
     .single()
   if (error) throw error
   await logAuditEvent({ action: `Created page: ${page.slug}`, entityType: 'pages', entityId: data.id })
@@ -75,7 +86,7 @@ export async function updatePagePublished(slug: string, published: boolean): Pro
     .from('pages')
     .update({ published })
     .eq('id', page.id)
-    .select()
+    .select(PAGE_COLS)
     .single()
   if (error) throw error
   await logAuditEvent({ action: `${published ? 'Published' : 'Unpublished'} page: ${slug}`, entityType: 'pages', entityId: page.id })
@@ -91,13 +102,13 @@ export async function deletePage(slug: string): Promise<void> {
 }
 
 export async function getHomepageSections(): Promise<HomepageSection[]> {
-  const { data, error } = await supabase.from('homepage_sections').select('*').order('sort_order', { ascending: true })
+  const { data, error } = await supabase.from('homepage_sections').select(HOMEPAGE_COLS).order('sort_order', { ascending: true })
   if (error) throw error
   return data || []
 }
 
 export async function getHomepageSection(key: string): Promise<HomepageSection | null> {
-  const { data, error } = await supabase.from('homepage_sections').select('*').eq('section_key', key).maybeSingle()
+  const { data, error } = await supabase.from('homepage_sections').select(HOMEPAGE_COLS).eq('section_key', key).maybeSingle()
   if (error) throw error
   return data
 }
@@ -108,7 +119,7 @@ export async function updateHomepageSection(id: string, updates: Partial<Homepag
     .from('homepage_sections')
     .update({ ...updates, updated_by: userId })
     .eq('id', id)
-    .select()
+    .select(HOMEPAGE_COLS)
     .single()
   if (error) throw error
   await logAuditEvent({ action: `Updated homepage section: ${data.section_key}`, entityType: 'homepage_sections', entityId: id })
@@ -116,7 +127,7 @@ export async function updateHomepageSection(id: string, updates: Partial<Homepag
 }
 
 export async function getVideos(featuredOnly?: boolean): Promise<Video[]> {
-  let query = supabase.from('videos').select('*').order('created_at', { ascending: false })
+  let query = supabase.from('videos').select(VIDEO_COLS).order('created_at', { ascending: false })
   if (featuredOnly) query = query.eq('is_featured', true)
   const { data, error } = await query
   if (error) throw error
@@ -124,7 +135,7 @@ export async function getVideos(featuredOnly?: boolean): Promise<Video[]> {
 }
 
 export async function getVideoById(id: string): Promise<Video | null> {
-  const { data, error } = await supabase.from('videos').select('*').eq('id', id).maybeSingle()
+  const { data, error } = await supabase.from('videos').select(VIDEO_COLS).eq('id', id).maybeSingle()
   if (error) throw error
   return data
 }
@@ -134,7 +145,7 @@ export async function createVideo(video: Omit<Video, 'id' | 'created_at' | 'upda
   const { data, error } = await supabase
     .from('videos')
     .insert({ ...video, uploaded_by: userId })
-    .select()
+    .select(VIDEO_COLS)
     .single()
   if (error) throw error
   await logAuditEvent({ action: `Created video: ${data.title}`, entityType: 'videos', entityId: data.id })
@@ -142,7 +153,7 @@ export async function createVideo(video: Omit<Video, 'id' | 'created_at' | 'upda
 }
 
 export async function updateVideo(id: string, updates: Partial<Video>): Promise<Video> {
-  const { data, error } = await supabase.from('videos').update(updates).eq('id', id).select().single()
+  const { data, error } = await supabase.from('videos').update(updates).eq('id', id).select(VIDEO_COLS).single()
   if (error) throw error
   await logAuditEvent({ action: `Updated video: ${data.title}`, entityType: 'videos', entityId: id })
   return data
@@ -161,7 +172,7 @@ export async function deleteVideo(id: string): Promise<void> {
 }
 
 export async function getFaqs(publishedOnly?: boolean): Promise<Faq[]> {
-  let query = supabase.from('faqs').select('*').order('sort_order', { ascending: true })
+  let query = supabase.from('faqs').select(FAQ_COLS).order('sort_order', { ascending: true })
   if (publishedOnly) query = query.eq('is_published', true)
   const { data, error } = await query
   if (error) throw error
@@ -169,20 +180,20 @@ export async function getFaqs(publishedOnly?: boolean): Promise<Faq[]> {
 }
 
 export async function getFaqById(id: string): Promise<Faq | null> {
-  const { data, error } = await supabase.from('faqs').select('*').eq('id', id).maybeSingle()
+  const { data, error } = await supabase.from('faqs').select(FAQ_COLS).eq('id', id).maybeSingle()
   if (error) throw error
   return data
 }
 
 export async function createFaq(faq: Omit<Faq, 'id' | 'created_at' | 'updated_at'>): Promise<Faq> {
-  const { data, error } = await supabase.from('faqs').insert(faq).select().single()
+  const { data, error } = await supabase.from('faqs').insert(faq).select(FAQ_COLS).single()
   if (error) throw error
   await logAuditEvent({ action: `Created FAQ: ${faq.question.substring(0, 50)}`, entityType: 'faqs', entityId: data.id })
   return data
 }
 
 export async function updateFaq(id: string, updates: Partial<Faq>): Promise<Faq> {
-  const { data, error } = await supabase.from('faqs').update(updates).eq('id', id).select().single()
+  const { data, error } = await supabase.from('faqs').update(updates).eq('id', id).select(FAQ_COLS).single()
   if (error) throw error
   await logAuditEvent({ action: `Updated FAQ: ${data.question.substring(0, 50)}`, entityType: 'faqs', entityId: id })
   return data
@@ -201,7 +212,7 @@ export async function reorderFaqs(items: { id: string; sort_order: number }[]): 
 }
 
 export async function getStudentStories(publishedOnly?: boolean): Promise<StudentStory[]> {
-  let query = supabase.from('student_stories').select('*').order('created_at', { ascending: false })
+  let query = supabase.from('student_stories').select(STORY_COLS).order('created_at', { ascending: false })
   if (publishedOnly) query = query.eq('is_published', true)
   const { data, error } = await query
   if (error) throw error
@@ -209,20 +220,20 @@ export async function getStudentStories(publishedOnly?: boolean): Promise<Studen
 }
 
 export async function getStudentStoryById(id: string): Promise<StudentStory | null> {
-  const { data, error } = await supabase.from('student_stories').select('*').eq('id', id).maybeSingle()
+  const { data, error } = await supabase.from('student_stories').select(STORY_COLS).eq('id', id).maybeSingle()
   if (error) throw error
   return data
 }
 
 export async function createStudentStory(story: Omit<StudentStory, 'id' | 'created_at' | 'updated_at'>): Promise<StudentStory> {
-  const { data, error } = await supabase.from('student_stories').insert(story).select().single()
+  const { data, error } = await supabase.from('student_stories').insert(story).select(STORY_COLS).single()
   if (error) throw error
   await logAuditEvent({ action: `Created student story: ${data.title}`, entityType: 'student_stories', entityId: data.id })
   return data
 }
 
 export async function updateStudentStory(id: string, updates: Partial<StudentStory>): Promise<StudentStory> {
-  const { data, error } = await supabase.from('student_stories').update(updates).eq('id', id).select().single()
+  const { data, error } = await supabase.from('student_stories').update(updates).eq('id', id).select(STORY_COLS).single()
   if (error) throw error
   await logAuditEvent({ action: `Updated student story: ${data.title}`, entityType: 'student_stories', entityId: id })
   return data
@@ -235,7 +246,7 @@ export async function deleteStudentStory(id: string): Promise<void> {
 }
 
 export async function getMedia(publishedOnly?: boolean): Promise<MediaItem[]> {
-  let query = supabase.from('media_library').select('*').order('created_at', { ascending: false })
+  let query = supabase.from('media_library').select(MEDIA_COLS).order('created_at', { ascending: false })
   if (publishedOnly) query = query.eq('is_published', true)
   const { data, error } = await query
   if (error) throw error
@@ -273,7 +284,7 @@ export async function uploadMedia(file: File, altText?: string, folder?: string)
       folder: folder || '/',
       uploaded_by: userId,
     })
-    .select()
+    .select(MEDIA_COLS)
     .single()
   if (error) throw error
 
@@ -286,7 +297,7 @@ export async function updateMedia(id: string, updates: Partial<MediaItem>): Prom
     .from('media_library')
     .update(updates)
     .eq('id', id)
-    .select()
+    .select(MEDIA_COLS)
     .single()
   if (error) throw error
   return data
@@ -303,7 +314,7 @@ export async function deleteMedia(id: string, url: string): Promise<void> {
 }
 
 export async function getGalleryItemsWithCategory(category?: string, publishedOnly = true): Promise<GalleryItem[]> {
-  let query = supabase.from('gallery_items').select('*').order('created_at', { ascending: false })
+  let query = supabase.from('gallery_items').select(GALLERY_COLS).order('created_at', { ascending: false })
   if (category && category !== 'all') query = query.eq('category', category)
   if (publishedOnly) query = query.eq('is_published', true)
   const { data, error } = await query
@@ -318,7 +329,7 @@ export async function createGalleryItemWithCategory(
   const { data, error } = await supabase
     .from('gallery_items')
     .insert({ ...item, uploaded_by: userId })
-    .select()
+    .select(GALLERY_COLS)
     .single()
   if (error) throw error
   await logAuditEvent({ action: `Created gallery item: ${data.title}`, entityType: 'gallery_items', entityId: data.id })
@@ -326,14 +337,14 @@ export async function createGalleryItemWithCategory(
 }
 
 export async function updateGalleryItemWithCategory(id: string, updates: Partial<GalleryItem>): Promise<GalleryItem> {
-  const { data, error } = await supabase.from('gallery_items').update(updates).eq('id', id).select().single()
+  const { data, error } = await supabase.from('gallery_items').update(updates).eq('id', id).select(GALLERY_COLS).single()
   if (error) throw error
   await logAuditEvent({ action: `Updated gallery item: ${data.title}`, entityType: 'gallery_items', entityId: id })
   return data
 }
 
 export async function getAllNews(includeUnpublished?: boolean): Promise<News[]> {
-  let query = supabase.from('news').select('*').order('created_at', { ascending: false })
+  let query = supabase.from('news').select(NEWS_COLS).order('created_at', { ascending: false })
   if (!includeUnpublished) query = query.eq('published', true)
   const { data, error } = await query
   if (error) throw error
@@ -346,7 +357,7 @@ export async function createNewsWithAuthor(article: Omit<News, 'id' | 'created_a
   const { data, error } = await supabase
     .from('news')
     .insert({ ...article, slug, updated_by: userId })
-    .select()
+    .select(NEWS_COLS)
     .single()
   if (error) throw error
   await logAuditEvent({ action: `Created news: ${data.title}`, entityType: 'news', entityId: data.id })
@@ -359,7 +370,7 @@ export async function updateNewsWithAuthor(id: string, updates: Partial<News>): 
     .from('news')
     .update({ ...updates, updated_by: userId })
     .eq('id', id)
-    .select()
+    .select(NEWS_COLS)
     .single()
   if (error) throw error
   await logAuditEvent({ action: `Updated news: ${data.title}`, entityType: 'news', entityId: id })
@@ -367,7 +378,7 @@ export async function updateNewsWithAuthor(id: string, updates: Partial<News>): 
 }
 
 export async function getTestimonialsWithType(type?: string): Promise<Testimonial[]> {
-  let query = supabase.from('testimonials').select('*').order('sort_order', { ascending: true })
+  let query = supabase.from('testimonials').select(TESTIMONIAL_COLS).order('sort_order', { ascending: true })
   if (type && type !== 'all') query = query.eq('testimonial_type', type as Testimonial['testimonial_type'])
   const { data, error } = await query
   if (error) throw error
@@ -375,14 +386,14 @@ export async function getTestimonialsWithType(type?: string): Promise<Testimonia
 }
 
 export async function createTestimonial(item: Omit<Testimonial, 'id' | 'created_at' | 'updated_at'>): Promise<Testimonial> {
-  const { data, error } = await supabase.from('testimonials').insert(item).select().single()
+  const { data, error } = await supabase.from('testimonials').insert(item).select(TESTIMONIAL_COLS).single()
   if (error) throw error
   await logAuditEvent({ action: `Created testimonial: ${data.author_name}`, entityType: 'testimonials', entityId: data.id })
   return data
 }
 
 export async function updateTestimonial(id: string, updates: Partial<Testimonial>): Promise<Testimonial> {
-  const { data, error } = await supabase.from('testimonials').update(updates).eq('id', id).select().single()
+  const { data, error } = await supabase.from('testimonials').update(updates).eq('id', id).select(TESTIMONIAL_COLS).single()
   if (error) throw error
   await logAuditEvent({ action: `Updated testimonial: ${data.author_name}`, entityType: 'testimonials', entityId: id })
   return data
@@ -400,7 +411,7 @@ export async function getContentVersions(
 ): Promise<ContentVersion[]> {
   const { data, error } = await supabase
     .from('content_versions')
-    .select('*')
+    .select(VERSION_COLS)
     .eq('entity_type', entityType)
     .eq('entity_id', entityId)
     .order('version_number', { ascending: false })
@@ -411,7 +422,7 @@ export async function getContentVersions(
 export async function getAllContentVersions(
   entityType?: string
 ): Promise<ContentVersion[]> {
-  let query = supabase.from('content_versions').select('*').order('created_at', { ascending: false })
+  let query = supabase.from('content_versions').select(VERSION_COLS).order('created_at', { ascending: false })
   if (entityType) query = query.eq('entity_type', entityType)
   const { data, error } = await query.limit(100)
   if (error) throw error
@@ -424,7 +435,7 @@ export async function restoreContentVersion(
 ): Promise<ContentVersion> {
   const { data: version, error: fetchError } = await supabase
     .from('content_versions')
-    .select('*')
+    .select(VERSION_COLS)
     .eq('id', versionId)
     .single()
   if (fetchError) throw fetchError
@@ -448,7 +459,7 @@ export async function restoreContentVersion(
     .from('content_versions')
     .update({ restored_at: new Date().toISOString(), restore_notes: notes || 'Restored via admin panel' })
     .eq('id', versionId)
-    .select()
+    .select(VERSION_COLS)
     .single()
   if (error) throw error
 

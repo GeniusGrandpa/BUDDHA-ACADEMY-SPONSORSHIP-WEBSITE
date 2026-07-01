@@ -5,13 +5,12 @@ const supabase = getSupabaseClient()
 export async function getNotifications(userId: string, limit = 20): Promise<Notification[]> {
   const { data, error } = await supabase
     .from('notifications')
-    .select('*')
+    .select('id, user_id, type, title, message, data, read, read_at, created_at')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .limit(limit)
 
   if (error) {
-    console.error('Error fetching notifications:', error)
     return []
   }
 
@@ -61,7 +60,6 @@ export async function createNotification(
     p_data: data ?? null,
   })
   if (error) {
-    console.error('Error creating notification:', error)
     return false
   }
   return true
@@ -87,13 +85,11 @@ export async function broadcastNotification(
         p_data: data ?? null,
       })
       if (error) {
-        console.error('Error sending notification to user', userId, ':', error)
         failed++
       } else {
         success++
       }
     } catch (err) {
-      console.error('Exception sending notification to user', userId, ':', err)
       failed++
     }
   }
@@ -113,7 +109,6 @@ export async function getAllUserIds(options?: { roles?: string[]; status?: strin
 
   const { data, error } = await query
   if (error) {
-    console.error('Error fetching user IDs:', error)
     return []
   }
   return ((data || []) as { id: string }[]).map(p => p.id)

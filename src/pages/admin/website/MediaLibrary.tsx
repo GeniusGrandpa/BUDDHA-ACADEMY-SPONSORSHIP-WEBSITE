@@ -1,33 +1,59 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import toast from 'react-hot-toast'
-import { Search, Grid3X3, List, Upload, Trash2, X, Edit3, Check, Copy, Image } from 'lucide-react'
+import { Search, Grid3X3, List, Upload, Trash2, X, Edit3, Check, Copy, Image, Loader2 } from 'lucide-react'
 import { fetchMedia, updateMedia, deleteMedia, uploadImage } from '../../../services/website-builder'
 import { DashboardSkeleton } from '../../../components/ui/LoadingSkeleton'
 import { EmptyState } from '../../../components/ui/EmptyState'
+import { useDebounce } from '../../../hooks/useDebounce'
 import type { WebsiteMedia } from '../../../types/website-builder'
 
 type ViewMode = 'grid' | 'list'
+const PER_PAGE = 50
 
 export function MediaLibrary() {
   const [items, setItems] = useState<WebsiteMedia[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
+  const [page, setPage] = useState(1)
   const [uploading, setUploading] = useState(false)
   const [view, setView] = useState<ViewMode>('grid')
   const [search, setSearch] = useState('')
   const [editingAlt, setEditingAlt] = useState<{ id: string; alt: string } | null>(null)
-
-  const loadMedia = useCallback(async () => {
+  const debouncedSearch = useDebounce(search, 300)
+  const loadMedia = useCallback(async (pageNum: number, append = false) => {
+    if (pageNum === 1) setLoading(true)
+    else setLoadingMore(true)
     try {
-      const data = await fetchMedia()
-      setItems(data)
+      const data = await fetchMedia(pageNum, PER_PAGE)
+      if (append) {
+        setItems(prev => [...prev, ...data])
+      } else {
+        setItems(data)
+      }
+      setHasMore(data.length === PER_PAGE)
+      setPage(pageNum)
     } catch {
       toast.error('Failed to load media library')
     } finally {
       setLoading(false)
+      setLoadingMore(false)
     }
   }, [])
 
-  useEffect(() => { loadMedia() }, [loadMedia])
+  const observerRef = useRef<IntersectionObserver | null>(null)
+  const sentinelCallbackRef = useCallback((node: HTMLDivElement | null) => {
+    if (observerRef.current) observerRef.current.disconnect()
+    if (!node) return
+    observerRef.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore && !loadingMore) {
+        loadMedia(page + 1, true)
+      }
+    }, { rootMargin: '200px' })
+    observerRef.current.observe(node)
+  }, [hasMore, loadingMore, page, loadMedia])
+
+  useEffect(() => { loadMedia(1) }, [loadMedia])
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -80,8 +106,8 @@ export function MediaLibrary() {
     })
   }
 
-  const filtered = search
-    ? items.filter(i => i.file_name.toLowerCase().includes(search.toLowerCase()) || i.alt_text.toLowerCase().includes(search.toLowerCase()))
+  const filtered = debouncedSearch
+    ? items.filter(i => i.file_name.toLowerCase().includes(debouncedSearch.toLowerCase()) || i.alt_text?.toLowerCase().includes(debouncedSearch.toLowerCase()))
     : items
 
   if (loading) return <DashboardSkeleton />
@@ -114,7 +140,7 @@ export function MediaLibrary() {
       </div>
 
       {filtered.length === 0 ? (
-        <EmptyState title={search ? 'No results found' : 'No images uploaded'} message={search ? 'Try a different search term' : 'Upload your first image to get started'} icon={<Image className="w-12 h-12" />} />
+        <EmptyState title={debouncedSearch ? 'No results found' : 'No images uploaded'} message={debouncedSearch ? 'Try a different search term' : 'Upload your first image to get started'} icon={<Image className="w-12 h-12" />} />
       ) : view === 'grid' ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
           {filtered.map(item => (
@@ -151,6 +177,9 @@ export function MediaLibrary() {
               )}
             </div>
           ))}
+          <div ref={sentinelCallbackRef} className="col-span-full flex items-center justify-center py-4">
+            {loadingMore && <Loader2 className="w-5 h-5 animate-spin text-gray-400" />}
+          </div>
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
@@ -200,6 +229,13 @@ export function MediaLibrary() {
                   </td>
                 </tr>
               ))}
+              <tr>
+                <td colSpan={5} className="text-center py-4">
+                  <div ref={sentinelCallbackRef}>
+                    {loadingMore && <Loader2 className="w-5 h-5 animate-spin text-gray-400 mx-auto" />}
+                  </div>
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>

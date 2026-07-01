@@ -180,7 +180,7 @@ function ImageUpload({ label, url, uploading, onChange, onRemove }: { label: str
       <div className="p-4 rounded-lg border-2 border-dashed border-gray-200 bg-gray-50">
         {url ? (
           <div className="space-y-2">
-            <img src={url} alt={label} className="h-16 object-contain" />
+            <img src={url} alt={label} className="h-16 object-contain" loading="eager" decoding="async" />
             <button onClick={onRemove} className="text-xs text-red-500 hover:text-red-600">Remove</button>
           </div>
         ) : (

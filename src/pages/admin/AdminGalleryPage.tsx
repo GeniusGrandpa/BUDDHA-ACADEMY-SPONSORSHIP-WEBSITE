@@ -17,8 +17,7 @@ export function AdminGalleryPage() {
     try {
       const data = await getGalleryItems()
       setItems(data)
-    } catch (error) {
-      console.error('Error loading gallery:', error)
+    } catch {
     } finally {
       setLoading(false)
     }
@@ -28,8 +27,7 @@ export function AdminGalleryPage() {
     try {
       await updateGalleryItem(item.id, { is_published: !item.is_published })
       setItems(items.map(i => i.id === item.id ? { ...i, is_published: !i.is_published } : i))
-    } catch (error) {
-      console.error('Error toggling publish status:', error)
+    } catch {
     }
   }
 
@@ -38,8 +36,7 @@ export function AdminGalleryPage() {
       try {
         await deleteGalleryItem(id)
         setItems(items.filter(i => i.id !== id))
-      } catch (error) {
-        console.error('Error deleting gallery item:', error)
+      } catch {
       }
     }
   }
@@ -73,7 +70,7 @@ export function AdminGalleryPage() {
           {items.map((item) => (
             <Card key={item.id} variant="bordered" className="overflow-hidden">
               {item.type === 'photo' && (
-                <img src={item.url} alt={item.title} className="w-full h-40 object-cover" />
+                <img src={item.url} alt={item.title} className="w-full h-40 object-cover" loading="lazy" decoding="async" />
               )}
               {item.type === 'video' && (
                 <div className="w-full h-40 bg-gray-200 flex items-center justify-center">

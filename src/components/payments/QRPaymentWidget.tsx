@@ -38,6 +38,7 @@ export function QRPaymentWidget({ setting, transactionId, amount }: QRPaymentWid
               src={setting.qr_image_url}
               alt={`${setting.gateway_display_name} QR`}
               className="w-48 h-48 object-contain"
+              loading="lazy" decoding="async"
             />
             <p className="text-center text-xs text-gray-500 mt-2">Scan to pay</p>
           </div>

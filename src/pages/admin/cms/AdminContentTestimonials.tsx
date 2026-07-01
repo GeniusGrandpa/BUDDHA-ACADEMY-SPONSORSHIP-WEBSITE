@@ -139,7 +139,7 @@ const [form, setForm] = useState<TestimonialForm>({
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white font-bold flex-shrink-0">
                   {item.avatar_url ? (
-                    <img src={item.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
+                    <img src={item.avatar_url} alt="" className="w-full h-full rounded-full object-cover" loading="lazy" decoding="async" />
                   ) : item.author_name?.charAt(0)?.toUpperCase() || '?'}
                 </div>
                 <div className="flex-1 min-w-0">

@@ -12,7 +12,7 @@ export interface LegalPageWithSections extends LegalPage {
 export async function getLegalPageByType(type: LegalPageType): Promise<LegalPageWithSections | null> {
   const { data: page, error } = await supabase
     .from('legal_pages')
-    .select('*')
+    .select('id, type, title, slug, meta_title, meta_description, status, effective_date, published_at, created_at')
     .eq('type', type)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -23,7 +23,7 @@ export async function getLegalPageByType(type: LegalPageType): Promise<LegalPage
 
   const { data: sections } = await supabase
     .from('legal_page_sections')
-    .select('*')
+    .select('id, legal_page_id, heading, content, sort_order, is_visible')
     .eq('legal_page_id', page.id)
     .order('sort_order', { ascending: true })
 
@@ -33,7 +33,7 @@ export async function getLegalPageByType(type: LegalPageType): Promise<LegalPage
 export async function getPublishedLegalPageByType(type: LegalPageType): Promise<LegalPageWithSections | null> {
   const { data: page, error } = await supabase
     .from('legal_pages')
-    .select('*')
+    .select('id, type, title, slug, meta_title, meta_description, status, effective_date, published_at, created_at')
     .eq('type', type)
     .eq('status', 'published')
     .order('created_at', { ascending: false })
@@ -45,7 +45,7 @@ export async function getPublishedLegalPageByType(type: LegalPageType): Promise<
 
   const { data: sections } = await supabase
     .from('legal_page_sections')
-    .select('*')
+    .select('id, legal_page_id, heading, content, sort_order, is_visible')
     .eq('legal_page_id', page.id)
     .eq('is_visible', true)
     .order('sort_order', { ascending: true })
@@ -83,7 +83,7 @@ export async function upsertLegalPage(
         ...(data.status === 'published' && existing.status !== 'published' ? { published_at: new Date().toISOString() } : {}),
       })
       .eq('id', existing.id)
-      .select()
+      .select('id, type, title, slug, meta_title, meta_description, status, effective_date, published_at, created_at')
       .single()
 
     if (error) throw error
@@ -108,7 +108,7 @@ export async function upsertLegalPage(
       created_by: userId,
       updated_by: userId,
     })
-    .select()
+    .select('id, type, title, slug, meta_title, meta_description, status, effective_date, published_at, created_at')
     .single()
 
   if (error) throw error
@@ -224,7 +224,7 @@ export async function getLegalPageVersions(type: LegalPageType): Promise<LegalPa
 
   const { data } = await supabase
     .from('legal_page_versions')
-    .select('*')
+    .select('id, legal_page_id, version_number, snapshot, created_at')
     .eq('legal_page_id', page.id)
     .order('version_number', { ascending: false })
 

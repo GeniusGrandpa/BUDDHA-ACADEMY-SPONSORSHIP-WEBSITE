@@ -33,8 +33,7 @@ export function AdminPaymentSettingsPage() {
     try {
       const data = await getAllPaymentSettings()
       setSettings(data)
-    } catch (err) {
-      console.error('Error loading payment settings:', err)
+    } catch {
       toast.error('Failed to load payment settings')
     } finally {
       setLoading(false)
@@ -46,8 +45,7 @@ export function AdminPaymentSettingsPage() {
     try {
       await togglePaymentGateway(id, !current)
       await loadSettings()
-    } catch (err) {
-      console.error('Error toggling payment gateway:', err)
+    } catch {
       toast.error('Failed to update payment gateway')
     } finally {
       setSaving(null)
@@ -59,8 +57,7 @@ export function AdminPaymentSettingsPage() {
     try {
       await updatePaymentSetting(id, updates)
       await loadSettings()
-    } catch (err) {
-      console.error('Error updating payment setting:', err)
+    } catch {
       toast.error('Failed to update payment setting')
     } finally {
       setSaving(null)
@@ -97,8 +94,7 @@ export function AdminPaymentSettingsPage() {
         sort_order: 0,
       })
       await loadSettings()
-    } catch (err) {
-      console.error('Error adding gateway:', err)
+    } catch {
       toast.error('Failed to add gateway')
     } finally {
       setSaving(null)
@@ -184,7 +180,7 @@ export function AdminPaymentSettingsPage() {
                 <div className="flex gap-2 items-start">
                   <div className="flex-1 space-y-2">
                     {newGateway.qr_image_url && (
-                      <img src={newGateway.qr_image_url} alt="QR preview" className="h-20 w-20 object-contain rounded border border-gray-200" />
+                      <img src={newGateway.qr_image_url} alt="QR preview" className="h-20 w-20 object-contain rounded border border-gray-200" loading="lazy" decoding="async" />
                     )}
                     <div className="flex gap-2">
                       <input
@@ -307,7 +303,7 @@ export function AdminPaymentSettingsPage() {
                   <div className="flex gap-2 items-start">
                     <div className="flex-1 space-y-2">
                       {setting.qr_image_url && (
-                        <img src={setting.qr_image_url} alt="QR" className="h-20 w-20 object-contain rounded border border-gray-200" />
+                        <img src={setting.qr_image_url} alt="QR" className="h-20 w-20 object-contain rounded border border-gray-200" loading="lazy" decoding="async" />
                       )}
                       <div className="flex gap-2">
                         <input

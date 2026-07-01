@@ -1,1 +1,0 @@
-function e(e){return`NPR ${e.toLocaleString(`en-US`)}`}export{e as t};

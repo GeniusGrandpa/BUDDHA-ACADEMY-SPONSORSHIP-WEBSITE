@@ -5,13 +5,12 @@ const supabase = getSupabaseClient()
 export async function getPublicActivities(limit = 20): Promise<ActivityRow[]> {
   const { data, error } = await supabase
     .from('activities')
-    .select('*')
+    .select('id, user_id, activity_type, title, description, metadata, entity_type, entity_id, is_public, created_at')
     .eq('is_public', true)
     .order('created_at', { ascending: false })
     .limit(limit)
 
   if (error) {
-    console.error('Error fetching public activities:', error)
     return []
   }
 
@@ -21,13 +20,12 @@ export async function getPublicActivities(limit = 20): Promise<ActivityRow[]> {
 export async function getUserActivities(userId: string, limit = 20): Promise<ActivityRow[]> {
   const { data, error } = await supabase
     .from('activities')
-    .select('*')
+    .select('id, user_id, activity_type, title, description, metadata, entity_type, entity_id, is_public, created_at')
     .or(`user_id.eq.${userId},is_public.eq.true`)
     .order('created_at', { ascending: false })
     .limit(limit)
 
   if (error) {
-    console.error('Error fetching user activities:', error)
     return []
   }
 
@@ -56,7 +54,7 @@ export async function createActivity(params: {
   })
 
   if (error) {
-    console.error('Error creating activity:', error)
+    throw error
   }
 }
 

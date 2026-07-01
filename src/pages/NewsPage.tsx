@@ -29,8 +29,7 @@ export function NewsPage() {
       ])
       setNews(data)
       if (header) setPageHeader(header)
-    } catch (error) {
-      console.error('Error loading news:', error)
+    } catch {
     } finally {
       setLoading(false)
     }
@@ -97,6 +96,7 @@ export function NewsPage() {
                       src={article.image_url}
                       alt={article.title}
                       className="w-full h-48 object-cover"
+                      loading="lazy" decoding="async"
                     />
                   )}
                   <div className="p-6">

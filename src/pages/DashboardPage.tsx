@@ -26,8 +26,7 @@ export function DashboardPage() {
       ])
       setDonations(donationsData)
       setSponsorships(sponsorshipsData as SponsorshipWithStudent[])
-    } catch (error) {
-      console.error('Error loading dashboard data:', error)
+    } catch {
     } finally {
       setLoading(false)
     }
@@ -107,6 +106,7 @@ export function DashboardPage() {
                         src={student?.photo_url || 'https://images.pexels.com/photos/1171086/pexels-photo-1171086.jpeg?auto=compress&cs=tinysrgb&w=200'}
                         alt={student?.name || 'Student'}
                         className="w-16 h-16 rounded-full object-cover"
+                        loading="lazy" decoding="async"
                       />
                       <div>
                         <h3 className="font-semibold text-gray-900">{student?.name}</h3>

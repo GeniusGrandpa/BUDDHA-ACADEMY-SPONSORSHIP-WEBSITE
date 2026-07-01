@@ -124,7 +124,7 @@ export function AdminSiteImages() {
                   <td className="py-3 px-2">
                     <div className="w-12 h-10 rounded-lg bg-gray-100 overflow-hidden">
                       {img.image_url ? (
-                        <img src={img.image_url} alt={img.alt_text || ''} className="w-full h-full object-cover" />
+                        <img src={img.image_url} alt={img.alt_text || ''} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">N/A</div>
                       )}

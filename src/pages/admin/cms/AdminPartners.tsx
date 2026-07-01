@@ -148,7 +148,7 @@ export function AdminPartners() {
           <Reorder.Item key={item.id} value={item} className="bg-white rounded-lg border border-gray-200 p-4 flex items-center gap-4">
             <GripVertical className="w-5 h-5 text-gray-400 cursor-grab shrink-0" />
             <div className="w-14 h-14 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center shrink-0 overflow-hidden">
-              <img src={item.logo_url} alt={item.name} className="w-full h-full object-contain" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+              <img src={item.logo_url} alt={item.name} className="w-full h-full object-contain" loading="lazy" decoding="async" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
@@ -179,7 +179,7 @@ export function AdminPartners() {
               <Input label="Logo URL" value={form.logo_url} onChange={e => setForm(prev => ({ ...prev, logo_url: e.target.value }))} placeholder="https://..." />
               {form.logo_url && (
                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  <img src={form.logo_url} alt="Preview" className="h-10 w-auto object-contain" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                  <img src={form.logo_url} alt="Preview" className="h-10 w-auto object-contain" loading="lazy" decoding="async" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
                   <span className="text-sm text-gray-500">Logo preview</span>
                 </div>
               )}

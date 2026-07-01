@@ -52,7 +52,7 @@ export function ImagePicker({ value, onChange, label }: ImagePickerProps) {
       <div className="space-y-2">
         {value && (
           <div className="relative w-full h-24 rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
-            <img src={value} alt="" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+            <img src={value} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
           </div>
         )}
         <div className="flex gap-2">
@@ -103,7 +103,7 @@ export function ImagePicker({ value, onChange, label }: ImagePickerProps) {
                       onClick={() => { onChange(item.url); setShowPicker(false) }}
                       className={`aspect-square rounded-xl overflow-hidden border-2 transition-all hover:border-amber-500 ${value === item.url ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-transparent'}`}
                     >
-                      <img src={item.url} alt={item.file_name} className="w-full h-full object-cover" />
+                      <img src={item.url} alt={item.file_name} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                     </button>
                   ))}
                 </div>

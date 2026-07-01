@@ -10,6 +10,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
+    include: ['react', 'react-dom', 'react-router-dom'],
     exclude: ['lucide-react'],
   },
   build: {
@@ -17,12 +18,19 @@ export default defineConfig({
       output: {
         manualChunks(id: string) {
           if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/') || id.includes('node_modules/react-router-dom/')) return 'vendor';
-          if (id.includes('node_modules/html2canvas/')) return 'html2canvas';
-          if (id.includes('node_modules/dompurify/')) return 'dompurify';
+          if (id.includes('node_modules/@tanstack/react-query')) return 'query';
+          if (id.includes('node_modules/framer-motion')) return 'animation';
+          if (id.includes('node_modules/recharts')) return 'charts';
+          if (id.includes('node_modules/@tiptap')) return 'editor';
+          if (id.includes('node_modules/html2canvas/') || id.includes('node_modules/jspdf')) return 'pdf';
+          if (id.includes('node_modules/@hello-pangea/dnd')) return 'dnd';
+          if (id.includes('node_modules/lucide-react')) return 'icons';
         },
       },
     },
-    chunkSizeWarningLimit: 500,
+    chunkSizeWarningLimit: 300,
+    sourcemap: false,
+    reportCompressedSize: false,
   },
   server: {
     host: true,

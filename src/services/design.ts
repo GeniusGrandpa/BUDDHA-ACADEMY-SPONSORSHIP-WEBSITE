@@ -16,7 +16,7 @@ const supabase = getSupabaseClient()
 export async function getPublishedDesignSettings(): Promise<DesignSettings | null> {
   const { data, error } = await supabase
     .from('design_settings')
-    .select('*')
+    .select('id, branding, colors, typography, layout, component_styles, tokens, config, is_published, created_at')
     .eq('is_published', true)
     .maybeSingle()
   if (error) throw error
@@ -26,7 +26,7 @@ export async function getPublishedDesignSettings(): Promise<DesignSettings | nul
 export async function getDesignSettings(): Promise<DesignSettings | null> {
   const { data, error } = await supabase
     .from('design_settings')
-    .select('*')
+    .select('id, branding, colors, typography, layout, component_styles, tokens, config, draft, is_published, created_at')
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle()
@@ -55,7 +55,7 @@ export async function upsertDesignSettings(
         ...(settings.publish ? { is_published: true, published_at: new Date().toISOString() } : {}),
       })
       .eq('id', existing.id)
-      .select()
+      .select('id, branding, colors, typography, layout, component_styles, tokens, config, draft, is_published, created_at')
       .single()
     if (error) throw error
     await logAuditEvent({ action: 'Updated design settings', entityType: 'design_settings', entityId: existing.id })
@@ -76,7 +76,7 @@ export async function upsertDesignSettings(
       updated_by: userId,
       ...(settings.publish ? { published_at: new Date().toISOString() } : {}),
     })
-    .select()
+    .select('id, branding, colors, typography, layout, component_styles, tokens, config, draft, is_published, created_at')
     .single()
   if (error) throw error
   await logAuditEvent({ action: 'Created design settings', entityType: 'design_settings', entityId: data.id })
@@ -128,7 +128,7 @@ export async function publishDesignSettings(): Promise<DesignSettings> {
       updated_by: (await supabase.auth.getSession()).data.session?.user?.id,
     })
     .eq('id', existing.id)
-    .select()
+    .select('id, branding, colors, typography, layout, component_styles, tokens, config, draft, is_published, created_at')
     .single()
   if (error) throw error
   await logAuditEvent({ action: 'Published design settings', entityType: 'design_settings', entityId: existing.id })
@@ -153,7 +153,7 @@ export async function resetToDefaultDesignSettings(): Promise<DesignSettings> {
 export async function getThemePresets(): Promise<ThemePreset[]> {
   const { data, error } = await supabase
     .from('theme_presets')
-    .select('*')
+    .select('id, name, branding, colors, typography, layout, component_styles, tokens, config, sort_order, is_default')
     .order('sort_order', { ascending: true })
     .order('name', { ascending: true })
   if (error) throw error
@@ -167,7 +167,7 @@ export async function saveThemePreset(
   const { data, error } = await supabase
     .from('theme_presets')
     .insert({ ...preset, created_by: userId } as unknown as Database['public']['Tables']['theme_presets']['Insert'])
-    .select()
+    .select('id, name, branding, colors, typography, layout, component_styles, tokens, config, sort_order, is_default')
     .single()
   if (error) throw error
   await logAuditEvent({ action: `Saved theme preset: ${preset.name}`, entityType: 'theme_presets', entityId: data.id })
@@ -183,7 +183,7 @@ export async function deleteThemePreset(id: string): Promise<void> {
 export async function applyThemePreset(id: string): Promise<DesignSettings> {
   const { data: preset, error: fetchError } = await supabase
     .from('theme_presets')
-    .select('*')
+    .select('id, name, branding, colors, typography, layout, component_styles, tokens, config, sort_order, is_default')
     .eq('id', id)
     .single()
   if (fetchError) throw fetchError
@@ -204,7 +204,7 @@ export async function applyThemePreset(id: string): Promise<DesignSettings> {
 export async function getWebsiteConfigs(): Promise<WebsiteConfigEntry[]> {
   const { data, error } = await supabase
     .from('website_config')
-    .select('*')
+    .select('id, key, label, value, is_active')
     .order('label', { ascending: true })
   if (error) throw error
   return (data || []) as unknown as WebsiteConfigEntry[]
@@ -213,7 +213,7 @@ export async function getWebsiteConfigs(): Promise<WebsiteConfigEntry[]> {
 export async function getWebsiteConfig(key: string): Promise<WebsiteConfigEntry | null> {
   const { data, error } = await supabase
     .from('website_config')
-    .select('*')
+    .select('id, key, label, value, is_active')
     .eq('key', key)
     .maybeSingle()
   if (error) throw error
@@ -229,7 +229,7 @@ export async function upsertWebsiteConfig(key: string, label: string, value: Rec
       .from('website_config')
       .update({ value: value as unknown as Json, is_active: isActive, updated_by: userId })
       .eq('id', existing.id)
-      .select()
+      .select('id, key, label, value, is_active')
       .single()
     if (error) throw error
     return data as unknown as WebsiteConfigEntry
@@ -238,7 +238,7 @@ export async function upsertWebsiteConfig(key: string, label: string, value: Rec
   const { data, error } = await supabase
     .from('website_config')
     .insert({ key, label, value: value as unknown as Json, is_active: isActive, updated_by: userId })
-    .select()
+    .select('id, key, label, value, is_active')
     .single()
   if (error) throw error
   await logAuditEvent({ action: `Created website config: ${key}`, entityType: 'website_config', entityId: data.id })
@@ -248,7 +248,7 @@ export async function upsertWebsiteConfig(key: string, label: string, value: Rec
 export async function getSectionVisibility(): Promise<SectionVisibilityEntry[]> {
   const { data, error } = await supabase
     .from('section_visibility')
-    .select('*')
+    .select('id, section_key, section_name, is_visible, sort_order')
     .order('section_key', { ascending: true })
   if (error) throw error
   return (data || []) as unknown as SectionVisibilityEntry[]
@@ -260,7 +260,7 @@ export async function updateSectionVisibility(id: string, isVisible: boolean): P
     .from('section_visibility')
     .update({ is_visible: isVisible, updated_by: userId })
     .eq('id', id)
-    .select()
+    .select('id, section_key, section_name, is_visible, sort_order')
     .single()
   if (error) throw error
   return data as unknown as SectionVisibilityEntry

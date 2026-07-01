@@ -146,7 +146,7 @@ export async function getDonorDonationsWithPayment(donorId: string): Promise<Don
 export async function getDonorPaymentSessions(donorId: string): Promise<PaymentSession[]> {
   const { data, error } = await supabase
     .from('payment_sessions')
-    .select('*')
+    .select('id, donor_id, amount, frequency, gateway, status, created_at')
     .eq('donor_id', donorId)
     .in('status', ['pending', 'processing'])
     .order('created_at', { ascending: false })
@@ -158,7 +158,7 @@ export async function getDonorPaymentSessions(donorId: string): Promise<PaymentS
 export async function getPaymentSession(sessionId: string): Promise<PaymentSession | null> {
   const { data, error } = await supabase
     .from('payment_sessions')
-    .select('*')
+    .select('id, donor_id, amount, frequency, gateway, status, created_at, completed_at')
     .eq('id', sessionId)
     .single()
 
@@ -169,7 +169,7 @@ export async function getPaymentSession(sessionId: string): Promise<PaymentSessi
 export async function getPaymentVerifications(sessionId: string): Promise<PaymentVerification[]> {
   const { data, error } = await supabase
     .from('payment_verifications')
-    .select('*')
+    .select('id, payment_session_id, verified_by, status, notes, created_at')
     .eq('payment_session_id', sessionId)
     .order('created_at', { ascending: true })
 
@@ -180,7 +180,7 @@ export async function getPaymentVerifications(sessionId: string): Promise<Paymen
 export async function getPaymentReceipt(donationId: string): Promise<PaymentReceipt | null> {
   const { data, error } = await supabase
     .from('payment_receipts')
-    .select('*')
+    .select('id, donation_id, receipt_url, receipt_number, created_at')
     .eq('donation_id', donationId)
     .single()
 

@@ -6,7 +6,7 @@ export async function createContactSubmission(submission: Omit<ContactSubmission
   const { data, error } = await supabase
     .from('contact_submissions')
     .insert({ ...submission, status: 'unread' })
-    .select()
+    .select('id, name, email, phone, subject, message, status, created_at')
     .single()
 
   if (error) throw error
@@ -16,7 +16,7 @@ export async function createContactSubmission(submission: Omit<ContactSubmission
 export async function getAllContactSubmissions(): Promise<ContactSubmission[]> {
   const { data, error } = await supabase
     .from('contact_submissions')
-    .select('*')
+    .select('id, name, email, phone, subject, message, status, created_at')
     .order('created_at', { ascending: false })
 
   if (error) throw error
@@ -28,7 +28,7 @@ export async function updateContactSubmissionStatus(id: string, status: ContactS
     .from('contact_submissions')
     .update({ status })
     .eq('id', id)
-    .select()
+    .select('id, name, email, phone, subject, message, status, created_at')
     .single()
 
   if (error) throw error

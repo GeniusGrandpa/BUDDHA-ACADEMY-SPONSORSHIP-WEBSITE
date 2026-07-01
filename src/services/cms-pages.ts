@@ -180,7 +180,7 @@ function buildToggleState(_pages: CmsPage[], visibility: SectionVisibility[]): T
 
 async function fetchHeroContent(): Promise<HeroContent | null> {
   const { data } = await db('hero_content')
-    .select('*')
+    .select('id, title, subtitle, description, image_url, button_text, button_link, is_visible, display_order')
     .eq('is_visible', true)
     .order('display_order')
     .limit(1)
@@ -190,7 +190,7 @@ async function fetchHeroContent(): Promise<HeroContent | null> {
 
 async function fetchPageHeader(slug: string): Promise<PageHeader | null> {
   const { data } = await db('page_headers')
-    .select('*')
+    .select('id, page_slug, title, subtitle, is_visible')
     .eq('page_slug', slug)
     .maybeSingle()
   return data as PageHeader | null
@@ -198,7 +198,7 @@ async function fetchPageHeader(slug: string): Promise<PageHeader | null> {
 
 async function fetchSponsorshipContent(): Promise<SponsorshipContent | null> {
   const { data } = await db('sponsorship_content')
-    .select('*')
+    .select('id, heading, description, impact_stats, steps, is_published, created_at')
     .eq('is_published', true)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -208,7 +208,7 @@ async function fetchSponsorshipContent(): Promise<SponsorshipContent | null> {
 
 async function fetchDonationContent(): Promise<DonationContent | null> {
   const { data } = await db('donation_content')
-    .select('*')
+    .select('id, heading, description, options, is_published, created_at')
     .eq('is_published', true)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -218,7 +218,7 @@ async function fetchDonationContent(): Promise<DonationContent | null> {
 
 async function fetchVolunteerContent(): Promise<VolunteerContent | null> {
   const { data } = await db('volunteer_content')
-    .select('*')
+    .select('id, heading, description, opportunities, is_published, created_at')
     .eq('is_published', true)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -228,7 +228,7 @@ async function fetchVolunteerContent(): Promise<VolunteerContent | null> {
 
 async function fetchFooterContent(): Promise<FooterContent | null> {
   const { data } = await db('footer_content')
-    .select('*')
+    .select('id, description, copyright_text, social_links, quick_links, contact_info, is_published, created_at')
     .eq('is_published', true)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -238,7 +238,7 @@ async function fetchFooterContent(): Promise<FooterContent | null> {
 
 async function fetchSeoContent(slug: string): Promise<SeoContent | null> {
   const { data } = await db('seo_content')
-    .select('*')
+    .select('id, page_slug, meta_title, meta_description, is_published')
     .eq('page_slug', slug)
     .maybeSingle()
   return data as SeoContent | null
@@ -246,7 +246,7 @@ async function fetchSeoContent(slug: string): Promise<SeoContent | null> {
 
 async function fetchPageBySlug(slug: string): Promise<Page | null> {
   const { data } = await db('pages')
-    .select('*')
+    .select('id, slug, title, content, published, blocks, seo, created_at, updated_at')
     .eq('slug', slug)
     .maybeSingle()
   return data as Page | null
@@ -254,7 +254,7 @@ async function fetchPageBySlug(slug: string): Promise<Page | null> {
 
 async function fetchSectionContent(key: string): Promise<SectionContent | null> {
   const { data } = await db('section_content')
-    .select('*')
+    .select('id, section_key, title, content')
     .eq('section_key', key)
     .maybeSingle()
   return data as SectionContent | null
@@ -262,21 +262,21 @@ async function fetchSectionContent(key: string): Promise<SectionContent | null> 
 
 async function fetchSectionVisibility(): Promise<SectionVisibility[]> {
   const { data } = await db('section_visibility')
-    .select('*')
+    .select('id, section_key, section_name, is_visible, sort_order')
     .order('sort_order')
   return (data || []) as SectionVisibility[]
 }
 
 async function fetchSiteImagesBySection(section: string): Promise<SiteImage[]> {
   const { data } = await db('site_images')
-    .select('*')
+    .select('id, image_key, image_url, alt_text, section')
     .eq('section', section)
   return (data || []) as SiteImage[]
 }
 
 async function fetchTransparencyContent(): Promise<TransparencyContent | null> {
   const { data } = await db('transparency_content')
-    .select('*')
+    .select('id, heading, description, programs, reports, is_published, created_at')
     .eq('is_published', true)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -286,21 +286,21 @@ async function fetchTransparencyContent(): Promise<TransparencyContent | null> {
 
 async function fetchTestimonials(): Promise<Testimonial[]> {
   const { data } = await supabase.from('testimonials')
-    .select('*')
+    .select('id, author_name, author_role, content, quote, avatar_url, is_published, is_featured, testimonial_type, sort_order, created_at, updated_at')
     .order('sort_order', { ascending: true })
   return (data || []) as Testimonial[]
 }
 
 async function fetchStudentStories(): Promise<StudentStory[]> {
   const { data } = await supabase.from('student_stories')
-    .select('*')
+    .select('id, title, content, image_url, student_name, quote, achievements, is_published, featured, published_at, created_at, updated_at')
     .order('created_at', { ascending: false })
   return (data || []) as StudentStory[]
 }
 
 async function fetchFaqs(): Promise<Faq[]> {
   const { data } = await supabase.from('faqs')
-    .select('*')
+    .select('id, question, answer, sort_order, is_published, created_at')
     .eq('is_published', true)
     .order('sort_order', { ascending: true })
   return (data || []) as Faq[]
@@ -308,7 +308,7 @@ async function fetchFaqs(): Promise<Faq[]> {
 
 async function fetchVideos(): Promise<Video[]> {
   const { data } = await supabase.from('videos')
-    .select('*')
+    .select('id, title, url, description, thumbnail_url, is_featured, created_at, updated_at')
     .order('created_at', { ascending: false })
   return (data || []) as Video[]
 }

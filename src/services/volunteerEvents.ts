@@ -5,13 +5,12 @@ const supabase = getSupabaseClient()
 export async function getUpcomingEvents(): Promise<VolunteerEvent[]> {
   const { data, error } = await supabase
     .from('volunteer_events')
-    .select('*')
+    .select('id, title, description, event_date, event_time, location, max_volunteers, current_volunteers, required_skills, responsibilities, category, image_url, is_active, created_by, created_at, updated_at')
     .eq('is_active', true)
     .gte('event_date', new Date().toISOString().split('T')[0])
     .order('event_date', { ascending: true })
 
   if (error) {
-    console.error('Error fetching volunteer events:', error)
     return []
   }
 
@@ -21,12 +20,11 @@ export async function getUpcomingEvents(): Promise<VolunteerEvent[]> {
 export async function getAllEvents(): Promise<VolunteerEvent[]> {
   const { data, error } = await supabase
     .from('volunteer_events')
-    .select('*')
+    .select('id, title, description, event_date, event_time, location, max_volunteers, current_volunteers, required_skills, responsibilities, category, image_url, is_active, created_by, created_at, updated_at')
     .eq('is_active', true)
     .order('event_date', { ascending: false })
 
   if (error) {
-    console.error('Error fetching all events:', error)
     return []
   }
 
@@ -36,12 +34,11 @@ export async function getAllEvents(): Promise<VolunteerEvent[]> {
 export async function getVolunteerSignups(volunteerId: string): Promise<VolunteerEventSignup[]> {
   const { data, error } = await supabase
     .from('volunteer_event_signups')
-    .select('*, volunteer_events(*)')
+    .select('id, event_id, volunteer_id, status, attended, hours_logged, notes, checked_in_at, created_at, volunteer_events(id, title, description, event_date, event_time, location, max_volunteers, current_volunteers, required_skills, responsibilities, category, image_url, is_active, created_by, created_at, updated_at)')
     .eq('volunteer_id', volunteerId)
     .order('created_at', { ascending: false })
 
   if (error) {
-    console.error('Error fetching volunteer signups:', error)
     return []
   }
 

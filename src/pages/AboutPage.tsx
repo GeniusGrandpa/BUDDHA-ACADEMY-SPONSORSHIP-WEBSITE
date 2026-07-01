@@ -114,6 +114,7 @@ export function AboutPage() {
                     src={img.image_url}
                     alt={img.alt_text || 'About image'}
                     className={`rounded-lg shadow-lg object-cover w-full ${idx % 2 === 1 ? 'h-48 sm:h-64 mt-4 sm:mt-8' : 'h-48 sm:h-64'}`}
+                    loading="lazy" decoding="async"
                   />
                 ))}
               </div>

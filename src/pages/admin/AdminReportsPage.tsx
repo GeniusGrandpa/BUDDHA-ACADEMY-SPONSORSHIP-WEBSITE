@@ -487,8 +487,7 @@ export function AdminReportsPage() {
     setLoading(key)
     try {
       await generators[key]()
-    } catch (err) {
-      console.error('Report generation failed:', err)
+    } catch {
       alert('Failed to generate report. Please try again.')
     } finally {
       setLoading(null)

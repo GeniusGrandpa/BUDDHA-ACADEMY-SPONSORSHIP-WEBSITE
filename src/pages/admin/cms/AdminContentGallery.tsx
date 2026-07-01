@@ -152,7 +152,7 @@ export function AdminContentGallery() {
               className="group bg-white border border-gray-100 rounded-xl overflow-hidden hover:border-amber-500/30 transition-all"
             >
               <div className="relative aspect-[4/3]">
-                <img src={brokenImages.has(item.id) ? FALLBACK_IMAGE : item.url} alt={item.title} className="w-full h-full object-cover" onError={() => setBrokenImages(prev => new Set(prev).add(item.id))} />
+                <img src={brokenImages.has(item.id) ? FALLBACK_IMAGE : item.url} alt={item.title} className="w-full h-full object-cover" loading="lazy" decoding="async" onError={() => setBrokenImages(prev => new Set(prev).add(item.id))} />
                 <div className="absolute inset-0 bg-gradient-to-t from-stone-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
                   <div className="absolute bottom-2 right-2 flex gap-1">
                     <button onClick={() => togglePublish(item)} className="px-2 py-1 rounded-lg text-xs text-white transition-colors bg-stone-900/60 hover:bg-emerald-500">

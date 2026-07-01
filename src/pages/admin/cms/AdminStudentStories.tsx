@@ -115,7 +115,7 @@ export function AdminStudentStories() {
               className="bg-white border border-gray-100 rounded-xl overflow-hidden hover:border-amber-500/30 transition-all">
               {story.image_url && (
                 <div className="h-40 overflow-hidden">
-                  <img src={story.image_url} alt="" className="w-full h-full object-cover" />
+                  <img src={story.image_url} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                 </div>
               )}
               <div className="p-4">

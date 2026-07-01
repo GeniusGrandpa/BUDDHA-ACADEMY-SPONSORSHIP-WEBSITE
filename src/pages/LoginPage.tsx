@@ -254,6 +254,7 @@ export function LoginPage() {
               src={logo}
               alt="Buddha Academy"
               className="h-12 w-auto rounded-xl bg-white/10 backdrop-blur-sm border border-white/10"
+              loading="eager" decoding="async"
             />
             <div>
               <span className="text-sm font-semibold text-white/90">Buddha Academy</span>

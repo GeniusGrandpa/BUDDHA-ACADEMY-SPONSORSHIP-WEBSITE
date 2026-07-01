@@ -72,7 +72,7 @@ export function StudentProgressUpdates({ reports, students }: StudentProgressUpd
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-100 to-orange-100 flex items-center justify-center shrink-0">
                     {report.studentPhoto ? (
-                      <img src={report.studentPhoto} alt="" className="w-10 h-10 rounded-xl object-cover" />
+                      <img src={report.studentPhoto} alt="" className="w-10 h-10 rounded-xl object-cover" loading="lazy" decoding="async" />
                     ) : (
                       <User className="w-5 h-5 text-orange-500" />
                     )}

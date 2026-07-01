@@ -79,7 +79,7 @@ export function AdminLayout() {
           <div className="fixed inset-y-0 left-0 flex flex-col w-72 bg-[var(--color-sidebar-bg)] border-r border-[var(--color-border)]">
             <div className="flex items-center justify-between h-16 px-4 border-b border-[var(--color-border)]">
               <Link to="/" className="flex items-center space-x-2">
-                <img src={branding.logo_url || fallbackLogo} alt={branding.organization_name} className="h-8 w-8 rounded-lg object-cover shrink-0 shadow-lg" />
+                <img src={branding.logo_url || fallbackLogo} alt={branding.organization_name} className="h-8 w-8 rounded-lg object-cover shrink-0 shadow-lg" loading="eager" decoding="async" />
                 <span className="text-[var(--color-text-primary)] font-semibold text-sm">Admin Portal</span>
               </Link>
               <button onClick={() => setSidebarOpen(false)} className="p-1.5 rounded-lg hover:opacity-80" aria-label="Close sidebar">
@@ -97,7 +97,7 @@ export function AdminLayout() {
         <div className="flex flex-col flex-grow overflow-y-auto bg-[var(--color-sidebar-bg)] border-r border-[var(--color-border)]">
           <div className="flex items-center h-16 px-4 border-b border-[var(--color-border)]">
             <Link to="/" className="flex items-center space-x-2">
-              <img src={branding.logo_url || fallbackLogo} alt={branding.organization_name} className="h-8 w-8 rounded-lg object-cover shrink-0 shadow-lg" />
+              <img src={branding.logo_url || fallbackLogo} alt={branding.organization_name} className="h-8 w-8 rounded-lg object-cover shrink-0 shadow-lg" loading="eager" decoding="async" />
               <div>
                 <span className="font-semibold text-sm text-[var(--color-text-primary)]">{branding.organization_name}</span>
                 <p className="text-xs text-[var(--color-text-muted)]">Admin Portal</p>

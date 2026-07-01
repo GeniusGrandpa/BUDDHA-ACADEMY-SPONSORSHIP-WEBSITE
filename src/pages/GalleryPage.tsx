@@ -81,8 +81,7 @@ export function GalleryPage() {
         }
       })
       setItems([...galleryData, ...mappedVideos])
-    } catch (error) {
-      console.error('Error loading gallery:', error)
+    } catch {
     } finally {
       setLoading(false)
     }
@@ -134,6 +133,7 @@ export function GalleryPage() {
                         src={brokenImages.has(item.id) ? fallbackImage || '' : item.url || ''}
                         alt={item.title}
                         className="w-full h-56 object-cover cursor-pointer"
+                        loading="lazy" decoding="async"
                         onClick={() => setSelectedImage(brokenImages.has(item.id) ? item.url : item.url)}
                         onError={() => setBrokenImages(prev => new Set(prev).add(item.id))}
                       />
@@ -150,8 +150,8 @@ export function GalleryPage() {
                         <img
                           src={item.thumbnail_url}
                           alt={item.title}
-                          className="w-full h-56 object-cover"
-                          onError={() => setBrokenImages(prev => new Set(prev).add(item.id))}
+                          className="w-full h-56 object-cover transition-transform duration-300 group-hover:scale-105"
+                          loading="lazy" decoding="async"
                         />
                       ) : (
                         <div className="w-full h-56 bg-stone-100 flex items-center justify-center">
@@ -216,11 +216,12 @@ export function GalleryPage() {
           >
             &times;
           </button>
-          <img
-            src={selectedImage}
-            alt="Gallery image"
-            className="max-w-full max-h-full object-contain"
-          />
+              <img
+                src={selectedImage}
+                alt="Gallery image"
+                className="max-w-full max-h-[80vh] object-contain"
+                loading="lazy" decoding="async"
+              />
         </div>
       )}
 

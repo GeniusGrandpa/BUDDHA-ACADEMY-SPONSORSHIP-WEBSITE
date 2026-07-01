@@ -102,8 +102,6 @@ export function WebsiteBuilder() {
   )
 }
 
-// ============ PAGE LIST VIEW ============
-
 function PageListView({ pages, searchQuery, onSearchChange, statusFilter, onStatusFilterChange, onEditPage, onToggleStatus, onRefresh }: {
   pages: WebsitePage[]
   searchQuery: string
@@ -264,7 +262,6 @@ function PageListView({ pages, searchQuery, onSearchChange, statusFilter, onStat
   )
 }
 
-// ============ PAGE EDITOR VIEW ============
 
 function PageEditorView({ page, sections, selectedSection, selectedSectionId, onSelectSection, onUpdatePage, onUpdateSection, onUpdateSettings, onToggleVisibility, onReorder, onPublish, onSaveDraft, onBack, previewDevice, setPreviewDevice, editorTab, setEditorTab, isSaving }: {
   page: WebsitePage
@@ -308,7 +305,6 @@ function PageEditorView({ page, sections, selectedSection, selectedSectionId, on
 
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)] -mx-6 -mb-6">
-      {/* Top Bar */}
       <div className="flex items-center justify-between px-4 lg:px-6 py-3 bg-white border-b border-gray-200 shrink-0">
         <div className="flex items-center gap-3">
           <button onClick={onBack} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors" title="Back to pages">
@@ -321,7 +317,6 @@ function PageEditorView({ page, sections, selectedSection, selectedSectionId, on
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {/* Preview Device Toggle */}
           <div className="hidden md:flex items-center bg-gray-100 rounded-lg p-0.5">
             {(['desktop', 'tablet', 'mobile'] as const).map(d => {
               const Icon = d === 'desktop' ? Monitor : d === 'tablet' ? Tablet : Smartphone
@@ -348,7 +343,6 @@ function PageEditorView({ page, sections, selectedSection, selectedSectionId, on
         </div>
       </div>
 
-      {/* Mobile section selector */}
       <div className="md:hidden border-b border-gray-200 bg-white">
         <button onClick={() => setShowMobileNav(!showMobileNav)} className="w-full px-4 py-2.5 text-sm font-medium text-gray-700 flex items-center justify-between">
           <span>{selectedSection ? (SECTION_TYPE_LABELS[selectedSection.section_type] || selectedSection.section_key) : 'Select a section...'}</span>
@@ -366,9 +360,7 @@ function PageEditorView({ page, sections, selectedSection, selectedSectionId, on
         )}
       </div>
 
-      {/* Main Editor Area */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left Sidebar - Section List (desktop) */}
         <div className="hidden md:flex md:flex-col w-60 lg:w-72 bg-gray-50 border-r border-gray-200 shrink-0">
           <div className="p-3 border-b border-gray-200">
             <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Sections</h3>
@@ -408,9 +400,7 @@ function PageEditorView({ page, sections, selectedSection, selectedSectionId, on
           </div>
         </div>
 
-        {/* Main Content Area - Preview */}
         <div className="flex-1 flex flex-col overflow-hidden bg-gray-100">
-          {/* Preview Toolbar */}
           <div className="hidden md:flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200">
             <div className="flex items-center gap-2">
               {sectionOrder.filter(s => s.is_visible).length === 0 && (
@@ -423,7 +413,6 @@ function PageEditorView({ page, sections, selectedSection, selectedSectionId, on
             </div>
           </div>
 
-          {/* Preview Frame */}
           <div className="flex-1 overflow-y-auto p-4 lg:p-6 flex justify-center">
             <div
               className="bg-white shadow-lg rounded-lg overflow-hidden transition-all duration-300"
@@ -451,11 +440,9 @@ function PageEditorView({ page, sections, selectedSection, selectedSectionId, on
           </div>
         </div>
 
-        {/* Right Panel - Editor */}
         <div className="hidden lg:flex lg:flex-col w-80 bg-white border-l border-gray-200 shrink-0">
           {selectedSection ? (
             <>
-              {/* Editor Tabs */}
               <div className="flex border-b border-gray-200">
                 {(['content', 'design', 'seo'] as const).map(tab => (
                   <button key={tab} onClick={() => setEditorTab(tab)} className={`flex-1 px-3 py-2.5 text-xs font-medium transition-colors ${editorTab === tab ? 'text-amber-600 border-b-2 border-amber-500 bg-amber-50/30' : 'text-gray-500 hover:text-gray-700'}`}>
@@ -493,7 +480,6 @@ function PageEditorView({ page, sections, selectedSection, selectedSectionId, on
   )
 }
 
-// ============ CONTENT EDITOR PANEL ============
 
 function ContentEditorPanel({ section, onUpdate }: { section: WebsiteSection; onUpdate: (id: string, updates: Partial<WebsiteSection>) => void }) {
   const [title, setTitle] = useState(section.title || '')
@@ -536,7 +522,6 @@ function ContentEditorPanel({ section, onUpdate }: { section: WebsiteSection; on
   )
 }
 
-// ============ DESIGN CONTROLS PANEL ============
 
 function DesignControlsPanel({ section, onUpdateSettings }: { section: WebsiteSection; onUpdateSettings: (id: string, settings: SectionSettings) => void }) {
   const settings = section.settings || {}
@@ -600,7 +585,7 @@ function DesignControlsPanel({ section, onUpdateSettings }: { section: WebsiteSe
         </div>
         {bgImage && (
           <div className="mt-2 h-16 rounded-lg overflow-hidden border border-gray-200">
-            <img src={bgImage} alt="" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+            <img src={bgImage} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
           </div>
         )}
       </div>
@@ -642,7 +627,6 @@ function DesignControlsPanel({ section, onUpdateSettings }: { section: WebsiteSe
   )
 }
 
-// ============ SEO EDITOR PANEL ============
 
 function SeoEditorPanel({ page, metaTitle, metaDesc, onMetaTitleChange, onMetaDescChange, onSave }: {
   page: WebsitePage
@@ -682,7 +666,6 @@ function SeoEditorPanel({ page, metaTitle, metaDesc, onMetaTitleChange, onMetaDe
   )
 }
 
-// ============ SECTION PREVIEW ============
 
 function SectionPreview({ section, isSelected, onSelect }: { section: WebsiteSection; isSelected: boolean; onSelect: () => void }) {
   const s = section.settings || {}

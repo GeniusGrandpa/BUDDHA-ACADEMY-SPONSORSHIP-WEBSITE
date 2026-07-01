@@ -18,8 +18,7 @@ export function AdminNewsPage() {
     try {
       const data = await getNews()
       setNews(data)
-    } catch (error) {
-      console.error('Error loading news:', error)
+    } catch {
     } finally {
       setLoading(false)
     }
@@ -30,8 +29,7 @@ export function AdminNewsPage() {
       try {
         await deleteNews(id)
         setNews(news.filter(n => n.id !== id))
-      } catch (error) {
-        console.error('Error deleting news:', error)
+      } catch {
       }
     }
   }

@@ -41,7 +41,7 @@ export function Topbar({ userName, onMenuClick, userId, onSectionChange }: Topba
             <Menu className="w-5 h-5" />
           </button>
           <Link to="/" className="shrink-0">
-            <img src={logo} alt="Buddha Academy" className="h-9 w-9 rounded-lg object-cover" />
+            <img src={logo} alt="Buddha Academy" className="h-9 w-9 rounded-lg object-cover" loading="eager" decoding="async" />
           </Link>
           <div className="hidden sm:block">
             <h1 className="text-sm font-medium text-gray-900 truncate">
@@ -120,7 +120,7 @@ export function Topbar({ userName, onMenuClick, userId, onSectionChange }: Topba
 
       <div className="sm:hidden flex items-center gap-2 px-4 pb-3">
         <Link to="/" className="shrink-0">
-          <img src={logo} alt="Buddha Academy" className="h-7 w-7 rounded object-cover" />
+          <img src={logo} alt="Buddha Academy" className="h-7 w-7 rounded object-cover" loading="eager" decoding="async" />
         </Link>
         <div>
           <h1 className="text-sm font-medium text-gray-900">Welcome back, {userName}</h1>

@@ -175,8 +175,7 @@ const userRole = profile?.role as Role | undefined
       setSendRole('all')
       setShowSendForm(false)
       loadNotifications()
-    } catch (error) {
-      console.error('Error sending notifications:', error)
+    } catch {
       toast.error('Failed to send notifications')
     } finally {
       setSending(false)

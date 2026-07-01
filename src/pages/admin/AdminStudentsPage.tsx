@@ -45,8 +45,7 @@ export function AdminStudentsPage() {
     try {
       const data = await getStudents()
       setStudents(data)
-    } catch (error) {
-      console.error('Error loading students:', error)
+    } catch {
       toast.error('Failed to load students')
     } finally {
       setLoading(false)
@@ -87,7 +86,6 @@ export function AdminStudentsPage() {
       setShowModal(false)
       await loadStudents()
     } catch (error: unknown) {
-      console.error('Error saving student:', error)
       toast.error(error instanceof Error ? error.message : 'Failed to save student')
     } finally {
       setSaving(false)
@@ -100,8 +98,7 @@ export function AdminStudentsPage() {
         await deleteStudent(id)
         toast.success('Student deleted')
         setStudents(students.filter(s => s.id !== id))
-      } catch (error) {
-        console.error('Error deleting student:', error)
+      } catch {
         toast.error('Failed to delete student')
       }
     }
@@ -148,11 +145,12 @@ export function AdminStudentsPage() {
                     <tr key={student.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <img
-                            src={student.photo_url || 'https://images.pexels.com/photos/1171086/pexels-photo-1171086.jpeg?auto=compress&cs=tinysrgb&w=100'}
-                            alt={student.name}
-                            className="w-10 h-10 rounded-full object-cover"
-                          />
+                  <img
+                    src={student.photo_url || 'https://images.pexels.com/photos/1171086/pexels-photo-1171086.jpeg?auto=compress&cs=tinysrgb&w=100'}
+                    alt={student.name}
+                    className="w-10 h-10 rounded-full object-cover"
+                    loading="lazy" decoding="async"
+                  />
                           <div>
                             <div className="font-medium text-gray-900">{student.name}</div>
                             <div className="text-sm text-gray-500 truncate max-w-xs">{student.bio}</div>

@@ -5,11 +5,15 @@ function db(table: string) {
   return supabase.from(table as never)
 }
 
-// ============ PAGES ============
+const PAGE_COLUMNS = 'id, slug, title, status, is_draft, published_version_id, created_at, updated_at'
+const SECTION_COLUMNS = 'id, page_id, section_type, title, subtitle, settings, is_visible, sort_order, created_at, updated_at'
+const BLOCK_COLUMNS = 'id, section_id, block_type, content, sort_order, created_at, updated_at'
+const MEDIA_COLUMNS = 'id, file_url, file_name, file_size, mime_type, alt_text, created_at'
+const VERSION_COLUMNS = 'id, page_id, version_number, status, snapshot, created_at'
 
 export async function fetchAllPages(): Promise<WebsitePage[]> {
   const { data, error } = await db('website_pages')
-    .select('*')
+    .select(PAGE_COLUMNS)
     .order('updated_at' as never, { ascending: false } as never)
   if (error) throw error
   return (data || []) as unknown as WebsitePage[]
@@ -17,7 +21,7 @@ export async function fetchAllPages(): Promise<WebsitePage[]> {
 
 export async function fetchPageBySlug(slug: string): Promise<WebsitePage | null> {
   const { data, error } = await db('website_pages')
-    .select('*')
+    .select(PAGE_COLUMNS)
     .eq('slug' as never, slug as never)
     .maybeSingle()
   if (error) throw error
@@ -26,7 +30,7 @@ export async function fetchPageBySlug(slug: string): Promise<WebsitePage | null>
 
 export async function fetchPageById(id: string): Promise<WebsitePage | null> {
   const { data, error } = await db('website_pages')
-    .select('*')
+    .select(PAGE_COLUMNS)
     .eq('id' as never, id as never)
     .maybeSingle()
   if (error) throw error
@@ -36,7 +40,7 @@ export async function fetchPageById(id: string): Promise<WebsitePage | null> {
 export async function createPage(page: Partial<WebsitePage>): Promise<WebsitePage> {
   const { data, error } = await db('website_pages')
     .insert(page as never)
-    .select() as any
+    .select(PAGE_COLUMNS) as any
   if (error) throw error
   return (data?.[0]) as WebsitePage
 }
@@ -60,11 +64,9 @@ export async function deletePage(id: string): Promise<void> {
   if (error) throw error
 }
 
-// ============ SECTIONS ============
-
 export async function fetchSectionsByPage(pageId: string): Promise<WebsiteSection[]> {
   const { data, error } = await db('website_sections')
-    .select('*')
+    .select(SECTION_COLUMNS)
     .eq('page_id' as never, pageId as never)
     .order('sort_order' as never, { ascending: true } as never)
   if (error) throw error
@@ -73,7 +75,7 @@ export async function fetchSectionsByPage(pageId: string): Promise<WebsiteSectio
 
 export async function fetchSectionById(id: string): Promise<WebsiteSection | null> {
   const { data, error } = await db('website_sections')
-    .select('*')
+    .select(SECTION_COLUMNS)
     .eq('id' as never, id as never)
     .maybeSingle()
   if (error) throw error
@@ -83,7 +85,7 @@ export async function fetchSectionById(id: string): Promise<WebsiteSection | nul
 export async function upsertSection(section: Partial<WebsiteSection>): Promise<WebsiteSection> {
   const { data, error } = await db('website_sections')
     .upsert(section as never)
-    .select() as any
+    .select(SECTION_COLUMNS) as any
   if (error) throw error
   return (data?.[0]) as WebsiteSection
 }
@@ -123,11 +125,10 @@ export async function deleteSection(id: string): Promise<void> {
   if (error) throw error
 }
 
-// ============ CONTENT BLOCKS ============
 
 export async function fetchBlocksBySection(sectionId: string): Promise<WebsiteContentBlock[]> {
   const { data, error } = await db('website_content_blocks')
-    .select('*')
+    .select(BLOCK_COLUMNS)
     .eq('section_id' as never, sectionId as never)
     .order('sort_order' as never, { ascending: true } as never)
   if (error) throw error
@@ -137,7 +138,7 @@ export async function fetchBlocksBySection(sectionId: string): Promise<WebsiteCo
 export async function upsertBlock(block: Partial<WebsiteContentBlock>): Promise<WebsiteContentBlock> {
   const { data, error } = await db('website_content_blocks')
     .upsert(block as never)
-    .select() as any
+    .select(BLOCK_COLUMNS) as any
   if (error) throw error
   return (data?.[0]) as WebsiteContentBlock
 }
@@ -163,19 +164,21 @@ export async function reorderBlocks(_sectionId: string, blockIds: string[]): Pro
   }
 }
 
-// ============ MEDIA ============
 
-export async function fetchMedia(): Promise<WebsiteMedia[]> {
+export async function fetchMedia(page = 1, perPage = 50): Promise<WebsiteMedia[]> {
+  const from = (page - 1) * perPage
+  const to = from + perPage - 1
   const { data, error } = await db('website_media')
-    .select('*')
+    .select(MEDIA_COLUMNS)
     .order('created_at' as never, { ascending: false } as never)
+    .range(from, to)
   if (error) throw error
   return (data || []) as unknown as WebsiteMedia[]
 }
 
 export async function fetchMediaById(id: string): Promise<WebsiteMedia | null> {
   const { data, error } = await db('website_media')
-    .select('*')
+    .select(MEDIA_COLUMNS)
     .eq('id' as never, id as never)
     .maybeSingle()
   if (error) throw error
@@ -185,7 +188,7 @@ export async function fetchMediaById(id: string): Promise<WebsiteMedia | null> {
 export async function createMedia(media: Partial<WebsiteMedia>): Promise<WebsiteMedia> {
   const { data, error } = await db('website_media')
     .insert(media as never)
-    .select() as any
+    .select(MEDIA_COLUMNS) as any
   if (error) throw error
   return (data?.[0]) as WebsiteMedia
 }
@@ -244,11 +247,9 @@ export async function uploadImage(file: File, _onProgress?: (pct: number) => voi
   return mediaItem
 }
 
-// ============ VERSIONS ============
-
 export async function fetchVersionsByPage(pageId: string): Promise<WebsitePageVersion[]> {
   const { data, error } = await db('website_page_versions')
-    .select('*')
+    .select(VERSION_COLUMNS)
     .eq('page_id' as never, pageId as never)
     .order('version_number' as never, { ascending: false } as never)
   if (error) throw error
@@ -284,7 +285,7 @@ export async function createVersion(pageId: string): Promise<WebsitePageVersion>
       status: 'draft',
       snapshot: snapshot as never,
     } as never)
-    .select() as any
+    .select(VERSION_COLUMNS) as any
 
   if (error) throw error
   return (data?.[0]) as WebsitePageVersion
@@ -298,7 +299,6 @@ export async function publishPage(pageId: string): Promise<void> {
   await updatePage(pageId, { status: 'published', is_draft: false, published_version_id: version.id })
 }
 
-// ============ PAGE DATA COMPOSITE ============
 
 export interface PageWithSections {
   page: WebsitePage

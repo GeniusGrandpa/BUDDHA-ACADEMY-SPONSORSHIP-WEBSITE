@@ -141,7 +141,12 @@ const [form, setForm] = useState({
                 className="group bg-white border border-gray-100 rounded-xl overflow-hidden hover:border-amber-500/30 transition-all">
                 <div className="relative aspect-video bg-stone-100">
                   {v.thumbnail_url ? (
-                    <img src={v.thumbnail_url} alt={v.title} className="w-full h-full object-cover" />
+                          <img
+                            src={`https://img.youtube.com/vi/${getYoutubeId(v.url)}/mqdefault.jpg`}
+                            alt={v.title}
+                            className="w-full h-full object-cover"
+                            loading="lazy" decoding="async"
+                          />
                   ) : ytId ? (
                     <img src={`https://img.youtube.com/vi/${ytId}/mqdefault.jpg`} alt={v.title}
                       className="w-full h-full object-cover" />

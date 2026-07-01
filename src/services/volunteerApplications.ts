@@ -23,7 +23,6 @@ export async function submitVolunteerApplication(
     })
 
   if (error) {
-    console.error('[Volunteer] Failed to submit application:', error)
     if (error.code === 'PGRST116') {
       throw new Error('Volunteer applications are temporarily unavailable. Please email us at info@buddhaacademy.org')
     }

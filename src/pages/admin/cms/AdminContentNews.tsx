@@ -108,7 +108,7 @@ export function AdminContentNews() {
               <div className="flex">
                 {article.image_url && (
                   <div className="w-48 flex-shrink-0 hidden sm:block">
-                    <img src={article.image_url} alt="" className="w-full h-full object-cover" />
+                    <img src={article.image_url} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                   </div>
                 )}
                 <div className="flex-1 p-4">
@@ -198,7 +198,7 @@ export function AdminContentNews() {
                   <input id="news-image" value={form.image_url || ''} onChange={e => setForm({ ...form, image_url: e.target.value })}
                     className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:border-amber-500/50" />
                   {form.image_url && (
-                    <img src={form.image_url} alt="" className="mt-2 h-32 w-full object-cover rounded-lg" />
+                    <img src={form.image_url} alt="" className="mt-2 h-32 w-full object-cover rounded-lg" loading="lazy" decoding="async" />
                   )}
                 </div>
                 <div>

@@ -6,7 +6,7 @@ const supabase = getSupabaseClient()
 export async function getNews(category?: string): Promise<News[]> {
   let query = supabase
     .from('news')
-    .select('*')
+    .select('id, slug, title, excerpt, content, image_url, category, tags, published, published_at, updated_by, created_at, updated_at')
     .eq('published', true)
     .order('published_at', { ascending: false })
 
@@ -22,7 +22,7 @@ export async function getNews(category?: string): Promise<News[]> {
 export async function getNewsById(id: string): Promise<News | null> {
   const { data, error } = await supabase
     .from('news')
-    .select('*')
+    .select('id, slug, title, excerpt, content, image_url, category, tags, published, published_at, updated_by, created_at, updated_at')
     .eq('id', id)
     .maybeSingle()
 
@@ -36,7 +36,7 @@ export async function createNews(article: Omit<News, 'id' | 'created_at' | 'upda
   const { data, error } = await supabase
     .from('news')
     .insert(article)
-    .select()
+    .select('id, slug, title, excerpt, content, image_url, category, tags, published, published_at, updated_by, created_at, updated_at')
     .single()
 
   if (error) throw error
@@ -50,7 +50,7 @@ export async function updateNews(id: string, updates: Partial<News>): Promise<Ne
     .from('news')
     .update(updates)
     .eq('id', id)
-    .select()
+    .select('id, slug, title, excerpt, content, image_url, category, tags, published, published_at, updated_by, created_at, updated_at')
     .single()
 
   if (error) throw error

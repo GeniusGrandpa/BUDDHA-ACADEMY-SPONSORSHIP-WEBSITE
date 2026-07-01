@@ -5,7 +5,7 @@ import { Card } from '../components/ui/Card'
 import { Tabs } from '../components/ui/Tabs'
 import { Button } from '../components/ui/Button'
 import { getStudents } from '../services/students'
-import { getPageHeader, getSiteImage } from '../services/cms-content'
+import { getPageHeader } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import type { Student } from '../types/database'
 import type { PageHeader } from '../types/cms-content'
@@ -18,24 +18,19 @@ export function StudentsPage() {
   const [loading, setLoading] = useState(true)
   const [activeFilter, setActiveFilter] = useState('all')
   const [pageHeader, setPageHeader] = useState<PageHeader | null>(null)
-  const [studentFallback, setStudentFallback] = useState('')
-
   useEffect(() => {
     loadStudents()
   }, [])
 
   const loadStudents = async () => {
     try {
-      const [data, header, fallbackImg] = await Promise.all([
+      const [data, header] = await Promise.all([
         getStudents(),
         getPageHeader('students'),
-        getSiteImage('student_fallback'),
       ])
       setStudents(data)
       if (header) setPageHeader(header)
-      if (fallbackImg?.image_url) setStudentFallback(fallbackImg.image_url)
-    } catch (error) {
-      console.error('Error loading students:', error)
+    } catch {
     } finally {
       setLoading(false)
     }
@@ -85,9 +80,10 @@ export function StudentsPage() {
                 <Card key={student.id} variant="bordered" className="overflow-hidden hover:shadow-lg transition-shadow">
                   <div className="aspect-w-4 aspect-h-3">
                     <img
-                      src={student.photo_url || studentFallback || ''}
+                      src={student.photo_url ?? undefined}
                       alt={student.name}
-                      className="w-full h-48 sm:h-56 object-cover"
+                      className="w-full h-full object-cover"
+                      loading="lazy" decoding="async"
                     />
                   </div>
                   <div className="p-4 sm:p-6">

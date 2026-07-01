@@ -20,7 +20,7 @@ export function db(table: string) {
 
 export async function getDonationContent(): Promise<DonationContent | null> {
   const { data } = await db('donation_content')
-    .select('*')
+    .select('id, heading, description, options, is_published, created_at')
     .eq('is_published', true)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -35,7 +35,7 @@ export async function upsertDonationContent(content: Partial<DonationContent>): 
 
 export async function getSponsorshipContent(): Promise<SponsorshipContent | null> {
   const { data } = await db('sponsorship_content')
-    .select('*')
+    .select('id, heading, description, impact_stats, steps, is_published, created_at')
     .eq('is_published', true)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -50,7 +50,7 @@ export async function upsertSponsorshipContent(content: Partial<SponsorshipConte
 
 export async function getVolunteerContent(): Promise<VolunteerContent | null> {
   const { data } = await db('volunteer_content')
-    .select('*')
+    .select('id, heading, description, opportunities, is_published, created_at')
     .eq('is_published', true)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -65,7 +65,7 @@ export async function upsertVolunteerContent(content: Partial<VolunteerContent>)
 
 export async function getTransparencyContent(): Promise<TransparencyContent | null> {
   const { data } = await db('transparency_content')
-    .select('*')
+    .select('id, heading, description, programs, reports, is_published, created_at')
     .eq('is_published', true)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -80,7 +80,7 @@ export async function upsertTransparencyContent(content: Partial<TransparencyCon
 
 export async function getHeroContent(): Promise<HeroContent | null> {
   const { data } = await db('hero_content')
-    .select('*')
+    .select('id, title, subtitle, description, image_url, button_text, button_link, is_visible, display_order')
     .eq('is_visible', true)
     .order('display_order', { ascending: true })
     .limit(1)
@@ -95,7 +95,7 @@ export async function upsertHeroContent(content: Partial<HeroContent>): Promise<
 
 export async function getSectionVisibility(): Promise<SectionVisibility[]> {
   const { data } = await db('section_visibility')
-    .select('*')
+    .select('id, section_key, section_name, is_visible, sort_order')
     .order('sort_order', { ascending: true })
   return (data || []) as SectionVisibility[]
 }
@@ -117,7 +117,7 @@ export async function updateSectionVisibility(key: string, isVisible: boolean): 
 
 export async function getSiteImage(imageKey: string): Promise<SiteImage | null> {
   const { data } = await db('site_images')
-    .select('*')
+    .select('id, image_key, image_url, alt_text, section')
     .eq('image_key', imageKey)
     .maybeSingle()
   return data as SiteImage | null
@@ -125,7 +125,7 @@ export async function getSiteImage(imageKey: string): Promise<SiteImage | null> 
 
 export async function getSiteImagesBySection(section: string): Promise<SiteImage[]> {
   const { data } = await db('site_images')
-    .select('*')
+    .select('id, image_key, image_url, alt_text, section')
     .eq('section', section)
   return (data || []) as SiteImage[]
 }
@@ -142,7 +142,7 @@ export async function deleteSiteImage(id: string): Promise<void> {
 
 export async function getFooterContent(): Promise<FooterContent | null> {
   const { data } = await db('footer_content')
-    .select('*')
+    .select('id, description, copyright_text, social_links, quick_links, contact_info, is_published, created_at')
     .eq('is_published', true)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -157,7 +157,7 @@ export async function upsertFooterContent(content: Partial<FooterContent>): Prom
 
 export async function getSeoContent(pageSlug: string): Promise<SeoContent | null> {
   const { data } = await db('seo_content')
-    .select('*')
+    .select('id, page_slug, meta_title, meta_description, is_published')
     .eq('page_slug', pageSlug)
     .eq('is_published', true)
     .maybeSingle()
@@ -171,7 +171,7 @@ export async function upsertSeoContent(content: Partial<SeoContent>): Promise<vo
 
 export async function getPageHeader(pageSlug: string): Promise<PageHeader | null> {
   const { data } = await db('page_headers')
-    .select('*')
+    .select('id, page_slug, title, subtitle, is_visible')
     .eq('page_slug', pageSlug)
     .eq('is_visible', true)
     .maybeSingle()
@@ -185,7 +185,7 @@ export async function upsertPageHeader(header: Partial<PageHeader>): Promise<voi
 
 export async function getSectionContent(sectionKey: string): Promise<SectionContent | null> {
   const { data } = await db('section_content')
-    .select('*')
+    .select('id, section_key, title, content')
     .eq('section_key', sectionKey)
     .maybeSingle()
   return data as SectionContent | null

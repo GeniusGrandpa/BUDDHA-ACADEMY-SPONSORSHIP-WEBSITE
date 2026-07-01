@@ -5,7 +5,7 @@ import type { Partner, PartnerType } from '../types/cms'
 const supabase = getSupabaseClient()
 
 export async function getPartners(type?: PartnerType, visibleOnly?: boolean): Promise<Partner[]> {
-  let query = supabase.from('partners').select('*').order('sort_order', { ascending: true })
+  let query = supabase.from('partners').select('id, name, logo_url, website_url, description, partner_type, sort_order, is_visible').order('sort_order', { ascending: true })
   if (type) query = query.eq('partner_type', type)
   if (visibleOnly) query = query.eq('is_visible', true)
   const { data, error } = await query
@@ -14,21 +14,21 @@ export async function getPartners(type?: PartnerType, visibleOnly?: boolean): Pr
 }
 
 export async function getPartnerById(id: string): Promise<Partner | null> {
-  const { data, error } = await supabase.from('partners').select('*').eq('id', id).maybeSingle()
+  const { data, error } = await supabase.from('partners').select('id, name, logo_url, website_url, description, partner_type, sort_order, is_visible').eq('id', id).maybeSingle()
   if (error) throw error
   return data as Partner | null
 }
 
 export async function createPartner(item: Omit<Partner, 'id' | 'created_at' | 'updated_at'>): Promise<Partner> {
   const userId = (await supabase.auth.getSession()).data.session?.user?.id
-  const { data, error } = await supabase.from('partners').insert({ ...item, created_by: userId }).select().single()
+  const { data, error } = await supabase.from('partners').insert({ ...item, created_by: userId }).select('id, name, logo_url, website_url, description, partner_type, sort_order, is_visible').single()
   if (error) throw error
   await logAuditEvent({ action: `Created partner: ${data.name}`, entityType: 'partners', entityId: data.id })
   return data as Partner
 }
 
 export async function updatePartner(id: string, updates: Partial<Partner>): Promise<Partner> {
-  const { data, error } = await supabase.from('partners').update(updates).eq('id', id).select().single()
+  const { data, error } = await supabase.from('partners').update(updates).eq('id', id).select('id, name, logo_url, website_url, description, partner_type, sort_order, is_visible').single()
   if (error) throw error
   await logAuditEvent({ action: `Updated partner: ${data.name}`, entityType: 'partners', entityId: id })
   return data as Partner

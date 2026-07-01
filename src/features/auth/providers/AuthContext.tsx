@@ -68,13 +68,11 @@ async function fetchOrCreateProfile(user: User, retries = 1): Promise<Profile | 
       }).select().maybeSingle()
 
       if (insertError) {
-        console.error('[Auth] Fallback profile insert failed:', insertError.message)
         return null
       }
       return newProfile
     } catch (error) {
       if (attempt >= retries) {
-        console.error('[Auth] fetchOrCreateProfile error:', error)
         return null
       }
       await new Promise(r => setTimeout(r, 300))
@@ -86,8 +84,7 @@ async function fetchOrCreateProfile(user: User, retries = 1): Promise<Profile | 
 async function safeFetchOrCreateProfile(user: User): Promise<Profile | null> {
   try {
     return await fetchOrCreateProfile(user)
-  } catch (error) {
-    console.error('[Auth] safeFetchOrCreateProfile failed:', error)
+  } catch {
     return null
   }
 }
@@ -95,8 +92,7 @@ async function safeFetchOrCreateProfile(user: User): Promise<Profile | null> {
 async function safeFetchPermissions(userId: string): Promise<PermissionCode[]> {
   try {
     return await fetchUserPermissions(userId)
-  } catch (error) {
-    console.error('[Auth] safeFetchPermissions failed:', error)
+  } catch {
     return []
   }
 }
@@ -170,7 +166,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const { data, error } = await supabase.auth.getSession()
         if (error) {
-          console.error('[Auth] getSession error:', error.message)
           await supabase.auth.signOut()
           return
         }
@@ -184,8 +179,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             await applySession(data.session)
           }
         }
-      } catch (error) {
-        console.error('[Auth] initAuth failed:', error)
+      } catch {
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -204,8 +198,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setProfile(null)
           setPermissions([])
         }
-      } catch (error) {
-        console.error('[Auth] onAuthStateChange failed:', error)
+      } catch {
       } finally {
         if (!cancelled) setLoading(false)
       }

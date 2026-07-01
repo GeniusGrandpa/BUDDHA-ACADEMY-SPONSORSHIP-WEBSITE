@@ -55,7 +55,7 @@ export function StudentDetailPage() {
   const navigate = useNavigate()
   const [student, setStudent] = useState<Student | null>(null)
   const [loading, setLoading] = useState(true)
-  const [studentFallback, setStudentFallback] = useState('')
+  const [photoFallback, setPhotoFallback] = useState('')
 
   useEffect(() => {
     if (id) loadStudent(id)
@@ -63,14 +63,13 @@ export function StudentDetailPage() {
 
   const loadStudent = async (studentId: string) => {
     try {
-      const [data, fallbackImg] = await Promise.all([
+      const [data, fb] = await Promise.all([
         getStudentById(studentId),
         getSiteImage('student_fallback'),
       ])
       setStudent(data)
-      if (fallbackImg?.image_url) setStudentFallback(fallbackImg.image_url)
-    } catch (error) {
-      console.error('Error loading student:', error)
+      if (fb?.image_url) setPhotoFallback(fb.image_url)
+    } catch {
     } finally {
       setLoading(false)
     }
@@ -109,11 +108,12 @@ export function StudentDetailPage() {
         <div className="grid lg:grid-cols-3 gap-6 sm:gap-8">
           <div className="lg:col-span-1">
             <Card variant="bordered" className="overflow-hidden">
-              <img
-                src={student.photo_url || studentFallback || ''}
-                alt={student.name}
-                className="w-full h-64 sm:h-80 object-cover"
-              />
+                  <img
+                    src={student.photo_url ?? (photoFallback || undefined)}
+                    alt={student.name}
+                    className="w-full h-full object-cover"
+                    loading="eager" decoding="async"
+                  />
               <div className="p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{student.name}</h1>

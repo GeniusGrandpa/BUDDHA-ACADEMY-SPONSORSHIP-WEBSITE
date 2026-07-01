@@ -283,6 +283,7 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
                                 src={screenshotPreview}
                                 alt="Payment screenshot preview"
                                 className="mt-2 w-32 h-32 object-cover rounded-lg border border-gray-200"
+                                loading="lazy" decoding="async"
                               />
                             )}
                             <p className="text-xs text-gray-400 mt-1">
@@ -359,6 +360,7 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
                             src={selectedSetting.qr_image_url}
                             alt={`${selectedSetting.gateway_display_name} QR`}
                             className="w-48 h-48 object-contain"
+                            loading="lazy" decoding="async"
                           />
                           <p className="text-center text-xs text-gray-500 mt-2">Scan to pay</p>
                         </div>

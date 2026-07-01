@@ -46,7 +46,7 @@ export function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           <div>
             <div className="flex items-center space-x-3 mb-4">
-              <img src={footerLogoSrc} alt={branding.organization_name || ''} className="h-14 w-auto" />
+              <img src={footerLogoSrc} alt={branding.organization_name || ''} className="h-14 w-auto" loading="lazy" decoding="async" width="56" height="56" />
               <div>
                 {branding.organization_name && (
                   <div className="font-semibold text-[var(--color-footer-heading)]">{branding.organization_name}</div>

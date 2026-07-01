@@ -16,8 +16,7 @@ export function AdminContactsPage() {
     try {
       const data = await getAllContactSubmissions()
       setSubmissions(data)
-    } catch (error) {
-      console.error('Error loading submissions:', error)
+    } catch {
     } finally {
       setLoading(false)
     }
@@ -27,8 +26,7 @@ export function AdminContactsPage() {
     try {
       await updateContactSubmissionStatus(id, status)
       setSubmissions(submissions.map(s => s.id === id ? { ...s, status } : s))
-    } catch (error) {
-      console.error('Error updating submission:', error)
+    } catch {
     }
   }
 

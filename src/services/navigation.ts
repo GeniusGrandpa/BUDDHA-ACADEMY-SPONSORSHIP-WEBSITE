@@ -7,7 +7,7 @@ const supabase = getSupabaseClient()
 export async function getNavigationItems(location?: NavigationLocation): Promise<NavigationItem[]> {
   let query = supabase
     .from('navigation_items')
-    .select('*')
+    .select('id, label, url, route, location, parent_id, sort_order, is_visible, is_cta, cta_style, target')
     .order('sort_order', { ascending: true })
   if (location) query = query.eq('location', location)
   const { data, error } = await query
@@ -16,20 +16,20 @@ export async function getNavigationItems(location?: NavigationLocation): Promise
 }
 
 export async function getNavigationItemById(id: string): Promise<NavigationItem | null> {
-  const { data, error } = await supabase.from('navigation_items').select('*').eq('id', id).maybeSingle()
+  const { data, error } = await supabase.from('navigation_items').select('id, label, url, route, location, parent_id, sort_order, is_visible, is_cta, cta_style, target').eq('id', id).maybeSingle()
   if (error) throw error
   return data as NavigationItem | null
 }
 
 export async function createNavigationItem(item: Omit<NavigationItem, 'id' | 'created_at' | 'updated_at'>): Promise<NavigationItem> {
-  const { data, error } = await supabase.from('navigation_items').insert(item).select().single()
+  const { data, error } = await supabase.from('navigation_items').insert(item).select('id, label, url, route, location, parent_id, sort_order, is_visible, is_cta, cta_style, target').single()
   if (error) throw error
   await logAuditEvent({ action: `Created navigation item: ${data.label}`, entityType: 'navigation_items', entityId: data.id })
   return data as NavigationItem
 }
 
 export async function updateNavigationItem(id: string, updates: Partial<NavigationItem>): Promise<NavigationItem> {
-  const { data, error } = await supabase.from('navigation_items').update(updates).eq('id', id).select().single()
+  const { data, error } = await supabase.from('navigation_items').update(updates).eq('id', id).select('id, label, url, route, location, parent_id, sort_order, is_visible, is_cta, cta_style, target').single()
   if (error) throw error
   await logAuditEvent({ action: `Updated navigation item: ${data.label}`, entityType: 'navigation_items', entityId: id })
   return data as NavigationItem

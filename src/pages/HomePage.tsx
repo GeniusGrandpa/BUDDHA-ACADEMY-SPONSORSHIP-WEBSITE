@@ -38,6 +38,7 @@ function HeroSection({ hero, visible }: { hero: HeroContent; visible: boolean })
           src={hero.background_image}
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
+          loading="eager" fetchPriority="high" decoding="async"
           onError={e => { (e.target as HTMLImageElement).style.opacity = '0' }}
         />
       )}
@@ -206,6 +207,7 @@ function StudentsSection({ students, brokenPhotos, fallbackImage, setBrokenPhoto
                     src={brokenPhotos.has(student.id) ? fallbackImage : (student.photo_url || fallbackImage)}
                     alt={student.name}
                     className="w-full h-48 object-cover"
+                    loading="lazy" decoding="async"
                     onError={() => setBrokenPhotos(prev => new Set(prev).add(student.id))}
                   />
                 </div>
