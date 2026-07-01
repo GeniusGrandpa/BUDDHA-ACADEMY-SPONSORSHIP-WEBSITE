@@ -7,7 +7,7 @@ import { Badge } from '../components/ui/Badge'
 import { StudentCardSkeleton } from '../components/ui/LoadingSkeleton'
 import { CtaBanner } from '../components/CtaBanner'
 import { getStudents } from '../services/students'
-import { getHeroContent, getSectionContent, getSectionVisibility, getSiteImage } from '../services/cms-content'
+import { getHeroContent, getSectionContent, getSectionVisibility } from '../services/cms-content'
 import { getTestimonialsWithType } from '../services/content'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import type { Student, Testimonial } from '../types/database'
@@ -20,6 +20,58 @@ const BADGE_MAP: Record<string, 'success' | 'warning' | 'info'> = {
   partially_sponsored: 'warning',
   fully_sponsored: 'info',
 }
+
+const STUDENT_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23e5e7eb'/%3E%3Ccircle cx='200' cy='110' r='50' fill='%239ca3af'/%3E%3Cellipse cx='200' cy='230' rx='80' ry='50' fill='%239ca3af'/%3E%3C/svg%3E"
+
+const DEFAULT_HERO: HeroContent = {
+  id: '',
+  title: 'Empowering Nepal\'s Future',
+  highlight: 'One Child at a Time',
+  description: 'Buddha Academy provides free education, meals, and healthcare to underprivileged children in Kathmandu, Nepal.',
+  background_image: '',
+  overlay_color: '#000000',
+  overlay_opacity: 0.5,
+  cta_primary_text: 'Sponsor a Child',
+  cta_primary_link: '/students',
+  cta_secondary_text: 'Donate Now',
+  cta_secondary_link: '/donate',
+  statistics: [
+    { value: 'Since 1977', label: 'Trusted Service' },
+    { value: '49+', label: 'Years of Service' },
+    { value: '100%', label: 'Free Education' },
+    { value: '250+', label: 'Children Supported' },
+  ],
+  badges: [],
+  layout: 'left',
+  display_order: 1,
+  is_visible: true,
+  animation_enabled: false,
+  updated_by: null,
+  created_at: '',
+  updated_at: '',
+}
+
+const DEFAULT_ABOUT_CONTENT = {
+  title: 'About Buddha Academy',
+  description: 'Founded in 1977, Buddha Academy is a nonprofit boarding school in Kathmandu, Nepal, dedicated to providing free education to underprivileged children.',
+  milestones: [
+    { year: '1977', event: 'Founded with 12 students' },
+    { year: '1990s', event: 'Hostel expansion program' },
+    { year: '2010s', event: 'Computer lab established' },
+    { year: 'Today', event: 'Educating hundreds annually' },
+  ],
+}
+
+const DEFAULT_SPONSORSHIP_STEPS = [
+  { title: 'Browse Profiles', desc: 'Review children waiting for sponsors' },
+  { title: 'Choose a Child', desc: 'Select a student to sponsor' },
+  { title: 'Make Your Pledge', desc: 'Complete donation form securely' },
+  { title: 'We Connect', desc: 'Link you with your sponsored child' },
+  { title: 'Receive Updates', desc: 'Get progress reports & photos' },
+  { title: 'Build Connection', desc: 'Exchange letters & messages' },
+  { title: 'Track Impact', desc: 'See your contribution at work' },
+  { title: 'Join Community', desc: 'Connect with other sponsors' },
+]
 
 function sponsorshipVariant(status: string) {
   return BADGE_MAP[status] ?? 'default'
@@ -38,7 +90,7 @@ function HeroSection({ hero, visible }: { hero: HeroContent; visible: boolean })
           src={hero.background_image}
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
-          loading="eager" decoding="async" {...{'fetchpriority': 'high'}}
+          loading="eager" decoding="async" {...{ 'fetchpriority': 'high' }}
           onError={e => { (e.target as HTMLImageElement).style.opacity = '0' }}
         />
       )}
@@ -115,24 +167,21 @@ function WelcomeSection({ welcome, visible }: { welcome: SectionContent; visible
   )
 }
 
-function AboutSection({ about, visible, t }: { about: SectionContent; visible: boolean; t: (k: string) => string }) {
+function AboutSection({ about, visible, t }: { about: SectionContent | null; visible: boolean; t: (k: string) => string }) {
   if (!visible) return null
-  const milestones: { year: string; event: string }[] =
-    (about.content as { milestones?: { year: string; event: string }[] })?.milestones || []
-  const content = about.content as { title?: string; description?: string }
-  if (!about.title && !about.description && !content.title && !content.description && milestones.length === 0) return null
+  const milestones: { year: string; event: string }[] = about
+    ? ((about.content as { milestones?: { year: string; event: string }[] })?.milestones || [])
+    : DEFAULT_ABOUT_CONTENT.milestones
+  const title = about?.title || (about?.content as { title?: string } | undefined)?.title || DEFAULT_ABOUT_CONTENT.title
+  const description = about?.description || (about?.content as { description?: string } | undefined)?.description || DEFAULT_ABOUT_CONTENT.description
   return (
     <section className="py-12 sm:py-16 lg:py-24 bg-[var(--color-background)]">
       <div className="px-4 sm:px-6 lg:px-12">
         <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center max-w-7xl mx-auto">
           <div>
-            {about.title || content.title ? (
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text-primary)] mb-4 sm:mb-6">{about.title || content.title}</h2>
-            ) : null}
-            {about.description || content.description ? (
-              <p className="text-[var(--color-text-secondary)] mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">{about.description || content.description}</p>
-            ) : null}
-            {about.content && (about.content as Record<string, string>).mission_description && (
+            {title && <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text-primary)] mb-4 sm:mb-6">{title}</h2>}
+            {description && <p className="text-[var(--color-text-secondary)] mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">{description}</p>}
+            {about?.content && (about.content as Record<string, string>).mission_description && (
               <p className="text-[var(--color-text-secondary)] mb-6 sm:mb-8 leading-relaxed text-sm sm:text-base">{(about.content as Record<string, string>).mission_description}</p>
             )}
             <Link to="/about">
@@ -165,10 +214,9 @@ function AboutSection({ about, visible, t }: { about: SectionContent; visible: b
   )
 }
 
-function StudentsSection({ students, brokenPhotos, fallbackImage, setBrokenPhotos, visible, loading, t, featuredContent }: {
+function StudentsSection({ students, brokenPhotos, setBrokenPhotos, visible, loading, t, featuredContent }: {
   students: Student[]
   brokenPhotos: Set<string>
-  fallbackImage: string
   setBrokenPhotos: React.Dispatch<React.SetStateAction<Set<string>>>
   visible: boolean
   loading: boolean
@@ -200,33 +248,38 @@ function StudentsSection({ students, brokenPhotos, fallbackImage, setBrokenPhoto
               No students available at the moment.
             </div>
           ) : (
-            students.map((student) => (
-              <Card key={student.id} variant="bordered" className="overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="aspect-w-4 aspect-h-3">
-                  <img
-                    src={brokenPhotos.has(student.id) ? fallbackImage : (student.photo_url || fallbackImage)}
-                    alt={student.name}
-                    className="w-full h-48 object-cover"
-                    loading="lazy" decoding="async"
-                    onError={() => setBrokenPhotos(prev => new Set(prev).add(student.id))}
-                  />
-                </div>
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">{student.name}</h3>
-                    <Badge variant={sponsorshipVariant(student.sponsorship_status)}>{sponsorshipLabel(student.sponsorship_status)}</Badge>
+            students.map((student) => {
+              const photoSrc = brokenPhotos.has(student.id) || !student.photo_url
+                ? STUDENT_PLACEHOLDER
+                : student.photo_url
+              return (
+                <Card key={student.id} variant="bordered" className="overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="aspect-w-4 aspect-h-3">
+                    <img
+                      src={photoSrc}
+                      alt={student.name}
+                      className="w-full h-48 object-cover"
+                      loading="lazy" decoding="async"
+                      onError={() => setBrokenPhotos(prev => new Set(prev).add(student.id))}
+                    />
                   </div>
-                  <div className="flex gap-4 text-sm text-[var(--color-text-secondary)] mb-3">
-                    <span>{t('home_age_label', { age: student.age })}</span>
-                    <span>{t('home_grade_label', { grade: student.grade })}</span>
+                  <div className="p-6">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">{student.name}</h3>
+                      <Badge variant={sponsorshipVariant(student.sponsorship_status)}>{sponsorshipLabel(student.sponsorship_status)}</Badge>
+                    </div>
+                    <div className="flex gap-4 text-sm text-[var(--color-text-secondary)] mb-3">
+                      <span>{t('home_age_label', { age: student.age })}</span>
+                      <span>{t('home_grade_label', { grade: student.grade })}</span>
+                    </div>
+                    {student.bio && <p className="text-[var(--color-text-secondary)] text-sm mb-4 line-clamp-2">{student.bio}</p>}
+                    <Link to={`/students/${student.id}`}>
+                      <Button variant="outline" className="w-full">{t('home_view_profile')}</Button>
+                    </Link>
                   </div>
-                  {student.bio && <p className="text-[var(--color-text-secondary)] text-sm mb-4 line-clamp-2">{student.bio}</p>}
-                  <Link to={`/students/${student.id}`}>
-                    <Button variant="outline" className="w-full">{t('home_view_profile')}</Button>
-                  </Link>
-                </div>
-              </Card>
-            ))
+                </Card>
+              )
+            })
           )}
         </div>
         {!loading && students.length > 0 && (
@@ -279,21 +332,19 @@ function SponsorshipTree({ steps }: { steps: { title: string; desc: string }[] }
   )
 }
 
-function SponsorshipStepsSection({ sponsorshipSteps, visible }: { sponsorshipSteps: SectionContent; visible: boolean }) {
+function SponsorshipStepsSection({ sponsorshipSteps, visible }: { sponsorshipSteps: SectionContent | null; visible: boolean }) {
   if (!visible) return null
-  const content = sponsorshipSteps.content as { title?: string; description?: string; steps?: Array<{ title: string; desc: string }> }
-  const steps = content?.steps || []
+  const content = sponsorshipSteps?.content as { title?: string; description?: string; steps?: Array<{ title: string; desc: string }> } | undefined
+  const steps: { title: string; desc: string }[] = content?.steps?.length ? content.steps : DEFAULT_SPONSORSHIP_STEPS
+  const title = content?.title || 'How Sponsorship Works'
+  const description = content?.description || 'Your journey to changing a child\'s life starts here.'
   return (
     <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-[var(--color-primary-light)]/10 via-[var(--color-surface)] to-[var(--color-secondary-light)]/10">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {content?.title && (
-          <div className="text-center mb-10 sm:mb-14">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text-primary)] mb-4">{content.title}</h2>
-            {content.description && (
-              <p className="text-sm sm:text-base text-[var(--color-text-secondary)] max-w-2xl mx-auto">{content.description}</p>
-            )}
-          </div>
-        )}
+        <div className="text-center mb-10 sm:mb-14">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text-primary)] mb-4">{title}</h2>
+          <p className="text-sm sm:text-base text-[var(--color-text-secondary)] max-w-2xl mx-auto">{description}</p>
+        </div>
         <SponsorshipTree steps={steps} />
       </div>
     </section>
@@ -365,8 +416,9 @@ export function HomePage() {
   const [donationCtaSection, setDonationCtaSection] = useState<SectionContent | null>(null)
   const [sectionsVisible, setSectionsVisible] = useState<Record<string, boolean>>({})
   const [brokenStudentPhotos, setBrokenStudentPhotos] = useState<Set<string>>(new Set())
-  const [studentFallbackImage, setStudentFallbackImage] = useState('')
   const [studentsLoading, setStudentsLoading] = useState(true)
+  const [cmsLoaded, setCmsLoaded] = useState(false)
+
   useEffect(() => {
     Promise.all([
       getHeroContent().then(d => {
@@ -381,64 +433,67 @@ export function HomePage() {
                 cta_secondary_text?: string; cta_secondary_link?: string;
                 statistics?: { value: string; label: string }[];
                 badges?: { text: string }[];
+                background_image?: string;
               }
               setHero({
-                title: heroSection.title || c?.title || '',
-                highlight: c?.highlight || '',
-                description: heroSection.description || c?.description || '',
-                background_image: '',
-                cta_primary_text: c?.cta_primary_text || '',
-                cta_primary_link: c?.cta_primary_link || '',
-                cta_secondary_text: c?.cta_secondary_text || '',
-                cta_secondary_link: c?.cta_secondary_link || '',
-                statistics: c?.statistics || [],
+                ...DEFAULT_HERO,
+                title: heroSection.title || c?.title || DEFAULT_HERO.title,
+                highlight: c?.highlight || DEFAULT_HERO.highlight,
+                description: heroSection.description || c?.description || DEFAULT_HERO.description,
+                background_image: c?.background_image || '',
+                cta_primary_text: c?.cta_primary_text || DEFAULT_HERO.cta_primary_text,
+                cta_primary_link: c?.cta_primary_link || DEFAULT_HERO.cta_primary_link,
+                cta_secondary_text: c?.cta_secondary_text || DEFAULT_HERO.cta_secondary_text,
+                cta_secondary_link: c?.cta_secondary_link || DEFAULT_HERO.cta_secondary_link,
+                statistics: c?.statistics?.length ? c.statistics : DEFAULT_HERO.statistics,
                 badges: c?.badges || [],
-              } as unknown as HeroContent)
+              })
             }
-          }).catch(() => {})
+          }).catch(() => { })
         }
-      }).catch(() => {}),
-      getSectionContent('welcome').then(d => { if (d) setWelcomeSection(d) }).catch(() => {}),
-      getSectionContent('about_preview').then(d => { if (d) setAboutSection(d) }).catch(() => {}),
-      getSectionContent('stats').then(d => { if (d) setStatsSection(d) }).catch(() => {}),
-      getSectionContent('featured_students').then(d => { if (d) setFeaturedStudentsSection(d) }).catch(() => {}),
-      getSectionContent('sponsorship_steps').then(d => { if (d) setSponsorshipSteps(d) }).catch(() => {}),
-      getSectionContent('testimonials').then(d => { if (d) setTestimonialsSection(d) }).catch(() => {}),
-      getTestimonialsWithType('testimonial').then(d => { if (d && d.length > 0) setTestimonialItems(d) }).catch(() => {}),
-      getSectionContent('donation_cta').then(d => { if (d) setDonationCtaSection(d) }).catch(() => {}),
+      }).catch(() => { }),
+      getSectionContent('welcome').then(d => { if (d) setWelcomeSection(d) }).catch(() => { }),
+      getSectionContent('about_preview').then(d => { if (d) setAboutSection(d) }).catch(() => { }),
+      getSectionContent('stats').then(d => { if (d) setStatsSection(d) }).catch(() => { }),
+      getSectionContent('featured_students').then(d => { if (d) setFeaturedStudentsSection(d) }).catch(() => { }),
+      getSectionContent('sponsorship_steps').then(d => { if (d) setSponsorshipSteps(d) }).catch(() => { }),
+      getSectionContent('testimonials').then(d => { if (d) setTestimonialsSection(d) }).catch(() => { }),
+      getTestimonialsWithType('testimonial').then(d => { if (d && d.length > 0) setTestimonialItems(d) }).catch(() => { }),
+      getSectionContent('donation_cta').then(d => { if (d) setDonationCtaSection(d) }).catch(() => { }),
       getSectionVisibility().then(sections => {
         const map: Record<string, boolean> = {}
         sections.forEach((s: { section_key: string; is_visible: boolean }) => { map[s.section_key] = s.is_visible })
         setSectionsVisible(map)
-      }).catch(() => {}),
+      }).catch(() => { }),
       getStudents(undefined, { limit: 3 }).then(d => { setStudents(d); setStudentsLoading(false) }).catch(() => { setStudentsLoading(false) }),
-      getSiteImage('student_fallback').then(img => { if (img) setStudentFallbackImage(img.image_url) }).catch(() => {}),
-    ])
+    ]).finally(() => setCmsLoaded(true))
   }, [])
 
-  if (!hero && !aboutSection && !sponsorshipSteps && studentsLoading) {
-    return <div className="min-h-screen" />
+  const activeHero = hero ?? DEFAULT_HERO
+  const statsToShow = (activeHero.statistics as { value: string; label: string }[]) || []
+
+  if (!cmsLoaded) {
+    return <div className="min-h-screen bg-gradient-to-br from-stone-900 via-stone-800 to-amber-900" />
   }
 
   return (
     <div>
-      {hero && <HeroSection hero={hero} visible={sectionsVisible.hero !== false} />}
-      {hero?.statistics && hero.statistics.length > 0 && (
-        <StatsSection hero={hero} statsSection={statsSection} visible={sectionsVisible.stats !== false} />
+      <HeroSection hero={activeHero} visible={sectionsVisible.hero !== false} />
+      {statsToShow.length > 0 && (
+        <StatsSection hero={activeHero} statsSection={statsSection} visible={sectionsVisible.stats !== false} />
       )}
       {welcomeSection && <WelcomeSection welcome={welcomeSection} visible={sectionsVisible.welcome !== false} />}
-      {aboutSection && <AboutSection about={aboutSection} visible={sectionsVisible.about_preview !== false} t={t} />}
+      <AboutSection about={aboutSection} visible={sectionsVisible.about_preview !== false} t={t} />
       <StudentsSection
         students={students}
         brokenPhotos={brokenStudentPhotos}
-        fallbackImage={studentFallbackImage}
         setBrokenPhotos={setBrokenStudentPhotos}
         visible={sectionsVisible.featured_students !== false}
         loading={studentsLoading}
         t={t}
         featuredContent={featuredStudentsSection}
       />
-      {sponsorshipSteps && <SponsorshipStepsSection sponsorshipSteps={sponsorshipSteps} visible={sectionsVisible.sponsorship_steps !== false} />}
+      <SponsorshipStepsSection sponsorshipSteps={sponsorshipSteps} visible={sectionsVisible.sponsorship_steps !== false} />
       {testimonialsSection && <TestimonialsSection testimonials={testimonialsSection} testimonialList={testimonialItems} visible={sectionsVisible.testimonials !== false} />}
       {donationCtaSection && <DonationCtaSection donationCta={donationCtaSection} visible={sectionsVisible.donation_cta !== false} />}
       <section><CtaBanner /></section>

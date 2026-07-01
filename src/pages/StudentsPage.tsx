@@ -8,6 +8,8 @@ import { getStudents } from '../services/students'
 import { getPageHeader } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import type { Student } from '../types/database'
+
+const STUDENT_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23e5e7eb'/%3E%3Ccircle cx='200' cy='110' r='50' fill='%239ca3af'/%3E%3Cellipse cx='200' cy='230' rx='80' ry='50' fill='%239ca3af'/%3E%3C/svg%3E"
 import type { PageHeader } from '../types/cms-content'
 import { formatNPR } from '../utils/currency'
 import { StudentCardSkeleton } from '../components/ui/LoadingSkeleton'
@@ -80,10 +82,11 @@ export function StudentsPage() {
                 <Card key={student.id} variant="bordered" className="overflow-hidden hover:shadow-lg transition-shadow">
                   <div className="aspect-w-4 aspect-h-3">
                     <img
-                      src={student.photo_url ?? undefined}
+                      src={student.photo_url || STUDENT_PLACEHOLDER}
                       alt={student.name}
                       className="w-full h-full object-cover"
                       loading="lazy" decoding="async"
+                      onError={e => { (e.target as HTMLImageElement).src = STUDENT_PLACEHOLDER }}
                     />
                   </div>
                   <div className="p-4 sm:p-6">
