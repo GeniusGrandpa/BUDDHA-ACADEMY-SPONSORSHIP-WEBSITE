@@ -1,8 +1,4 @@
--- Website Builder / CMS Unified System
--- Adds proper website_pages, website_sections, website_page_versions tables
--- with draft/publish workflow, JSONB design settings, and RLS policies
 
--- 1. WEBSITE_PAGES - unified pages registry
 CREATE TABLE IF NOT EXISTS public.website_pages (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   slug TEXT UNIQUE NOT NULL,
@@ -21,7 +17,6 @@ CREATE TABLE IF NOT EXISTS public.website_pages (
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
--- 2. WEBSITE_SECTIONS - sections per page
 CREATE TABLE IF NOT EXISTS public.website_sections (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   page_id UUID NOT NULL REFERENCES public.website_pages(id) ON DELETE CASCADE,
@@ -41,7 +36,6 @@ CREATE TABLE IF NOT EXISTS public.website_sections (
   UNIQUE(page_id, section_key)
 );
 
--- 3. WEBSITE_CONTENT_BLOCKS - individual blocks within sections
 CREATE TABLE IF NOT EXISTS public.website_content_blocks (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   section_id UUID NOT NULL REFERENCES public.website_sections(id) ON DELETE CASCADE,
@@ -55,7 +49,6 @@ CREATE TABLE IF NOT EXISTS public.website_content_blocks (
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
--- 4. WEBSITE_PAGE_VERSIONS - version history for draft/publish
 CREATE TABLE IF NOT EXISTS public.website_page_versions (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   page_id UUID NOT NULL REFERENCES public.website_pages(id) ON DELETE CASCADE,
@@ -67,7 +60,6 @@ CREATE TABLE IF NOT EXISTS public.website_page_versions (
   UNIQUE(page_id, version_number)
 );
 
--- 5. WEBSITE_MEDIA - unified media library
 CREATE TABLE IF NOT EXISTS public.website_media (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   file_url TEXT NOT NULL,
@@ -81,7 +73,6 @@ CREATE TABLE IF NOT EXISTS public.website_media (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- Add updated_at triggers
 DO $$
 DECLARE
   tbl TEXT;
@@ -95,14 +86,12 @@ BEGIN
   END LOOP;
 END $$;
 
--- RLS ENABLE
 ALTER TABLE public.website_pages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.website_sections ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.website_content_blocks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.website_page_versions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.website_media ENABLE ROW LEVEL SECURITY;
 
--- RLS: website_pages
 DROP POLICY IF EXISTS "Public can read published pages" ON public.website_pages;
 CREATE POLICY "Public can read published pages"
   ON public.website_pages FOR SELECT
@@ -124,7 +113,6 @@ CREATE POLICY "Admins can delete website_pages"
   ON public.website_pages FOR DELETE
   USING (public.is_admin_or_super_admin());
 
--- RLS: website_sections
 DROP POLICY IF EXISTS "Public can read visible sections" ON public.website_sections;
 CREATE POLICY "Public can read visible sections"
   ON public.website_sections FOR SELECT
@@ -146,7 +134,6 @@ CREATE POLICY "Admins can delete website_sections"
   ON public.website_sections FOR DELETE
   USING (public.is_admin_or_super_admin());
 
--- RLS: website_content_blocks
 DROP POLICY IF EXISTS "Public can read visible blocks" ON public.website_content_blocks;
 CREATE POLICY "Public can read visible blocks"
   ON public.website_content_blocks FOR SELECT
@@ -163,14 +150,12 @@ CREATE POLICY "Admins can manage blocks"
   USING (public.is_admin_or_super_admin())
   WITH CHECK (public.is_admin_or_super_admin());
 
--- RLS: website_page_versions
 DROP POLICY IF EXISTS "Admins can manage versions" ON public.website_page_versions;
 CREATE POLICY "Admins can manage versions"
   ON public.website_page_versions FOR ALL
   USING (public.is_admin_or_super_admin())
   WITH CHECK (public.is_admin_or_super_admin());
 
--- RLS: website_media
 DROP POLICY IF EXISTS "Public can read media" ON public.website_media;
 CREATE POLICY "Public can read media"
   ON public.website_media FOR SELECT
@@ -192,7 +177,6 @@ CREATE POLICY "Admins can delete media"
   ON public.website_media FOR DELETE
   USING (public.is_admin_or_super_admin());
 
--- Indexes
 CREATE INDEX IF NOT EXISTS idx_website_pages_slug ON public.website_pages(slug);
 CREATE INDEX IF NOT EXISTS idx_website_pages_status ON public.website_pages(status);
 CREATE INDEX IF NOT EXISTS idx_website_sections_page ON public.website_sections(page_id);
@@ -203,7 +187,6 @@ CREATE INDEX IF NOT EXISTS idx_website_versions_page ON public.website_page_vers
 CREATE INDEX IF NOT EXISTS idx_website_media_type ON public.website_media(mime_type);
 CREATE INDEX IF NOT EXISTS idx_website_pages_updated ON public.website_pages(updated_at DESC);
 
--- Seed initial pages from existing ALL_PUBLIC_PAGES
 INSERT INTO public.website_pages (slug, title, status, meta_title, meta_description)
 VALUES
   ('home', 'Home', 'published', 'Home - Buddha Academy', 'Welcome to Buddha Academy'),
@@ -227,7 +210,6 @@ ON CONFLICT (slug) DO UPDATE SET
   meta_title = EXCLUDED.meta_title,
   meta_description = EXCLUDED.meta_description;
 
--- Audit triggers for website tables
 DO $$
 DECLARE
   tbl TEXT;

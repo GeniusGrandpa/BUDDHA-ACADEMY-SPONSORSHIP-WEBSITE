@@ -1,15 +1,3 @@
--- The admin RLS policies on CMS tables reference `profiles` in subqueries:
---   EXISTS (SELECT 1 FROM profiles WHERE profiles.id = auth.uid() ...)
--- PostgreSQL checks table-access permissions before evaluating WHERE conditions.
--- Even though auth.uid() is NULL for anon (making the subquery return no rows),
--- PostgreSQL still requires SELECT privilege on `profiles` to execute the subquery.
---
--- The profiles table has strict RLS policies that prevent anon from seeing any
--- actual row data. Granting SELECT allows the subquery to be parsed; RLS then
--- filters everything out for anon.
---
--- As a belt-and-suspenders measure, also wrap the admin policies that lack an
--- auth.role() guard so they short-circuit earlier.
 
 GRANT SELECT ON public.profiles TO anon;
 

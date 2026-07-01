@@ -1,4 +1,3 @@
--- Fix content_versions trigger functions (changed_by → created_by, and add required columns)
 
 CREATE OR REPLACE FUNCTION public.create_content_version_v2()
 RETURNS TRIGGER
@@ -40,7 +39,6 @@ BEGIN
 END;
 $$;
 
--- Also fix create_content_version() just in case it's used anywhere
 CREATE OR REPLACE FUNCTION public.create_content_version()
 RETURNS TRIGGER AS $$
 DECLARE

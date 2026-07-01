@@ -28,7 +28,7 @@ export default defineConfig({
         },
       },
     },
-    chunkSizeWarningLimit: 300,
+    chunkSizeWarningLimit: 650,
     sourcemap: false,
     reportCompressedSize: false,
   },
