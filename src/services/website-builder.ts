@@ -5,11 +5,11 @@ function db(table: string) {
   return supabase.from(table as never)
 }
 
-const PAGE_COLUMNS = 'id, slug, title, status, is_draft, published_version_id, created_at, updated_at'
-const SECTION_COLUMNS = 'id, page_id, section_type, title, subtitle, settings, is_visible, sort_order, created_at, updated_at'
-const BLOCK_COLUMNS = 'id, section_id, block_type, content, sort_order, created_at, updated_at'
-const MEDIA_COLUMNS = 'id, file_url, file_name, file_size, mime_type, alt_text, created_at'
-const VERSION_COLUMNS = 'id, page_id, version_number, status, snapshot, created_at'
+const PAGE_COLUMNS = 'id, slug, title, status, meta_title, meta_description, hero_background_image, hero_overlay_color, hero_overlay_opacity, layout_settings, is_draft, published_version_id, updated_by, created_at, updated_at'
+const SECTION_COLUMNS = 'id, page_id, section_key, section_type, title, subtitle, description, content, settings, is_visible, is_draft, updated_by, sort_order, created_at, updated_at'
+const BLOCK_COLUMNS = 'id, section_id, block_type, title, content, settings, sort_order, is_visible, created_at, updated_at'
+const MEDIA_COLUMNS = 'id, file_url, file_name, file_size, mime_type, alt_text, width, height, uploaded_by, created_at'
+const VERSION_COLUMNS = 'id, page_id, version_number, status, snapshot, created_by, created_at'
 
 export async function fetchAllPages(): Promise<WebsitePage[]> {
   const { data, error } = await db('website_pages')
