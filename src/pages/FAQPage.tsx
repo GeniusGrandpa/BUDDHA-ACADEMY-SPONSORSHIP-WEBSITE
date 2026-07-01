@@ -3,13 +3,11 @@ import { AccordionItem } from '../components/ui/Accordion'
 import { Card } from '../components/ui/Card'
 import { getFaqs } from '../services/content'
 import { getPageHeader } from '../services/cms-content'
-import { useCmsStrings } from '../context/CmsStringsContext'
 import type { Faq } from '../types/database'
 import type { PageHeader } from '../types/cms-content'
 import { CardSkeleton } from '../components/ui/LoadingSkeleton'
 
 export function FAQPage() {
-  const { t } = useCmsStrings()
   const [faqs, setFaqs] = useState<Faq[]>([])
   const [loading, setLoading] = useState(true)
   const [pageHeader, setPageHeader] = useState<PageHeader | null>(null)

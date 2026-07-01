@@ -265,9 +265,9 @@ export const router = createBrowserRouter([
       { path: 'reports', element: <LazyPage Component={AdminReportsPage} /> },
       { path: 'users', element: <LazyPage Component={AdminUsersPage} /> },
 
-      { path: 'website', element: <LazyPage Component={WebsiteDashboard} /> },
-      { path: 'website/builder', element: <LazyPage Component={WebsiteBuilder} /> },
-      { path: 'website/media', element: <LazyPage Component={MediaLibrary} /> },
+      { path: 'website', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={WebsiteDashboard} /></ProtectedRoute> },
+      { path: 'website/builder', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={WebsiteBuilder} /></ProtectedRoute> },
+      { path: 'website/media', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={MediaLibrary} /></ProtectedRoute> },
       { path: 'website/homepage', element: <LazyPage Component={HomePageEditor} /> },
       { path: 'website/about', element: <LazyPage Component={AboutPageEditor} /> },
       { path: 'website/contact', element: <LazyPage Component={ContactPageEditor} /> },

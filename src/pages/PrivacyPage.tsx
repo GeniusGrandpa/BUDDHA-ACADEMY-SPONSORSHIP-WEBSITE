@@ -91,7 +91,7 @@ export function PrivacyPage() {
             updated_by: null,
             created_at: '',
             updated_at: '',
-            sections: c.sections || [],
+            sections: (c.sections || []) as LegalPageWithSections['sections'],
           })
         }
       }
