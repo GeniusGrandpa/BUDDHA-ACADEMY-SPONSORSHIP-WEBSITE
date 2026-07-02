@@ -7,7 +7,37 @@ import { Input } from '../../../components/ui/Input'
 import type { SiteSettings } from '../../../types/cms'
 
 export function AdminSiteSettings() {
-  const [settings, setSettings] = useState<SiteSettings | null>(null)
+  const [settings, setSettings] = useState<SiteSettings | null>({
+    id: '',
+    site_name: '',
+    tagline: '',
+    logo_url: null,
+    favicon_url: null,
+    theme_primary_color: '#F59E0B',
+    theme_secondary_color: '#D97706',
+    contact_email: '',
+    contact_phone: '',
+    contact_address: '',
+    social_facebook: null,
+    social_instagram: null,
+    social_twitter: null,
+    social_youtube: null,
+    social_linkedin: null,
+    seo_default_title: '',
+    seo_default_description: '',
+    seo_default_image: null,
+    announcement_enabled: false,
+    announcement_text: null,
+    announcement_type: 'info',
+    maintenance_mode: false,
+    maintenance_message: null,
+    donation_default_currency: 'USD',
+    donation_min_amount: 1,
+    donation_max_amount: 100000,
+    footer_description: '',
+    footer_copyright: '',
+    footer_nonprofit_text: '',
+  })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
@@ -18,7 +48,7 @@ export function AdminSiteSettings() {
   const load = async () => {
     try {
       const data = await getSiteSettings()
-      setSettings(data)
+      if (data) setSettings(data)
     } catch {
       toast.error('Failed to load settings')
     } finally {
@@ -27,10 +57,9 @@ export function AdminSiteSettings() {
   }
 
   const handleSave = async () => {
-    if (!settings) return
     setSaving(true)
     try {
-      await updateSiteSettings(settings)
+      await updateSiteSettings(settings as SiteSettings)
       toast.success('Settings saved')
     } catch {
       toast.error('Failed to save settings')

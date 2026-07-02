@@ -28,15 +28,16 @@ export function CampaignsEditor() {
   const handleSave = async (goal: DonationGoal) => {
     setSaving(true)
     try {
-
-      const { id, ...rest } = goal
-      void id
-      const { error } = await supabase.from('donation_goals').upsert({ ...rest, start_date: rest.start_date || null, end_date: rest.end_date || null })
+      const { error } = await supabase.from('donation_goals').upsert({
+        ...goal,
+        start_date: goal.start_date || null,
+        end_date: goal.end_date || null,
+      })
       if (error) throw error
       toast.success('Campaign saved')
       load()
     } catch { toast.error('Failed to save campaign') }
-    finally { setSaving(false) }
+    finally { setSaving(false)}
   }
 
   const handleDelete = async (id: string) => {

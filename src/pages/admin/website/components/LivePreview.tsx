@@ -101,7 +101,7 @@ function SectionPreviewRenderer({ section }: { section: WebsiteSection }) {
     )
   }
 
-  switch (section.section_type) { {
+  switch (section.section_type) {
     case 'hero': {
       return (
         <HeroPreview hero={{

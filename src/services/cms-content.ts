@@ -29,8 +29,14 @@ export async function getDonationContent(): Promise<DonationContent | null> {
 }
 
 export async function upsertDonationContent(content: Partial<DonationContent>): Promise<void> {
-  const { error } = await db('donation_content').upsert(content as never)
-  if (error) throw error
+  const { data: existing } = await db('donation_content').select('id').limit(1).maybeSingle()
+  if (existing) {
+    const { error } = await db('donation_content').update({ ...content, updated_at: new Date().toISOString() } as never).eq('id', (existing as { id: string }).id)
+    if (error) throw error
+  } else {
+    const { error } = await db('donation_content').insert(content as never)
+    if (error) throw error
+  }
 }
 
 export async function getSponsorshipContent(): Promise<SponsorshipContent | null> {
@@ -44,8 +50,14 @@ export async function getSponsorshipContent(): Promise<SponsorshipContent | null
 }
 
 export async function upsertSponsorshipContent(content: Partial<SponsorshipContent>): Promise<void> {
-  const { error } = await db('sponsorship_content').upsert(content as never)
-  if (error) throw error
+  const { data: existing } = await db('sponsorship_content').select('id').limit(1).maybeSingle()
+  if (existing) {
+    const { error } = await db('sponsorship_content').update({ ...content, updated_at: new Date().toISOString() } as never).eq('id', (existing as { id: string }).id)
+    if (error) throw error
+  } else {
+    const { error } = await db('sponsorship_content').insert(content as never)
+    if (error) throw error
+  }
 }
 
 export async function getVolunteerContent(): Promise<VolunteerContent | null> {
@@ -59,8 +71,14 @@ export async function getVolunteerContent(): Promise<VolunteerContent | null> {
 }
 
 export async function upsertVolunteerContent(content: Partial<VolunteerContent>): Promise<void> {
-  const { error } = await db('volunteer_content').upsert(content as never)
-  if (error) throw error
+  const { data: existing } = await db('volunteer_content').select('id').limit(1).maybeSingle()
+  if (existing) {
+    const { error } = await db('volunteer_content').update({ ...content, updated_at: new Date().toISOString() } as never).eq('id', (existing as { id: string }).id)
+    if (error) throw error
+  } else {
+    const { error } = await db('volunteer_content').insert(content as never)
+    if (error) throw error
+  }
 }
 
 export async function getTransparencyContent(): Promise<TransparencyContent | null> {
@@ -74,8 +92,14 @@ export async function getTransparencyContent(): Promise<TransparencyContent | nu
 }
 
 export async function upsertTransparencyContent(content: Partial<TransparencyContent>): Promise<void> {
-  const { error } = await db('transparency_content').upsert(content as never)
-  if (error) throw error
+  const { data: existing } = await db('transparency_content').select('id').limit(1).maybeSingle()
+  if (existing) {
+    const { error } = await db('transparency_content').update({ ...content, updated_at: new Date().toISOString() } as never).eq('id', (existing as { id: string }).id)
+    if (error) throw error
+  } else {
+    const { error } = await db('transparency_content').insert(content as never)
+    if (error) throw error
+  }
 }
 
 export async function getHeroContent(): Promise<HeroContent | null> {
@@ -89,8 +113,14 @@ export async function getHeroContent(): Promise<HeroContent | null> {
 }
 
 export async function upsertHeroContent(content: Partial<HeroContent>): Promise<void> {
-  const { error } = await db('hero_content').upsert(content as never)
-  if (error) throw error
+  const { data: existing } = await db('hero_content').select('id').limit(1).maybeSingle()
+  if (existing) {
+    const { error } = await db('hero_content').update({ ...content, updated_at: new Date().toISOString() } as never).eq('id', (existing as { id: string }).id)
+    if (error) throw error
+  } else {
+    const { error } = await db('hero_content').insert(content as never)
+    if (error) throw error
+  }
 }
 
 export async function getSectionVisibility(): Promise<SectionVisibility[]> {
@@ -131,8 +161,21 @@ export async function getSiteImagesBySection(section: string): Promise<SiteImage
 }
 
 export async function upsertSiteImage(image: Partial<SiteImage>): Promise<void> {
-  const { error } = await db('site_images').upsert(image as never)
-  if (error) throw error
+  if (!image.image_key) return
+  const { data: existing } = await db('site_images')
+    .select('id')
+    .eq('image_key', image.image_key)
+    .maybeSingle()
+  if (existing) {
+    const { error } = await db('site_images')
+      .update({ ...image, updated_at: new Date().toISOString() } as never)
+      .eq('id', (existing as { id: string }).id)
+    if (error) throw error
+  } else {
+    const { error } = await db('site_images')
+      .insert(image as never)
+    if (error) throw error
+  }
 }
 
 export async function deleteSiteImage(id: string): Promise<void> {
@@ -151,8 +194,14 @@ export async function getFooterContent(): Promise<FooterContent | null> {
 }
 
 export async function upsertFooterContent(content: Partial<FooterContent>): Promise<void> {
-  const { error } = await db('footer_content').upsert(content as never)
-  if (error) throw error
+  const { data: existing } = await db('footer_content').select('id').limit(1).maybeSingle()
+  if (existing) {
+    const { error } = await db('footer_content').update({ ...content, updated_at: new Date().toISOString() } as never).eq('id', (existing as { id: string }).id)
+    if (error) throw error
+  } else {
+    const { error } = await db('footer_content').insert(content as never)
+    if (error) throw error
+  }
 }
 
 export async function getSeoContent(pageSlug: string): Promise<SeoContent | null> {
@@ -165,8 +214,21 @@ export async function getSeoContent(pageSlug: string): Promise<SeoContent | null
 }
 
 export async function upsertSeoContent(content: Partial<SeoContent>): Promise<void> {
-  const { error } = await db('seo_content').upsert(content as never)
-  if (error) throw error
+  if (!content.page_slug) return
+  const { data: existing } = await db('seo_content')
+    .select('id')
+    .eq('page_slug', content.page_slug)
+    .maybeSingle()
+  if (existing) {
+    const { error } = await db('seo_content')
+      .update({ ...content, updated_at: new Date().toISOString() } as never)
+      .eq('id', (existing as { id: string }).id)
+    if (error) throw error
+  } else {
+    const { error } = await db('seo_content')
+      .insert(content as never)
+    if (error) throw error
+  }
 }
 
 export async function getPageHeader(pageSlug: string): Promise<PageHeader | null> {
@@ -179,8 +241,21 @@ export async function getPageHeader(pageSlug: string): Promise<PageHeader | null
 }
 
 export async function upsertPageHeader(header: Partial<PageHeader>): Promise<void> {
-  const { error } = await db('page_headers').upsert(header as never)
-  if (error) throw error
+  if (!header.page_slug) return
+  const { data: existing } = await db('page_headers')
+    .select('id')
+    .eq('page_slug', header.page_slug)
+    .maybeSingle()
+  if (existing) {
+    const { error } = await db('page_headers')
+      .update({ ...header, updated_at: new Date().toISOString() } as never)
+      .eq('id', (existing as { id: string }).id)
+    if (error) throw error
+  } else {
+    const { error } = await db('page_headers')
+      .insert(header as never)
+    if (error) throw error
+  }
 }
 
 export async function getSectionContent(sectionKey: string): Promise<SectionContent | null> {
@@ -192,8 +267,21 @@ export async function getSectionContent(sectionKey: string): Promise<SectionCont
 }
 
 export async function upsertSectionContent(content: Partial<SectionContent>): Promise<void> {
-  const { error } = await db('section_content').upsert(content as never)
-  if (error) throw error
+  if (!content.section_key) return
+  const { data: existing } = await db('section_content')
+    .select('id')
+    .eq('section_key', content.section_key)
+    .maybeSingle()
+  if (existing) {
+    const { error } = await db('section_content')
+      .update({ ...content, updated_at: new Date().toISOString() } as never)
+      .eq('id', (existing as { id: string }).id)
+    if (error) throw error
+  } else {
+    const { error } = await db('section_content')
+      .insert(content as never)
+    if (error) throw error
+  }
 }
 
 export async function getAllCmsStrings(): Promise<CmsStringMap> {
@@ -218,6 +306,18 @@ export async function getCmsString(key: string): Promise<string | null> {
 }
 
 export async function upsertCmsString(stringData: { key: string; value: string; page_slug?: string; category?: string }): Promise<void> {
-  const { error } = await db('cms_strings').upsert(stringData as never)
-  if (error) throw error
+  const { data: existing } = await db('cms_strings')
+    .select('id')
+    .eq('key', stringData.key)
+    .maybeSingle()
+  if (existing) {
+    const { error } = await db('cms_strings')
+      .update({ ...stringData, updated_at: new Date().toISOString() } as never)
+      .eq('id', (existing as { id: string }).id)
+    if (error) throw error
+  } else {
+    const { error } = await db('cms_strings')
+      .insert(stringData as never)
+    if (error) throw error
+  }
 }
