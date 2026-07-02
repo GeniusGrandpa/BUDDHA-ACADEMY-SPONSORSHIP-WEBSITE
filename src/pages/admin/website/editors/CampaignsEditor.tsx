@@ -28,12 +28,21 @@ export function CampaignsEditor() {
   const handleSave = async (goal: DonationGoal) => {
     setSaving(true)
     try {
-      const { error } = await supabase.from('donation_goals').upsert({
+      const payload = {
         ...goal,
         start_date: goal.start_date || null,
         end_date: goal.end_date || null,
-      })
-      if (error) throw error
+      }
+      if (goal.id) {
+        const { error } = await supabase.from('donation_goals').update(payload).eq('id', goal.id)
+        if (error) throw error
+      } else {
+        const { data, error } = await supabase.from('donation_goals').insert(payload).select('id').single()
+        if (error) throw error
+        if (data) {
+          setGoals(prev => prev.map(g => g === goal ? { ...g, id: data.id, _new: false } : g))
+        }
+      }
       toast.success('Campaign saved')
       load()
     } catch { toast.error('Failed to save campaign') }
