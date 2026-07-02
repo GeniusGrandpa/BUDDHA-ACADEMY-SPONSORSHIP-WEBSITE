@@ -24,7 +24,7 @@ export function AdminVolunteerContent() {
         .select('*').order('created_at', { ascending: false }).limit(1).maybeSingle()
       if (data) {
 
-        const d = data as any // eslint-disable-line @typescript-eslint/no-explicit-any
+        const d = data as any 
         setContentId(d.id)
         setHeroTitle(d.hero_title || '')
         setHeroSubtitle(d.hero_subtitle || '')

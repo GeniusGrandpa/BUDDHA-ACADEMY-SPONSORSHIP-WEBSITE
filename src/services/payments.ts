@@ -94,13 +94,12 @@ export async function verifyPayment(
   status: 'verified' | 'rejected' | 'failed',
   notes?: string,
 ): Promise<void> {
-  // First get the payment session to get donor_id
   const { data: session, error: sessionError } = await supabase
     .from('payment_sessions')
     .select('donor_id')
     .eq('id', sessionId)
     .single()
-  
+
   if (sessionError) throw sessionError
 
   const { error } = await supabase.rpc('verify_payment', {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { fetchFullPageBySlug } from '../services/website-builder'
+import { fetchPublicPageBySlug } from '../services/website-builder'
 import type { WebsiteSection, WebsitePage } from '../types/website-builder'
 import { DashboardSkeleton } from './ui/LoadingSkeleton'
 import { SECTION_RENDERER_REGISTRY, DefaultSectionRenderer } from './website-builder/SectionRenderers'
@@ -20,9 +20,12 @@ function sectionHasContent(s: WebsiteSection): boolean {
 }
 
 function hasPopulatedSections(sections: WebsiteSection[]): boolean {
-  const nonHeader = sections.filter(s => !HEADER_TYPES.has(s.section_type))
-  if (nonHeader.length === 0) return false
-  return nonHeader.some(s => sectionHasContent(s))
+  if (sections.length === 0) return false
+  return sections.some(s => {
+    if (sectionHasContent(s)) return true
+    if (HEADER_TYPES.has(s.section_type) && (s.title?.trim() || s.subtitle?.trim())) return true
+    return false
+  })
 }
 
 function buildPageHeaderSection(page: WebsitePage): WebsiteSection {
@@ -60,11 +63,11 @@ export function DynamicPublicPageRenderer({ slug, fallback }: DynamicPublicPageR
     setLoading(true)
     setError(false)
 
-    fetchFullPageBySlug(slug)
+    fetchPublicPageBySlug(slug)
       .then(result => {
         if (cancelled) return
         if (result) {
-          const visible = result.sections.filter(s => s.is_visible)
+          const visible = result.sections.filter(s => s.is_visible && !s.is_draft)
           if (hasPopulatedSections(visible)) {
             setPage(result.page)
             setSections(visible)
@@ -118,8 +121,8 @@ export function usePageContent(slug: string) {
   useEffect(() => {
     let cancelled = false
     setLoading(true)
-    fetchFullPageBySlug(slug)
-      .then(result => {
+    fetchPublicPageBySlug(slug)
+      .then((result: { page: WebsitePage; sections: WebsiteSection[] } | null) => {
         if (!cancelled && result) {
           setData(result)
         }

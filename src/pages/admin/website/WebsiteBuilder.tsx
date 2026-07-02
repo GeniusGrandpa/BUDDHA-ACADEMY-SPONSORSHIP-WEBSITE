@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { Search, Eye, EyeOff, Save, Send, ArrowUp, ArrowDown, Image, FileText, Smartphone, Tablet, Monitor, Globe, Layers, ChevronLeft, MoveVertical, Check, X } from 'lucide-react'
@@ -8,6 +8,7 @@ import { ImagePicker } from '../../../components/ui/ImagePicker'
 import { Select } from '../../../components/ui/Select'
 import { DashboardSkeleton } from '../../../components/ui/LoadingSkeleton'
 import { StatusBadge } from '../../../components/ui/StatusBadge'
+import { SectionContentEditor } from './components/SectionContentEditor'
 import { SECTION_TYPE_LABELS, FONT_SIZE_OPTIONS, LAYOUT_PRESET_OPTIONS, PADDING_OPTIONS, BORDER_RADIUS_OPTIONS } from '../../../types/website-builder'
 import type { WebsitePage, WebsiteSection, PageStatus, SectionSettings } from '../../../types/website-builder'
 
@@ -262,7 +263,6 @@ function PageListView({ pages, searchQuery, onSearchChange, statusFilter, onStat
   )
 }
 
-
 function PageEditorView({ page, sections, selectedSection, selectedSectionId, onSelectSection, onUpdatePage, onUpdateSection, onUpdateSettings, onToggleVisibility, onReorder, onPublish, onSaveDraft, onBack, previewDevice, setPreviewDevice, editorTab, setEditorTab, isSaving }: {
   page: WebsitePage
   sections: WebsiteSection[]
@@ -299,7 +299,7 @@ function PageEditorView({ page, sections, selectedSection, selectedSectionId, on
     if (direction === 'down' && idx === sectionOrder.length - 1) return
     const newOrder = [...sectionOrder]
     const swapIdx = direction === 'up' ? idx - 1 : idx + 1
-    ;[newOrder[idx], newOrder[swapIdx]] = [newOrder[swapIdx], newOrder[idx]]
+      ;[newOrder[idx], newOrder[swapIdx]] = [newOrder[swapIdx], newOrder[idx]]
     onReorder(page.id, newOrder.map(s => s.id))
   }, [sectionOrder, page.id, onReorder])
 
@@ -374,9 +374,8 @@ function PageEditorView({ page, sections, selectedSection, selectedSectionId, on
                 <div key={section.id} className="group">
                   <button
                     onClick={() => onSelectSection(section.id)}
-                    className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm transition-all ${
-                      isSelected ? 'bg-amber-50 text-amber-700 font-medium ring-1 ring-amber-200' : 'text-gray-600 hover:bg-white'
-                    } ${!section.is_visible ? 'opacity-60' : ''}`}
+                    className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm transition-all ${isSelected ? 'bg-amber-50 text-amber-700 font-medium ring-1 ring-amber-200' : 'text-gray-600 hover:bg-white'
+                      } ${!section.is_visible ? 'opacity-60' : ''}`}
                   >
                     <span className={`w-2 h-2 rounded-full shrink-0 ${section.is_visible ? 'bg-green-400' : 'bg-gray-300'}`} />
                     <span className="flex-1 text-left truncate">{label}</span>
@@ -480,48 +479,20 @@ function PageEditorView({ page, sections, selectedSection, selectedSectionId, on
   )
 }
 
-
 function ContentEditorPanel({ section, onUpdate }: { section: WebsiteSection; onUpdate: (id: string, updates: Partial<WebsiteSection>) => void }) {
-  const [title, setTitle] = useState(section.title || '')
-  const [subtitle, setSubtitle] = useState(section.subtitle || '')
-  const [description, setDescription] = useState(section.description || '')
-
-  useEffect(() => {
-    setTitle(section.title || '')
-    setSubtitle(section.subtitle || '')
-    setDescription(section.description || '')
-  }, [section.id])
-
-  const handleSave = useCallback(() => {
-    onUpdate(section.id, { title, subtitle, description })
-    toast.success('Content updated')
-  }, [section.id, title, subtitle, description, onUpdate])
-
   return (
     <div className="space-y-4">
-      <div>
-        <label className="block text-xs font-medium text-gray-500 mb-1">Section Title</label>
-        <input type="text" value={title} onChange={e => setTitle(e.target.value)} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500" placeholder="Section title..." />
+      <div className="px-1">
+        <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Section</p>
+        <p className="text-sm font-semibold text-gray-700">{SECTION_TYPE_LABELS[section.section_type] || section.section_key}</p>
+        <p className="text-xs text-gray-400 mt-0.5">Key: {section.section_key}</p>
       </div>
-      <div>
-        <label className="block text-xs font-medium text-gray-500 mb-1">Subtitle</label>
-        <input type="text" value={subtitle} onChange={e => setSubtitle(e.target.value)} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500" placeholder="Section subtitle..." />
+      <div className="border-t border-gray-100 pt-3">
+        <SectionContentEditor key={section.id} section={section} onUpdate={onUpdate} />
       </div>
-      <div>
-        <label className="block text-xs font-medium text-gray-500 mb-1">Description</label>
-        <textarea value={description} onChange={e => setDescription(e.target.value)} rows={4} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 resize-none" placeholder="Section description..." />
-      </div>
-      <div>
-        <label className="block text-xs font-medium text-gray-500 mb-1">Section Key</label>
-        <input type="text" value={section.section_key} disabled className="w-full px-3 py-2 border border-gray-100 rounded-lg text-sm text-gray-400 bg-gray-50 cursor-not-allowed" />
-      </div>
-      <button onClick={handleSave} className="w-full px-4 py-2 text-sm font-medium rounded-lg text-white bg-amber-500 hover:bg-amber-600 transition-colors">
-        Apply Changes
-      </button>
     </div>
   )
 }
-
 
 function DesignControlsPanel({ section, onUpdateSettings }: { section: WebsiteSection; onUpdateSettings: (id: string, settings: SectionSettings) => void }) {
   const settings = section.settings || {}
@@ -627,7 +598,6 @@ function DesignControlsPanel({ section, onUpdateSettings }: { section: WebsiteSe
   )
 }
 
-
 function SeoEditorPanel({ page, metaTitle, metaDesc, onMetaTitleChange, onMetaDescChange, onSave }: {
   page: WebsitePage
   metaTitle: string
@@ -666,7 +636,6 @@ function SeoEditorPanel({ page, metaTitle, metaDesc, onMetaTitleChange, onMetaDe
   )
 }
 
-
 function SectionPreview({ section, isSelected, onSelect }: { section: WebsiteSection; isSelected: boolean; onSelect: () => void }) {
   const s = section.settings || {}
   const style: React.CSSProperties = {
@@ -703,16 +672,14 @@ function SectionPreview({ section, isSelected, onSelect }: { section: WebsiteSec
   return (
     <div
       onClick={onSelect}
-      className={`relative cursor-pointer border-2 transition-all ${
-        isSelected ? 'border-amber-400 ring-2 ring-amber-200' : 'border-transparent hover:border-amber-200/50'
-      }`}
+      className={`relative cursor-pointer border-2 transition-all ${isSelected ? 'border-amber-400 ring-2 ring-amber-200' : 'border-transparent hover:border-amber-200/50'
+        }`}
     >
       {s.overlay_color && s.overlay_opacity && (
         <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: s.overlay_color, opacity: s.overlay_opacity }} />
       )}
-      <div className={`absolute top-2 right-2 z-10 px-2 py-1 rounded-md text-xs font-medium ${
-        isSelected ? 'bg-amber-500 text-white' : 'bg-white/90 text-gray-600 shadow-sm border opacity-0 group-hover:opacity-100'
-      }`}>
+      <div className={`absolute top-2 right-2 z-10 px-2 py-1 rounded-md text-xs font-medium ${isSelected ? 'bg-amber-500 text-white' : 'bg-white/90 text-gray-600 shadow-sm border opacity-0 group-hover:opacity-100'
+        }`}>
         {label}
       </div>
       <div style={style} className="relative z-[1] min-h-[60px] p-4">

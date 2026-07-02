@@ -61,10 +61,17 @@ export function useWebsiteBuilder() {
     try {
       await updateSection(id, updates)
       setActiveSections(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s))
+      if (activePageId) {
+        const page = pages.find(p => p.id === activePageId)
+        if (page?.status === 'published') {
+          await updatePageStatus(activePageId, 'draft')
+          setPages(prev => prev.map(p => p.id === activePageId ? { ...p, status: 'draft', is_draft: true } : p))
+        }
+      }
     } catch {
       toast.error('Failed to update section')
     }
-  }, [])
+  }, [activePageId, pages])
 
   const handleUpdateSectionSettings = useCallback(async (id: string, settings: SectionSettings) => {
     try {
@@ -116,8 +123,9 @@ export function useWebsiteBuilder() {
     setIsSaving(true)
     try {
       await createVersion(pageId)
-      await updatePage(pageId, { is_draft: true })
-      toast.success('Draft saved')
+      await updatePage(pageId, { status: 'draft', is_draft: true })
+      setPages(prev => prev.map(p => p.id === pageId ? { ...p, status: 'draft', is_draft: true } : p))
+      toast.success('Draft saved — changes are hidden from the public site')
     } catch {
       toast.error('Failed to save draft')
     } finally {

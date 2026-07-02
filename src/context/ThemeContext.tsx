@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from 'react'
 import type { DesignSettings, DesignColors, DesignBranding, DesignTypography, DesignLayout, DesignTokens, DesignComponentStyles } from '../types/design'
 import { DEFAULT_COLORS, DEFAULT_BRANDING, DEFAULT_TYPOGRAPHY, DEFAULT_LAYOUT, DEFAULT_TOKENS, DEFAULT_COMPONENT_STYLES } from '../types/design'

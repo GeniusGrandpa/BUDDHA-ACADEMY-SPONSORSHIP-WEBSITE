@@ -13,8 +13,6 @@ import { useCmsStrings } from '../context/CmsStringsContext'
 import type { Student, Testimonial } from '../types/database'
 import type { HeroContent, SectionContent } from '../types/cms-content'
 
-
-
 const BADGE_MAP: Record<string, 'success' | 'warning' | 'info'> = {
   available: 'success',
   partially_sponsored: 'warning',

@@ -34,16 +34,15 @@ export async function getAllDonations(): Promise<Donation[]> {
 
 export async function updateDonationStatus(id: string, status: Donation['status']): Promise<Donation> {
   const userId = (await supabase.auth.getSession()).data.session?.user?.id
-  
-  // First get the donation to get donor_id
+
   const { data: donationBefore, error: getError } = await supabase
     .from('donations')
     .select('donor_id')
     .eq('id', id)
     .single()
-  
+
   if (getError) throw getError
-  
+
   const updates: Partial<Donation> = { status }
   if (status === 'completed') {
     updates.verified_by = userId

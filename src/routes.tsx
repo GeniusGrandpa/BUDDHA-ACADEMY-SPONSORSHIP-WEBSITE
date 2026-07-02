@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import { lazy, Suspense } from 'react'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { ProtectedRoute } from './components/ProtectedRoute'
@@ -26,6 +25,8 @@ const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.H
 const AboutPage = lazy(() => import('./pages/AboutPage').then(m => ({ default: m.AboutPage })))
 
 const SponsorshipPage = lazy(() => import('./pages/SponsorshipPage').then(m => ({ default: m.SponsorshipPage })))
+
+const ProgramsPage = lazy(() => import('./pages/ProgramsPage').then(m => ({ default: m.ProgramsPage })))
 
 const StudentsPage = lazy(() => import('./pages/StudentsPage').then(m => ({ default: m.StudentsPage })))
 
@@ -159,6 +160,10 @@ const AdminDonationContent = lazy(() => import('./pages/admin/cms/AdminDonationC
 
 const AdminSponsorshipContent = lazy(() => import('./pages/admin/cms/AdminSponsorshipContent').then(m => ({ default: m.AdminSponsorshipContent })))
 
+const AdminPrograms = lazy(() => import('./pages/admin/cms/AdminPrograms').then(m => ({ default: m.AdminPrograms })))
+
+const AdminImpactStats = lazy(() => import('./pages/admin/cms/AdminImpactStats').then(m => ({ default: m.AdminImpactStats })))
+
 const AdminVolunteerContent = lazy(() => import('./pages/admin/cms/AdminVolunteerContent').then(m => ({ default: m.AdminVolunteerContent })))
 
 const AdminFooterContent = lazy(() => import('./pages/admin/cms/AdminFooterContent').then(m => ({ default: m.AdminFooterContent })))
@@ -202,6 +207,7 @@ export const router = createBrowserRouter([
       { index: true, element: <DynamicPublicPageRenderer slug="home" fallback={<LazyPage Component={HomePage} />} /> },
       { path: 'about', element: <DynamicPublicPageRenderer slug="about" fallback={<LazyPage Component={AboutPage} />} /> },
       { path: 'sponsor', element: <DynamicPublicPageRenderer slug="sponsor" fallback={<LazyPage Component={SponsorshipPage} />} /> },
+      { path: 'programs', element: <DynamicPublicPageRenderer slug="programs" fallback={<LazyPage Component={ProgramsPage} />} /> },
       { path: 'students', element: <DynamicPublicPageRenderer slug="students" fallback={<LazyPage Component={StudentsPage} />} /> },
       { path: 'students/:id', element: <LazyPage Component={StudentDetailPage} /> },
       { path: 'gallery', element: <DynamicPublicPageRenderer slug="gallery" fallback={<LazyPage Component={GalleryPage} />} /> },
@@ -269,33 +275,35 @@ export const router = createBrowserRouter([
       { path: 'website', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={WebsiteDashboard} /></ProtectedRoute> },
       { path: 'website/builder', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={WebsiteBuilder} /></ProtectedRoute> },
       { path: 'website/media', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={MediaLibrary} /></ProtectedRoute> },
-      { path: 'website/homepage', element: <LazyPage Component={HomePageEditor} /> },
-      { path: 'website/about', element: <LazyPage Component={AboutPageEditor} /> },
-      { path: 'website/contact', element: <LazyPage Component={ContactPageEditor} /> },
-      { path: 'website/campaigns', element: <LazyPage Component={CampaignsEditor} /> },
-      { path: 'website/privacy', element: <LazyPage Component={PrivacyPageEditor} /> },
-      { path: 'website/terms', element: <LazyPage Component={TermsPageEditor} /> },
-      { path: 'website/branding', element: <LazyPage Component={BrandingEditor} /> },
-      { path: 'website/seo', element: <LazyPage Component={SEOEditor} /> },
-      { path: 'website/donation', element: <LazyPage Component={AdminDonationContent} /> },
-      { path: 'website/sponsorship', element: <LazyPage Component={AdminSponsorshipContent} /> },
-      { path: 'website/volunteer', element: <LazyPage Component={AdminVolunteerContent} /> },
-      { path: 'website/footer', element: <LazyPage Component={AdminFooterContent} /> },
-      { path: 'website/navigation', element: <LazyPage Component={AdminNavigationManager} /> },
-      { path: 'website/gallery', element: <LazyPage Component={AdminContentGallery} /> },
-      { path: 'website/testimonials', element: <LazyPage Component={AdminContentTestimonials} /> },
-      { path: 'website/news', element: <LazyPage Component={AdminContentNews} /> },
-      { path: 'website/stories', element: <LazyPage Component={AdminStudentStories} /> },
-      { path: 'website/faqs', element: <LazyPage Component={AdminFaqManager} /> },
-      { path: 'website/videos', element: <LazyPage Component={AdminVideoManager} /> },
-      { path: 'website/announcements', element: <LazyPage Component={AdminAnnouncements} /> },
-      { path: 'website/partners', element: <LazyPage Component={AdminPartners} /> },
-      { path: 'website/settings', element: <LazyPage Component={AdminSiteSettings} /> },
-      { path: 'website/versions', element: <LazyPage Component={AdminVersionHistory} /> },
-      { path: 'website/images', element: <LazyPage Component={AdminSiteImages} /> },
-      { path: 'website/sections', element: <LazyPage Component={AdminSectionVisibility} /> },
-      { path: 'website/transparency', element: <LazyPage Component={AdminTransparencyContent} /> },
-      { path: 'website/pages/:slug', element: <LazyPage Component={AdminPageEditor} /> },
+      { path: 'website/homepage', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={HomePageEditor} /></ProtectedRoute> },
+      { path: 'website/about', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AboutPageEditor} /></ProtectedRoute> },
+      { path: 'website/contact', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={ContactPageEditor} /></ProtectedRoute> },
+      { path: 'website/campaigns', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={CampaignsEditor} /></ProtectedRoute> },
+      { path: 'website/privacy', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={PrivacyPageEditor} /></ProtectedRoute> },
+      { path: 'website/terms', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={TermsPageEditor} /></ProtectedRoute> },
+      { path: 'website/branding', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={BrandingEditor} /></ProtectedRoute> },
+      { path: 'website/seo', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={SEOEditor} /></ProtectedRoute> },
+      { path: 'website/donation', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminDonationContent} /></ProtectedRoute> },
+      { path: 'website/sponsorship', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminSponsorshipContent} /></ProtectedRoute> },
+      { path: 'website/volunteer', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminVolunteerContent} /></ProtectedRoute> },
+      { path: 'website/footer', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminFooterContent} /></ProtectedRoute> },
+      { path: 'website/navigation', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminNavigationManager} /></ProtectedRoute> },
+      { path: 'website/gallery', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminContentGallery} /></ProtectedRoute> },
+      { path: 'website/testimonials', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminContentTestimonials} /></ProtectedRoute> },
+      { path: 'website/news', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminContentNews} /></ProtectedRoute> },
+      { path: 'website/stories', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminStudentStories} /></ProtectedRoute> },
+      { path: 'website/faqs', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminFaqManager} /></ProtectedRoute> },
+      { path: 'website/videos', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminVideoManager} /></ProtectedRoute> },
+      { path: 'website/announcements', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminAnnouncements} /></ProtectedRoute> },
+      { path: 'website/partners', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminPartners} /></ProtectedRoute> },
+      { path: 'website/settings', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminSiteSettings} /></ProtectedRoute> },
+      { path: 'website/versions', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminVersionHistory} /></ProtectedRoute> },
+      { path: 'website/images', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminSiteImages} /></ProtectedRoute> },
+      { path: 'website/sections', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminSectionVisibility} /></ProtectedRoute> },
+      { path: 'website/programs', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminPrograms} /></ProtectedRoute> },
+      { path: 'website/impact-stats', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminImpactStats} /></ProtectedRoute> },
+      { path: 'website/transparency', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminTransparencyContent} /></ProtectedRoute> },
+      { path: 'website/pages/:slug', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminPageEditor} /></ProtectedRoute> },
 
       { path: 'content', element: <Navigate to="/admin/website" replace /> },
       { path: 'content/homepage', element: <Navigate to="/admin/website/homepage" replace /> },

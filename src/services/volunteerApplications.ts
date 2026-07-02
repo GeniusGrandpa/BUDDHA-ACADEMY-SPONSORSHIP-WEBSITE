@@ -15,7 +15,7 @@ export async function submitVolunteerApplication(
   data: VolunteerApplicationData,
 ): Promise<void> {
 
-  const { error } = await (supabase as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase as any) 
     .from('volunteer_applications')
     .insert({
       ...data,

@@ -22,5 +22,3 @@ export interface StudentSummary {
   dream_career: string | null
   sponsorship_status: string
 }
-
-

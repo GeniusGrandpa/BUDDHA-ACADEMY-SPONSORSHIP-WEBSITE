@@ -1059,10 +1059,8 @@ CREATE POLICY permissions_delete ON public.permissions FOR DELETE TO authenticat
 DROP POLICY IF EXISTS "role_permissions_read" ON public.role_permissions;
 CREATE POLICY role_permissions_read ON public.role_permissions FOR SELECT TO authenticated USING (true);
 
--- Add is_verified column to profiles
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS is_verified boolean NOT NULL DEFAULT false;
 
--- Update handle_new_user to include is_verified
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
@@ -1089,7 +1087,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
--- Backfill existing users who have completed donations as verified
 UPDATE public.profiles
 SET is_verified = true
 WHERE id IN (
@@ -4098,8 +4095,6 @@ DROP POLICY IF EXISTS "payment_verifications_finance_all" ON payment_verificatio
 CREATE POLICY "payment_verifications_finance_all"
   ON payment_verifications FOR ALL;
 
--- Fix content_versions trigger functions (changed_by → created_by, and add required columns)
-
 CREATE OR REPLACE FUNCTION public.create_content_version_v2()
 RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
@@ -4110,7 +4105,7 @@ BEGIN
   SELECT COALESCE(MAX(version_number), 0) + 1 INTO v_version_number
   FROM public.content_versions
   WHERE entity_type = TG_TABLE_NAME AND entity_id = COALESCE(NEW.id, OLD.id);
-  
+
   INSERT INTO public.content_versions (
     entity_type, 
     entity_id, 
@@ -4140,7 +4135,6 @@ BEGIN
 END;
 $$;
 
--- Also fix create_content_version() just in case it's used anywhere
 CREATE OR REPLACE FUNCTION public.create_content_version()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -4150,7 +4144,7 @@ BEGIN
   FROM public.content_versions
   WHERE entity_type = TG_TABLE_NAME
   AND entity_id = COALESCE(NEW.id, OLD.id);
-  
+
   INSERT INTO public.content_versions (
     entity_type,
     entity_id,

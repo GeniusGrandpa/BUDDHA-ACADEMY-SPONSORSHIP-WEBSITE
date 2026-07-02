@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { type Session, type User } from '@supabase/supabase-js'
 import { getSupabaseClient } from '../../../lib/supabase'

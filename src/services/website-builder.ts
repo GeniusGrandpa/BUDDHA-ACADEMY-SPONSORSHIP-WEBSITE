@@ -40,9 +40,10 @@ export async function fetchPageById(id: string): Promise<WebsitePage | null> {
 export async function createPage(page: Partial<WebsitePage>): Promise<WebsitePage> {
   const { data, error } = await db('website_pages')
     .insert(page as never)
-    .select(PAGE_COLUMNS) as any
+    .select(PAGE_COLUMNS)
+    .single()
   if (error) throw error
-  return (data?.[0]) as WebsitePage
+  return data as unknown as WebsitePage
 }
 
 export async function updatePage(id: string, updates: Partial<WebsitePage>): Promise<void> {
@@ -85,9 +86,10 @@ export async function fetchSectionById(id: string): Promise<WebsiteSection | nul
 export async function upsertSection(section: Partial<WebsiteSection>): Promise<WebsiteSection> {
   const { data, error } = await db('website_sections')
     .upsert(section as never)
-    .select(SECTION_COLUMNS) as any
+    .select(SECTION_COLUMNS)
+    .single()
   if (error) throw error
-  return (data?.[0]) as WebsiteSection
+  return data as unknown as WebsiteSection
 }
 
 export async function updateSection(id: string, updates: Partial<WebsiteSection>): Promise<void> {
@@ -125,7 +127,6 @@ export async function deleteSection(id: string): Promise<void> {
   if (error) throw error
 }
 
-
 export async function fetchBlocksBySection(sectionId: string): Promise<WebsiteContentBlock[]> {
   const { data, error } = await db('website_content_blocks')
     .select(BLOCK_COLUMNS)
@@ -138,9 +139,10 @@ export async function fetchBlocksBySection(sectionId: string): Promise<WebsiteCo
 export async function upsertBlock(block: Partial<WebsiteContentBlock>): Promise<WebsiteContentBlock> {
   const { data, error } = await db('website_content_blocks')
     .upsert(block as never)
-    .select(BLOCK_COLUMNS) as any
+    .select(BLOCK_COLUMNS)
+    .single()
   if (error) throw error
-  return (data?.[0]) as WebsiteContentBlock
+  return data as unknown as WebsiteContentBlock
 }
 
 export async function updateBlock(id: string, updates: Partial<WebsiteContentBlock>): Promise<void> {
@@ -163,7 +165,6 @@ export async function reorderBlocks(_sectionId: string, blockIds: string[]): Pro
     if (error) throw error
   }
 }
-
 
 export async function fetchMedia(page = 1, perPage = 50): Promise<WebsiteMedia[]> {
   const from = (page - 1) * perPage
@@ -188,9 +189,10 @@ export async function fetchMediaById(id: string): Promise<WebsiteMedia | null> {
 export async function createMedia(media: Partial<WebsiteMedia>): Promise<WebsiteMedia> {
   const { data, error } = await db('website_media')
     .insert(media as never)
-    .select(MEDIA_COLUMNS) as any
+    .select(MEDIA_COLUMNS)
+    .single()
   if (error) throw error
-  return (data?.[0]) as WebsiteMedia
+  return data as unknown as WebsiteMedia
 }
 
 export async function updateMedia(id: string, updates: Partial<WebsiteMedia>): Promise<void> {
@@ -233,7 +235,8 @@ export async function uploadImage(file: File, _onProgress?: (pct: number) => voi
     .from('media')
     .getPublicUrl(filePath)
 
-  const publicUrl = urlData?.publicUrl || `${process.env.NEXT_PUBLIC_SUPABASE_URL || ''}/storage/v1/object/public/media/${filePath}`
+  const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL as string | undefined) || ''
+  const publicUrl = urlData?.publicUrl || `${supabaseUrl}/storage/v1/object/public/media/${filePath}`
 
   const mediaItem = await createMedia({
     file_url: publicUrl,
@@ -269,9 +272,9 @@ export async function createVersion(pageId: string): Promise<WebsitePageVersion>
     .select('version_number')
     .eq('page_id' as never, pageId as never)
     .order('version_number' as never, { ascending: false } as never)
-    .limit(1) as any
+    .limit(1)
 
-  const versionNumber = (maxVer?.[0] as { version_number: number } | null)?.version_number ?? 0
+  const versionNumber = (maxVer?.[0] as { version_number: number } | undefined)?.version_number ?? 0
 
   const snapshot = {
     page: { ...page, sections: undefined },
@@ -285,10 +288,11 @@ export async function createVersion(pageId: string): Promise<WebsitePageVersion>
       status: 'draft',
       snapshot: snapshot as never,
     } as never)
-    .select(VERSION_COLUMNS) as any
+    .select(VERSION_COLUMNS)
+    .single()
 
   if (error) throw error
-  return (data?.[0]) as WebsitePageVersion
+  return data as unknown as WebsitePageVersion
 }
 
 export async function publishPage(pageId: string): Promise<void> {
@@ -299,31 +303,54 @@ export async function publishPage(pageId: string): Promise<void> {
   await updatePage(pageId, { status: 'published', is_draft: false, published_version_id: version.id })
 }
 
-
 export interface PageWithSections {
   page: WebsitePage
   sections: WebsiteSection[]
 }
 
-export async function fetchFullPageBySlug(slug: string): Promise<PageWithSections | null> {
-  const page = await fetchPageBySlug(slug)
-  if (!page) return null
-  const sections = await fetchSectionsByPage(page.id)
+export interface FetchPageOptions {
+
+  publicOnly?: boolean
+}
+
+function filterPublicSections(sections: WebsiteSection[]): WebsiteSection[] {
+  return sections
+    .filter(s => s.is_visible && !s.is_draft)
+    .map(s => ({
+      ...s,
+      blocks: (s.blocks || []).filter(b => b.is_visible),
+    }))
+}
+
+async function loadPageSections(pageId: string): Promise<WebsiteSection[]> {
+  const sections = await fetchSectionsByPage(pageId)
   for (const section of sections) {
     const blocks = await fetchBlocksBySection(section.id)
     section.blocks = blocks
   }
+  return sections
+}
+
+export async function fetchFullPageBySlug(slug: string, options: FetchPageOptions = {}): Promise<PageWithSections | null> {
+  const page = await fetchPageBySlug(slug)
+  if (!page) return null
+  if (options.publicOnly && page.status !== 'published') return null
+
+  let sections = await loadPageSections(page.id)
+  if (options.publicOnly) {
+    sections = filterPublicSections(sections)
+  }
   return { page, sections }
+}
+
+export async function fetchPublicPageBySlug(slug: string): Promise<PageWithSections | null> {
+  return fetchFullPageBySlug(slug, { publicOnly: true })
 }
 
 export async function fetchFullPageById(id: string): Promise<PageWithSections | null> {
   const page = await fetchPageById(id)
   if (!page) return null
-  const sections = await fetchSectionsByPage(page.id)
-  for (const section of sections) {
-    const blocks = await fetchBlocksBySection(section.id)
-    section.blocks = blocks
-  }
+  const sections = await loadPageSections(page.id)
   return { page, sections }
 }
 
@@ -404,6 +431,10 @@ const DEFAULT_SECTIONS: Record<string, { section_key: string; section_type: stri
     { section_key: 'page_header', section_type: 'page_header', title: 'Page Header' },
     { section_key: 'activity_feed', section_type: 'activity_feed', title: 'Activity Feed' },
   ],
+  programs: [
+    { section_key: 'page_header', section_type: 'page_header', title: 'Page Header' },
+    { section_key: 'programs_list', section_type: 'programs_list', title: 'Programs List' },
+  ],
   transparency: [
     { section_key: 'page_header', section_type: 'page_header', title: 'Page Header' },
     { section_key: 'transparency_content', section_type: 'transparency_content', title: 'Transparency Content' },
@@ -439,11 +470,12 @@ export async function createDefaultSections(pageId: string, slug: string): Promi
         settings: {} as never,
       } as never)
       .select(SECTION_COLUMNS)
-      .single() as any
+      .single()
 
     if (!error && data) {
-      data.blocks = []
-      sections.push(data as unknown as WebsiteSection)
+      const section = data as unknown as WebsiteSection
+      section.blocks = []
+      sections.push(section)
     }
   }
 

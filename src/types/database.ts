@@ -2804,6 +2804,108 @@ export interface Database {
         ]
       }
     }
+      cms_programs: {
+        Row: {
+          id: string
+          title: string
+          slug: string
+          description: string
+          full_description: string
+          image_url: string
+          category: string
+          status: string
+          sort_order: number
+          is_active: boolean
+          features: Json
+          impact: string
+          funding_goal: number
+          raised_amount: number
+          metadata: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          slug: string
+          description?: string
+          full_description?: string
+          image_url?: string
+          category?: string
+          status?: string
+          sort_order?: number
+          is_active?: boolean
+          features?: Json
+          impact?: string
+          funding_goal?: number
+          raised_amount?: number
+          metadata?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          slug?: string
+          description?: string
+          full_description?: string
+          image_url?: string
+          category?: string
+          status?: string
+          sort_order?: number
+          is_active?: boolean
+          features?: Json
+          impact?: string
+          funding_goal?: number
+          raised_amount?: number
+          metadata?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      cms_impact_stats: {
+        Row: {
+          id: string
+          label: string
+          value: string
+          prefix: string
+          suffix: string
+          icon: string
+          category: string
+          sort_order: number
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          label: string
+          value: string
+          prefix?: string
+          suffix?: string
+          icon?: string
+          category?: string
+          sort_order?: number
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          label?: string
+          value?: string
+          prefix?: string
+          suffix?: string
+          icon?: string
+          category?: string
+          sort_order?: number
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     Views: Record<string, never>
     Functions: {
       get_donor_dashboard_stats: {
@@ -2982,3 +3084,37 @@ export type ContentVersion = Database['public']['Tables']['content_versions']['R
 export type LegalPage = Database['public']['Tables']['legal_pages']['Row']
 export type LegalPageSection = Database['public']['Tables']['legal_page_sections']['Row']
 export type LegalPageVersion = Database['public']['Tables']['legal_page_versions']['Row']
+// Manually defined until migration is applied and types regenerated
+export interface CmsProgram {
+  id: string
+  title: string
+  slug: string
+  description: string | null
+  full_description: string | null
+  image_url: string | null
+  category: string | null
+  status: string
+  sort_order: number
+  is_active: boolean
+  features: unknown
+  impact: string | null
+  funding_goal: number | null
+  raised_amount: number | null
+  metadata: unknown
+  created_at: string
+  updated_at: string
+}
+
+export interface CmsImpactStat {
+  id: string
+  label: string
+  value: string
+  prefix: string | null
+  suffix: string | null
+  icon: string | null
+  category: string | null
+  sort_order: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}

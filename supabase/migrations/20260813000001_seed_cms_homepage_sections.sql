@@ -1,14 +1,8 @@
--- Seed all section_content rows required by HomePage rendering
--- Fixes: missing welcome, stats, featured_students, testimonials, donation_cta sections
--- Fixes: section_visibility key mismatch (students_preview -> featured_students)
-
--- 1. Hero background image — restore on hero_content if blank
 UPDATE public.hero_content
 SET background_image = 'https://www.holistiquelearning.com/blog/wp-content/uploads/2020/01/Morning_assembly1.jpg'
 WHERE (background_image IS NULL OR background_image = '')
   AND is_visible = true;
 
--- 2. Ensure hero_content has all required stat fields populated
 UPDATE public.hero_content
 SET
   statistics = '[
@@ -20,7 +14,6 @@ SET
 WHERE (statistics IS NULL OR statistics = '[]'::jsonb)
   AND is_visible = true;
 
--- 3. section_content: welcome section
 INSERT INTO public.section_content (section_key, title, description, content, is_visible, sort_order)
 VALUES (
   'welcome',
@@ -35,7 +28,6 @@ ON CONFLICT (section_key) DO UPDATE SET
   content     = EXCLUDED.content,
   is_visible  = true;
 
--- 4. section_content: stats section
 INSERT INTO public.section_content (section_key, title, description, content, is_visible, sort_order)
 VALUES (
   'stats',
@@ -50,7 +42,6 @@ ON CONFLICT (section_key) DO UPDATE SET
   content    = EXCLUDED.content,
   is_visible = true;
 
--- 5. section_content: about_preview (upsert to ensure correct content)
 INSERT INTO public.section_content (section_key, title, description, content, is_visible, sort_order)
 VALUES (
   'about_preview',
@@ -71,7 +62,6 @@ ON CONFLICT (section_key) DO UPDATE SET
   content     = EXCLUDED.content,
   is_visible  = true;
 
--- 6. section_content: featured_students section
 INSERT INTO public.section_content (section_key, title, description, content, is_visible, sort_order)
 VALUES (
   'featured_students',
@@ -86,7 +76,6 @@ ON CONFLICT (section_key) DO UPDATE SET
   content    = EXCLUDED.content,
   is_visible = true;
 
--- 7. section_content: sponsorship_steps (upsert)
 INSERT INTO public.section_content (section_key, title, description, content, is_visible, sort_order)
 VALUES (
   'sponsorship_steps',
@@ -111,7 +100,6 @@ ON CONFLICT (section_key) DO UPDATE SET
   content     = EXCLUDED.content,
   is_visible  = true;
 
--- 8. section_content: testimonials section
 INSERT INTO public.section_content (section_key, title, description, content, is_visible, sort_order)
 VALUES (
   'testimonials',
@@ -126,7 +114,6 @@ ON CONFLICT (section_key) DO UPDATE SET
   content    = EXCLUDED.content,
   is_visible = true;
 
--- 9. section_content: donation_cta section
 INSERT INTO public.section_content (section_key, title, description, content, is_visible, sort_order)
 VALUES (
   'donation_cta',
@@ -142,8 +129,6 @@ ON CONFLICT (section_key) DO UPDATE SET
   content     = EXCLUDED.content,
   is_visible  = true;
 
--- 10. Fix section_visibility: add missing keys and fix key mismatch
--- The codebase checks 'featured_students' but the old seed used 'students_preview'
 INSERT INTO public.section_visibility (section_key, section_name, is_visible, sort_order) VALUES
   ('hero',              'Hero Section',        true, 1),
   ('stats',             'Statistics Bar',      true, 2),
@@ -158,7 +143,6 @@ INSERT INTO public.section_visibility (section_key, section_name, is_visible, so
 ON CONFLICT (section_key) DO UPDATE SET
   is_visible = true;
 
--- 11. page_headers: seed all pages used by DynamicPublicPageRenderer
 INSERT INTO public.page_headers (page_slug, title, subtitle, is_visible) VALUES
   ('home',             'Buddha Academy',            'Empowering Nepal''s Future, One Child at a Time',                                                                 true),
   ('about',            'About Buddha Academy',      'For over four decades we have been providing free, quality education to underprivileged children in Nepal.',       true),
@@ -179,7 +163,6 @@ ON CONFLICT (page_slug) DO UPDATE SET
   subtitle   = EXCLUDED.subtitle,
   is_visible = true;
 
--- 12. Seed testimonials for the home page testimonials section
 INSERT INTO public.testimonials (author_name, author_role, content, quote, is_published, is_featured, testimonial_type, sort_order)
 VALUES
   ('Sarah M.',   'Sponsor from USA',        'Sponsoring a child at Buddha Academy has been one of the most rewarding experiences of my life. Seeing the progress reports every term fills me with joy.',  'Seeing the progress reports fills me with joy.',              true, true, 'donor',   1),

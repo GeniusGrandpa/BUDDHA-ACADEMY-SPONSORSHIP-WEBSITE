@@ -1,4 +1,3 @@
-
 CREATE OR REPLACE FUNCTION public.create_content_version_v2()
 RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
@@ -9,7 +8,7 @@ BEGIN
   SELECT COALESCE(MAX(version_number), 0) + 1 INTO v_version_number
   FROM public.content_versions
   WHERE entity_type = TG_TABLE_NAME AND entity_id = COALESCE(NEW.id, OLD.id);
-  
+
   INSERT INTO public.content_versions (
     entity_type, 
     entity_id, 
@@ -48,7 +47,7 @@ BEGIN
   FROM public.content_versions
   WHERE entity_type = TG_TABLE_NAME
   AND entity_id = COALESCE(NEW.id, OLD.id);
-  
+
   INSERT INTO public.content_versions (
     entity_type,
     entity_id,

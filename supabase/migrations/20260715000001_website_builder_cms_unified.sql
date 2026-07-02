@@ -1,4 +1,3 @@
-
 CREATE TABLE IF NOT EXISTS public.website_pages (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   slug TEXT UNIQUE NOT NULL,

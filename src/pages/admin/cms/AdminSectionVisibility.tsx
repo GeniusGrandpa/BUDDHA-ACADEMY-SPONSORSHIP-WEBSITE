@@ -54,7 +54,7 @@ export function AdminSectionVisibility() {
       }))
       for (const u of updates) {
 
-        await (db('section_visibility') as any).update(u).eq('section_key', u.section_key) // eslint-disable-line @typescript-eslint/no-explicit-any
+        await (db('section_visibility') as any).update(u).eq('section_key', u.section_key) 
       }
       toast.success('Section order saved')
     } catch { toast.error('Failed to save order') }

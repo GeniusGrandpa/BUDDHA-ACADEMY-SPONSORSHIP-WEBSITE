@@ -14,7 +14,6 @@ export async function getProfile(userId: string): Promise<Profile | null> {
 }
 
 export async function markDonorAsVerified(donorId: string): Promise<void> {
-  // Check if donor already has any completed donations first OR if already verified
   const { data: existing } = await supabase
     .from('donations')
     .select('id')
@@ -23,7 +22,6 @@ export async function markDonorAsVerified(donorId: string): Promise<void> {
     .limit(1)
 
   if (existing && existing.length > 0) {
-    // Mark them as verified if they have a completed donation
     const { error } = await supabase
       .from('profiles')
       .update({ is_verified: true })

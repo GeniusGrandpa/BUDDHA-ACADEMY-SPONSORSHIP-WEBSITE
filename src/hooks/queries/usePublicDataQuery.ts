@@ -7,6 +7,7 @@ import * as galleryService from '../../services/gallery'
 import * as navigationService from '../../services/navigation'
 import * as cmsContent from '../../services/cms-content'
 import { getSiteSettings } from '../../services/settings'
+import { getCmsPrograms, getCmsImpactStats } from '../../services/cms-programs'
 
 const KEYS = {
   pages: ['public', 'pages'] as const,
@@ -28,6 +29,8 @@ const KEYS = {
   studentStories: ['public', 'student-stories'] as const,
   testimonials: ['public', 'testimonials'] as const,
   videos: ['public', 'videos'] as const,
+  programs: ['public', 'programs'] as const,
+  impactStats: ['public', 'impact-stats'] as const,
 }
 
 export function usePublicPages() {
@@ -181,6 +184,22 @@ export function useVideos() {
   return useQuery({
     queryKey: KEYS.videos,
     queryFn: () => content.getVideos(),
+    staleTime: STALE_TIMES.publicPages,
+  })
+}
+
+export function usePrograms(activeOnly = true) {
+  return useQuery({
+    queryKey: [...KEYS.programs, activeOnly],
+    queryFn: () => getCmsPrograms(activeOnly),
+    staleTime: STALE_TIMES.publicPages,
+  })
+}
+
+export function useImpactStats(activeOnly = true) {
+  return useQuery({
+    queryKey: [...KEYS.impactStats, activeOnly],
+    queryFn: () => getCmsImpactStats(activeOnly),
     staleTime: STALE_TIMES.publicPages,
   })
 }
