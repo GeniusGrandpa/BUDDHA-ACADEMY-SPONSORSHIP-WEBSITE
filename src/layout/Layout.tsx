@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Header } from './Header'
 import { Footer } from './Footer'
 import { AdminPageToolbar } from '../components/AdminPageToolbar'
+import { ErrorBoundary } from '../components/ErrorBoundary'
 
 export function Layout() {
   const location = useLocation()
@@ -20,7 +21,9 @@ export function Layout() {
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.15, ease: 'easeOut' }}
           >
-            <Outlet />
+            <ErrorBoundary context={pageSlug}>
+              <Outlet />
+            </ErrorBoundary>
           </motion.div>
         </AnimatePresence>
       </main>

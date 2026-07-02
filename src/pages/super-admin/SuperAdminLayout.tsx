@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Bell } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { RoleBadge } from '../../components/RoleBadge'
+import { ErrorBoundary } from '../../components/ErrorBoundary'
 import type { Role } from '../../types/permissions'
 
 const superAdminNavItems = [
@@ -219,7 +220,9 @@ export function SuperAdminLayout() {
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.12, ease: 'easeOut' }}
             >
-              <Outlet />
+              <ErrorBoundary context="super-admin-content">
+                <Outlet />
+              </ErrorBoundary>
             </motion.div>
           </AnimatePresence>
         </main>

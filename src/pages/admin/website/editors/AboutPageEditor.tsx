@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { getPageHeader, upsertPageHeader, getSiteImagesBySection, upsertSiteImage, deleteSiteImage } from '../../../../services/cms-content'
 import { getPageBySlug, upsertPage } from '../../../../services/content'
 import { FormSkeleton } from '../../../../components/ui/LoadingSkeleton'
+import { PreviewModal } from '../shared/PreviewModal'
 import toast from 'react-hot-toast'
 
 interface TimelineItem { year: string; title: string; desc: string }
@@ -22,6 +23,7 @@ interface AboutContent {
 export function AboutPageEditor() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [previewOpen, setPreviewOpen] = useState(false)
   const [header, setHeader] = useState({ title: '', subtitle: '' })
   const [mission, setMission] = useState('')
   const [vision, setVision] = useState('')
@@ -116,10 +118,15 @@ export function AboutPageEditor() {
           <h1 className="text-2xl font-bold text-gray-900">About Page</h1>
           <p className="text-gray-500 mt-1">Manage all content for the About Us page</p>
         </div>
-        <button onClick={handleSave} disabled={saving}
-          className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 disabled:bg-amber-300 text-white text-sm font-medium rounded-lg transition-colors">
-          {saving ? 'Saving...' : 'Save Changes'}
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setPreviewOpen(true)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+            Preview
+          </button>
+          <button onClick={handleSave} disabled={saving}
+            className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 disabled:bg-amber-300 text-white text-sm font-medium rounded-lg transition-colors">
+            {saving ? 'Saving...' : 'Save Changes'}
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-5">
@@ -225,6 +232,7 @@ export function AboutPageEditor() {
           <button onClick={handleSaveImages} className="text-sm text-amber-600 hover:text-amber-700 font-medium">Save Images</button>
         )}
       </div>
+      <PreviewModal open={previewOpen} onClose={() => setPreviewOpen(false)} url="/about" title="About Page" />
     </div>
   )
 }

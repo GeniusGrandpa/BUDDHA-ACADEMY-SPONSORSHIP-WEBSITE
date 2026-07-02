@@ -54,23 +54,38 @@ export const navigationConfig: NavSection[] = [
     ],
   },
   {
-    title: 'Website',
-    items: [
-      {
-        label: 'Website Dashboard',
-        href: '/admin/website',
-        permission: 'content.homepage',
-      },
-      {
-        label: 'Visual Builder',
-        href: '/admin/website/builder',
-        permission: 'content.homepage',
-      },
-    ],
-  },
-  {
     title: 'Content',
     items: [
+      {
+        label: 'Homepage',
+        href: '/admin/website/homepage',
+        permission: 'content.homepage',
+      },
+      {
+        label: 'About Page',
+        href: '/admin/website/about',
+        permission: 'content.homepage',
+      },
+      {
+        label: 'Contact Page',
+        href: '/admin/website/contact',
+        permission: 'content.homepage',
+      },
+      {
+        label: 'Campaigns Page',
+        href: '/admin/website/campaigns',
+        permission: 'content.homepage',
+      },
+      {
+        label: 'Privacy Page',
+        href: '/admin/website/privacy',
+        permission: 'content.legal',
+      },
+      {
+        label: 'Terms Page',
+        href: '/admin/website/terms',
+        permission: 'content.legal',
+      },
       {
         label: 'Gallery',
         href: '/admin/website/gallery',
@@ -116,11 +131,6 @@ export const navigationConfig: NavSection[] = [
         href: '/admin/website/transparency',
         permission: 'content.settings',
       },
-    ],
-  },
-  {
-    title: 'Website Settings',
-    items: [
       {
         label: 'Navigation',
         href: '/admin/website/navigation',
@@ -155,11 +165,6 @@ export const navigationConfig: NavSection[] = [
         label: 'Site Settings',
         href: '/admin/website/settings',
         permission: 'content.settings',
-      },
-      {
-        label: 'Legal Pages',
-        href: '/admin/website/privacy',
-        permission: 'content.legal',
       },
       {
         label: 'Section Visibility',

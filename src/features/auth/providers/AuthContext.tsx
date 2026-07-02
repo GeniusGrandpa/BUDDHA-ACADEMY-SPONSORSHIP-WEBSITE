@@ -70,7 +70,7 @@ async function fetchOrCreateProfile(user: User, retries = 1): Promise<Profile | 
         return null
       }
       return newProfile
-    } catch (error) {
+    } catch {
       if (attempt >= retries) {
         return null
       }

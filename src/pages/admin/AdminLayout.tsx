@@ -6,6 +6,7 @@ import { useRole } from '../../hooks/useRole'
 import { getNavigationForRole } from '../../config/navigation'
 import { NotificationBell } from '../../components/notifications/NotificationBell'
 import { RoleBadge } from '../../components/RoleBadge'
+import { ErrorBoundary } from '../../components/ErrorBoundary'
 import type { Role } from '../../features/auth/types/permissions'
 import { useTheme } from '../../context/ThemeContext'
 import fallbackLogo from '../../assets/logo.jpg'
@@ -171,7 +172,9 @@ export function AdminLayout() {
         </header>
 
         <main className="p-4 lg:p-6">
-          <Outlet />
+          <ErrorBoundary context="admin-content">
+            <Outlet />
+          </ErrorBoundary>
         </main>
       </div>
     </div>

@@ -15,7 +15,7 @@ export async function submitVolunteerApplication(
   data: VolunteerApplicationData,
 ): Promise<void> {
 
-  const { error } = await (supabase as any) 
+  const { error } = await supabase
     .from('volunteer_applications')
     .insert({
       ...data,

@@ -89,7 +89,7 @@ export async function broadcastNotification(
       } else {
         success++
       }
-    } catch (err) {
+    } catch {
       failed++
     }
   }

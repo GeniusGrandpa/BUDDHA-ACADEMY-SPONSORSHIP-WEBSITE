@@ -23,7 +23,7 @@ export function AdminSiteImages() {
     try {
       const { data } = await db('site_images').select('*').order('created_at', { ascending: false })
 
-      setImages((data || []) as any[]) 
+      setImages((data || []) as SiteImage[])
     } catch { toast.error('Failed to load site images') }
     finally { setLoading(false) }
   }, [])

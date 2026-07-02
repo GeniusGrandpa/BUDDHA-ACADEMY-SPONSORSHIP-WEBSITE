@@ -22,7 +22,7 @@ export function AdminDonationContent() {
         .select('*').order('created_at', { ascending: false }).limit(1).maybeSingle()
       if (data) {
 
-        const d = data as any 
+        const d = data as unknown as Record<string, unknown> 
         setContentId(d.id)
         setHeroTitle(d.hero_title || '')
         setHeroSubtitle(d.hero_subtitle || '')

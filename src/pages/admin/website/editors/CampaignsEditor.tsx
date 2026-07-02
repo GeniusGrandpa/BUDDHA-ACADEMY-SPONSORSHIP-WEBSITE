@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { getSupabaseClient } from '../../../../lib/supabase'
 import { FormSkeleton } from '../../../../components/ui/LoadingSkeleton'
+import { PreviewModal } from '../shared/PreviewModal'
 import type { DonationGoal as DBDonationGoal } from '../../../../types/database'
 import toast from 'react-hot-toast'
 
@@ -11,6 +12,7 @@ type DonationGoal = DBDonationGoal & { _new?: boolean }
 export function CampaignsEditor() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [previewOpen, setPreviewOpen] = useState(false)
   const [goals, setGoals] = useState<DonationGoal[]>([])
 
   useEffect(() => { load() }, [])
@@ -27,7 +29,8 @@ export function CampaignsEditor() {
     setSaving(true)
     try {
 
-      const { id: _id, _new: __new, ...rest } = goal 
+      const { id, ...rest } = goal
+      void id
       const { error } = await supabase.from('donation_goals').upsert({ ...rest, start_date: rest.start_date || null, end_date: rest.end_date || null })
       if (error) throw error
       toast.success('Campaign saved')
@@ -66,10 +69,15 @@ export function CampaignsEditor() {
           <h1 className="text-2xl font-bold text-gray-900">Campaigns & Donation Goals</h1>
           <p className="text-gray-500 mt-1">Manage fundraising campaigns and donation targets</p>
         </div>
-        <button onClick={addGoal}
-          className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-lg transition-colors">
-          + Add Campaign
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setPreviewOpen(true)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+            Preview
+          </button>
+          <button onClick={addGoal}
+            className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-lg transition-colors">
+            + Add Campaign
+          </button>
+        </div>
       </div>
 
       {goals.length === 0 ? (
@@ -151,6 +159,7 @@ export function CampaignsEditor() {
           </div>
         ))
       )}
+      <PreviewModal open={previewOpen} onClose={() => setPreviewOpen(false)} url="/campaigns" title="Campaigns Page" />
     </div>
   )
 }

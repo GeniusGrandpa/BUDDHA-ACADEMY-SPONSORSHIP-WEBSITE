@@ -3,6 +3,7 @@ import { getPageHeader, upsertPageHeader } from '../../../../services/cms-conten
 import { getSiteSettings, updateSiteSettings } from '../../../../services/settings'
 import { getAllCmsStrings, upsertCmsString } from '../../../../services/cms-content'
 import { FormSkeleton } from '../../../../components/ui/LoadingSkeleton'
+import { PreviewModal } from '../shared/PreviewModal'
 import toast from 'react-hot-toast'
 
 const STRING_KEYS = [
@@ -17,6 +18,7 @@ const STRING_KEYS = [
 export function ContactPageEditor() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [previewOpen, setPreviewOpen] = useState(false)
   const [header, setHeader] = useState({ title: '', subtitle: '' })
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
@@ -76,10 +78,15 @@ export function ContactPageEditor() {
           <h1 className="text-2xl font-bold text-gray-900">Contact Page</h1>
           <p className="text-gray-500 mt-1">Manage contact information, page header, and form text</p>
         </div>
-        <button onClick={handleSave} disabled={saving}
-          className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 disabled:bg-amber-300 text-white text-sm font-medium rounded-lg transition-colors">
-          {saving ? 'Saving...' : 'Save Changes'}
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setPreviewOpen(true)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+            Preview
+          </button>
+          <button onClick={handleSave} disabled={saving}
+            className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 disabled:bg-amber-300 text-white text-sm font-medium rounded-lg transition-colors">
+            {saving ? 'Saving...' : 'Save Changes'}
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-5">
@@ -129,6 +136,7 @@ export function ContactPageEditor() {
           ))}
         </div>
       </div>
+      <PreviewModal open={previewOpen} onClose={() => setPreviewOpen(false)} url="/contact" title="Contact Page" />
     </div>
   )
 }

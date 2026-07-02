@@ -431,10 +431,6 @@ const DEFAULT_SECTIONS: Record<string, { section_key: string; section_type: stri
     { section_key: 'page_header', section_type: 'page_header', title: 'Page Header' },
     { section_key: 'activity_feed', section_type: 'activity_feed', title: 'Activity Feed' },
   ],
-  programs: [
-    { section_key: 'page_header', section_type: 'page_header', title: 'Page Header' },
-    { section_key: 'programs_list', section_type: 'programs_list', title: 'Programs List' },
-  ],
   transparency: [
     { section_key: 'page_header', section_type: 'page_header', title: 'Page Header' },
     { section_key: 'transparency_content', section_type: 'transparency_content', title: 'Transparency Content' },

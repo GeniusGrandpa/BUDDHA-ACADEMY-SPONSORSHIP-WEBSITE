@@ -181,7 +181,7 @@ export function SuperAdminRolesPage() {
         p_changes: { added: toAdd, removed: toRemove },
         p_metadata: null,
       } as never)
-      if (auditError) {}
+      if (auditError) { /* log silently */ }
 
       setOriginalPermissions(new Set(rolePermissions))
       addToast('Permissions saved successfully', 'success')

@@ -4,9 +4,10 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 import { Layout } from './layout/Layout'
 import { useAuth } from './context/AuthContext'
 import { DashboardSkeleton } from './components/ui/LoadingSkeleton'
-import { DynamicPublicPageRenderer } from './components/DynamicPublicPageRenderer'
 import { getRedirectPath } from './features/auth/utils/redirectByRole'
 import type { Role } from './features/auth/types/permissions'
+import { RouteErrorPage } from './components/pages/RouteErrorPage'
+import { AdminErrorPage } from './components/pages/AdminErrorPage'
 
 function LazyPage({ Component }: { Component: React.LazyExoticComponent<React.ComponentType> }) {
   return (
@@ -25,8 +26,6 @@ const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.H
 const AboutPage = lazy(() => import('./pages/AboutPage').then(m => ({ default: m.AboutPage })))
 
 const SponsorshipPage = lazy(() => import('./pages/SponsorshipPage').then(m => ({ default: m.SponsorshipPage })))
-
-const ProgramsPage = lazy(() => import('./pages/ProgramsPage').then(m => ({ default: m.ProgramsPage })))
 
 const StudentsPage = lazy(() => import('./pages/StudentsPage').then(m => ({ default: m.StudentsPage })))
 
@@ -160,10 +159,6 @@ const AdminDonationContent = lazy(() => import('./pages/admin/cms/AdminDonationC
 
 const AdminSponsorshipContent = lazy(() => import('./pages/admin/cms/AdminSponsorshipContent').then(m => ({ default: m.AdminSponsorshipContent })))
 
-const AdminPrograms = lazy(() => import('./pages/admin/cms/AdminPrograms').then(m => ({ default: m.AdminPrograms })))
-
-const AdminImpactStats = lazy(() => import('./pages/admin/cms/AdminImpactStats').then(m => ({ default: m.AdminImpactStats })))
-
 const AdminVolunteerContent = lazy(() => import('./pages/admin/cms/AdminVolunteerContent').then(m => ({ default: m.AdminVolunteerContent })))
 
 const AdminFooterContent = lazy(() => import('./pages/admin/cms/AdminFooterContent').then(m => ({ default: m.AdminFooterContent })))
@@ -202,33 +197,32 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: <Layout />,
-    errorElement: <LazyPage Component={NotFoundPage} />,
+    errorElement: <RouteErrorPage />,
     children: [
-      { index: true, element: <DynamicPublicPageRenderer slug="home" fallback={<LazyPage Component={HomePage} />} /> },
-      { path: 'about', element: <DynamicPublicPageRenderer slug="about" fallback={<LazyPage Component={AboutPage} />} /> },
-      { path: 'sponsor', element: <DynamicPublicPageRenderer slug="sponsor" fallback={<LazyPage Component={SponsorshipPage} />} /> },
-      { path: 'programs', element: <DynamicPublicPageRenderer slug="programs" fallback={<LazyPage Component={ProgramsPage} />} /> },
-      { path: 'students', element: <DynamicPublicPageRenderer slug="students" fallback={<LazyPage Component={StudentsPage} />} /> },
-      { path: 'students/:id', element: <LazyPage Component={StudentDetailPage} /> },
-      { path: 'gallery', element: <DynamicPublicPageRenderer slug="gallery" fallback={<LazyPage Component={GalleryPage} />} /> },
-      { path: 'news', element: <DynamicPublicPageRenderer slug="news" fallback={<LazyPage Component={NewsPage} />} /> },
-      { path: 'news/:id', element: <LazyPage Component={NewsDetailPage} /> },
-      { path: 'contact', element: <DynamicPublicPageRenderer slug="contact" fallback={<LazyPage Component={ContactPage} />} /> },
-      { path: 'donate', element: <DynamicPublicPageRenderer slug="donate" fallback={<LazyPage Component={DonatePage} />} /> },
-      { path: 'transparency', element: <DynamicPublicPageRenderer slug="transparency" fallback={<LazyPage Component={TransparencyPage} />} /> },
-      { path: 'faq', element: <DynamicPublicPageRenderer slug="faq" fallback={<LazyPage Component={FAQPage} />} /> },
-      { path: 'volunteer', element: <DynamicPublicPageRenderer slug="volunteer" fallback={<LazyPage Component={VolunteerPage} />} /> },
-      { path: 'campaigns', element: <LazyPage Component={CampaignsPage} /> },
-      { path: 'success-stories', element: <LazyPage Component={SuccessStoriesPage} /> },
-      { path: 'activity', element: <LazyPage Component={ActivityPage} /> },
-      { path: 'privacy', element: <LazyPage Component={PrivacyPage} /> },
-      { path: 'terms', element: <LazyPage Component={TermsPage} /> },
-      { path: 'login', element: <LazyPage Component={LoginPage} /> },
+      { index: true, element: <LazyPage Component={HomePage} />, errorElement: <RouteErrorPage simple /> },
+      { path: 'about', element: <LazyPage Component={AboutPage} />, errorElement: <RouteErrorPage simple /> },
+      { path: 'sponsor', element: <LazyPage Component={SponsorshipPage} />, errorElement: <RouteErrorPage simple /> },
+      { path: 'students', element: <LazyPage Component={StudentsPage} />, errorElement: <RouteErrorPage simple /> },
+      { path: 'students/:id', element: <LazyPage Component={StudentDetailPage} />, errorElement: <RouteErrorPage simple /> },
+      { path: 'gallery', element: <LazyPage Component={GalleryPage} />, errorElement: <RouteErrorPage simple /> },
+      { path: 'news', element: <LazyPage Component={NewsPage} />, errorElement: <RouteErrorPage simple /> },
+      { path: 'news/:id', element: <LazyPage Component={NewsDetailPage} />, errorElement: <RouteErrorPage simple /> },
+      { path: 'contact', element: <LazyPage Component={ContactPage} />, errorElement: <RouteErrorPage simple /> },
+      { path: 'donate', element: <LazyPage Component={DonatePage} />, errorElement: <RouteErrorPage simple /> },
+      { path: 'transparency', element: <LazyPage Component={TransparencyPage} />, errorElement: <RouteErrorPage simple /> },
+      { path: 'faq', element: <LazyPage Component={FAQPage} />, errorElement: <RouteErrorPage simple /> },
+      { path: 'volunteer', element: <LazyPage Component={VolunteerPage} />, errorElement: <RouteErrorPage simple /> },
+      { path: 'campaigns', element: <LazyPage Component={CampaignsPage} />, errorElement: <RouteErrorPage simple /> },
+      { path: 'success-stories', element: <LazyPage Component={SuccessStoriesPage} />, errorElement: <RouteErrorPage simple /> },
+      { path: 'activity', element: <LazyPage Component={ActivityPage} />, errorElement: <RouteErrorPage simple /> },
+      { path: 'privacy', element: <LazyPage Component={PrivacyPage} />, errorElement: <RouteErrorPage simple /> },
+      { path: 'terms', element: <LazyPage Component={TermsPage} />, errorElement: <RouteErrorPage simple /> },
+      { path: 'login', element: <LazyPage Component={LoginPage} />, errorElement: <RouteErrorPage /> },
       { path: 'register', element: <Navigate to="/login" replace /> },
-      { path: 'forgot-password', element: <LazyPage Component={ForgotPasswordPage} /> },
-      { path: 'reset-password', element: <LazyPage Component={ResetPasswordPage} /> },
-      { path: 'auth/callback', element: <LazyPage Component={AuthCallbackPage} /> },
-      { path: '*', element: <LazyPage Component={NotFoundPage} /> },
+      { path: 'forgot-password', element: <LazyPage Component={ForgotPasswordPage} />, errorElement: <RouteErrorPage /> },
+      { path: 'reset-password', element: <LazyPage Component={ResetPasswordPage} />, errorElement: <RouteErrorPage /> },
+      { path: 'auth/callback', element: <LazyPage Component={AuthCallbackPage} />, errorElement: <RouteErrorPage /> },
+      { path: '*', element: <LazyPage Component={NotFoundPage} />, errorElement: <RouteErrorPage /> },
     ],
   },
   {
@@ -238,6 +232,7 @@ export const router = createBrowserRouter([
         <LazyPage Component={DashboardPage} />
       </ProtectedRoute>
     ),
+    errorElement: <RouteErrorPage />,
   },
   {
     path: '/donations',
@@ -246,6 +241,7 @@ export const router = createBrowserRouter([
         <LazyPage Component={DonationHistoryPage} />
       </ProtectedRoute>
     ),
+    errorElement: <RouteErrorPage />,
   },
   {
     path: '/admin',
@@ -254,56 +250,55 @@ export const router = createBrowserRouter([
         <LazyPage Component={AdminLayout} />
       </ProtectedRoute>
     ),
+    errorElement: <AdminErrorPage />,
     children: [
       { index: true, element: <AdminIndexRedirect /> },
-      { path: 'students', element: <LazyPage Component={AdminStudentsPage} /> },
-      { path: 'donations', element: <LazyPage Component={AdminDonationsPage} /> },
-      { path: 'news', element: <LazyPage Component={AdminNewsPage} /> },
-      { path: 'gallery', element: <LazyPage Component={AdminGalleryPage} /> },
-      { path: 'contacts', element: <LazyPage Component={AdminContactsPage} /> },
-      { path: 'donors', element: <LazyPage Component={AdminDonorsPage} /> },
-      { path: 'finance', element: <LazyPage Component={FinanceDashboard} /> },
-      { path: 'payments/verify', element: <LazyPage Component={AdminPaymentVerificationPage} /> },
-      { path: 'payments/settings', element: <LazyPage Component={AdminPaymentSettingsPage} /> },
-      { path: 'sponsorships', element: <LazyPage Component={SponsorshipDashboard} /> },
-      { path: 'volunteers', element: <LazyPage Component={VolunteerDashboard} /> },
-      { path: 'events', element: <LazyPage Component={AdminEventsPage} /> },
-      { path: 'notifications', element: <LazyPage Component={AdminNotificationsPage} /> },
-      { path: 'reports', element: <LazyPage Component={AdminReportsPage} /> },
-      { path: 'users', element: <LazyPage Component={AdminUsersPage} /> },
+      { path: 'students', element: <LazyPage Component={AdminStudentsPage} />, errorElement: <AdminErrorPage /> },
+      { path: 'donations', element: <LazyPage Component={AdminDonationsPage} />, errorElement: <AdminErrorPage /> },
+      { path: 'news', element: <LazyPage Component={AdminNewsPage} />, errorElement: <AdminErrorPage /> },
+      { path: 'gallery', element: <LazyPage Component={AdminGalleryPage} />, errorElement: <AdminErrorPage /> },
+      { path: 'contacts', element: <LazyPage Component={AdminContactsPage} />, errorElement: <AdminErrorPage /> },
+      { path: 'donors', element: <LazyPage Component={AdminDonorsPage} />, errorElement: <AdminErrorPage /> },
+      { path: 'finance', element: <LazyPage Component={FinanceDashboard} />, errorElement: <AdminErrorPage /> },
+      { path: 'payments/verify', element: <LazyPage Component={AdminPaymentVerificationPage} />, errorElement: <AdminErrorPage /> },
+      { path: 'payments/settings', element: <LazyPage Component={AdminPaymentSettingsPage} />, errorElement: <AdminErrorPage /> },
+      { path: 'sponsorships', element: <LazyPage Component={SponsorshipDashboard} />, errorElement: <AdminErrorPage /> },
+      { path: 'volunteers', element: <LazyPage Component={VolunteerDashboard} />, errorElement: <AdminErrorPage /> },
+      { path: 'events', element: <LazyPage Component={AdminEventsPage} />, errorElement: <AdminErrorPage /> },
+      { path: 'notifications', element: <LazyPage Component={AdminNotificationsPage} />, errorElement: <AdminErrorPage /> },
+      { path: 'reports', element: <LazyPage Component={AdminReportsPage} />, errorElement: <AdminErrorPage /> },
+      { path: 'users', element: <LazyPage Component={AdminUsersPage} />, errorElement: <AdminErrorPage /> },
 
-      { path: 'website', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={WebsiteDashboard} /></ProtectedRoute> },
-      { path: 'website/builder', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={WebsiteBuilder} /></ProtectedRoute> },
-      { path: 'website/media', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={MediaLibrary} /></ProtectedRoute> },
-      { path: 'website/homepage', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={HomePageEditor} /></ProtectedRoute> },
-      { path: 'website/about', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AboutPageEditor} /></ProtectedRoute> },
-      { path: 'website/contact', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={ContactPageEditor} /></ProtectedRoute> },
-      { path: 'website/campaigns', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={CampaignsEditor} /></ProtectedRoute> },
-      { path: 'website/privacy', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={PrivacyPageEditor} /></ProtectedRoute> },
-      { path: 'website/terms', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={TermsPageEditor} /></ProtectedRoute> },
-      { path: 'website/branding', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={BrandingEditor} /></ProtectedRoute> },
-      { path: 'website/seo', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={SEOEditor} /></ProtectedRoute> },
-      { path: 'website/donation', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminDonationContent} /></ProtectedRoute> },
-      { path: 'website/sponsorship', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminSponsorshipContent} /></ProtectedRoute> },
-      { path: 'website/volunteer', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminVolunteerContent} /></ProtectedRoute> },
-      { path: 'website/footer', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminFooterContent} /></ProtectedRoute> },
-      { path: 'website/navigation', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminNavigationManager} /></ProtectedRoute> },
-      { path: 'website/gallery', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminContentGallery} /></ProtectedRoute> },
-      { path: 'website/testimonials', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminContentTestimonials} /></ProtectedRoute> },
-      { path: 'website/news', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminContentNews} /></ProtectedRoute> },
-      { path: 'website/stories', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminStudentStories} /></ProtectedRoute> },
-      { path: 'website/faqs', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminFaqManager} /></ProtectedRoute> },
-      { path: 'website/videos', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminVideoManager} /></ProtectedRoute> },
-      { path: 'website/announcements', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminAnnouncements} /></ProtectedRoute> },
-      { path: 'website/partners', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminPartners} /></ProtectedRoute> },
-      { path: 'website/settings', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminSiteSettings} /></ProtectedRoute> },
-      { path: 'website/versions', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminVersionHistory} /></ProtectedRoute> },
-      { path: 'website/images', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminSiteImages} /></ProtectedRoute> },
-      { path: 'website/sections', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminSectionVisibility} /></ProtectedRoute> },
-      { path: 'website/programs', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminPrograms} /></ProtectedRoute> },
-      { path: 'website/impact-stats', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminImpactStats} /></ProtectedRoute> },
-      { path: 'website/transparency', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminTransparencyContent} /></ProtectedRoute> },
-      { path: 'website/pages/:slug', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminPageEditor} /></ProtectedRoute> },
+      { path: 'website', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={WebsiteDashboard} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
+      { path: 'website/builder', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={WebsiteBuilder} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
+      { path: 'website/media', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={MediaLibrary} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
+      { path: 'website/homepage', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={HomePageEditor} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
+      { path: 'website/about', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AboutPageEditor} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
+      { path: 'website/contact', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={ContactPageEditor} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
+      { path: 'website/campaigns', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={CampaignsEditor} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
+      { path: 'website/privacy', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={PrivacyPageEditor} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
+      { path: 'website/terms', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={TermsPageEditor} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
+      { path: 'website/branding', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={BrandingEditor} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
+      { path: 'website/seo', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={SEOEditor} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
+      { path: 'website/donation', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminDonationContent} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
+      { path: 'website/sponsorship', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminSponsorshipContent} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
+      { path: 'website/volunteer', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminVolunteerContent} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
+      { path: 'website/footer', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminFooterContent} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
+      { path: 'website/navigation', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminNavigationManager} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
+      { path: 'website/gallery', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminContentGallery} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
+      { path: 'website/testimonials', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminContentTestimonials} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
+      { path: 'website/news', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminContentNews} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
+      { path: 'website/stories', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminStudentStories} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
+      { path: 'website/faqs', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminFaqManager} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
+      { path: 'website/videos', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminVideoManager} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
+      { path: 'website/announcements', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminAnnouncements} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
+      { path: 'website/partners', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminPartners} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
+      { path: 'website/settings', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminSiteSettings} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
+      { path: 'website/versions', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminVersionHistory} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
+      { path: 'website/images', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminSiteImages} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
+      { path: 'website/sections', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminSectionVisibility} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
+      { path: 'website/transparency', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminTransparencyContent} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
+      { path: 'website/pages/:slug', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AdminPageEditor} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
 
       { path: 'content', element: <Navigate to="/admin/website" replace /> },
       { path: 'content/homepage', element: <Navigate to="/admin/website/homepage" replace /> },
@@ -327,14 +322,14 @@ export const router = createBrowserRouter([
       { path: 'content/footer', element: <Navigate to="/admin/website/footer" replace /> },
       { path: 'content/images', element: <Navigate to="/admin/website/images" replace /> },
       { path: 'content/sections', element: <Navigate to="/admin/website/sections" replace /> },
-      { path: 'design', element: <LazyPage Component={AdminDesignDashboard} /> },
-      { path: 'design/branding', element: <LazyPage Component={AdminBrandingPage} /> },
-      { path: 'design/colors', element: <LazyPage Component={AdminColorsPage} /> },
-      { path: 'design/typography', element: <LazyPage Component={AdminTypographyPage} /> },
-      { path: 'design/layout', element: <LazyPage Component={AdminLayoutPage} /> },
-      { path: 'design/components', element: <LazyPage Component={AdminComponentsPage} /> },
-      { path: 'design/config', element: <LazyPage Component={AdminConfigPage} /> },
-      { path: 'design/presets', element: <LazyPage Component={AdminThemePresetsPage} /> },
+      { path: 'design', element: <LazyPage Component={AdminDesignDashboard} />, errorElement: <AdminErrorPage /> },
+      { path: 'design/branding', element: <LazyPage Component={AdminBrandingPage} />, errorElement: <AdminErrorPage /> },
+      { path: 'design/colors', element: <LazyPage Component={AdminColorsPage} />, errorElement: <AdminErrorPage /> },
+      { path: 'design/typography', element: <LazyPage Component={AdminTypographyPage} />, errorElement: <AdminErrorPage /> },
+      { path: 'design/layout', element: <LazyPage Component={AdminLayoutPage} />, errorElement: <AdminErrorPage /> },
+      { path: 'design/components', element: <LazyPage Component={AdminComponentsPage} />, errorElement: <AdminErrorPage /> },
+      { path: 'design/config', element: <LazyPage Component={AdminConfigPage} />, errorElement: <AdminErrorPage /> },
+      { path: 'design/presets', element: <LazyPage Component={AdminThemePresetsPage} />, errorElement: <AdminErrorPage /> },
     ],
   },
   {
@@ -344,12 +339,13 @@ export const router = createBrowserRouter([
         <LazyPage Component={SuperAdminLayout} />
       </ProtectedRoute>
     ),
+    errorElement: <AdminErrorPage />,
     children: [
-      { index: true, element: <LazyPage Component={SuperAdminUsersPage} /> },
-      { path: 'users', element: <LazyPage Component={SuperAdminUsersPage} /> },
-      { path: 'roles', element: <LazyPage Component={SuperAdminRolesPage} /> },
-      { path: 'audit', element: <LazyPage Component={SuperAdminAuditLogsPage} /> },
-      { path: 'notifications', element: <LazyPage Component={SuperAdminNotificationsPage} /> },
+      { index: true, element: <LazyPage Component={SuperAdminUsersPage} />, errorElement: <AdminErrorPage /> },
+      { path: 'users', element: <LazyPage Component={SuperAdminUsersPage} />, errorElement: <AdminErrorPage /> },
+      { path: 'roles', element: <LazyPage Component={SuperAdminRolesPage} />, errorElement: <AdminErrorPage /> },
+      { path: 'audit', element: <LazyPage Component={SuperAdminAuditLogsPage} />, errorElement: <AdminErrorPage /> },
+      { path: 'notifications', element: <LazyPage Component={SuperAdminNotificationsPage} />, errorElement: <AdminErrorPage /> },
     ],
   },
   {
@@ -359,5 +355,6 @@ export const router = createBrowserRouter([
         <LazyPage Component={TeacherDashboard} />
       </ProtectedRoute>
     ),
+    errorElement: <RouteErrorPage />,
   },
 ])

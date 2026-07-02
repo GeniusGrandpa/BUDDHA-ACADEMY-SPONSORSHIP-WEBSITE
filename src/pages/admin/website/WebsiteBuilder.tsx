@@ -9,12 +9,13 @@ import { Select } from '../../../components/ui/Select'
 import { DashboardSkeleton } from '../../../components/ui/LoadingSkeleton'
 import { StatusBadge } from '../../../components/ui/StatusBadge'
 import { SectionContentEditor } from './components/SectionContentEditor'
+import { LivePreview, UnsavedChangesIndicator, DraftBadge, PublishedBadge } from './components/LivePreview'
 import { SECTION_TYPE_LABELS, FONT_SIZE_OPTIONS, LAYOUT_PRESET_OPTIONS, PADDING_OPTIONS, BORDER_RADIUS_OPTIONS } from '../../../types/website-builder'
 import type { WebsitePage, WebsiteSection, PageStatus, SectionSettings } from '../../../types/website-builder'
 
 type ViewMode = 'list' | 'editor'
 type PreviewDevice = 'desktop' | 'tablet' | 'mobile'
-type EditorTab = 'content' | 'design' | 'seo'
+type EditorTab = 'content' | 'design' | 'seo' | 'comparison'
 
 const previewWidths: Record<PreviewDevice, string> = {
   desktop: '100%',
@@ -31,12 +32,15 @@ export function WebsiteBuilder() {
     handleReorderSections, handlePublish, handleSaveDraft,
     handleChangeStatus, refreshPages,
   } = useWebsiteBuilder()
+  const { refreshTheme } = useTheme()
 
   const [viewMode, setViewMode] = useState<ViewMode>('list')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<PageStatus | 'all'>('all')
   const [previewDevice, setPreviewDevice] = useState<PreviewDevice>('desktop')
   const [editorTab, setEditorTab] = useState<EditorTab>('content')
+  const [showPreviewBeforePublish, setShowPreviewBeforePublish] = useState(false)
+  const [originalSections, setOriginalSections] = useState<WebsiteSection[]>([])
 
   const filteredPages = useMemo(() => {
     return pages.filter(p => {
@@ -53,6 +57,13 @@ export function WebsiteBuilder() {
   }, [selectPage])
 
   const selectedSection = activeSections.find(s => s.id === selectedSectionId) || null
+
+  const hasUnsavedChanges = useMemo(() => {
+    if (!activePage) return false
+    if (activePage.status === 'published' && activePage.is_draft) return true
+    return originalSections.length !== activeSections.length ||
+      JSON.stringify(originalSections) !== JSON.stringify(activeSections)
+  }, [activePage, originalSections, activeSections])
 
   if (loading) {
     return (
@@ -413,29 +424,12 @@ function PageEditorView({ page, sections, selectedSection, selectedSectionId, on
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 lg:p-6 flex justify-center">
-            <div
-              className="bg-white shadow-lg rounded-lg overflow-hidden transition-all duration-300"
-              style={{ width: previewWidths[previewDevice], maxWidth: '100%' }}
-            >
-              {sectionOrder.length === 0 ? (
-                <div className="p-12 text-center text-gray-400">
-                  <Layers className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                  <p className="text-sm font-medium">No sections yet</p>
-                  <p className="text-xs mt-1">This page has no content sections defined</p>
-                </div>
-              ) : (
-                <div className="min-h-[400px]">
-                  {sectionOrder.map(section => (
-                    <SectionPreview
-                      key={section.id}
-                      section={section}
-                      isSelected={selectedSectionId === section.id}
-                      onSelect={() => onSelectSection(section.id)}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
+            <LivePreview
+              page={page}
+              sections={sectionOrder}
+              device={previewDevice}
+              isPreview={true}
+            />
           </div>
         </div>
 

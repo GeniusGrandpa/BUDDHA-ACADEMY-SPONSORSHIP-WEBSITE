@@ -22,7 +22,7 @@ export function Header() {
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
 
   useEffect(() => {
-    getNavigationItems('header').then(items => setNavItems(items.filter(i => i.is_visible))).catch(() => {})
+    getNavigationItems('header').then(items => setNavItems(items.filter(i => i.is_visible && i.label !== 'Programs'))).catch(() => {})
     getSiteSettings().then(s => {
       if (s) {
         setSiteName(s.site_name || '')
@@ -50,17 +50,17 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 bg-[var(--color-navbar-bg)] border-b border-[var(--color-border)]">
-      <div className="w-full px-6 sm:px-10 lg:px-16 xl:px-24">
-        <div className="flex justify-between items-center h-24">
-          <Link to="/" className="flex items-center space-x-4">
-            <img src={headerLogoSrc} alt={siteName || branding.organization_name || ''} className="h-14 w-auto drop-shadow-sm" loading="eager" decoding="async" width="56" height="56" {...{'fetchpriority': 'high'}} />
+      <div className="w-full px-4 sm:px-8 lg:px-16 xl:px-24">
+        <div className="flex justify-between items-center h-20">
+          <Link to="/" className="flex items-center space-x-3">
+            <img src={headerLogoSrc} alt={siteName || branding.organization_name || ''} className="h-12 w-auto drop-shadow-sm" loading="eager" decoding="async" width="48" height="48" {...{'fetchpriority': 'high'}} />
             <div className="hidden sm:block">
-              <div className="font-semibold text-[var(--color-navbar-text)]">{siteName || branding.organization_name || ''}</div>
+              <div className="font-semibold text-lg text-[var(--color-navbar-text)]">{siteName || branding.organization_name || ''}</div>
               {branding.tagline && <div className="text-xs text-[var(--color-text-muted)]">{branding.tagline}</div>}
             </div>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-10">
+          <nav className="hidden lg:flex items-center gap-8">
             {navigation.map((item) => {
               if (item.isCta) {
                 return (
@@ -83,11 +83,11 @@ export function Header() {
             })}
           </nav>
 
-          <div className="hidden lg:flex items-center gap-6">
+          <div className="hidden lg:flex items-center gap-5">
             <LanguageSwitcher />
 
             {user ? (
-              <div className="flex items-center gap-5">
+              <div className="flex items-center gap-4">
                 {(profile?.role === 'admin' || profile?.role === 'super_admin') && (
                   <Link to={profile?.role === 'super_admin' ? '/super-admin' : '/admin'}
                     className="text-sm font-medium transition-colors hover:opacity-80 text-[var(--color-navbar-text)]">

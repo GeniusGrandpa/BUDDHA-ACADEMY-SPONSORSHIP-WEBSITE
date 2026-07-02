@@ -25,7 +25,7 @@ export function AdminFooterContent() {
         .select('*').order('created_at', { ascending: false }).limit(1).maybeSingle()
       if (data) {
 
-        const d = data as any 
+        const d = data as unknown as Record<string, unknown> 
         setContentId(d.id)
         setDescription(d.description || '')
         setCopyrightText(d.copyright_text || '')

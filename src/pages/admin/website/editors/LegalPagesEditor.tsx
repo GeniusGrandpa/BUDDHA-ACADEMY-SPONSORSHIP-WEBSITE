@@ -10,6 +10,7 @@ import {
 import { useAuth } from '../../../../context/AuthContext'
 import { hasPermission } from '../../../../features/auth/services/permissions'
 import { FormSkeleton } from '../../../../components/ui/LoadingSkeleton'
+import { PreviewModal } from '../shared/PreviewModal'
 import type { LegalPageType, LegalPageStatus } from '../../../../services/legal-pages'
 import type { PermissionCode } from '../../../../features/auth/types/permissions'
 import toast from 'react-hot-toast'
@@ -68,6 +69,7 @@ export function LegalPagesEditor({ type: propType }: LegalPagesEditorProps) {
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [previewOpen, setPreviewOpen] = useState(false)
   const [pageTitle, setPageTitle] = useState(config.title)
   const [metaTitle, setMetaTitle] = useState(config.meta)
   const [metaDescription, setMetaDescription] = useState('')
@@ -214,7 +216,7 @@ export function LegalPagesEditor({ type: propType }: LegalPagesEditorProps) {
   }
 
   const handlePreview = () => {
-    window.open(`/${config.slug}`, '_blank')
+    setPreviewOpen(true)
   }
 
   if (!canEdit) {
@@ -426,6 +428,7 @@ export function LegalPagesEditor({ type: propType }: LegalPagesEditorProps) {
           {saving ? 'Processing...' : status === 'published' ? 'Unpublish' : 'Publish'}
         </button>
       </div>
+      <PreviewModal open={previewOpen} onClose={() => setPreviewOpen(false)} url={`/${config.slug}`} title={config.title} />
     </div>
   )
 }
