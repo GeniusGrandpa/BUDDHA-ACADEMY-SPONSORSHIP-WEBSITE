@@ -20,19 +20,18 @@ export function PreviewModal({ open, onClose, url, title }: PreviewModalProps) {
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-[9999] flex flex-col bg-[#FFF8F0]">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-amber-200 bg-white shadow-sm">
+    <div className="fixed inset-0 z-[9999] flex flex-col bg-white">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white shadow-sm">
         <div className="flex items-center gap-3">
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-amber-50 text-gray-500 transition-colors"
+            className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
             aria-label="Close preview"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
-          <div className="w-px h-5 bg-amber-200" />
           <span className="text-sm font-medium text-gray-700">Preview: {title}</span>
         </div>
         <a
@@ -47,12 +46,13 @@ export function PreviewModal({ open, onClose, url, title }: PreviewModalProps) {
           Open in new tab
         </a>
       </div>
-      <div className="flex-1 bg-gray-100">
+      <div className="flex-1 bg-gray-50">
         <iframe
           src={url}
           title={`Preview: ${title}`}
           className="w-full h-full border-0"
-          sandbox="allow-same-origin"
+          sandbox="allow-scripts allow-same-origin allow-forms"
+          loading="eager"
         />
       </div>
     </div>

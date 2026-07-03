@@ -72,7 +72,6 @@ export function HomePageEditor() {
       visibilityData.forEach(s => { visMap[s.section_key] = s.is_visible })
       setSectionsVisible(visMap)
     } catch (error) {
-      console.error('Failed to load homepage content:', error)
       toast.error('Failed to load homepage content')
     } finally {
       setLoading(false)
@@ -91,11 +90,10 @@ export function HomePageEditor() {
     try {
       await updateSectionVisibility(sectionKey, newVisible)
       toast.success(`Section ${newVisible ? 'shown' : 'hidden'}`)
-    } catch (error) {
-      console.error('Visibility update error:', error)
-      setSectionsVisible(prev => ({ ...prev, [sectionKey]: !newVisible }))
-      toast.error('Failed to update visibility')
-    }
+} catch (error) {
+        setSectionsVisible(prev => ({ ...prev, [sectionKey]: !newVisible }))
+        toast.error('Failed to update visibility')
+      }
   }
 
   const validateBeforeSave = (): boolean => {
@@ -130,7 +128,6 @@ export function HomePageEditor() {
       toast.success('Home page published successfully')
       setPublished(true)
     } catch (error) {
-      console.error('Save error:', error)
       toast.error('Failed to save homepage content')
     } finally {
       setSaving(false)

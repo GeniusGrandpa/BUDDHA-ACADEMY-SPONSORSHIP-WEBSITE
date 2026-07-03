@@ -148,7 +148,6 @@ export function AdminColorsPage() {
       await refreshTheme()
       toast.success('Colors saved! Click Publish to make changes live.')
     } catch (error) {
-      console.error('Save error:', error)
       toast.error('Failed to save colors')
     } finally {
       setSaving(false)
@@ -173,7 +172,6 @@ export function AdminColorsPage() {
       await refreshTheme()
       toast.success('Colors published and applied to website!')
     } catch (error) {
-      console.error('Publish error:', error)
       toast.error('Failed to publish colors')
     } finally {
       setPublishing(false)

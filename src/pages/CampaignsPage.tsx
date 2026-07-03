@@ -31,8 +31,8 @@ export function CampaignsPage() {
 
   return (
     <div>
-      <section className="relative py-20 lg:py-28 bg-gradient-to-br from-emerald-900 via-emerald-800 to-amber-900 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-amber-500/10 via-transparent to-transparent" />
+      <section className="relative py-20 lg:py-28 bg-gradient-to-br from-yellow-600 via-amber-500 to-yellow-700 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-yellow-500/10 via-transparent to-transparent" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
@@ -42,7 +42,7 @@ export function CampaignsPage() {
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
               {t('campaigns_title')}
             </h1>
-            <p className="text-lg md:text-xl text-gray-300 leading-relaxed">
+            <p className="text-lg md:text-xl text-yellow-100 leading-relaxed">
               {t('campaigns_description')}
             </p>
           </motion.div>

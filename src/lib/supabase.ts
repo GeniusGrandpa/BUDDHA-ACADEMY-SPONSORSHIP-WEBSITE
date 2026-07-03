@@ -7,7 +7,6 @@ function getEnvVar(name: string): string {
   const value = (import.meta.env as unknown as Record<string, string | undefined>)[name]
   if (!value) {
     const msg = `Missing required environment variable: ${name}. Check your .env file.`
-    console.error(`[Supabase] ${msg}`)
     throw new Error(msg)
   }
   return value
@@ -21,7 +20,6 @@ export function getSupabaseClient() {
 
   if (supabaseUrl === 'https://your-project.supabase.co') {
     const msg = 'VITE_SUPABASE_URL still has the placeholder value. Set it to your actual Supabase project URL in .env'
-    console.error(`[Supabase] ${msg}`)
     throw new Error(msg)
   }
 

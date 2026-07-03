@@ -46,7 +46,6 @@ export function getAuthErrorMessage(error: unknown): string {
     return 'Network error. Please check your connection and try again'
   }
 
-  console.error('[Auth] Unrecognized error:', message)
   return GENERIC_FALLBACK
 }
 
@@ -159,6 +158,5 @@ export function classifyAuthError(error: unknown): {
     return { userMessage: 'Your account has been suspended. Please contact support', category: 'account_status' }
   }
 
-  console.error('[Auth] Unrecognized error:', { message })
   return { userMessage: GENERIC_FALLBACK, category: 'unknown' }
 }

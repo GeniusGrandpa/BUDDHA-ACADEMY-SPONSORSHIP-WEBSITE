@@ -7,7 +7,7 @@ import toast from 'react-hot-toast'
 
 const supabase = getSupabaseClient()
 
-type DonationGoal = DBDonationGoal & { _new?: boolean }
+type DonationGoal = DBDonationGoal & { _new?: boolean, _tempId?: string }
 
 export function CampaignsEditor() {
   const [loading, setLoading] = useState(true)
@@ -28,8 +28,9 @@ export function CampaignsEditor() {
   const handleSave = async (goal: DonationGoal) => {
     setSaving(true)
     try {
+      const { _new, _tempId, ...cleanGoal } = goal
       const payload = {
-        ...goal,
+        ...cleanGoal,
         start_date: goal.start_date || null,
         end_date: goal.end_date || null,
       }
@@ -40,7 +41,7 @@ export function CampaignsEditor() {
         const { data, error } = await supabase.from('donation_goals').insert(payload).select('id').single()
         if (error) throw error
         if (data) {
-          setGoals(prev => prev.map(g => g === goal ? { ...g, id: data.id, _new: false } : g))
+          setGoals(prev => prev.map(g => g._tempId === goal._tempId ? { ...g, id: data.id, _new: false, _tempId: undefined } : g))
         }
       }
       toast.success('Campaign saved')
@@ -59,15 +60,23 @@ export function CampaignsEditor() {
   }
 
   const addGoal = () => {
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
     setGoals(prev => [{
       id: '', title: '', description: '', target_amount: 0, raised_amount: 0,
       donor_count: 0, icon: 'heart', color: '#f59e0b', category: 'general',
-      is_active: true, start_date: '', end_date: '', created_at: '', updated_at: '', _new: true,
+      is_active: true, start_date: '', end_date: '', created_at: '', updated_at: '', _new: true, _tempId: tempId,
     } as DonationGoal, ...prev])
   }
 
   const updateGoal = (i: number, field: string, value: unknown) => {
-    setGoals(prev => prev.map((g, idx) => idx === i ? { ...g, [field]: value } : g))
+    setGoals(prev => prev.map((g, idx) => {
+      if (idx === i) {
+        const updated: DonationGoal = { ...g, [field]: value }
+        if (g._tempId) updated._tempId = g._tempId
+        return updated
+      }
+      return g
+    }))
   }
 
   if (loading) return <FormSkeleton fields={4} />
