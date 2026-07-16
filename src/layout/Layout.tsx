@@ -4,6 +4,7 @@ import { Header } from './Header'
 import { Footer } from './Footer'
 import { AdminPageToolbar } from '../components/AdminPageToolbar'
 import { ErrorBoundary } from '../components/ErrorBoundary'
+import { SeoMetadata } from '../lib/seo-metadata'
 
 export function Layout() {
   const location = useLocation()
@@ -11,6 +12,7 @@ export function Layout() {
   const isAdminRoute = location.pathname.startsWith('/admin') || location.pathname.startsWith('/super-admin') || location.pathname.startsWith('/teacher')
   return (
     <div className="min-h-screen flex flex-col bg-[var(--color-background)] text-[var(--color-text-primary)] overflow-x-hidden">
+      <SeoMetadata routeSlug={isAdminRoute ? '' : pageSlug} />
       <Header />
       <main className="flex-grow w-full max-w-[100vw]">
         <AnimatePresence mode="wait">

@@ -5,6 +5,7 @@ import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { Badge } from '../components/ui/Badge'
 import { StudentCardSkeleton } from '../components/ui/LoadingSkeleton'
+import { CtaBanner } from '../components/CtaBanner'
 import { getStudents } from '../services/students'
 import { getHeroContent, getSectionContent, getSectionVisibility } from '../services/cms-content'
 import { getTestimonialsWithType } from '../services/content'
@@ -409,35 +410,6 @@ function TestimonialsSection({ testimonials, testimonialList, visible }: { testi
   )
 }
 
-function DonationCtaSection({ donationCta, visible }: { donationCta: SectionContent; visible: boolean }) {
-   if (!visible) return null
-   const content = donationCta.content as { title?: string; description?: string; button_text?: string; button_link?: string }
-   return (
-     <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-[var(--color-primary)] via-[var(--color-accent)] to-[var(--color-secondary)]" aria-label="Call to action">
-       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-         {content?.title && <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 sm:mb-6">{content.title}</h2>}
-         {content?.description && (
-           <p className="text-base sm:text-lg text-white/90 mb-6 sm:mb-8 leading-relaxed">{content.description}</p>
-         )}
-         {content?.button_text && (
-           <Link 
-             to={content.button_link || '/donate'}
-             className="inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-white/40 rounded-full"
-           >
-             <Button 
-               size="lg" 
-               className="bg-white text-[var(--color-primary)] hover:opacity-90 w-full sm:w-auto"
-               aria-label={`${content.button_text} - Support our cause`}
-             >
-               {content.button_text}
-             </Button>
-           </Link>
-         )}
-       </div>
-     </section>
-   )
- }
-
 export function HomePage() {
   const { t } = useCmsStrings()
   const [students, setStudents] = useState<Student[]>([])
@@ -449,7 +421,6 @@ export function HomePage() {
   const [sponsorshipSteps, setSponsorshipSteps] = useState<SectionContent | null>(null)
   const [testimonialsSection, setTestimonialsSection] = useState<SectionContent | null>(null)
   const [testimonialItems, setTestimonialItems] = useState<Testimonial[]>([])
-  const [donationCtaSection, setDonationCtaSection] = useState<SectionContent | null>(null)
   const [sectionsVisible, setSectionsVisible] = useState<Record<string, boolean>>({})
   const [brokenStudentPhotos, setBrokenStudentPhotos] = useState<Set<string>>(new Set())
   const [studentsLoading, setStudentsLoading] = useState(true)
@@ -495,7 +466,6 @@ export function HomePage() {
       getSectionContent('sponsorship_steps').then(d => { if (d) setSponsorshipSteps(d) }).catch(() => { }),
       getSectionContent('testimonials').then(d => { if (d) setTestimonialsSection(d) }).catch(() => { }),
       getTestimonialsWithType('testimonial').then(d => { if (d && d.length > 0) setTestimonialItems(d) }).catch(() => { }),
-      getSectionContent('donation_cta').then(d => { if (d) setDonationCtaSection(d) }).catch(() => { }),
       getSectionVisibility().then(sections => {
         const map: Record<string, boolean> = {}
         sections.forEach((s: { section_key: string; is_visible: boolean }) => { map[s.section_key] = s.is_visible })
@@ -531,7 +501,7 @@ export function HomePage() {
       />
       <SponsorshipStepsSection sponsorshipSteps={sponsorshipSteps} visible={sectionsVisible.sponsorship_steps !== false} />
       {testimonialsSection && <TestimonialsSection testimonials={testimonialsSection} testimonialList={testimonialItems} visible={sectionsVisible.testimonials !== false} />}
-      {donationCtaSection && <DonationCtaSection donationCta={donationCtaSection} visible={sectionsVisible.donation_cta !== false} />}
+      {sectionsVisible.donation_cta !== false && <CtaBanner />}
     </div>
   )
 }

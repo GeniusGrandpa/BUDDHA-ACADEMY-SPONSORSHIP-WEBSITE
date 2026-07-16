@@ -11,6 +11,7 @@ import { PaymentMethodCard } from './PaymentMethodCard'
 import { QRPaymentWidget } from './QRPaymentWidget'
 import { DonationImpactCard } from './DonationImpactCard'
 import { PaymentSuccess } from './PaymentSuccess'
+import { StripePaymentWrapper } from './stripe/StripePaymentWrapper'
 import type { PaymentGateway, PaymentSetting } from '../../types/payments'
 
 interface PaymentModalProps {
@@ -114,6 +115,10 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
     reader.readAsDataURL(file)
   }
 
+  const handleStripeSuccess = async (paymentIntentId: string) => {
+    await confirmPayment(checkout.sessionId!, [], paymentIntentId)
+  }
+
   const handleClose = async () => {
     await abandonCheckout()
     setScreenshot(null)
@@ -215,6 +220,23 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">Payment Failed</h3>
                       <p className="text-sm text-gray-500 mb-4">{error || 'Something went wrong. Please try again.'}</p>
                       <Button onClick={handleClose}>Close</Button>
+                    </div>
+                  ) : selectedGateway === 'stripe' ? (
+                    <div className="space-y-6">
+                      <div className="bg-gray-50 rounded-xl p-4">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-gray-600">Donation Amount</span>
+                          <span className="text-xl font-bold text-gray-900">{formatNPR(amount)}</span>
+                        </div>
+                      </div>
+                      <StripePaymentWrapper
+                        amount={amount}
+                        frequency={frequency}
+                        studentId={studentId}
+                        message={message}
+                        onSuccess={handleStripeSuccess}
+                        onCancel={() => setSelectedGateway(null)}
+                      />
                     </div>
                   ) : (
                     <>

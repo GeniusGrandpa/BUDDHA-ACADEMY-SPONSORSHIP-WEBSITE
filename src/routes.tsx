@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { createBrowserRouter, Navigate } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { Layout } from './layout/Layout'
 import { useAuth } from './context/AuthContext'
@@ -193,7 +193,7 @@ function AdminIndexRedirect() {
   return <LazyPage Component={SuperAdminDashboard} />
 }
 
-export const router = createBrowserRouter([
+export const routeDefinitions = [
   {
     path: '/',
     element: <Layout />,
@@ -357,4 +357,4 @@ export const router = createBrowserRouter([
     ),
     errorElement: <RouteErrorPage />,
   },
-])
+]

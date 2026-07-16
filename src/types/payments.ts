@@ -1,4 +1,4 @@
-export type PaymentGateway = 'khalti' | 'esewa' | 'mobile_banking'
+export type PaymentGateway = 'khalti' | 'esewa' | 'mobile_banking' | 'stripe'
 export type DonationStatus = 'pending' | 'processing' | 'verified' | 'completed' | 'failed' | 'rejected' | 'cancelled'
 export type PaymentSessionStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled'
 export type VerificationAction = 'submitted' | 'processing' | 'verified' | 'rejected' | 'failed' | 'expired' | 'cancelled'
@@ -121,10 +121,12 @@ export const GATEWAY_LABELS: Record<PaymentGateway, string> = {
   khalti: 'Khalti',
   esewa: 'eSewa',
   mobile_banking: 'Mobile Banking / Fonepay',
+  stripe: 'Credit / Debit Card',
 }
 
 export const GATEWAY_DESCRIPTIONS: Record<PaymentGateway, string> = {
   khalti: 'Pay via Khalti digital wallet',
   esewa: 'Pay via eSewa online wallet',
   mobile_banking: 'Bank transfer or Fonepay',
+  stripe: 'Pay securely with your credit or debit card',
 }

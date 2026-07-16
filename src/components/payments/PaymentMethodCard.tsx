@@ -13,6 +13,7 @@ const gatewayIcons: Record<PaymentGateway, string> = {
   khalti: 'K',
   esewa: 'E',
   mobile_banking: 'MB',
+  stripe: 'CC',
 }
 
 export function PaymentMethodCard({ gateway, name, description, isSelected, onSelect }: PaymentMethodCardProps) {

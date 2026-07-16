@@ -5,6 +5,10 @@ export function getAuthRedirectBase(): string {
     return configured.replace(/\/$/, '')
   }
 
+  if (typeof window === 'undefined') {
+    return configured || 'http://localhost:5174'
+  }
+
   try {
     const origin = window.location.origin
     if (origin && origin !== 'null') {

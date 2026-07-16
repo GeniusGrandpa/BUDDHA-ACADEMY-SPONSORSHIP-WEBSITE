@@ -3,6 +3,8 @@ import { Database } from '../types/database'
 
 let _client: SupabaseClient<Database> | null = null
 
+const isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined'
+
 function getEnvVar(name: string): string {
   const value = (import.meta.env as unknown as Record<string, string | undefined>)[name]
   if (!value) {
@@ -10,6 +12,15 @@ function getEnvVar(name: string): string {
     throw new Error(msg)
   }
   return value
+}
+
+function getStorageAdapter() {
+  if (isBrowser) return undefined
+  return {
+    getItem: () => null,
+    setItem: () => {},
+    removeItem: () => {},
+  }
 }
 
 export function getSupabaseClient() {
@@ -26,9 +37,10 @@ export function getSupabaseClient() {
   _client = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     auth: {
       flowType: 'pkce',
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
+      persistSession: isBrowser,
+      autoRefreshToken: isBrowser,
+      detectSessionInUrl: isBrowser,
+      storage: getStorageAdapter(),
     },
   })
 
