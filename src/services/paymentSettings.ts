@@ -119,7 +119,9 @@ export async function getPaymentSettingByGateway(
     .select('id, gateway_name, gateway_display_name, gateway_description, qr_image_url, account_name, account_number, instructions, is_active, sort_order, created_at, updated_at')
     .eq('gateway_name', gateway)
     .eq('is_active', true)
-    .single()
+    .order('sort_order', { ascending: true })
+    .limit(1)
+    .maybeSingle()
 
   if (error) return null
   return data as unknown as PaymentSetting | null

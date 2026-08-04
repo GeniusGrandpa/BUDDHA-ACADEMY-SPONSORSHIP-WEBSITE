@@ -67,6 +67,7 @@ export function AdminPaymentSettingsPage() {
   const handleAddGateway = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newGateway.gateway_name) return
+    const isStripe = newGateway.gateway_name === 'stripe'
     setSaving('__new__')
     try {
       await createPaymentSetting({
@@ -74,8 +75,8 @@ export function AdminPaymentSettingsPage() {
         gateway_display_name: newGateway.gateway_display_name,
         gateway_description: newGateway.gateway_description || null,
         qr_image_url: newGateway.qr_image_url,
-        account_name: newGateway.account_name,
-        account_number: newGateway.account_number,
+        account_name: isStripe ? '' : newGateway.account_name,
+        account_number: isStripe ? '' : newGateway.account_number,
         instructions: newGateway.instructions,
         is_active: true,
         sort_order: settings.length + 1,
@@ -105,6 +106,8 @@ export function AdminPaymentSettingsPage() {
     return <FormSkeleton />
   }
 
+  const isStripe = newGateway.gateway_name === 'stripe'
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -132,7 +135,17 @@ export function AdminPaymentSettingsPage() {
                 <select
                   required
                   value={newGateway.gateway_name}
-                  onChange={(e) => setNewGateway({ ...newGateway, gateway_name: e.target.value as PaymentGateway })}
+                  onChange={(e) => {
+                    const name = e.target.value as PaymentGateway
+                    setNewGateway({
+                      ...newGateway,
+                      gateway_name: name,
+                      gateway_display_name: name === 'stripe' ? 'Credit / Debit Card' : newGateway.gateway_display_name,
+                      gateway_description: name === 'stripe' ? 'Pay securely with your credit or debit card' : newGateway.gateway_description,
+                      account_name: name === 'stripe' ? '' : newGateway.account_name,
+                      account_number: name === 'stripe' ? '' : newGateway.account_number,
+                    })
+                  }}
                   className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500/50"
                   aria-label="Select gateway"
                 >
@@ -154,28 +167,36 @@ export function AdminPaymentSettingsPage() {
                   placeholder="e.g. Khalti"
                 />
               </div>
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">Account Name</label>
-                <input
-                  type="text"
-                  required
-                  value={newGateway.account_name}
-                  onChange={(e) => setNewGateway({ ...newGateway, account_name: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500/50"
-                  placeholder="Buddha Academy"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">Account Number</label>
-                <input
-                  type="text"
-                  required
-                  value={newGateway.account_number}
-                  onChange={(e) => setNewGateway({ ...newGateway, account_number: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500/50"
-                  placeholder="9800000000"
-                />
-              </div>
+              {!isStripe ? (
+                <>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Account Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={newGateway.account_name}
+                      onChange={(e) => setNewGateway({ ...newGateway, account_name: e.target.value })}
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500/50"
+                      placeholder="Buddha Academy"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Account Number</label>
+                    <input
+                      type="text"
+                      required
+                      value={newGateway.account_number}
+                      onChange={(e) => setNewGateway({ ...newGateway, account_number: e.target.value })}
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500/50"
+                      placeholder="9800000000"
+                    />
+                  </div>
+                </>
+              ) : (
+                <div className="md:col-span-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-xs text-amber-700">
+                  Account details and QR code are not required for Stripe card payments.
+                </div>
+              )}
               <div className="md:col-span-2">
                 <label className="block text-xs text-gray-500 mb-1">QR Image</label>
                 <div className="flex gap-2 items-start">
@@ -271,34 +292,43 @@ export function AdminPaymentSettingsPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs text-gray-500 mb-1">Account Name</label>
-                  <input
-                    type="text"
-                    defaultValue={setting.account_name}
-                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500/50"
-                    placeholder="Account name"
-                    onBlur={(e) => {
-                      if (e.target.value !== setting.account_name) {
-                        handleUpdate(setting.id, { account_name: e.target.value })
-                      }
-                    }}
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-gray-500 mb-1">Account Number</label>
-                  <input
-                    type="text"
-                    defaultValue={setting.account_number}
-                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500/50"
-                    placeholder="Account number"
-                    onBlur={(e) => {
-                      if (e.target.value !== setting.account_number) {
-                        handleUpdate(setting.id, { account_number: e.target.value })
-                      }
-                    }}
-                  />
-                </div>
+                {setting.gateway_name !== 'stripe' ? (
+                  <>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Account Name</label>
+                      <input
+                        type="text"
+                        defaultValue={setting.account_name}
+                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500/50"
+                        placeholder="Account name"
+                        onBlur={(e) => {
+                          if (e.target.value !== setting.account_name) {
+                            handleUpdate(setting.id, { account_name: e.target.value })
+                          }
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Account Number</label>
+                      <input
+                        type="text"
+                        defaultValue={setting.account_number}
+                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500/50"
+                        placeholder="Account number"
+                        onBlur={(e) => {
+                          if (e.target.value !== setting.account_number) {
+                            handleUpdate(setting.id, { account_number: e.target.value })
+                          }
+                        }}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <div className="md:col-span-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-xs text-amber-700">
+                    Account details are managed by Stripe for card payments.
+                  </div>
+                )}
+                {setting.gateway_name !== 'stripe' && (
                 <div className="md:col-span-2">
                   <label className="block text-xs text-gray-500 mb-1">QR Image</label>
                   <div className="flex gap-2 items-start">
@@ -344,6 +374,7 @@ export function AdminPaymentSettingsPage() {
                     </div>
                   </div>
                 </div>
+                )}
                 <div className="md:col-span-2">
                   <label className="block text-xs text-gray-500 mb-1">Payment Instructions</label>
                   <textarea
