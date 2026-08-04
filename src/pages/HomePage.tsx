@@ -282,11 +282,11 @@ function StudentsSection({ students, brokenPhotos, setBrokenPhotos, visible, loa
                 : student.photo_url
               return (
                 <Card key={student.id} variant="bordered" className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="aspect-w-4 aspect-h-3">
+                  <div className="aspect-[4/3]">
                     <img
                       src={photoSrc}
                       alt={student.name}
-                      className="w-full h-48 object-cover"
+                      className="w-full h-full object-cover"
                       loading="lazy" decoding="async"
                       onError={() => setBrokenPhotos(prev => new Set(prev).add(student.id))}
                     />

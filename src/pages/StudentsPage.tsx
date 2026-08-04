@@ -82,7 +82,7 @@ export function StudentsPage() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
               {filteredStudents.map((student) => (
                 <Card key={student.id} variant="bordered" className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="aspect-w-4 aspect-h-3">
+                  <div className="aspect-[4/3]">
                     <img
                       src={optimizeImageUrl(student.photo_url, { width: 480, height: 360, resize: 'cover', quality: 70 }) || STUDENT_PLACEHOLDER}
                       alt={student.name}
