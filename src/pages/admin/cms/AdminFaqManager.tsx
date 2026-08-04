@@ -4,10 +4,12 @@ import toast from 'react-hot-toast'
 import { getFaqs, createFaq, updateFaq, deleteFaq, reorderFaqs } from '../../../services/content'
 import type { Faq } from '../../../types/database'
 import { ListSkeleton } from '../../../components/ui/LoadingSkeleton'
+import { useConfirm } from '../../../context/ConfirmContext'
 
 const FAQ_CATEGORIES = ['Sponsorship', 'Donations', 'General', 'Volunteering', 'Partnerships']
 
 export function AdminFaqManager() {
+  const { confirm } = useConfirm()
   const [faqs, setFaqs] = useState<Faq[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -63,7 +65,7 @@ const [form, setForm] = useState({ question: '', answer: '', category: 'General'
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this FAQ?')) return
+    if (!(await confirm('Delete this FAQ?'))) return
     try {
       await deleteFaq(id)
       setFaqs(faqs.filter(f => f.id !== id))

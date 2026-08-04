@@ -4,6 +4,7 @@ import toast from 'react-hot-toast'
 import { getGalleryItems, createGalleryItem, updateGalleryItem, deleteGalleryItem } from '../../../services/gallery'
 import type { GalleryItem } from '../../../types/database'
 import { GallerySkeleton } from '../../../components/ui/LoadingSkeleton'
+import { useConfirm } from '../../../context/ConfirmContext'
 
 const GALLERY_TYPES = ['photo', 'video', 'testimonial']
 const GALLERY_CATEGORIES = ['School Life', 'Events', 'Community', 'Sponsorship', 'General']
@@ -11,6 +12,7 @@ const GALLERY_CATEGORIES = ['School Life', 'Events', 'Community', 'Sponsorship',
 const FALLBACK_IMAGE = 'https://images.pexels.com/photos/8471831/pexels-photo-8471831.jpeg?auto=compress&cs=tinysrgb&w=600'
 
 export function AdminContentGallery() {
+  const { confirm } = useConfirm()
   const [items, setItems] = useState<GalleryItem[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -77,7 +79,7 @@ export function AdminContentGallery() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this item?')) return
+    if (!(await confirm('Delete this item?'))) return
     try {
       await deleteGalleryItem(id)
       toast.success('Gallery item deleted')

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useTheme } from '../../../context/ThemeContext'
 import { publishDesignSettings, resetDesignSettingsToDefaults } from '../../../services/design'
 import toast from 'react-hot-toast'
+import { useConfirm } from '../../../context/ConfirmContext'
 
 const designCards = [
   { label: 'Branding', description: 'Logo, favicon, organization name & tagline', href: '/admin/design/branding', icon: Image, color: 'bg-orange-100 text-orange-700' },
@@ -16,6 +17,7 @@ const designCards = [
 
 export function AdminDesignDashboard() {
   const { branding, refreshTheme } = useTheme()
+  const { confirm } = useConfirm()
   const [publishing, setPublishing] = useState(false)
 
   const handlePublish = async () => {
@@ -32,7 +34,7 @@ export function AdminDesignDashboard() {
   }
 
   const handleReset = async () => {
-    if (!window.confirm('Reset all design settings to defaults? This cannot be undone.')) return
+    if (!(await confirm({ title: 'Reset design settings', message: 'Reset all design settings to defaults? This cannot be undone.' }))) return
     try {
       await resetDesignSettingsToDefaults()
       await refreshTheme()

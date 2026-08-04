@@ -18,29 +18,29 @@ Access is enforced at three independent layers:
 
 ### 1. Route Level — `ProtectedRoute`
 
-Checked on every navigation. Fetches user role directly from Supabase `profiles` table. Handles suspended/banned users by signing them out.
+`ProtectedRoute` (`src/features/auth/guards/ProtectedRoute.tsx`, re-exported from `src/components/ProtectedRoute.tsx`) wraps every gated route in `src/routes.tsx`. It reads the user role from `AuthContext`, handles suspended/banned users by signing them out, and redirects denied users to their role-appropriate dashboard.
 
 Props: `requiredRoles`, `requiredPermission`, `requiredAnyPermission`, `adminOnly`.
 
-If denied, redirects to the user's role-appropriate dashboard.
+### 2. Client Permission Helpers
 
-### 2. Component Level — `PermissionGuard`
+`src/features/auth/services/permissions.ts` (re-exported from `src/lib/permissions.ts`) provides pure helpers used across pages and components:
 
-Conditionally renders children based on permission checks. Props:
-- `permission` (single PermissionCode)
-- `anyPermission` (PermissionCode[])
-- `allPermissions` (PermissionCode[])
-- `roles` (Role[])
-- `fallback` (custom fallback)
-- `showAccessDenied` (defaults to true)
+- `hasRole(role, ...roles)` — checks the user's role
+- `hasPermission(role, code)` / `hasAnyPermission` / `hasAllPermissions` — permission code checks
+- `isAdminOrAbove(role)`, `isStaffOrAbove(role)`, `getRoleLevel(role)`
+- `canEdit`, `canDelete`, `canManageUsers`, `canViewFinancials`, `canManageContent`, `canManageRole`, `canAccessSection`
+- `fetchUserPermissions(role)` — fetches custom permissions
 
-### 3. Function Level — `useProtectedAction`
+These guard individual buttons, sections, and page-level features (e.g. `HomePageEditor` checks `hasRole(profile?.role, 'super_admin', 'admin')`).
 
-Wraps callbacks and silently denies execution without the required permission.
+### 3. Server Side — RLS + RPC
+
+Row Level Security policies on every table plus guarded RPC functions enforce authorization independently of the client. Sensitive RPCs are `SECURITY DEFINER` and restricted to `service_role`/authorized roles (e.g. `stripe_confirm_payment`, `verify_payment`, `admin_update_user_role`), so the client cannot bypass checks even if it calls them directly.
 
 ## Permission Codes
 
-~80 permission codes following the pattern `<entity>.<action>` (e.g., `users.read`, `students.create`, `content.pages`, `payments.verify`).
+77 permission codes following the pattern `<entity>.<action>` (e.g., `users.read`, `students.create`, `content.pages`, `payments.verify`), defined in `src/features/auth/types/permissions.ts`.
 
 ### Permission Groups
 

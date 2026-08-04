@@ -57,6 +57,16 @@ export const navigationConfig: NavSection[] = [
     title: 'Content',
     items: [
       {
+        label: 'Website Dashboard',
+        href: '/admin/website',
+        permission: 'content.homepage',
+      },
+      {
+        label: 'Visual Builder',
+        href: '/admin/website/builder',
+        permission: 'content.homepage',
+      },
+      {
         label: 'Homepage',
         href: '/admin/website/homepage',
         permission: 'content.homepage',
@@ -74,6 +84,21 @@ export const navigationConfig: NavSection[] = [
       {
         label: 'Campaigns Page',
         href: '/admin/website/campaigns',
+        permission: 'content.homepage',
+      },
+      {
+        label: 'Donation Page',
+        href: '/admin/website/donation',
+        permission: 'content.homepage',
+      },
+      {
+        label: 'Sponsorship Page',
+        href: '/admin/website/sponsorship',
+        permission: 'content.homepage',
+      },
+      {
+        label: 'Volunteer Page',
+        href: '/admin/website/volunteer',
         permission: 'content.homepage',
       },
       {
@@ -139,11 +164,6 @@ export const navigationConfig: NavSection[] = [
       {
         label: 'Footer',
         href: '/admin/website/footer',
-        permission: 'content.settings',
-      },
-      {
-        label: 'Branding',
-        href: '/admin/website/branding',
         permission: 'content.settings',
       },
       {

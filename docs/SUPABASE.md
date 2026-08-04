@@ -12,8 +12,10 @@ One file per domain under `src/services/`. Each imports `getSupabaseClient()` lo
 |-------------|--------|
 | `students.ts` | Student management |
 | `donations.ts` | Donation records |
-| `payments.ts` | Payment sessions |
+| `payments.ts` | Payment sessions, verification |
+| `stripePayment.ts` | Stripe PaymentIntent creation (edge function) |
 | `paymentSettings.ts` | Payment gateway settings |
+| `profiles.ts` | User profiles |
 | `design.ts` | Design settings, presets |
 | `content.ts` | CMS content (pages, news, gallery, media library, etc.) |
 | `cms-content.ts` | CMS page content, headers, sections, site images, strings |
@@ -25,12 +27,12 @@ One file per domain under `src/services/`. Each imports `getSupabaseClient()` lo
 | `gallery.ts` | Gallery items |
 | `activities.ts` | Activity log |
 | `contact.ts` | Contact form submissions |
-| `sponsorships.ts` | Sponsorship management |
+| `legal-pages.ts` | Privacy/terms legal pages |
 | `volunteerEvents.ts` | Volunteer event management |
 | `volunteerApplications.ts` | Volunteer applications |
 | `notifications.ts` | User notifications |
-| `pdfExport.ts` | PDF generation and certificates |
 | `allocations.ts` | Donation allocations |
+| `website-builder.ts` | Website builder sections/state |
 
 ## Auth
 
@@ -82,9 +84,20 @@ Every admin action calls `logAuditEvent()` which inserts into `audit_logs` table
 
 Audit logs are readable only by `super_admin`.
 
+## Edge Functions
+
+Deno edge functions live under `supabase/functions/` and share helpers in `supabase/functions/_shared/response.ts` (JSON response envelopes `{ success, message, errorCode }`, CORS, structured logging).
+
+| Function | Purpose |
+|----------|---------|
+| `create-payment-intent` | Creates a Stripe PaymentIntent for the donor session; returns `client_secret` |
+| `stripe-webhook` | Verifies Stripe webhook signatures; handles `payment_intent.succeeded/failed/canceled` and runs the corresponding RPC |
+
+Deploy with `supabase functions deploy <name>`. Set secrets with `supabase secrets set` (see README → Supabase Setup).
+
 ## Migrations
 
-All schema changes in `supabase/migrations/`, applied in timestamp order. Each migration is idempotent. Cumulative migration at `all_migrations.sql`.
+All schema changes in `supabase/migrations/` (75 files), applied in timestamp order. Each migration is idempotent. Cumulative migration at `all_migrations.sql`.
 
 ## RPC Functions
 
@@ -93,6 +106,10 @@ All schema changes in `supabase/migrations/`, applied in timestamp order. Each m
 | `admin_update_user_role` | Assign/change user roles with hierarchy enforcement |
 | `initiate_payment_checkout` | Create payment session |
 | `verify_payment` | Verify payment + create donation record |
+| `stripe_confirm_payment` | Webhook: confirm card payment + create donation record |
+| `stripe_fail_payment` | Webhook: mark payment failed/cancelled |
+| `cancel_payment_session` | Cancel an abandoned payment session |
+| `submit_payment_confirmation` | Submit manual payment reference/screenshots |
 | `get_user_permissions` | Fetch custom permissions for a user |
 | `reset_design_settings` | Reset design to defaults |
 | `handle_new_user` | Trigger function: creates profile on signup |

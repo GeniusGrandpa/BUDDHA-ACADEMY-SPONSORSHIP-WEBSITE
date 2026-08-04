@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 import type { PaymentGateway, CheckoutState } from '../types/payments'
 import { initiatePaymentCheckout, cancelPaymentSession, submitPaymentConfirmation } from '../services/payments'
+import { getErrorMessage } from '../lib/errors'
 
 interface UsePaymentReturn {
   checkout: CheckoutState
@@ -62,8 +63,7 @@ export function usePayment(): UsePaymentReturn {
         transactionId: result.transactionId,
       })
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to start payment'
-      setError(message)
+      setError(getErrorMessage(err, 'Failed to start payment'))
     } finally {
       setLoading(false)
     }
@@ -92,8 +92,7 @@ export function usePayment(): UsePaymentReturn {
         step: 'success',
       }))
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to confirm payment'
-      setError(message)
+      setError(getErrorMessage(err, 'Failed to confirm payment'))
       setCheckout(prev => ({ ...prev, step: 'failed' }))
     } finally {
       setLoading(false)

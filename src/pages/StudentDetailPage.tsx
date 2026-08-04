@@ -112,7 +112,7 @@ export function StudentDetailPage() {
                   <img
                     src={student.photo_url ?? (photoFallback || undefined)}
                     alt={student.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-80 object-cover"
                     loading="eager" decoding="async"
                   />
               <div className="p-4 sm:p-6">

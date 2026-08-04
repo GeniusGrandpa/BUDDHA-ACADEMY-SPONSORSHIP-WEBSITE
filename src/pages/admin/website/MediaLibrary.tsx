@@ -5,12 +5,14 @@ import { fetchMedia, updateMedia, deleteMedia, uploadImage } from '../../../serv
 import { DashboardSkeleton } from '../../../components/ui/LoadingSkeleton'
 import { EmptyState } from '../../../components/ui/EmptyState'
 import { useDebounce } from '../../../hooks/useDebounce'
+import { useConfirm } from '../../../context/ConfirmContext'
 import type { WebsiteMedia } from '../../../types/website-builder'
 
 type ViewMode = 'grid' | 'list'
 const PER_PAGE = 50
 
 export function MediaLibrary() {
+  const { confirm } = useConfirm()
   const [items, setItems] = useState<WebsiteMedia[]>([])
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
@@ -79,6 +81,7 @@ export function MediaLibrary() {
   }
 
   const handleDelete = async (id: string) => {
+    if (!(await confirm('Delete this image?'))) return
     try {
       await deleteMedia(id)
       setItems(prev => prev.filter(i => i.id !== id))
@@ -160,7 +163,7 @@ export function MediaLibrary() {
                 <button onClick={() => copyUrl(item.file_url)} className="p-1.5 rounded-full bg-white text-gray-600 shadow hover:bg-gray-100" title="Copy URL">
                   <Copy className="w-3 h-3" />
                 </button>
-                <button onClick={() => { if (confirm('Delete this image?')) handleDelete(item.id) }} className="p-1.5 rounded-full bg-red-500 text-white shadow hover:bg-red-600" title="Delete">
+                <button onClick={() => handleDelete(item.id)} className="p-1.5 rounded-full bg-red-500 text-white shadow hover:bg-red-600" title="Delete">
                   <Trash2 className="w-3 h-3" />
                 </button>
               </div>
@@ -224,7 +227,7 @@ export function MediaLibrary() {
                     <div className="flex items-center gap-1">
                       <button onClick={() => copyUrl(item.file_url)} className="p-1.5 rounded hover:bg-gray-100 text-gray-400" title="Copy URL"><Copy className="w-3.5 h-3.5" /></button>
                       <button onClick={() => setEditingAlt({ id: item.id, alt: item.alt_text || '' })} className="p-1.5 rounded hover:bg-gray-100 text-gray-400" title="Edit"><Edit3 className="w-3.5 h-3.5" /></button>
-                      <button onClick={() => { if (confirm('Delete this image?')) handleDelete(item.id) }} className="p-1.5 rounded hover:bg-red-50 text-red-400" title="Delete"><Trash2 className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => handleDelete(item.id)} className="p-1.5 rounded hover:bg-red-50 text-red-400" title="Delete"><Trash2 className="w-3.5 h-3.5" /></button>
                     </div>
                   </td>
                 </tr>

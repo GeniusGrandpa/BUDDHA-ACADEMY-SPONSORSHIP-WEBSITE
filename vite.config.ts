@@ -8,8 +8,6 @@ function devSsrMiddleware(): Plugin {
     name: 'dev-ssr',
     apply: 'serve',
     configureServer(server) {
-      // Register directly (not via returned post-hook) so this runs before
-      // Vite's internal index-html/fallback middlewares.
       server.middlewares.use(async (req, res, next) => {
         const url = (req.url || '/').split('?')[0]
         if (req.method !== 'GET') return next()

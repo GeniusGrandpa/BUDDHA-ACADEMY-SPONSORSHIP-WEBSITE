@@ -1,5 +1,6 @@
-import { Component, type ReactNode } from 'react'
+import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { RefreshCw, Home, AlertTriangle } from 'lucide-react'
+import { logger } from '../lib/logger'
 
 interface Props {
   children: ReactNode
@@ -20,6 +21,10 @@ export class ErrorBoundary extends Component<Props, State> {
 
   static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error }
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+    logger.error('ErrorBoundary caught an error', error, errorInfo.componentStack)
   }
 
   render() {

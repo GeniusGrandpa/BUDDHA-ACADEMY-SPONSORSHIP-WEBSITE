@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react'
 import { Plus, Edit, Trash2, Calendar, MapPin, Clock } from 'lucide-react'
+import toast from 'react-hot-toast'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { supabase } from '../../lib/supabase'
 import type { Event } from '../../types/database'
 import { TableSkeleton } from '../../components/ui/LoadingSkeleton'
+import { useConfirm } from '../../context/ConfirmContext'
 
 export function AdminEventsPage() {
+  const { confirm } = useConfirm()
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -22,17 +25,19 @@ export function AdminEventsPage() {
         .order('date', { ascending: false })
       if (data) setEvents(data)
     } catch {
+      toast.error('Failed to load events')
     } finally {
       setLoading(false)
     }
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this event?')) return
+    if (!(await confirm('Are you sure you want to delete this event?'))) return
     try {
       await supabase.from('events').delete().eq('id', id)
       setEvents(events.filter(e => e.id !== id))
     } catch {
+      toast.error('Failed to delete event')
     }
   }
 

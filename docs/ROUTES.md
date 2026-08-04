@@ -65,7 +65,7 @@ All routes defined in `src/routes.tsx` via `createBrowserRouter`.
 |------|-----------|
 | `/admin/website` | WebsiteDashboard |
 | `/admin/website/builder` | WebsiteBuilder (3-panel live preview) |
-| `/admin/website/homepage` | Redirects to `/admin/website/builder` |
+| `/admin/website/homepage` | HomePageEditor (hero + section-based homepage editor) |
 | `/admin/website/about` | AboutPageEditor |
 | `/admin/website/contact` | ContactPageEditor |
 | `/admin/website/volunteer` | AdminVolunteerContent |

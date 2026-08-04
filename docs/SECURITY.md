@@ -19,9 +19,9 @@ Access control is enforced at three independent layers:
 
 | Layer | Mechanism | Bypass Protection |
 |-------|-----------|-------------------|
-| **Route** | `ProtectedRoute` fetches role from `profiles` table on every navigation | Server-side role check; redirects denied users to their dashboard |
-| **Component** | `PermissionGuard` conditionally renders UI | Hides actions the user cannot perform |
-| **Function** | `useProtectedAction` wraps callbacks | Silently denies execution without permission |
+| **Route** | `ProtectedRoute` fetches role from `AuthContext` on every navigation | Server-side role check; redirects denied users to their dashboard |
+| **Client** | Permission helpers (`hasRole`, `hasPermission`, `canEdit`, ...) guard buttons and sections | Hides actions the user cannot perform |
+| **Server** | RLS policies + guarded `SECURITY DEFINER` RPC functions | Client cannot bypass checks even with direct API calls |
 
 - `super_admin` bypasses all checks by convention
 - Suspended/banned users are detected server-side and signed out with access revoked message
@@ -55,9 +55,15 @@ All Supabase tables have RLS policies enabled:
 - SQL injection prevented by using Supabase client (parameterized queries) and RPC functions
 - Dynamic CSS/URL injection from CMS settings is mitigated via `isTrustedUrl()` validation before DOM injection
 
+## Error Handling & Logging
+
+- **Client** — `src/lib/errors.ts` (`AppError`, `classifyError`, `getErrorMessage`) sanitizes errors before they reach the UI: sensitive details (SQL, Postgres codes, paths, API keys, stack traces) are mapped to generic messages. `src/lib/logger.ts` gates log output by level.
+- **Global handlers** — `src/entry-client.tsx` installs `unhandledrejection` and `error` listeners that log details and (in production only) show a throttled user-friendly toast.
+- **SSR server** — `server/index.mjs` writes structured JSON logs with a per-request `X-Request-Id`, logs uncaught exceptions and unhandled rejections, and serves a branded 500 page instead of partial HTML when a render fails. Edge functions log structured errors server-side and return only safe messages to clients.
+
 ## HTTP Security Headers
 
-Configured in `vite.config.ts` (dev/preview server only — production platform must replicate these):
+Set on both the Vite dev server (`vite.config.ts`) and the production SSR server (`server/index.mjs`):
 
 | Header | Value | Purpose |
 |--------|-------|---------|
@@ -65,10 +71,11 @@ Configured in `vite.config.ts` (dev/preview server only — production platform 
 | `X-Frame-Options` | `DENY` | Prevents clickjacking |
 | `X-XSS-Protection` | `1; mode=block` | Enables browser XSS filter |
 | `Referrer-Policy` | `strict-origin-when-cross-origin` | Controls referrer header |
+| `X-Request-Id` | `randomUUID()` (server) | Request correlation ID in logs and responses |
 
 ## SPA Routing Security
 
-- All routes serve `index.html` via Vite's built-in dev/preview server (no platform-specific configs)
+- In development, Vite serves the app (with SSR middleware); in production, the Node SSR server (`server/index.mjs`) serves static assets and streamed HTML with proper 404 responses for unknown paths — no blind SPA fallback that returns HTTP 200 for missing routes
 - Auth callback URLs validated server-side by Supabase against configured redirect URL whitelist
 
 ## Audit Logging
@@ -147,12 +154,17 @@ Three Supabase storage buckets with RLS:
 
 ## Environment Variables
 
-Sensitive configuration is stored in environment variables:
+Sensitive configuration is stored in environment variables (see `.env.example`):
 - `VITE_SUPABASE_URL` — Supabase project URL
 - `VITE_SUPABASE_ANON_KEY` — Supabase anonymous key (safe for client-side by design)
 - `VITE_PUBLIC_BASE_URL` — Public base URL for auth redirects
+- `VITE_STRIPE_PUBLISHABLE_KEY` — Stripe publishable key (browser)
+- `STRIPE_SECRET_KEY` — Stripe secret key (Edge Function secret, server-side only)
+- `STRIPE_WEBHOOK_SECRET` — Stripe webhook signing secret (Edge Function secret, server-side only)
+- `SUPABASE_SERVICE_ROLE_KEY` — Supabase service role key (Edge Function secret, server-side only)
+- `SUPABASE_JWKS_URL` — Optional JWKS URL used by the SSR server
 
-No secrets, API keys, or tokens are hardcoded in the source code. The Supabase service role key is never exposed to the frontend.
+No secrets, API keys, or tokens are hardcoded in the source code. The Supabase service role key and Stripe secret keys are never exposed to the frontend.
 
 ## Security Events
 

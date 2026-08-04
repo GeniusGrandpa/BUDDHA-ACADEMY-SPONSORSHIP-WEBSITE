@@ -4,10 +4,12 @@ import toast from 'react-hot-toast'
 import { upsertSiteImage, deleteSiteImage, db } from '../../../services/cms-content'
 import type { SiteImage } from '../../../types/cms-content'
 import { TableSkeleton } from '../../../components/ui/LoadingSkeleton'
+import { useConfirm } from '../../../context/ConfirmContext'
 
 const SECTIONS = ['home', 'about', 'donation', 'sponsorship', 'volunteer', 'gallery', 'footer']
 
 export function AdminSiteImages() {
+  const { confirm } = useConfirm()
   const [images, setImages] = useState<SiteImage[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -66,7 +68,7 @@ export function AdminSiteImages() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this image?')) return
+    if (!(await confirm('Delete this image?'))) return
     try {
       await deleteSiteImage(id)
       setImages(images.filter(i => i.id !== id))

@@ -1,6 +1,7 @@
 import { getSupabaseClient } from '../lib/supabase'
 import { logAuditEvent } from '../lib/audit'
 import { markDonorAsVerified } from './profiles'
+import { AppError, ErrorCodes, getErrorMessage } from '../lib/errors'
 import type {
   PaymentSession,
   PaymentVerification,
@@ -34,7 +35,10 @@ export async function initiatePaymentCheckout(
   const response = data as PaymentCheckoutResponse
 
   if (response && response.success === false) {
-    throw new Error(response.message || 'Payment initiation failed')
+    throw new AppError(getErrorMessage(response.message, 'Payment initiation failed'), {
+      code: ErrorCodes.PAYMENT_FAILED,
+      retryable: true,
+    })
   }
 
   const sessionId = (response?.payment_id || response?.session_id) as string
@@ -157,7 +161,7 @@ export async function getDonorPaymentSessions(donorId: string): Promise<PaymentS
 export async function getPaymentSession(sessionId: string): Promise<PaymentSession | null> {
   const { data, error } = await supabase
     .from('payment_sessions')
-    .select('id, donor_id, amount, frequency, gateway, status, created_at, completed_at')
+    .select('id, donor_id, amount, frequency, gateway, status, created_at')
     .eq('id', sessionId)
     .single()
 
@@ -168,7 +172,7 @@ export async function getPaymentSession(sessionId: string): Promise<PaymentSessi
 export async function getPaymentVerifications(sessionId: string): Promise<PaymentVerification[]> {
   const { data, error } = await supabase
     .from('payment_verifications')
-    .select('id, payment_session_id, verified_by, status, notes, created_at')
+    .select('id, payment_session_id, verified_by, action, notes, created_at')
     .eq('payment_session_id', sessionId)
     .order('created_at', { ascending: true })
 
@@ -179,7 +183,7 @@ export async function getPaymentVerifications(sessionId: string): Promise<Paymen
 export async function getPaymentReceipt(donationId: string): Promise<PaymentReceipt | null> {
   const { data, error } = await supabase
     .from('payment_receipts')
-    .select('id, donation_id, receipt_url, receipt_number, created_at')
+    .select('id, donation_id, receipt_number, receipt_data, generated_at')
     .eq('donation_id', donationId)
     .single()
 

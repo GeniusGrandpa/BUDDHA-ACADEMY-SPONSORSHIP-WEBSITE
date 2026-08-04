@@ -1,10 +1,3 @@
--- Stripe webhook support.
--- 1. Idempotency/audit table for processed Stripe webhook events.
--- 2. Service-role-only RPCs used by the `stripe-webhook` edge function to
---    auto-confirm or fail Stripe card payments without an admin review step.
--- 3. `submit_payment_confirmation` becomes a no-op on already-completed
---    sessions so the client and webhook cannot race against each other.
-
 CREATE TABLE IF NOT EXISTS public.stripe_webhook_events (
   event_id text PRIMARY KEY,
   event_type text NOT NULL,
@@ -13,8 +6,6 @@ CREATE TABLE IF NOT EXISTS public.stripe_webhook_events (
 );
 
 ALTER TABLE public.stripe_webhook_events ENABLE ROW LEVEL SECURITY;
-
--- No policies: only roles with BYPASSRLS (service_role / postgres) can access.
 
 CREATE OR REPLACE FUNCTION public.stripe_confirm_payment(
   p_session_id UUID,
@@ -170,7 +161,6 @@ BEGIN
 END;
 $$;
 
--- Make donor confirmation idempotent for sessions already completed by the webhook.
 CREATE OR REPLACE FUNCTION submit_payment_confirmation(
   p_session_id UUID,
   p_screenshots TEXT[] DEFAULT '{}',
@@ -224,7 +214,6 @@ REVOKE ALL ON FUNCTION public.stripe_fail_payment FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.stripe_confirm_payment TO service_role;
 GRANT EXECUTE ON FUNCTION public.stripe_fail_payment TO service_role;
 
--- Allow 'stripe' as a checkout gateway (was khalti/esewa/mobile_banking only).
 DROP FUNCTION IF EXISTS public.initiate_payment_checkout(numeric, text, text, text, text, uuid);
 CREATE OR REPLACE FUNCTION public.initiate_payment_checkout(
   p_amount numeric,

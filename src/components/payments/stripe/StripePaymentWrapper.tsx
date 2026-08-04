@@ -3,6 +3,7 @@ import { loadStripe, type Stripe } from '@stripe/stripe-js'
 import { Elements } from '@stripe/react-stripe-js'
 import { AlertCircle } from 'lucide-react'
 import { createPaymentIntent } from '../../../services/stripePayment'
+import { getErrorMessage } from '../../../lib/errors'
 import { StripeCheckoutForm } from './StripeCheckoutForm'
 
 let stripePromise: Promise<Stripe | null> | null = null
@@ -43,7 +44,7 @@ export function StripePaymentWrapper({ amount, frequency, sessionId, onSuccess, 
         if (!cancelled) setClientSecret(secret)
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'Failed to initialize payment')
+          setError(getErrorMessage(err, 'Failed to initialize payment'))
         }
       } finally {
         if (!cancelled) setLoading(false)

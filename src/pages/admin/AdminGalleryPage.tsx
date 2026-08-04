@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Edit, Trash2 } from 'lucide-react'
+import toast from 'react-hot-toast'
 import { Card } from '../../components/ui/Card'
 import { getGalleryItems, updateGalleryItem, deleteGalleryItem } from '../../services/gallery'
 import type { GalleryItem } from '../../types/database'
 import { GallerySkeleton } from '../../components/ui/LoadingSkeleton'
+import { useConfirm } from '../../context/ConfirmContext'
 
 export function AdminGalleryPage() {
+  const { confirm } = useConfirm()
   const [items, setItems] = useState<GalleryItem[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -18,6 +21,7 @@ export function AdminGalleryPage() {
       const data = await getGalleryItems()
       setItems(data)
     } catch {
+      toast.error('Failed to load gallery items')
     } finally {
       setLoading(false)
     }
@@ -28,16 +32,17 @@ export function AdminGalleryPage() {
       await updateGalleryItem(item.id, { is_published: !item.is_published })
       setItems(items.map(i => i.id === item.id ? { ...i, is_published: !i.is_published } : i))
     } catch {
+      toast.error('Failed to update publish status')
     }
   }
 
   const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this item?')) {
-      try {
-        await deleteGalleryItem(id)
-        setItems(items.filter(i => i.id !== id))
-      } catch {
-      }
+    if (!(await confirm('Are you sure you want to delete this item?'))) return
+    try {
+      await deleteGalleryItem(id)
+      setItems(items.filter(i => i.id !== id))
+    } catch {
+      toast.error('Failed to delete item')
     }
   }
 

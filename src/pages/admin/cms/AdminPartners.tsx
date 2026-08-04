@@ -6,6 +6,7 @@ import { getPartners, createPartner, updatePartner, deletePartner, reorderPartne
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import type { Partner, PartnerType } from '../../../types/cms'
+import { useConfirm } from '../../../context/ConfirmContext'
 
 const PARTNER_TYPES: { value: PartnerType; label: string }[] = [
   { value: 'sponsor', label: 'Sponsor' },
@@ -17,6 +18,7 @@ const PARTNER_TYPES: { value: PartnerType; label: string }[] = [
 ]
 
 export function AdminPartners() {
+  const { confirm } = useConfirm()
   const [partners, setPartners] = useState<Partner[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -100,7 +102,7 @@ export function AdminPartners() {
   }
 
   const handleDelete = async (item: Partner) => {
-    if (!confirm(`Delete "${item.name}"?`)) return
+    if (!(await confirm(`Delete "${item.name}"?`))) return
     try {
       await deletePartner(item.id)
       toast.success('Partner deleted')

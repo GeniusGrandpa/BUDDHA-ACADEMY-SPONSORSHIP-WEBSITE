@@ -4,8 +4,10 @@ import toast from 'react-hot-toast'
 import { getStudentStories, createStudentStory, updateStudentStory, deleteStudentStory } from '../../../services/content'
 import type { StudentStory } from '../../../types/database'
 import { ListSkeleton } from '../../../components/ui/LoadingSkeleton'
+import { useConfirm } from '../../../context/ConfirmContext'
 
 export function AdminStudentStories() {
+  const { confirm } = useConfirm()
   const [stories, setStories] = useState<StudentStory[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -68,7 +70,7 @@ export function AdminStudentStories() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this story?')) return
+    if (!(await confirm('Delete this story?'))) return
     try {
       await deleteStudentStory(id)
       setStories(stories.filter(s => s.id !== id))

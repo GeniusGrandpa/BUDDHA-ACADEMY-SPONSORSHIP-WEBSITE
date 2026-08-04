@@ -9,6 +9,8 @@ import { getStudents, createStudent, updateStudent, deleteStudent } from '../../
 import { sponsorshipVariant, sponsorshipLabel } from '../../utils/sponsorship'
 import type { Student } from '../../types/database'
 import { TableSkeleton } from '../../components/ui/LoadingSkeleton'
+import { useConfirm } from '../../context/ConfirmContext'
+import { getErrorMessage } from '../../lib/errors'
 
 type StudentForm = {
   name: string
@@ -31,6 +33,7 @@ const emptyForm: StudentForm = {
 }
 
 export function AdminStudentsPage() {
+  const { confirm } = useConfirm()
   const [students, setStudents] = useState<Student[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -87,21 +90,20 @@ export function AdminStudentsPage() {
       setShowModal(false)
       await loadStudents()
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : 'Failed to save student')
+      toast.error(getErrorMessage(error, 'Failed to save student'))
     } finally {
       setSaving(false)
     }
   }
 
   const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this student?')) {
-      try {
-        await deleteStudent(id)
-        toast.success('Student deleted')
-        setStudents(students.filter(s => s.id !== id))
-      } catch {
-        toast.error('Failed to delete student')
-      }
+    if (!(await confirm('Are you sure you want to delete this student?'))) return
+    try {
+      await deleteStudent(id)
+      toast.success('Student deleted')
+      setStudents(students.filter(s => s.id !== id))
+    } catch {
+      toast.error('Failed to delete student')
     }
   }
 

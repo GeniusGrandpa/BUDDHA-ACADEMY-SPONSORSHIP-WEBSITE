@@ -3,8 +3,8 @@ import { supabase } from '../../lib/supabase'
 import { Card } from '../../components/ui/Card'
 import { RoleBadge } from '../../components/RoleBadge'
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner'
-import { ToastContainer } from '../../components/ToastContainer'
-import { useToast } from '../../hooks/useToast'
+import toast from 'react-hot-toast'
+import { getErrorMessage } from '../../lib/errors'
 import type { Role, PermissionCode } from '../../types/permissions'
 import { ROLE_NAMES, ROLE_DESCRIPTIONS, ALL_PERMISSIONS, DEFAULT_ROLE_PERMISSIONS } from '../../types/permissions'
 
@@ -88,7 +88,6 @@ export function SuperAdminRolesPage() {
   const [originalPermissions, setOriginalPermissions] = useState<Set<string>>(new Set())
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
-  const { toasts, addToast, removeToast } = useToast()
 
   const loadRolePermissions = useCallback(async (role: Role) => {
     setLoading(true)
@@ -119,14 +118,14 @@ export function SuperAdminRolesPage() {
         }
       }
     } catch {
-      addToast('Failed to load permissions', 'error')
+      toast.error('Failed to load permissions')
       const defaults = new Set<string>((DEFAULT_ROLE_PERMISSIONS[role] || []) as string[])
       setRolePermissions(defaults)
       setOriginalPermissions(new Set(defaults))
     } finally {
       setLoading(false)
     }
-  }, [addToast])
+  }, [])
 
   useEffect(() => {
     loadRolePermissions(selectedRole)
@@ -140,7 +139,7 @@ export function SuperAdminRolesPage() {
 
   const handleSave = async () => {
     if (selectedRole === 'super_admin') {
-      addToast('Super Admin permissions cannot be modified', 'warning')
+      toast('Super Admin permissions cannot be modified')
       return
     }
 
@@ -181,12 +180,14 @@ export function SuperAdminRolesPage() {
         p_changes: { added: toAdd, removed: toRemove },
         p_metadata: null,
       } as never)
-      if (auditError) { /* log silently */ }
+      if (auditError) {
+        console.error('Failed to write permission audit log', auditError)
+      }
 
       setOriginalPermissions(new Set(rolePermissions))
-      addToast('Permissions saved successfully', 'success')
+      toast.success('Permissions saved successfully')
     } catch (err) {
-      addToast(err instanceof Error ? err.message : 'Failed to save permissions', 'error')
+      toast.error(getErrorMessage(err, 'Failed to save permissions'))
       setRolePermissions(new Set(originalPermissions))
     } finally {
       setSaving(false)
@@ -198,7 +199,6 @@ export function SuperAdminRolesPage() {
 
   return (
     <div className="space-y-6">
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
 
       <div className="flex items-center justify-between">
         <div>

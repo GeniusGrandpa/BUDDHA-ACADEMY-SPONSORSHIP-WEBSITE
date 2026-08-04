@@ -5,6 +5,8 @@ import { Upload, Loader2 } from 'lucide-react'
 import { getVideos, createVideo, updateVideo, deleteVideo, uploadVideoFile } from '../../../services/content'
 import type { Video } from '../../../types/database'
 import { GallerySkeleton } from '../../../components/ui/LoadingSkeleton'
+import { useConfirm } from '../../../context/ConfirmContext'
+import { getErrorMessage } from '../../../lib/errors'
 
 const VIDEO_CATEGORIES = [
   'School Events', 'Community Activities', 'Student Stories', 'Sponsorship Impact', 'General',
@@ -13,6 +15,7 @@ const VIDEO_CATEGORIES = [
 type VideoType = 'youtube' | 'upload' | 'vimeo'
 
 export function AdminVideoManager() {
+  const { confirm } = useConfirm()
   const [videos, setVideos] = useState<Video[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -78,7 +81,7 @@ const [form, setForm] = useState({
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this video?')) return
+    if (!(await confirm('Delete this video?'))) return
     try {
       await deleteVideo(id)
       toast.success('Video deleted')
@@ -95,7 +98,7 @@ const [form, setForm] = useState({
       setForm(prev => ({ ...prev, url, video_type: 'upload' }))
       toast.success('Video uploaded')
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Video upload failed')
+      toast.error(getErrorMessage(err, 'Video upload failed'))
     } finally {
       setUploading(null)
     }
@@ -108,7 +111,7 @@ const [form, setForm] = useState({
       setForm(prev => ({ ...prev, thumbnail_url: url }))
       toast.success('Thumbnail uploaded')
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Thumbnail upload failed')
+      toast.error(getErrorMessage(err, 'Thumbnail upload failed'))
     } finally {
       setUploading(null)
     }

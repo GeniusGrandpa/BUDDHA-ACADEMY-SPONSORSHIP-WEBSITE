@@ -7,6 +7,7 @@ import { AuthProvider } from './context/AuthContext'
 import { LanguageProvider } from './context/LanguageContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { CmsStringsProvider } from './context/CmsStringsContext'
+import { ConfirmProvider } from './context/ConfirmContext'
 import { SiteBranding } from './components/SiteBranding'
 import { queryClient } from './lib/query-client'
 import type { RouterProviderProps } from 'react-router-dom'
@@ -63,7 +64,9 @@ function App({ router }: AppProps) {
         <ThemeProvider>
           <SiteBranding />
           <CmsStringsProvider>
-            <RouterProvider router={router} />
+            <ConfirmProvider>
+              <RouterProvider router={router} />
+            </ConfirmProvider>
           </CmsStringsProvider>
         </ThemeProvider>
       </AuthProvider>

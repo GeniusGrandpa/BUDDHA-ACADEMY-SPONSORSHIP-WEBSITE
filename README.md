@@ -76,49 +76,61 @@ It supports:
 
 ## Architecture
 
-The application is a single-page React application that communicates directly with Supabase. There is no custom backend server in the current architecture.
+The application is a React application with server-side rendering (SSR). In production a small Node.js server (`server/index.mjs`) serves the built client assets, streams rendered HTML, and returns proper 404/500 pages. The client and server both talk to Supabase, and card payments are handled by Supabase Edge Functions that call the Stripe API.
 
 ```text
-Browser -> React SPA -> Service Layer -> Supabase
-                                -> PostgreSQL
-                                -> Auth
-                                -> Storage
-                                -> RPC Functions
-                                -> Row Level Security
+Browser -> Node SSR Server (server/index.mjs)
+               -> React (src/entry-client.tsx / src/entry-server.tsx)
+               -> Service Layer (src/services)
+               -> Supabase (PostgreSQL + Auth + Storage + RPC + RLS)
+               -> Supabase Edge Functions (create-payment-intent, stripe-webhook)
+               -> Stripe API
 ```
 
 ### Frontend Architecture
 
 - Built with React 18, TypeScript, Vite 8, and Tailwind CSS.
-- Uses React Router with `createBrowserRouter`.
+- Uses React Router with `createBrowserRouter` (client) and static handlers + `renderToPipeableStream` (server).
+- Client entry is `src/entry-client.tsx` (hydration or client render); server entry is `src/entry-server.tsx` (SSR with status codes).
 - Pages are lazy-loaded with `React.lazy()` and `Suspense`.
 - Shared UI primitives live under `src/components`.
 - Domain-specific dashboards and workflows live under `src/features`.
 - Data access is routed through service modules under `src/services`.
+- Global error handling lives in `src/lib/errors.ts` (error classification and sanitization), `src/lib/logger.ts` (client log levels), and the `ErrorBoundary` in `src/components/ErrorBoundary.tsx`.
 
 ### Supabase Integration
 
 - Supabase Auth manages authentication, sessions, email verification, password reset, and SMTP-delivered auth emails.
 - Supabase PostgreSQL stores users, profiles, students, donations, sponsorships, CMS content, design settings, payments, and audit logs.
 - Supabase Storage supports media uploads, payment screenshots, and payment QR codes.
+- Supabase Edge Functions (`create-payment-intent`, `stripe-webhook`) process Stripe card payments and handle webhook verification.
 - RPC functions handle sensitive workflows such as payment initiation, payment verification, permission retrieval, and role changes.
 - Row Level Security protects table access at the database layer.
 
 ### Provider Hierarchy
 
 ```text
-ErrorBoundary
+ErrorBoundary (client only)
   App
-    Toaster
-    LanguageProvider
-      AuthProvider
-        ThemeProvider
-          RouterProvider
+    HelmetProvider
+      LanguageProvider
+        QueryClientProvider
+          ClientToaster
+          AuthProvider
+            ThemeProvider
+              SiteBranding
+              CmsStringsProvider
+                ConfirmProvider
+                  RouterProvider
 ```
 
+- `HelmetProvider` manages document head tags (title, meta, links) for SEO.
 - `LanguageProvider` manages language state, translation strings, and browser-loaded translation support.
+- `QueryClientProvider` provides the React Query client used by data hooks.
 - `AuthProvider` manages session state, user profile data, and auth actions.
 - `ThemeProvider` loads published design settings and injects CSS variables.
+- `CmsStringsProvider` loads CMS-driven UI string overrides.
+- `ConfirmProvider` provides a Promise-based `useConfirm()` replacement for native `window.confirm()` dialogs.
 - `RouterProvider` renders public, protected, admin, and super-admin routes.
 
 ### Data Flow
@@ -163,8 +175,11 @@ The service layer keeps Supabase access organized by domain:
 | --- | --- |
 | Frontend | React 18, TypeScript, Vite 8 |
 | Styling | Tailwind CSS, dynamic CSS variables |
-| Routing | React Router |
+| Routing | React Router (createBrowserRouter + SSR static handlers) |
+| Server | Node.js HTTP server (`server/index.mjs`) with gzip, request IDs, structured JSON logs |
 | Backend Services | Supabase |
+| Edge Functions | Deno (`create-payment-intent`, `stripe-webhook`) |
+| Payments | Stripe (PaymentIntents, Payment Element, webhooks) |
 | Database | Supabase PostgreSQL |
 | Authentication | Supabase Auth with PKCE, email verification, password reset |
 | Authorization | Role-Based Access Control, permission guards, protected actions, RLS |
@@ -221,15 +236,17 @@ The service layer keeps Supabase access organized by domain:
 
 ### Payment Verification
 
-- Manual payment session workflow for external payment methods.
+- Manual payment session workflow for external payment methods (bank, eSewa, Khalti).
 - Transaction reference and screenshot submission.
 - Admin review, verification, rejection, and receipt-oriented workflows.
 - Verified payments create donation records through controlled RPC logic.
+- Automatic Stripe card verification: `create-payment-intent` Edge Function creates a PaymentIntent; the `stripe-webhook` Edge Function verifies `payment_intent.succeeded` events and completes the session without manual review.
+- Every payment action is audit-logged; card failures surface sanitized, user-friendly error messages.
 
 ### CMS
 
 - **Website Dashboard** (`/admin/website`) organizes tools into 9 categorized groups: Home Page, About Page, Sponsorship Page, Donation Page, Contact Page, Student Sections, Content Collections, Global Settings, Other Pages.
-- **WebsiteBuilder** (`/admin/website/homepage`): 3-panel live preview editor with 10 pages, 30+ section types, inline editing, drag-and-drop reorder, section visibility toggles, add/duplicate/hide/delete section actions, and draft/publish workflow.
+- **WebsiteBuilder** (`/admin/website/builder`): 3-panel live preview editor with 10 pages, 30+ section types, inline editing, drag-and-drop reorder, section visibility toggles, add/duplicate/hide/delete section actions, and draft/publish workflow.
 - **5 dedicated editors**: AboutPageEditor (mission, vision, stats, values, timeline, images), ContactPageEditor (details + 21 form label strings), CampaignsEditor (donation goals CRUD), PrivacyPageEditor, TermsPageEditor.
 - Dedicated content editors for donation, sponsorship, volunteer, footer, and transparency pages.
 - Collection managers for news, gallery, testimonials, videos, FAQs, student stories, and media library.
@@ -396,9 +413,11 @@ The platform includes a database-driven design management system.
 - **Protected Routes** through route-level guards.
 - **Row Level Security** on Supabase tables.
 - **Audit Logging** for sensitive administrative actions.
-- **Secure Payment Verification** through controlled RPC workflows and manual review.
+- **Secure Payment Verification** through controlled RPC workflows, manual review, and verified Stripe webhooks.
+- **Sanitized Error Handling** — sensitive details (SQL, paths, keys, traces) are never shown to users; errors surface as friendly messages via a centralized error library (`src/lib/errors.ts`).
+- **Structured Logging** — the SSR server writes JSON logs with per-request IDs (`X-Request-Id`) and crash handlers for uncaught exceptions and unhandled rejections.
 - **File Upload Validation** for payment screenshots and media assets.
-- **HTTP Security Headers** configured through Vite.
+- **HTTP Security Headers** configured on both the Vite dev server and the production SSR server.
 - **Database hardening** through restricted table/function access and safer function search paths.
 
 ## Database Overview
@@ -426,44 +445,56 @@ See [`docs/SUPABASE.md`](docs/SUPABASE.md) for the Supabase integration notes.
 src/
   components/      UI primitives, auth guards, donation and payment components
   config/          Navigation configuration and layout definitions
-  context/         AuthContext, LanguageContext, ThemeContext providers
+  context/         AuthContext, LanguageContext, ThemeContext, CmsStringsContext, ConfirmContext providers
   features/        Auth flows and role dashboards for donor, finance, sponsorship, volunteer, and staff workflows
-  hooks/           useRole, useToast, usePayment, and dashboard hooks
-  lib/             Supabase client, audit logger, shared helpers
+  hooks/           useRole, usePayment, useDebounce, useWebsiteBuilder, and feature hooks
+  lib/             Supabase client, audit logger, error handling, logger, permissions, auth helpers
   pages/           Route pages including public, admin, super-admin, teacher, and auth callback pages
-  services/        Domain service layer for Supabase access (~20 files)
+  services/        Domain service layer for Supabase access (23 files)
   types/           Database types, permission types, CMS types, and feature types
   App.tsx          Application provider hierarchy
-  main.tsx         Application entry point and ErrorBoundary setup
+  entry-client.tsx Client entry point (hydration + global error handlers)
+  entry-server.tsx Server entry point (SSR with status codes)
   routes.tsx       Route definitions and access guards
+
+server/
+  index.mjs        Production SSR server: static assets, streaming render, 404/500 pages, security headers
+
+supabase/
+  functions/       Edge functions: create-payment-intent, stripe-webhook, shared helpers
+  migrations/      Timestamped database migrations
+  config.toml      Supabase project configuration
 
 docs/
   ARCHITECTURE.md  Architecture, provider hierarchy, data flow, conventions
   CMS.md           CMS, design system, content managers, dynamic page builder
-  PAYMENTS.md      Manual payment verification workflow
+  PAYMENTS.md      Payment verification workflow (manual + Stripe)
   RBAC.md          Roles, permissions, enforcement layers
   ROUTES.md        Public, protected, admin, and super-admin route map
   SECURITY.md      Auth, authorization, RLS, payment security, audit logging
   SUPABASE.md      Supabase client, services, storage, RPCs, migrations
 
-supabase/
-  migrations/      Timestamped database migrations
-  config.toml      Supabase project configuration
-
 dist/
-  Production build output generated by Vite
+  Production build output generated by Vite (client + server)
 ```
 
 
 ## Environment Variables
 
-Create a `.env` file in the project root.
+Create a `.env` file in the project root (see `.env.example` for the full template).
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
 | `VITE_SUPABASE_URL` | Yes | Supabase project URL used by the frontend client. |
 | `VITE_SUPABASE_ANON_KEY` | Yes | Supabase anonymous public key. Safe for browser use when RLS is configured correctly. |
 | `VITE_PUBLIC_BASE_URL` | Recommended | Public base URL used for auth redirects and deployment-specific links. Example: `http://localhost:5174`. |
+| `VITE_STRIPE_PUBLISHABLE_KEY` | Yes (Stripe) | Stripe publishable key used by the Payment Element in the browser. |
+| `STRIPE_SECRET_KEY` | Yes (Stripe) | Stripe secret key used by the `create-payment-intent` Edge Function. Server-side only. |
+| `STRIPE_WEBHOOK_SECRET` | Yes (Stripe) | Stripe webhook signing secret (`whsec_...`) used by the `stripe-webhook` Edge Function. Server-side only. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Yes (Stripe) | Supabase service role key used by the webhook Edge Function. Server-side only; never expose to the browser. |
+| `SUPABASE_JWKS_URL` | Optional | Supabase JWKS URL used by the SSR server for signed requests. |
+
+Server runtime variables (`server/index.mjs`): `HOST` (default `0.0.0.0`), `PORT` (default `3000`), `LOG_LEVEL` (`debug`/`info`/`warn`/`error`/`silent`).
 
 Example:
 
@@ -471,9 +502,11 @@ Example:
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_or_publishable_key
 VITE_PUBLIC_BASE_URL=http://localhost:5174
+VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_SECRET_KEY=sk_test_...
 ```
 
-Do not commit production secrets. Supabase anonymous keys are public by design, but table access must be protected through RLS policies.
+Do not commit production secrets. Supabase anonymous keys are public by design, but table access must be protected through RLS policies. `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and `SUPABASE_SERVICE_ROLE_KEY` are server-side only — for local Edge Function development set them with `supabase secrets set`.
 
 ---
 
@@ -495,7 +528,7 @@ Create `.env` in the project root and provide the Supabase values listed above.
 npm run dev
 ```
 
-The development server runs with Vite. The current script uses `vite --host`, so Vite will show the local URL in the terminal.
+The development server runs with Vite on port `5174` (`vite --host`). A Vite middleware plugin in `vite.config.ts` also server-renders pages in dev via `src/entry-server.tsx`, so SSR behavior is active during development.
 
 ### 4. Type Checking
 
@@ -509,13 +542,23 @@ npm run typecheck
 npm run lint
 ```
 
-### 6. Production Build
+### 6. Production Build (SSR)
 
 ```bash
-npm run build
+npm run build:ssr
 ```
 
-### 7. Preview Production Build
+Builds both the client bundle (`dist/client`) and the server bundle (`dist/server`).
+
+### 7. Run the Production SSR Server
+
+```bash
+npm run serve:ssr
+```
+
+Runs `server/index.mjs` on port `3000` (override with `PORT`). The server requires the `dist/client/index.html` template and `dist/server/entry-server.mjs` to exist (i.e. run `build:ssr` first).
+
+### 8. Preview Client Build
 
 ```bash
 npm run preview
@@ -530,6 +573,20 @@ npm run preview
 5. Add local and production redirect URLs.
 6. Configure storage buckets and RLS policies.
 7. Confirm required RPC functions are available.
+8. Deploy the Edge Functions (`supabase/functions/`):
+
+```bash
+supabase functions deploy create-payment-intent
+supabase functions deploy stripe-webhook
+```
+
+9. Set Edge Function secrets:
+
+```bash
+supabase secrets set STRIPE_SECRET_KEY=sk_...
+supabase secrets set STRIPE_WEBHOOK_SECRET=whsec_...
+supabase secrets set SUPABASE_SERVICE_ROLE_KEY=...
+```
 
 Recommended local redirect URL:
 
@@ -541,46 +598,47 @@ For deployed environments, replace the domain with the production URL.
 
 ## Deployment
 
-The application builds to static assets in `dist/` and can be deployed to any standard static hosting platform (Netlify, Cloudflare Pages, AWS S3, self-hosted nginx, etc.).
+The application ships two parts: a **Node.js SSR server** (`server/index.mjs`) that serves the production build, and **Supabase Edge Functions** for payments.
 
 ### Build
 
 ```bash
-npm run build
+npm run build:ssr
 ```
 
-Output: `dist/`
+Output: `dist/client/` (static assets) and `dist/server/` (SSR entry).
+
+### Run the Node SSR Server
+
+Run `node server/index.mjs` with `NODE_ENV=production` on a Node 18+ runtime. The server serves static assets, streams SSR HTML with proper 404/500 pages, sets security headers and per-request IDs, and writes structured JSON logs.
+
+```bash
+NODE_ENV=production PORT=3000 node server/index.mjs
+```
+
+Recommended hosts: a VPS (systemd/PM2), Railway, Render, Fly.io, or a container on any provider. A minimal `Dockerfile` can copy `dist/`, `server/`, and `package.json` and run the command above.
 
 ### Platform Configuration
 
-For any hosting platform:
+For any host running the SSR server:
 
-1. Set the **build command** to `npm run build`.
-2. Set the **publish/output directory** to `dist`.
-3. Configure a **single-page application (SPA) fallback** — all routes should serve `dist/index.html` (handled automatically by most platforms; for nginx use `try_files $uri $uri/ /index.html`).
-4. Add environment variables (see checklist below).
-5. Add the deployment URL to Supabase Auth settings (Site URL + redirect URLs).
-
-### Examples
-
-| Platform | Notes |
-| --- | --- |
-| **Netlify** | Create site from repo; set build command `npm run build`, publish dir `dist`; add `_redirects` file for SPA fallback is automatic. |
-| **Cloudflare Pages** | Connect repo; framework preset = Vite; build command `npm run build`, build output dir `dist`. |
-| **AWS S3 + CloudFront** | Upload `dist/` to S3; configure S3 static website hosting or CloudFront with error page pointing to `/index.html`. |
-| **nginx** | Copy `dist/` to web root; configure `try_files $uri $uri/ /index.html;`. |
+1. Set the **build command** to `npm run build:ssr`.
+2. Set the **start command** to `node server/index.mjs`.
+3. Add environment variables (see checklist below).
+4. Add the deployment URL to Supabase Auth settings (Site URL + redirect URLs).
+5. Deploy the Edge Functions and set their secrets (see Supabase Setup).
 
 ### Deployment Checklist
 
-- Set `VITE_SUPABASE_URL`.
-- Set `VITE_SUPABASE_ANON_KEY`.
-- Set `VITE_PUBLIC_BASE_URL`.
+- Set `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_PUBLIC_BASE_URL`.
+- Set `VITE_STRIPE_PUBLISHABLE_KEY` and server-side `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`.
 - Configure Supabase Auth Site URL (set to your deployment URL).
 - Configure Supabase Auth redirect URLs (include `https://your-domain.com/auth/callback`).
 - Configure SMTP provider for auth emails.
 - Apply database migrations (`supabase/migrations/`).
+- Deploy Edge Functions and register the `stripe-webhook` endpoint in the Stripe Dashboard.
 - Confirm storage bucket policies and RLS policies are enabled.
-- Test email verification, sign-in, and password reset in production.
+- Test email verification, sign-in, password reset, and card payment in production.
 
 ## Future Roadmap
 
@@ -636,7 +694,7 @@ Contributions should improve reliability, transparency, accessibility, maintaina
 ```bash
 npm run typecheck
 npm run lint
-npm run build
+npm run build:ssr
 ```
 
 6. Open a pull request with:

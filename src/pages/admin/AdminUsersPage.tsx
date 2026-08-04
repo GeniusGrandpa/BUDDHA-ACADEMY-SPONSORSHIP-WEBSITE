@@ -4,8 +4,8 @@ import { useAuth } from '../../context/AuthContext'
 import { Card } from '../../components/ui/Card'
 import { RoleBadge } from '../../components/RoleBadge'
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner'
-import { ToastContainer } from '../../components/ToastContainer'
-import { useToast } from '../../hooks/useToast'
+import toast from 'react-hot-toast'
+import { getErrorMessage } from '../../lib/errors'
 import { useRole } from '../../hooks/useRole'
 import { ROLE_NAMES } from '../../features/auth/types/permissions'
 import type { Role } from '../../types/permissions'
@@ -81,7 +81,6 @@ export function AdminUsersPage() {
   } | null>(null)
   const [verificationStatus, setVerificationStatus] = useState<Record<string, VerificationInfo>>({})
   const [loadingVerification, setLoadingVerification] = useState<Record<string, boolean>>({})
-  const { toasts, addToast, removeToast } = useToast()
 
   const canManageRole = (targetRole: string): boolean => {
     if (isSuperAdmin) return true
@@ -107,11 +106,11 @@ export function AdminUsersPage() {
       setUsers((usersResult.data || []) as ExtendedProfile[])
       if (!statsResult.error) setStats(statsResult.data)
     } catch {
-      addToast('Failed to load users', 'error')
+      toast.error('Failed to load users')
     } finally {
       setLoading(false)
     }
-  }, [addToast])
+  }, [])
 
   useEffect(() => { loadData() }, [loadData])
 
@@ -135,7 +134,7 @@ export function AdminUsersPage() {
     try {
       const { error } = await (supabase.rpc('admin_update_user_role' as never, { target_user_id: userId, new_role: newRole } as never) as unknown as Promise<{ error: unknown }>)
       if (error) throw error
-      addToast('Role updated successfully', 'success')
+      toast.success('Role updated successfully')
       await loadData()
       setRoleDropdown(prev => {
         const next = { ...prev }
@@ -143,7 +142,7 @@ export function AdminUsersPage() {
         return next
       })
     } catch (err) {
-      addToast(err instanceof Error ? err.message : 'Failed to update role. Please try again.', 'error')
+      toast.error(getErrorMessage(err, 'Failed to update role. Please try again.'))
       setRoleDropdown(prev => {
         const next = { ...prev }
         delete next[userId]
@@ -160,10 +159,10 @@ export function AdminUsersPage() {
     try {
       const { error } = await (supabase.rpc('admin_update_user_status', { target_user_id: userId, new_status: status } as never) as unknown as Promise<{ error: unknown }>)
       if (error) throw error
-      addToast(`User ${status === 'active' ? 'restored' : 'suspended'} successfully`, 'success')
+      toast.success(`User ${status === 'active' ? 'restored' : 'suspended'} successfully`)
       await loadData()
     } catch (err) {
-      addToast(err instanceof Error ? err.message : 'Failed to update status', 'error')
+      toast.error(getErrorMessage(err, 'Failed to update status'))
     } finally {
       setUpdating(null)
       setConfirmAction(null)
@@ -179,9 +178,9 @@ export function AdminUsersPage() {
         options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
       })
       if (error) throw error
-      addToast('Verification email sent successfully', 'success')
+      toast.success('Verification email sent successfully')
     } catch (err) {
-      addToast(err instanceof Error ? err.message : 'Failed to send verification email', 'error')
+      toast.error(getErrorMessage(err, 'Failed to send verification email'))
     } finally {
       setUpdating(null)
       setConfirmAction(null)
@@ -227,7 +226,6 @@ export function AdminUsersPage() {
 
   return (
     <div className="space-y-6">
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
 
       <ConfirmModal
         open={confirmAction !== null}

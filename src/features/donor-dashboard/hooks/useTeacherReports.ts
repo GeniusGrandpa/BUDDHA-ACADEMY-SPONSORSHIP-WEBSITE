@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../../lib/supabase'
+import { getErrorMessage } from '../../../lib/errors'
 import type { TeacherReport } from '../../../types/database'
 
 export interface UseTeacherReportsOptions {
@@ -74,7 +75,7 @@ export function useTeacherReports(
       }
       setLatestReports(Array.from(latestMap.values()))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load teacher reports')
+      setError(getErrorMessage(err, 'Failed to load teacher reports'))
     } finally {
       setLoading(false)
     }

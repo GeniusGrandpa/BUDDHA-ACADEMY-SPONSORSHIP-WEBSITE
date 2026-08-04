@@ -1,43 +1,9 @@
--- ============================================================================
--- CORRECTIVE MIGRATION — Phase 11: Migration Audit & Rollback
--- ============================================================================
--- This migration safely removes architecture that no longer matches the
--- restored production system. It does NOT delete any production data.
---
--- PRESERVED:
---   ✓ profiles, students, sponsorships, donations, payments, audit_logs
---   ✓ media, navigation, footer_content, branding, site_settings
---   ✓ hero_content, section_content, section_visibility, page_headers
---   ✓ site_images, cms_strings, seo_content
---   ✓ donation_content, sponsorship_content, volunteer_content, transparency_content
---   ✓ website_pages, website_sections, website_content_blocks (used by admin)
---   ✓ website_page_versions, website_media (used by admin)
---   ✓ legal_pages, legal_page_sections, legal_page_versions
---   ✓ testimonials, gallery, news, contacts, faqs, announcements, partners
---
--- REMOVED (unused page builder architecture):
---   ✗ page_blocks table (from advanced_block_system — never used by restored code)
---   ✗ sync_page_blocks_json function (syncs to unused page_blocks)
---   ✗ migrate_homepage_sections_to_blocks function (migrates to unused page_blocks)
---   ✗ audit_page_blocks function (audits unused page_blocks)
---   ✗ version_pages_changes trigger (auto-versions on pages — handled by website_builder)
---   ✗ create_content_version_v2 function (replaced by website_page_versions)
--- ============================================================================
--- 1. Drop the page_blocks table (introduced by 20260707000001_advanced_block_system)
---    This table is NOT used by any code in the restored system.
---    The website_content_blocks table serves the same purpose for the website builder.
 DROP TABLE IF EXISTS public.page_blocks CASCADE;
--- 2. Drop functions that only served page_blocks
 DROP FUNCTION IF EXISTS public.sync_page_blocks_json(UUID);
 DROP FUNCTION IF EXISTS public.migrate_homepage_sections_to_blocks();
 DROP FUNCTION IF EXISTS public.audit_page_blocks();
--- 3. Drop the version_pages_changes trigger and its function
---    The website_page_versions table handles versioning in the website builder.
---    The create_content_version_v2 function was a duplicate versioning system.
 DROP TRIGGER IF EXISTS version_pages_changes ON public.pages;
 DROP FUNCTION IF EXISTS public.create_content_version_v2();
--- 4. Ensure the website_pages seed data is correct for all public pages
---    (Re-seed to ensure consistency with restored React pages)
 INSERT INTO public.website_pages (
     slug,
     title,
@@ -161,7 +127,6 @@ UPDATE
 SET title = EXCLUDED.title,
   meta_title = EXCLUDED.meta_title,
   meta_description = EXCLUDED.meta_description;
--- 5. Ensure homepage sections exist in website_sections for admin editing
 DO $$
 DECLARE v_page_id UUID;
 BEGIN
@@ -288,7 +253,6 @@ SET title = EXCLUDED.title,
   sort_order = EXCLUDED.sort_order,
   is_visible = true;
 END $$;
--- 6. Ensure section_visibility is seeded correctly
 INSERT INTO public.section_visibility (
     section_key,
     section_name,
@@ -353,7 +317,6 @@ VALUES (
 UPDATE
 SET is_visible = EXCLUDED.is_visible,
   sort_order = EXCLUDED.sort_order;
--- 7. Ensure hero_content has proper defaults
 UPDATE public.hero_content
 SET background_image = 'https://www.holistiquelearning.com/blog/wp-content/uploads/2020/01/Morning_assembly1.jpg'
 WHERE (
@@ -368,7 +331,6 @@ WHERE (
     OR statistics = '[]'::jsonb
   )
   AND is_visible = true;
--- 8. Ensure section_content has homepage sections seeded
 INSERT INTO public.section_content (
     section_key,
     title,
@@ -438,7 +400,6 @@ SET title = EXCLUDED.title,
   description = EXCLUDED.description,
   content = EXCLUDED.content,
   is_visible = true;
--- 9. Ensure page_headers are seeded for all public pages
 INSERT INTO public.page_headers (page_slug, title, subtitle, is_visible)
 VALUES (
     'home',

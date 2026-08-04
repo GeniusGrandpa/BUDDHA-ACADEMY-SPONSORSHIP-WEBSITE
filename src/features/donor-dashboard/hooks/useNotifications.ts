@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../../lib/supabase'
+import { getErrorMessage } from '../../../lib/errors'
 import type { Notification } from '../../../types/database'
 import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 
@@ -77,7 +78,7 @@ export function useNotifications(
       setUnreadCount(unreadResult.count ?? 0)
       setTotalCount(countResult.count ?? 0)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load notifications')
+      setError(getErrorMessage(err, 'Failed to load notifications'))
     } finally {
       setLoading(false)
     }

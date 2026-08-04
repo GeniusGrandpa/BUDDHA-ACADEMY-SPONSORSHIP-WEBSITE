@@ -29,9 +29,11 @@ The entry point is `/admin/website` which renders `WebsiteDashboard` — a categ
 | CampaignsEditor | `/admin/website/campaigns` | Donation goals CRUD (title, target, raised, dates, active) |
 | PrivacyPageEditor | `/admin/website/privacy` | Privacy policy header, body content, last updated date |
 | TermsPageEditor | `/admin/website/terms` | Terms of service header, body content, last updated date |
-| HomePageEditor | `/admin/website/homepage` (redirects to `/admin/website/builder`) | Section-based homepage content editor |
+| HomePageEditor | `/admin/website/homepage` | Hero, welcome, stats, and section-based homepage content editor |
 | BrandingEditor | `/admin/website/branding` | Unified branding/colors/typography/layout/components |
 | SEOEditor | `/admin/website/seo` | Per-page SEO meta tags |
+
+The 3-panel visual builder lives at `/admin/website/builder` (WebsiteBuilder).
 
 ### Legacy Redirects
 

@@ -6,6 +6,8 @@ import { formatNPR } from '../../utils/currency'
 import { usePayment } from '../../hooks/usePayment'
 import { getActivePaymentSettings } from '../../services/paymentSettings'
 import { uploadPaymentScreenshot } from '../../services/payments'
+import { getErrorMessage } from '../../lib/errors'
+import toast from 'react-hot-toast'
 import { Button } from '../ui/Button'
 import { PaymentMethodCard } from './PaymentMethodCard'
 import { QRPaymentWidget } from './QRPaymentWidget'
@@ -51,8 +53,7 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
         setSelectedGateway(settings[0].gateway_name as PaymentGateway)
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Could not load payment settings. Please try again later.'
-      setSettingsError(msg)
+      setSettingsError(getErrorMessage(err, 'Could not load payment settings. Please try again later.'))
     } finally {
       setSettingsLoading(false)
     }
@@ -87,7 +88,8 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
       try {
         const url = await uploadPaymentScreenshot(checkout.sessionId, screenshot)
         screenshots = [url]
-      } catch {
+      } catch (err) {
+        toast.error(getErrorMessage(err, 'Failed to upload payment screenshot. Please try again.'))
       }
       setUploadProgress(false)
     }

@@ -6,6 +6,7 @@ import { getNavigationItems, createNavigationItem, updateNavigationItem, deleteN
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import type { NavigationItem, NavigationLocation } from '../../../types/cms'
+import { useConfirm } from '../../../context/ConfirmContext'
 
 const LOCATIONS: { value: NavigationLocation; label: string }[] = [
   { value: 'header', label: 'Header Navigation' },
@@ -15,6 +16,7 @@ const LOCATIONS: { value: NavigationLocation; label: string }[] = [
 ]
 
 export function AdminNavigationManager() {
+  const { confirm } = useConfirm()
   const [items, setItems] = useState<NavigationItem[]>([])
   const [loading, setLoading] = useState(true)
   const [activeLocation, setActiveLocation] = useState<NavigationLocation>('header')
@@ -110,7 +112,7 @@ export function AdminNavigationManager() {
   }
 
   const handleDelete = async (item: NavigationItem) => {
-    if (!confirm(`Delete "${item.label}"?`)) return
+    if (!(await confirm(`Delete "${item.label}"?`))) return
     try {
       await deleteNavigationItem(item.id)
       toast.success('Navigation item deleted')

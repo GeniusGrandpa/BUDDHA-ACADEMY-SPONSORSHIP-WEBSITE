@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react'
 import { supabase } from '../../../lib/supabase'
+import { getErrorMessage } from '../../../lib/errors'
 import type { SponsorshipTimelineEvent } from '../../../types/features'
 
 export interface UseSponsorshipTimelineResult {
@@ -44,7 +45,7 @@ export function useSponsorshipTimeline(
 
       setEvents((data || []) as unknown as SponsorshipTimelineEvent[])
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load timeline')
+      setError(getErrorMessage(err, 'Failed to load timeline'))
     } finally {
       setLoading(false)
     }

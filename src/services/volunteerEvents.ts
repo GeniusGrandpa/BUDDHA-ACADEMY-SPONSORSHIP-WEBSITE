@@ -1,4 +1,5 @@
 import { getSupabaseClient } from '../lib/supabase'
+import { getErrorMessage } from '../lib/errors'
 import type { VolunteerEvent, VolunteerEventSignup } from '../types/database'
 const supabase = getSupabaseClient()
 
@@ -58,7 +59,7 @@ export async function signUpForEvent(eventId: string, volunteerId: string): Prom
     if (error.code === '23505') {
       return { success: false, error: 'You are already registered for this event.' }
     }
-    return { success: false, error: error.message }
+    return { success: false, error: getErrorMessage(error, 'Unable to register for this event. Please try again.') }
   }
 
   await supabase.rpc('increment_event_volunteers', { p_event_id: eventId })
@@ -74,7 +75,7 @@ export async function cancelSignup(eventId: string, volunteerId: string): Promis
     .eq('volunteer_id', volunteerId)
 
   if (error) {
-    return { success: false, error: error.message }
+    return { success: false, error: getErrorMessage(error, 'Unable to cancel your registration. Please try again.') }
   }
 
   await supabase.rpc('decrement_event_volunteers', { p_event_id: eventId })
@@ -97,7 +98,7 @@ export async function logVolunteerHours(
     .eq('id', signupId)
 
   if (error) {
-    return { success: false, error: error.message }
+    return { success: false, error: getErrorMessage(error, 'Unable to log volunteer hours. Please try again.') }
   }
 
   return { success: true }

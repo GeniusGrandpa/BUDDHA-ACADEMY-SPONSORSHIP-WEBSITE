@@ -1,8 +1,3 @@
--- Fixes admin/audit functions that referenced the non-existent `audit_logs.actor_id`
--- column (the table uses `user_id`) and had ambiguous/type-mismatched column
--- references, which caused runtime failures when the admin UI called them.
-
--- admin_update_role: audit_logs.actor_id -> user_id
 CREATE OR REPLACE FUNCTION public.admin_update_role(
   target_user_id UUID,
   new_role TEXT
@@ -55,7 +50,6 @@ BEGIN
 END;
 $$;
 
--- admin_update_user_status: audit_logs.actor_id -> user_id; renamed reserved keyword variable
 CREATE OR REPLACE FUNCTION public.admin_update_user_status(
   target_user_id UUID,
   new_status TEXT
@@ -106,8 +100,6 @@ BEGIN
 END;
 $$;
 
--- get_role_change_history: dropped so the return type can be corrected (id UUID,
--- matching audit_logs.id) and actor joins use audit_logs.user_id.
 DROP FUNCTION IF EXISTS public.get_role_change_history(INTEGER, INTEGER);
 CREATE OR REPLACE FUNCTION public.get_role_change_history(
   p_limit INTEGER DEFAULT 100,
@@ -160,7 +152,6 @@ BEGIN
 END;
 $$;
 
--- get_user_role_history: same corrections as get_role_change_history.
 DROP FUNCTION IF EXISTS public.get_user_role_history(UUID, INTEGER);
 CREATE OR REPLACE FUNCTION public.get_user_role_history(
   p_user_id UUID,

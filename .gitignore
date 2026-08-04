@@ -6,3 +6,7 @@ node_modules
 !.env.example
 supabase/.temp/
 dist/
+
+# TypeScript build artifacts
+*.tsbuildinfo
+vite.config.d.ts

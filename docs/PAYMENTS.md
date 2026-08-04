@@ -29,7 +29,16 @@ Hybrid flow: manual confirmation + admin verification for bank / eSewa / Khalti,
 8. All steps are audit-logged
 ```
 
-## Stripe Webhook
+## Stripe Card Flow
+
+### create-payment-intent Edge Function
+
+- Edge function: `supabase/functions/create-payment-intent/index.ts`
+- Called by `src/services/stripePayment.ts` (wrapped in `StripePaymentWrapper`)
+- Validates the amount/frequency and creates a Stripe PaymentIntent with `metadata.session_id`, then returns `{ client_secret }` to the client
+- Reads `STRIPE_SECRET_KEY` from Supabase function secrets (never exposed to the browser)
+
+### Stripe Webhook
 
 - Edge function: `supabase/functions/stripe-webhook/index.ts`
 - Verifies the `stripe-signature` header against `STRIPE_WEBHOOK_SECRET`.
@@ -51,6 +60,12 @@ Hybrid flow: manual confirmation + admin verification for bank / eSewa / Khalti,
 3. Events: `payment_intent.succeeded`, `payment_intent.payment_failed`, `payment_intent.canceled`.
 4. Copy the signing secret (`whsec_...`) and set `STRIPE_WEBHOOK_SECRET`:
    `supabase secrets set STRIPE_WEBHOOK_SECRET=whsec_...`
+5. Also set `STRIPE_SECRET_KEY` (for `create-payment-intent`) and `SUPABASE_SERVICE_ROLE_KEY` (for the webhook):
+   `supabase secrets set STRIPE_SECRET_KEY=sk_... SUPABASE_SERVICE_ROLE_KEY=...`
+
+### Error Handling
+
+Both edge functions return a standardized JSON envelope — `{ success, message, errorCode }` — via `supabase/functions/_shared/response.ts`. The client (`src/services/stripePayment.ts`, `src/hooks/usePayment.ts`, `src/lib/errors.ts`) parses this envelope, maps Stripe card errors to friendly messages (e.g. "Your card was declined"), and never surfaces raw server/Stripe messages to the UI.
 
 ## Key Design Decisions
 

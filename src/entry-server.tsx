@@ -10,11 +10,13 @@ import { LanguageProvider } from './context/LanguageContext'
 import { AuthProvider } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { CmsStringsProvider } from './context/CmsStringsContext'
+import { ConfirmProvider } from './context/ConfirmContext'
 import { SiteBranding } from './components/SiteBranding'
 import './index.css'
 
 export interface SsrResult {
   html: string
+  status: number
 }
 
 const handler = createStaticHandler(routeDefinitions)
@@ -23,16 +25,20 @@ export async function render(_url: string, template: string): Promise<SsrResult>
   const fetchRequest = new Request(_url)
   const context = await handler.query(fetchRequest)
 
-  if (context instanceof Response) {
-    return { html: template }
+  if (context === null) {
+    return { html: template, status: 404 }
   }
+
+  if (context instanceof Response) {
+    return { html: template, status: context.status }
+  }
+
+  const isNotFound = Array.isArray(context.matches) && context.matches.some((match) => match.route.path === '*')
 
   const router = createStaticRouter(handler.dataRoutes, context)
 
   const helmetContext: Record<string, unknown> = {}
 
-  // A fresh QueryClient per request prevents cache/data leakage across
-  // requests and unbounded memory growth on the server.
   const queryClient = createQueryClient()
 
   const app = (
@@ -44,7 +50,9 @@ export async function render(_url: string, template: string): Promise<SsrResult>
               <ThemeProvider>
                 <SiteBranding />
                 <CmsStringsProvider>
-                  <StaticRouterProvider router={router} context={context} />
+                  <ConfirmProvider>
+                    <StaticRouterProvider router={router} context={context} />
+                  </ConfirmProvider>
                 </CmsStringsProvider>
               </ThemeProvider>
             </AuthProvider>
@@ -80,7 +88,7 @@ export async function render(_url: string, template: string): Promise<SsrResult>
         .replace('<!--ssr-outlet-->', () => appHtml)
         .replace('</head>', (match) => `${headHtml}${match}`)
 
-      resolve({ html })
+      resolve({ html, status: isNotFound ? 404 : 200 })
     })
 
     writable.on('error', (err: Error) => {

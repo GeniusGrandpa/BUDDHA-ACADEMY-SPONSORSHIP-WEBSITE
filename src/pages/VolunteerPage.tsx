@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { getVolunteerContent, getPageHeader } from '../services/cms-content'
 import { getUpcomingEvents } from '../services/volunteerEvents'
 import { submitVolunteerApplication } from '../services/volunteerApplications'
+import { getErrorMessage } from '../lib/errors'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import type { VolunteerContent, PageHeader } from '../types/cms-content'
 import type { VolunteerEvent } from '../types/database'
@@ -48,7 +49,7 @@ export function VolunteerPage() {
       })
       setSubmitted(true)
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : 'Submission failed')
+      setSubmitError(getErrorMessage(err, 'Submission failed'))
     } finally {
       setSubmitting(false)
     }

@@ -4,6 +4,7 @@ import { FileText, Download, Filter, Loader2 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import toast from 'react-hot-toast'
 import { formatNPR } from '../../utils/currency'
 
 const BRAND_COLOR: [number, number, number] = [217, 119, 6]
@@ -65,7 +66,7 @@ async function generateDonationReport(): Promise<void> {
     .order('created_at', { ascending: false })
 
   if (error || !donations?.length) {
-    alert('No donation data available')
+    toast('No donation data available')
     return
   }
 
@@ -124,7 +125,7 @@ async function generateStudentReport(): Promise<void> {
     .order('name')
 
   if (error || !students?.length) {
-    alert('No student data available')
+    toast('No student data available')
     return
   }
 
@@ -184,7 +185,7 @@ async function generateFinancialReport(): Promise<void> {
     .select('*')
 
   if (donError) {
-    alert('Failed to load financial data')
+    toast.error('Failed to load financial data. Please try again.')
     return
   }
 
@@ -279,7 +280,7 @@ async function generateSponsorshipReport(): Promise<void> {
     .order('created_at', { ascending: false })
 
   if (error || !sponsorships?.length) {
-    alert('No sponsorship data available')
+    toast('No sponsorship data available')
     return
   }
 
@@ -332,7 +333,7 @@ async function generateVolunteerReport(): Promise<void> {
     .order('start_date', { ascending: false })
 
   if (error || !assignments?.length) {
-    alert('No volunteer data available')
+    toast('No volunteer data available')
     return
   }
 
@@ -390,7 +391,7 @@ async function generateImpactReport(): Promise<void> {
     .select('id')
 
   if (error) {
-    alert('Failed to load impact data')
+    toast.error('Failed to load impact data. Please try again.')
     return
   }
 
@@ -488,7 +489,7 @@ export function AdminReportsPage() {
     try {
       await generators[key]()
     } catch {
-      alert('Failed to generate report. Please try again.')
+      toast.error('Failed to generate report. Please try again.')
     } finally {
       setLoading(null)
     }

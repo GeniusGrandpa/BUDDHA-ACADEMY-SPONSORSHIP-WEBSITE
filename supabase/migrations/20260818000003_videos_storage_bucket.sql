@@ -1,5 +1,3 @@
--- Storage bucket for uploaded videos + video thumbnails.
--- Used by the CMS video manager (video_type = 'upload') and the gallery page.
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 VALUES (
   'videos',

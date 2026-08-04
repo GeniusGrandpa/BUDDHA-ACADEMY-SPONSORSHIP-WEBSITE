@@ -4,6 +4,7 @@ import toast from 'react-hot-toast'
 import { getTestimonialsWithType, createTestimonial, updateTestimonial, deleteTestimonial } from '../../../services/content'
 import type { Testimonial } from '../../../types/database'
 import { ListSkeleton } from '../../../components/ui/LoadingSkeleton'
+import { useConfirm } from '../../../context/ConfirmContext'
 
 const TESTIMONIAL_TYPES = [
   { value: 'donor', label: 'Donor' },
@@ -17,6 +18,7 @@ type TestimonialType = typeof TESTIMONIAL_TYPES[number]['value']
 type TestimonialForm = Omit<Testimonial, 'id' | 'created_at' | 'updated_at'>
 
 export function AdminContentTestimonials() {
+  const { confirm } = useConfirm()
   const [items, setItems] = useState<Testimonial[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -82,7 +84,7 @@ const [form, setForm] = useState<TestimonialForm>({
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this testimonial?')) return
+    if (!(await confirm('Delete this testimonial?'))) return
     try {
       await deleteTestimonial(id)
       setItems(items.filter(i => i.id !== id))

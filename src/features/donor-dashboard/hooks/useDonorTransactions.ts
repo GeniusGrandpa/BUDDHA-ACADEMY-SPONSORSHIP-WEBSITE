@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../../lib/supabase'
 import { getDonorPaymentSessions } from '../../../services/payments'
 import { getDonorAllocations } from '../../../services/allocations'
+import { getErrorMessage } from '../../../lib/errors'
 import type { TransactionWithDetails } from '../../../types/features'
 import type { DonationAllocation } from '../../../types/database'
 
@@ -87,7 +88,7 @@ export function useDonorTransactions(donorId: string | undefined): UseDonorTrans
 
       setTransactions(transactionsWithAllocs)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load transactions')
+      setError(getErrorMessage(err, 'Failed to load transactions'))
     } finally {
       setLoading(false)
     }

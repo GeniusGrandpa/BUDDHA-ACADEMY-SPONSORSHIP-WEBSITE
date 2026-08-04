@@ -5,8 +5,10 @@ import { getAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnounc
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import type { Announcement, AnnouncementType } from '../../../types/cms'
+import { useConfirm } from '../../../context/ConfirmContext'
 
 export function AdminAnnouncements() {
+  const { confirm } = useConfirm()
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -95,7 +97,7 @@ export function AdminAnnouncements() {
   }
 
   const handleDelete = async (item: Announcement) => {
-    if (!confirm(`Delete "${item.title}"?`)) return
+    if (!(await confirm(`Delete "${item.title}"?`))) return
     try {
       await deleteAnnouncement(item.id)
       toast.success('Announcement deleted')

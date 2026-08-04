@@ -5,9 +5,11 @@ import { getThemePresets, saveThemePreset, deleteThemePreset, applyThemePreset, 
 import toast from 'react-hot-toast'
 import { FormSkeleton } from '../../../components/ui/LoadingSkeleton'
 import type { ThemePreset } from '../../../types/design'
+import { useConfirm } from '../../../context/ConfirmContext'
 
 export function AdminThemePresetsPage() {
   const { settings, refreshTheme } = useTheme()
+  const { confirm } = useConfirm()
   const [presets, setPresets] = useState<ThemePreset[]>([])
   const [loading, setLoading] = useState(true)
   const [showSaveDialog, setShowSaveDialog] = useState(false)
@@ -57,7 +59,7 @@ export function AdminThemePresetsPage() {
   }
 
   const handleDeletePreset = async (id: string, name: string) => {
-    if (!window.confirm(`Delete preset "${name}"?`)) return
+    if (!(await confirm(`Delete preset "${name}"?`))) return
     try {
       await deleteThemePreset(id)
       toast.success('Preset deleted')
@@ -66,7 +68,7 @@ export function AdminThemePresetsPage() {
   }
 
   const handleReset = async () => {
-    if (!window.confirm('Reset all design settings to factory defaults? This cannot be undone.')) return
+    if (!(await confirm({ title: 'Reset design settings', message: 'Reset all design settings to factory defaults? This cannot be undone.' }))) return
     try {
       await resetDesignSettingsToDefaults()
       await refreshTheme()

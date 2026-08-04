@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react'
 import { Plus, Edit, Trash2 } from 'lucide-react'
+import toast from 'react-hot-toast'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { getNews, deleteNews } from '../../services/news'
 import type { News } from '../../types/database'
 import { TableSkeleton } from '../../components/ui/LoadingSkeleton'
+import { useConfirm } from '../../context/ConfirmContext'
 
 export function AdminNewsPage() {
+  const { confirm } = useConfirm()
   const [news, setNews] = useState<News[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -19,18 +22,19 @@ export function AdminNewsPage() {
       const data = await getNews()
       setNews(data)
     } catch {
+      toast.error('Failed to load news')
     } finally {
       setLoading(false)
     }
   }
 
   const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this article?')) {
-      try {
-        await deleteNews(id)
-        setNews(news.filter(n => n.id !== id))
-      } catch {
-      }
+    if (!(await confirm('Are you sure you want to delete this article?'))) return
+    try {
+      await deleteNews(id)
+      setNews(news.filter(n => n.id !== id))
+    } catch {
+      toast.error('Failed to delete article')
     }
   }
 

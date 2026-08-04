@@ -4,8 +4,8 @@ import { useAuth } from '../../context/AuthContext'
 import { Card } from '../../components/ui/Card'
 import { RoleBadge } from '../../components/RoleBadge'
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner'
-import { ToastContainer } from '../../components/ToastContainer'
-import { useToast } from '../../hooks/useToast'
+import toast from 'react-hot-toast'
+import { getErrorMessage } from '../../lib/errors'
 import type { Role } from '../../types/permissions'
 import type { Profile } from '../../types/database'
 
@@ -227,7 +227,6 @@ export function SuperAdminUsersPage() {
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const { profile: currentUser } = useAuth()
-  const { toasts, addToast, removeToast } = useToast()
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -248,11 +247,11 @@ export function SuperAdminUsersPage() {
       setUsers((usersResult.data || []) as ExtendedProfile[])
       if (!statsResult.error) setStats(statsResult.data)
     } catch {
-      addToast('Failed to load users', 'error')
+      toast.error('Failed to load users')
     } finally {
       setLoading(false)
     }
-  }, [addToast])
+  }, [])
 
   useEffect(() => { loadData() }, [loadData])
 
@@ -261,10 +260,10 @@ export function SuperAdminUsersPage() {
     try {
       const { error } = await supabase.rpc('admin_update_role', { target_user_id: userId, new_role: newRole } as never)
       if (error) throw error
-      addToast('Role updated successfully', 'success')
+      toast.success('Role updated successfully')
       await loadData()
     } catch (err) {
-      addToast(err instanceof Error ? err.message : 'Failed to update role', 'error')
+      toast.error(getErrorMessage(err, 'Failed to update role'))
     } finally {
       setUpdating(null)
       setConfirmAction(null)
@@ -277,10 +276,10 @@ export function SuperAdminUsersPage() {
     try {
       const { error } = await (supabase.rpc('admin_update_user_status', { target_user_id: userId, new_status: status } as never) as unknown as Promise<{ error: unknown }>)
       if (error) throw error
-      addToast(`User ${status === 'active' ? 'restored' : 'suspended'} successfully`, 'success')
+      toast.success(`User ${status === 'active' ? 'restored' : 'suspended'} successfully`)
       await loadData()
     } catch (err) {
-      addToast(err instanceof Error ? err.message : 'Failed to update status', 'error')
+      toast.error(getErrorMessage(err, 'Failed to update status'))
     } finally {
       setUpdating(null)
       setConfirmAction(null)
@@ -293,11 +292,11 @@ export function SuperAdminUsersPage() {
       for (const uid of selectedUsers) {
         await supabase.rpc('admin_update_user_status', { target_user_id: uid, new_status: action === 'suspend' ? 'suspended' : 'active' } as never)
       }
-      addToast(`${selectedUsers.size} users ${action === 'suspend' ? 'suspended' : 'restored'}`, 'success')
+      toast.success(`${selectedUsers.size} users ${action === 'suspend' ? 'suspended' : 'restored'}`)
       setSelectedUsers(new Set())
       await loadData()
     } catch (err) {
-      addToast(err instanceof Error ? err.message : `Failed to ${action} users`, 'error')
+      toast.error(getErrorMessage(err, `Failed to ${action} users`))
     } finally {
       setUpdating(null)
       setConfirmAction(null)
@@ -355,7 +354,6 @@ export function SuperAdminUsersPage() {
 
   return (
     <div className="space-y-6">
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
       <ConfirmModal
         open={confirmAction !== null}
         title={confirmAction?.type === 'super_admin' ? 'Promote to Super Admin?' : confirmAction?.type === 'suspend' ? 'Suspend User?' : confirmAction?.type === 'restore' ? 'Restore User?' : confirmAction?.type === 'bulk_suspend' ? 'Bulk Suspend?' : confirmAction?.type === 'bulk_restore' ? 'Bulk Restore?' : 'Confirm Role Change'}

@@ -1,10 +1,3 @@
--- ===============================================================
--- CMS Comprehensive Seed Migration
--- Creates missing CMS tables and seeds all CMS content
--- for Buddha Academy Boarding School, Kathmandu, Nepal
--- ===============================================================
-
--- 1. Create cms_programs table (manages programs page content)
 CREATE TABLE IF NOT EXISTS public.cms_programs (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   title TEXT NOT NULL,
@@ -28,7 +21,6 @@ CREATE INDEX IF NOT EXISTS idx_cms_programs_slug ON public.cms_programs(slug);
 CREATE INDEX IF NOT EXISTS idx_cms_programs_sort ON public.cms_programs(sort_order);
 CREATE INDEX IF NOT EXISTS idx_cms_programs_active ON public.cms_programs(is_active);
 
--- 2. Create cms_impact_stats table (homepage impact statistics)
 CREATE TABLE IF NOT EXISTS public.cms_impact_stats (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   label TEXT NOT NULL,
@@ -45,11 +37,9 @@ CREATE TABLE IF NOT EXISTS public.cms_impact_stats (
 CREATE INDEX IF NOT EXISTS idx_cms_impact_stats_sort ON public.cms_impact_stats(sort_order);
 CREATE INDEX IF NOT EXISTS idx_cms_impact_stats_active ON public.cms_impact_stats(is_active);
 
--- 3. Enable RLS on new tables
 ALTER TABLE public.cms_programs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.cms_impact_stats ENABLE ROW LEVEL SECURITY;
 
--- 4. RLS policies for cms_programs
 DROP POLICY IF EXISTS "cms_programs_select_public" ON public.cms_programs;
 CREATE POLICY "cms_programs_select_public"
   ON public.cms_programs FOR SELECT
@@ -76,7 +66,6 @@ CREATE POLICY "cms_programs_delete_admin"
   ON public.cms_programs FOR DELETE
   USING (public.get_user_role_level() >= 90);
 
--- 5. RLS policies for cms_impact_stats
 DROP POLICY IF EXISTS "cms_impact_stats_select_public" ON public.cms_impact_stats;
 CREATE POLICY "cms_impact_stats_select_public"
   ON public.cms_impact_stats FOR SELECT
@@ -103,21 +92,11 @@ CREATE POLICY "cms_impact_stats_delete_admin"
   ON public.cms_impact_stats FOR DELETE
   USING (public.get_user_role_level() >= 90);
 
--- 6. Grant permissions for new tables
 GRANT SELECT ON public.cms_programs TO anon, authenticated;
 GRANT INSERT, UPDATE, DELETE ON public.cms_programs TO authenticated;
 GRANT SELECT ON public.cms_impact_stats TO anon, authenticated;
 GRANT INSERT, UPDATE, DELETE ON public.cms_impact_stats TO authenticated;
 
--- ===============================================================
--- SEED DATA SECTION
--- ===============================================================
-
--- Fix: cms_audit_trigger was incorrectly redefined in migration
--- 20260710000001 to use public.audit_log (singular) which does not
--- exist. The actual table is public.audit_logs (plural).
--- Without this fix, the trigger on site_settings (and other CMS
--- tables) fails on every UPDATE/INSERT/DELETE.
 CREATE OR REPLACE FUNCTION public.cms_audit_trigger()
 RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
@@ -140,7 +119,6 @@ BEGIN
 END;
 $$;
 
--- 7. Update site_settings default currency to NPR
 UPDATE public.site_settings
 SET
   donation_default_currency = 'NPR',
@@ -158,7 +136,6 @@ SET
   footer_nonprofit_text = COALESCE(footer_nonprofit_text, 'Buddha Academy is a registered nonprofit organization.')
 WHERE id = (SELECT id FROM public.site_settings LIMIT 1);
 
--- Insert site_settings if not exists
 INSERT INTO public.site_settings (
   site_name, tagline, contact_email, contact_phone, contact_address,
   donation_default_currency, donation_min_amount, donation_max_amount,
@@ -179,7 +156,6 @@ SELECT
   'Support Buddha Academy in Kathmandu, Nepal. Sponsor a child''s education, provide meals, and transform lives through our transparent sponsorship program.'
 WHERE NOT EXISTS (SELECT 1 FROM public.site_settings LIMIT 1);
 
--- 8. Seed hero_content
 INSERT INTO public.hero_content (
   title, highlight, description, cta_primary_text, cta_primary_link,
   cta_secondary_text, cta_secondary_link, statistics, layout, is_visible,
@@ -198,7 +174,6 @@ VALUES (
 )
 ON CONFLICT DO NOTHING;
 
--- 9. Seed donation_content
 INSERT INTO public.donation_content (
   hero_title, hero_subtitle, currency_label,
   impact_cards, process_steps, is_published
@@ -213,7 +188,6 @@ VALUES (
 )
 ON CONFLICT DO NOTHING;
 
--- 10. Seed sponsorship_content
 INSERT INTO public.sponsorship_content (
   hero_title, hero_subtitle, section_title, section_description,
   steps, benefits, cta_title, cta_description,
@@ -234,7 +208,6 @@ VALUES (
 )
 ON CONFLICT DO NOTHING;
 
--- 11. Seed footer_content
 INSERT INTO public.footer_content (
   description, copyright_text, nonprofit_text,
   quick_links, social_links, contact_info, is_published
@@ -250,7 +223,6 @@ VALUES (
 )
 ON CONFLICT DO NOTHING;
 
--- 12. Seed transparency_content
 INSERT INTO public.transparency_content (
   hero_title, hero_subtitle,
   allocation_title, allocation_description,
@@ -281,7 +253,6 @@ VALUES (
 )
 ON CONFLICT DO NOTHING;
 
--- 13. Seed FAQs
 INSERT INTO public.faqs (question, answer, category, sort_order, is_published) VALUES
 (
   'How does student sponsorship work at Buddha Academy?',
@@ -325,7 +296,6 @@ INSERT INTO public.faqs (question, answer, category, sort_order, is_published) V
 )
 ON CONFLICT DO NOTHING;
 
--- 14. Seed testimonials
 INSERT INTO public.testimonials (author_name, author_role, content, is_published, is_featured, sort_order) VALUES
 (
   'Rajesh Sharma',
@@ -347,12 +317,10 @@ INSERT INTO public.testimonials (author_name, author_role, content, is_published
 )
 ON CONFLICT DO NOTHING;
 
--- Fix: extend legal_pages type check to include transparency_statement
 ALTER TABLE public.legal_pages DROP CONSTRAINT IF EXISTS legal_pages_type_check;
 ALTER TABLE public.legal_pages ADD CONSTRAINT legal_pages_type_check
   CHECK (type IN ('privacy_policy', 'terms_conditions', 'cookie_policy', 'donation_policy', 'transparency_statement'));
 
--- 15. Seed legal pages
 INSERT INTO public.legal_pages (type, title, slug, status, effective_date) VALUES
 ('privacy_policy', 'Privacy Policy', 'privacy', 'published', now()),
 ('terms_conditions', 'Terms and Conditions', 'terms', 'published', now()),
@@ -360,7 +328,6 @@ INSERT INTO public.legal_pages (type, title, slug, status, effective_date) VALUE
 ('transparency_statement', 'Transparency Statement', 'transparency-statement', 'published', now())
 ON CONFLICT (slug) DO UPDATE SET status = 'published', title = EXCLUDED.title;
 
--- Seed legal page sections
 DO $$
 DECLARE
   v_privacy_id UUID;
@@ -373,7 +340,6 @@ BEGIN
   SELECT id INTO v_donation_policy_id FROM public.legal_pages WHERE slug = 'donation-policy' LIMIT 1;
   SELECT id INTO v_transparency_stmt_id FROM public.legal_pages WHERE slug = 'transparency-statement' LIMIT 1;
 
-  -- Privacy Policy sections
   IF v_privacy_id IS NOT NULL THEN
     INSERT INTO public.legal_page_sections (legal_page_id, heading, content, sort_order, is_visible) VALUES
     (v_privacy_id, 'Information We Collect',
@@ -394,7 +360,6 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- Terms and Conditions sections
   IF v_terms_id IS NOT NULL THEN
     INSERT INTO public.legal_page_sections (legal_page_id, heading, content, sort_order, is_visible) VALUES
     (v_terms_id, 'Acceptance of Terms',
@@ -415,7 +380,6 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- Donation Policy sections
   IF v_donation_policy_id IS NOT NULL THEN
     INSERT INTO public.legal_page_sections (legal_page_id, heading, content, sort_order, is_visible) VALUES
     (v_donation_policy_id, 'Our Commitment',
@@ -436,7 +400,6 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- Transparency Statement sections
   IF v_transparency_stmt_id IS NOT NULL THEN
     INSERT INTO public.legal_page_sections (legal_page_id, heading, content, sort_order, is_visible) VALUES
     (v_transparency_stmt_id, 'Our Transparency Commitment',
@@ -458,7 +421,6 @@ BEGIN
   END IF;
 END $$;
 
--- 16. Seed cms_programs
 INSERT INTO public.cms_programs (title, slug, description, full_description, category, status, sort_order, is_active, features, impact, funding_goal) VALUES
 (
   'Student Sponsorship',
@@ -528,7 +490,6 @@ ON CONFLICT (slug) DO UPDATE SET
   status = EXCLUDED.status,
   is_active = true;
 
--- 17. Seed cms_impact_stats
 INSERT INTO public.cms_impact_stats (label, value, prefix, suffix, icon, category, sort_order, is_active) VALUES
 ('Years of Service', '49', '', '+', 'Clock', 'general', 1, true),
 ('Children Educated', '2000', '', '+', 'Users', 'general', 2, true),
@@ -536,7 +497,6 @@ INSERT INTO public.cms_impact_stats (label, value, prefix, suffix, icon, categor
 ('Free Education', '100', '', '%', 'CheckCircle', 'general', 4, true)
 ON CONFLICT DO NOTHING;
 
--- 18. Seed navigation items (update existing, add missing)
 INSERT INTO public.navigation_items (location, label, url, route, sort_order, is_visible) VALUES
   ('header', 'Sponsor', NULL, '/sponsor', 3, true),
   ('header', 'Donate', NULL, '/donate', 4, true),
@@ -547,7 +507,6 @@ INSERT INTO public.navigation_items (location, label, url, route, sort_order, is
   ('footer_information', 'Transparency Statement', NULL, '/transparency-statement', 7, true)
 ON CONFLICT DO NOTHING;
 
--- 19. Seed SEO content for all public pages
 INSERT INTO public.seo_content (page_slug, meta_title, meta_description, is_published) VALUES
   ('home', 'Buddha Academy Boarding School - Sponsor a Child in Kathmandu, Nepal', 'Buddha Academy provides free education, meals, and housing to underprivileged children in Kathmandu, Nepal. Sponsor a child and transform a life today.', true),
   ('about', 'About Us - Buddha Academy Boarding School, Kathmandu', 'Learn about Buddha Academy''s mission to provide free quality education to underprivileged children in Nepal since 1977.', true),
@@ -570,7 +529,6 @@ ON CONFLICT (page_slug) DO UPDATE SET
   meta_description = EXCLUDED.meta_description,
   is_published = true;
 
--- 20. Seed page_headers for all pages
 INSERT INTO public.page_headers (page_slug, title, subtitle, is_visible) VALUES
   ('sponsor', 'Sponsor a Child', 'Change a Life Through Education', true),
   ('programs', 'Our Programs', 'Discover How We Support Children and Communities', true),
@@ -587,7 +545,6 @@ ON CONFLICT (page_slug) DO UPDATE SET
   subtitle = EXCLUDED.subtitle,
   is_visible = true;
 
--- 21. Seed section_visibility
 INSERT INTO public.section_visibility (section_key, section_name, is_visible, sort_order) VALUES
   ('hero', 'Hero Section', true, 1),
   ('impact_stats', 'Impact Statistics', true, 2),
@@ -601,7 +558,6 @@ ON CONFLICT (section_key) DO UPDATE SET
   section_name = EXCLUDED.section_name,
   is_visible = true;
 
--- 22. Seed homepage_sections
 INSERT INTO public.homepage_sections (section_key, title, subtitle, content, is_active, sort_order) VALUES
 (
   'hero',
@@ -677,7 +633,6 @@ ON CONFLICT (section_key) DO UPDATE SET
   content = EXCLUDED.content,
   is_active = true;
 
--- 23. Seed cms_strings for key website labels
 INSERT INTO public.cms_strings (key, value, category, is_published) VALUES
   ('donate_hero_title', 'Make a Donation', 'donate', true),
   ('donate_hero_description', 'Your support provides education, meals and hope to children in Nepal.', 'donate', true),
@@ -694,7 +649,6 @@ ON CONFLICT (key) DO UPDATE SET
   category = EXCLUDED.category,
   is_published = true;
 
--- 24. Add page to website_pages for programs page
 INSERT INTO public.website_pages (slug, title, status, meta_title, meta_description)
 VALUES ('programs', 'Our Programs', 'published', 'Our Programs - Buddha Academy Boarding School', 'Explore our programs including student sponsorship, school supplies, meal support, and community outreach in Kathmandu.')
 ON CONFLICT (slug) DO UPDATE SET
@@ -702,7 +656,6 @@ ON CONFLICT (slug) DO UPDATE SET
   meta_title = EXCLUDED.meta_title,
   meta_description = EXCLUDED.meta_description;
 
--- 25. Seed website_sections for homepage if not already populated
 DO $$
 DECLARE
   v_home_id UUID;
@@ -803,7 +756,6 @@ BEGIN
   END IF;
 END $$;
 
--- 26. Seed website_section for programs page
 DO $$
 DECLARE
   v_programs_id UUID;
@@ -843,7 +795,6 @@ BEGIN
   END IF;
 END $$;
 
--- 27. Seed donation-policy and transparency-statement pages in website_pages
 INSERT INTO public.website_pages (slug, title, status, meta_title, meta_description)
 VALUES
   ('donation-policy', 'Donation Policy', 'published', 'Donation Policy - Buddha Academy Boarding School', 'Our donation policy outlining how contributions are used and managed.'),
