@@ -28,13 +28,22 @@ export async function getDonationContent(): Promise<DonationContent | null> {
   return data as DonationContent | null
 }
 
+async function resolveContentRowId(table: string, contentId?: string): Promise<string | undefined> {
+  const query = contentId
+    ? db(table).select('id').eq('id', contentId as never).limit(1)
+    : db(table).select('id').order('created_at', { ascending: false }).limit(1)
+  const { data } = await query.maybeSingle()
+  return (data as { id?: string } | null)?.id
+}
+
 export async function upsertDonationContent(content: Partial<DonationContent>): Promise<void> {
-  const { data: existing } = await db('donation_content').select('id').limit(1).maybeSingle()
-  if (existing) {
-    const { error } = await db('donation_content').update({ ...content, updated_at: new Date().toISOString() } as never).eq('id', (existing as { id: string }).id)
+  const { id: contentId, ...fields } = content
+  const existingId = await resolveContentRowId('donation_content', contentId)
+  if (existingId) {
+    const { error } = await db('donation_content').update({ ...fields, updated_at: new Date().toISOString() } as never).eq('id', existingId as never)
     if (error) throw error
   } else {
-    const { error } = await db('donation_content').insert(content as never)
+    const { error } = await db('donation_content').insert(fields as never)
     if (error) throw error
   }
 }
@@ -50,12 +59,13 @@ export async function getSponsorshipContent(): Promise<SponsorshipContent | null
 }
 
 export async function upsertSponsorshipContent(content: Partial<SponsorshipContent>): Promise<void> {
-  const { data: existing } = await db('sponsorship_content').select('id').limit(1).maybeSingle()
-  if (existing) {
-    const { error } = await db('sponsorship_content').update({ ...content, updated_at: new Date().toISOString() } as never).eq('id', (existing as { id: string }).id)
+  const { id: contentId, ...fields } = content
+  const existingId = await resolveContentRowId('sponsorship_content', contentId)
+  if (existingId) {
+    const { error } = await db('sponsorship_content').update({ ...fields, updated_at: new Date().toISOString() } as never).eq('id', existingId as never)
     if (error) throw error
   } else {
-    const { error } = await db('sponsorship_content').insert(content as never)
+    const { error } = await db('sponsorship_content').insert(fields as never)
     if (error) throw error
   }
 }
@@ -71,12 +81,13 @@ export async function getVolunteerContent(): Promise<VolunteerContent | null> {
 }
 
 export async function upsertVolunteerContent(content: Partial<VolunteerContent>): Promise<void> {
-  const { data: existing } = await db('volunteer_content').select('id').limit(1).maybeSingle()
-  if (existing) {
-    const { error } = await db('volunteer_content').update({ ...content, updated_at: new Date().toISOString() } as never).eq('id', (existing as { id: string }).id)
+  const { id: contentId, ...fields } = content
+  const existingId = await resolveContentRowId('volunteer_content', contentId)
+  if (existingId) {
+    const { error } = await db('volunteer_content').update({ ...fields, updated_at: new Date().toISOString() } as never).eq('id', existingId as never)
     if (error) throw error
   } else {
-    const { error } = await db('volunteer_content').insert(content as never)
+    const { error } = await db('volunteer_content').insert(fields as never)
     if (error) throw error
   }
 }
@@ -92,12 +103,13 @@ export async function getTransparencyContent(): Promise<TransparencyContent | nu
 }
 
 export async function upsertTransparencyContent(content: Partial<TransparencyContent>): Promise<void> {
-  const { data: existing } = await db('transparency_content').select('id').limit(1).maybeSingle()
-  if (existing) {
-    const { error } = await db('transparency_content').update({ ...content, updated_at: new Date().toISOString() } as never).eq('id', (existing as { id: string }).id)
+  const { id: contentId, ...fields } = content
+  const existingId = await resolveContentRowId('transparency_content', contentId)
+  if (existingId) {
+    const { error } = await db('transparency_content').update({ ...fields, updated_at: new Date().toISOString() } as never).eq('id', existingId as never)
     if (error) throw error
   } else {
-    const { error } = await db('transparency_content').insert(content as never)
+    const { error } = await db('transparency_content').insert(fields as never)
     if (error) throw error
   }
 }
@@ -113,12 +125,13 @@ export async function getHeroContent(): Promise<HeroContent | null> {
 }
 
 export async function upsertHeroContent(content: Partial<HeroContent>): Promise<void> {
-  const { data: existing } = await db('hero_content').select('id').limit(1).maybeSingle()
-  if (existing) {
-    const { error } = await db('hero_content').update({ ...content, updated_at: new Date().toISOString() } as never).eq('id', (existing as { id: string }).id)
+  const { id: contentId, ...fields } = content
+  const existingId = await resolveContentRowId('hero_content', contentId)
+  if (existingId) {
+    const { error } = await db('hero_content').update({ ...fields, updated_at: new Date().toISOString() } as never).eq('id', existingId as never)
     if (error) throw error
   } else {
-    const { error } = await db('hero_content').insert(content as never)
+    const { error } = await db('hero_content').insert(fields as never)
     if (error) throw error
   }
 }
@@ -194,12 +207,13 @@ export async function getFooterContent(): Promise<FooterContent | null> {
 }
 
 export async function upsertFooterContent(content: Partial<FooterContent>): Promise<void> {
-  const { data: existing } = await db('footer_content').select('id').limit(1).maybeSingle()
-  if (existing) {
-    const { error } = await db('footer_content').update({ ...content, updated_at: new Date().toISOString() } as never).eq('id', (existing as { id: string }).id)
+  const { id: contentId, ...fields } = content
+  const existingId = await resolveContentRowId('footer_content', contentId)
+  if (existingId) {
+    const { error } = await db('footer_content').update({ ...fields, updated_at: new Date().toISOString() } as never).eq('id', existingId as never)
     if (error) throw error
   } else {
-    const { error } = await db('footer_content').insert(content as never)
+    const { error } = await db('footer_content').insert(fields as never)
     if (error) throw error
   }
 }
