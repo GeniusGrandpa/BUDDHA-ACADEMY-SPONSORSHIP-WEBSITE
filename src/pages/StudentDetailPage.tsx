@@ -149,7 +149,7 @@ export function StudentDetailPage() {
                 {student.sponsorship_status !== 'fully_sponsored' && (
                   <Link to={`/donate?student=${student.id}`} className="block mt-6">
                     <Button className="w-full" size="lg">
-                      {t('student_sponsor_button')}
+                      {t('student_sponsor_button', { name: student.name })}
                     </Button>
                   </Link>
                 )}

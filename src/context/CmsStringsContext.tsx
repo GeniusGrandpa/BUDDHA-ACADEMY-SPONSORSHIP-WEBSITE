@@ -92,7 +92,7 @@ const DEFAULT_STRINGS: Record<string, string> = {
   donate_message_label: 'Message (Optional)',
   donate_message_placeholder: 'Leave a message with your donation...',
   donate_processing_text: 'Processing...',
-  donate_student_format: 'Sponsor {name}',
+  donate_student_format: 'Grade {grade} • Age {age} • {career}',
   donate_student_label: 'Select Student',
   donate_transparent_desc: '100% of your donation goes directly to supporting our programs',
   donate_transparent_heading: 'Transparent Giving',

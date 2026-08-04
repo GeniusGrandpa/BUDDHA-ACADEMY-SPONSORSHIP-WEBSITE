@@ -160,6 +160,7 @@ export function DonationForm({
                         </span>
                         <span className="block text-xs text-[var(--color-text-secondary)] mt-0.5">
                           {t('donate_student_format', {
+                            name: student.name,
                             grade: student.grade,
                             age: student.age,
                             career: student.dream_career || '',
