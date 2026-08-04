@@ -1,5 +1,3 @@
-import { motion } from 'framer-motion'
-
 interface SkeletonProps {
   className?: string
   style?: React.CSSProperties
@@ -27,9 +25,7 @@ function Skeletons({ count = 1, className }: { count?: number; className?: strin
 
 export function CardSkeleton() {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+    <div
       className="bg-[#FFF8F0] rounded-xl p-6 shadow-sm border border-[#FBE7CC]"
       role="status"
       aria-label="Loading content"
@@ -44,15 +40,13 @@ export function CardSkeleton() {
       <SkeletonPulse className="h-8 w-32 mb-2" />
       <SkeletonPulse className="h-3 w-full mb-1" />
       <SkeletonPulse className="h-3 w-3/4" />
-    </motion.div>
+    </div>
   )
 }
 
 export function StatCardSkeleton() {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+    <div
       className="bg-[#FFF8F0] rounded-xl p-5 shadow-sm border border-[#FBE7CC]"
       role="status"
       aria-label="Loading stat"
@@ -63,7 +57,7 @@ export function StatCardSkeleton() {
       </div>
       <SkeletonPulse className="h-7 w-28 mb-1" />
       <SkeletonPulse className="h-3 w-16" />
-    </motion.div>
+    </div>
   )
 }
 
@@ -208,9 +202,7 @@ export function DetailPageSkeleton() {
 
 export function StudentCardSkeleton() {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+    <div
       className="bg-[#FFF8F0] rounded-xl overflow-hidden shadow-sm border border-[#FBE7CC]"
       role="status"
       aria-label="Loading student card"
@@ -225,7 +217,7 @@ export function StudentCardSkeleton() {
           <SkeletonPulse className="h-9 w-full rounded-lg" />
         </div>
       </div>
-    </motion.div>
+    </div>
   )
 }
 
@@ -246,9 +238,7 @@ export function GallerySkeleton() {
 
 export function NewsCardSkeleton() {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+    <div
       className="bg-[#FFF8F0] rounded-xl overflow-hidden shadow-sm border border-[#FBE7CC]"
       role="status"
       aria-label="Loading news"
@@ -260,7 +250,7 @@ export function NewsCardSkeleton() {
         <SkeletonPulse className="h-3 w-full" />
         <SkeletonPulse className="h-3 w-2/3" />
       </div>
-    </motion.div>
+    </div>
   )
 }
 

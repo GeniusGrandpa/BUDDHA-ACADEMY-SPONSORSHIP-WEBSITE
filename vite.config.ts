@@ -45,8 +45,8 @@ export default defineConfig(({ mode }) => {
       },
     },
     optimizeDeps: {
-      include: ['react', 'react-dom', 'react-router-dom'],
-      exclude: ['lucide-react'],
+      include: ['react', 'react-dom', 'react-router-dom', 'lucide-react', '@supabase/supabase-js', 'framer-motion', 'clsx', 'tailwind-merge'],
+      exclude: [],
     },
     build: isSsrBuild
       ? {
@@ -64,6 +64,11 @@ export default defineConfig(({ mode }) => {
         }
       : {
           outDir: 'dist/client',
+          modulePreload: {
+            polyfill: true,
+            resolveDependencies: (_filename, deps) =>
+              deps.filter((dep) => !/\/pdf-|\/animation-|\/charts-|\/editor-|\/dnd-/.test(dep)),
+          },
           rollupOptions: {
             output: {
               manualChunks(id: string) {

@@ -1,5 +1,3 @@
-import { motion } from 'framer-motion'
-
 interface EmptyStateProps {
   icon?: React.ReactNode
   title: string
@@ -12,9 +10,7 @@ interface EmptyStateProps {
 
 export function EmptyState({ title, message, action }: EmptyStateProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+    <div
       className="flex flex-col items-center justify-center py-16 px-4 text-center"
     >
       <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -31,6 +27,6 @@ export function EmptyState({ title, message, action }: EmptyStateProps) {
           {action.label}
         </button>
       )}
-    </motion.div>
+    </div>
   )
 }
