@@ -21,8 +21,14 @@ export function AdminDonationContent() {
       const { data } = await db('donation_content')
         .select('*').order('created_at', { ascending: false }).limit(1).maybeSingle()
       if (data) {
-
-        const d = data as unknown as Record<string, unknown> 
+        const d = data as {
+          id?: string
+          hero_title?: string | null
+          hero_subtitle?: string | null
+          currency_label?: string | null
+          impact_cards?: ImpactCard[] | null
+          process_steps?: ProcessStep[] | null
+        }
         setContentId(d.id)
         setHeroTitle(d.hero_title || '')
         setHeroSubtitle(d.hero_subtitle || '')

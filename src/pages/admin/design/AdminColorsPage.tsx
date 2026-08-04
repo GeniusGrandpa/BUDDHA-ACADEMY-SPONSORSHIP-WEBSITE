@@ -147,7 +147,7 @@ export function AdminColorsPage() {
       await upsertDesignSettings({ colors })
       await refreshTheme()
       toast.success('Colors saved! Click Publish to make changes live.')
-    } catch (error) {
+    } catch {
       toast.error('Failed to save colors')
     } finally {
       setSaving(false)
@@ -171,7 +171,7 @@ export function AdminColorsPage() {
       await upsertDesignSettings({ colors, publish: true })
       await refreshTheme()
       toast.success('Colors published and applied to website!')
-    } catch (error) {
+    } catch {
       toast.error('Failed to publish colors')
     } finally {
       setPublishing(false)

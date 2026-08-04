@@ -24,8 +24,17 @@ export function AdminSponsorshipContent() {
       const { data } = await db('sponsorship_content')
         .select('*').order('created_at', { ascending: false }).limit(1).maybeSingle()
       if (data) {
-
-        const d = data as unknown as Record<string, unknown> 
+        const d = data as {
+          id?: string
+          hero_title?: string | null
+          hero_subtitle?: string | null
+          steps?: SponsorshipStep[] | null
+          benefits?: SponsorshipBenefit[] | null
+          cta_title?: string | null
+          cta_description?: string | null
+          cta_button_text?: string | null
+          cta_button_link?: string | null
+        }
         setContentId(d.id)
         setHeroTitle(d.hero_title || '')
         setHeroSubtitle(d.hero_subtitle || '')

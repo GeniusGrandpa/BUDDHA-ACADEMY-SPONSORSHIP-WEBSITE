@@ -140,6 +140,7 @@ export function AdminPaymentSettingsPage() {
                   <option value="khalti">khalti</option>
                   <option value="esewa">esewa</option>
                   <option value="mobile_banking">mobile_banking</option>
+                  <option value="stripe">stripe</option>
                 </select>
               </div>
               <div>

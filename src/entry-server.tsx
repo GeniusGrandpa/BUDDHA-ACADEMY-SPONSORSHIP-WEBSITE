@@ -5,7 +5,7 @@ import { HelmetProvider } from 'react-helmet-async'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { PassThrough } from 'stream'
 import { routeDefinitions } from './routes'
-import { queryClient } from './lib/query-client'
+import { createQueryClient } from './lib/query-client'
 import { LanguageProvider } from './context/LanguageContext'
 import { AuthProvider } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
@@ -30,6 +30,10 @@ export async function render(_url: string, template: string): Promise<SsrResult>
   const router = createStaticRouter(handler.dataRoutes, context)
 
   const helmetContext: Record<string, unknown> = {}
+
+  // A fresh QueryClient per request prevents cache/data leakage across
+  // requests and unbounded memory growth on the server.
+  const queryClient = createQueryClient()
 
   const app = (
     <React.StrictMode>

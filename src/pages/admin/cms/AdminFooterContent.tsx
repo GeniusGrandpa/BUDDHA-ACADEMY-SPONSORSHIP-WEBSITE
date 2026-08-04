@@ -24,8 +24,15 @@ export function AdminFooterContent() {
       const { data } = await db('footer_content')
         .select('*').order('created_at', { ascending: false }).limit(1).maybeSingle()
       if (data) {
-
-        const d = data as unknown as Record<string, unknown> 
+        const d = data as {
+          id?: string
+          description?: string | null
+          copyright_text?: string | null
+          nonprofit_text?: string | null
+          quick_links?: FooterLink[] | null
+          social_links?: SocialLink[] | null
+          contact_info?: { address?: string | null; phone?: string | null; email?: string | null } | null
+        }
         setContentId(d.id)
         setDescription(d.description || '')
         setCopyrightText(d.copyright_text || '')

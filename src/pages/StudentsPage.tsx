@@ -7,6 +7,8 @@ import { Button } from '../components/ui/Button'
 import { getStudents } from '../services/students'
 import { getPageHeader } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
+import { sponsorshipVariant, sponsorshipLabel } from '../utils/sponsorship'
+import { optimizeImageUrl } from '../utils/image'
 import type { Student } from '../types/database'
 
 const STUDENT_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23e5e7eb'/%3E%3Ccircle cx='200' cy='110' r='50' fill='%239ca3af'/%3E%3Cellipse cx='200' cy='230' rx='80' ry='50' fill='%239ca3af'/%3E%3C/svg%3E"
@@ -82,9 +84,11 @@ export function StudentsPage() {
                 <Card key={student.id} variant="bordered" className="overflow-hidden hover:shadow-lg transition-shadow">
                   <div className="aspect-w-4 aspect-h-3">
                     <img
-                      src={student.photo_url || STUDENT_PLACEHOLDER}
+                      src={optimizeImageUrl(student.photo_url, { width: 640, height: 480, resize: 'cover', quality: 75 }) || STUDENT_PLACEHOLDER}
                       alt={student.name}
                       className="w-full h-full object-cover"
+                      width={640}
+                      height={480}
                       loading="lazy" decoding="async"
                       onError={e => { (e.target as HTMLImageElement).src = STUDENT_PLACEHOLDER }}
                     />
@@ -92,7 +96,7 @@ export function StudentsPage() {
                   <div className="p-4 sm:p-6">
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="text-lg sm:text-xl font-semibold text-gray-900">{student.name}</h3>
-                      <Badge variant={student.sponsorship_status as 'success' | 'warning' | 'default'}>{student.sponsorship_status}</Badge>
+                      <Badge variant={sponsorshipVariant(student.sponsorship_status)}>{sponsorshipLabel(student.sponsorship_status)}</Badge>
                     </div>
                     <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 mb-3">
                       <span>{t('students_age_label', { age: student.age })}</span>

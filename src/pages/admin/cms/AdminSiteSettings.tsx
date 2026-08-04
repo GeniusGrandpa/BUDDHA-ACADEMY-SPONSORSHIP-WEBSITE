@@ -37,6 +37,9 @@ export function AdminSiteSettings() {
     footer_description: '',
     footer_copyright: '',
     footer_nonprofit_text: '',
+    updated_by: null,
+    created_at: '',
+    updated_at: '',
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)

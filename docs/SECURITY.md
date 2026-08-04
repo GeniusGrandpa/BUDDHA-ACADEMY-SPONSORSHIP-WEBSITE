@@ -81,6 +81,47 @@ Every admin/mutation action calls `logAuditEvent()` which inserts into the `audi
 
 Audit logs are readable only by `super_admin`.
 
+## Database Connection Security (SSL)
+
+The application never connects to PostgreSQL directly — the browser and the SSR
+server talk to Supabase exclusively over HTTPS (REST/PostgREST), which is always
+TLS-encrypted. The CA certificate below is only required for **direct
+PostgreSQL connections** (psql, pgAdmin, DBeaver, or a server-side `pg` client)
+so the database server certificate can be validated with `sslmode=verify-full`.
+
+- **CA bundle**: `server/certs/prod-ca-2021.crt` (Supabase Root 2021 CA)
+- **Connection string pattern** (transaction pooler, port 6543):
+
+  ```
+  postgresql://postgres.<project-ref>@<region>.pooler.supabase.com:6543/postgres?sslmode=verify-full&sslrootcert=server/certs/prod-ca-2021.crt
+  ```
+
+- Connection strings are kept out of source code; use the `DATABASE_URL`
+  variable documented in `.env.example`.
+- **SSL enforcement**: enable "Enforce SSL" in Supabase Dashboard →
+  Database → Connection security so the server rejects any non-TLS connection.
+
+### Restricting remote database access
+
+"Only the app can reach the database" is enforced at the platform level — not in
+application code. Complete these in Supabase Dashboard → Project Settings →
+Database:
+
+1. **Disable the public session pooler / direct connection** unless an
+   admin tool (psql/pgAdmin) needs it. Keep only the transaction pooler if any
+   backend must connect, and restrict it by IP.
+2. **IPv4-only mode** — blocks IPv6 direct connections.
+3. **Network restrictions** — add an IP allowlist containing only your
+   deployment hosts' egress IPs (e.g. Vercel/Netlify/Railway/Render). Leave
+   the allowlist empty only if all direct connections are disabled.
+4. Keep **`postgres` superuser and service-role secrets** out of any client
+   bundle; only the anon key is public and it is scoped by RLS.
+
+Verification:
+```bash
+psql "postgresql://postgres.<project-ref>@<region>.pooler.supabase.com:6543/postgres?sslmode=verify-full&sslrootcert=server/certs/prod-ca-2021.crt"
+```
+
 ## Database Security Hardening
 
 From migrations `20260607000003`–`20260803000001`:

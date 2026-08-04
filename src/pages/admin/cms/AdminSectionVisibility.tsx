@@ -53,12 +53,8 @@ export function AdminSectionVisibility() {
         updated_at: new Date().toISOString(),
       }))
       for (const u of updates) {
-
-                await db('section_visibility').update(u).eq('section_key', u.section_key)
-      }
-
-
-      toast.success('Section order saved')
+        await db('section_visibility').update(u as never).eq('section_key', u.section_key)
+      }      toast.success('Section order saved')
     } catch { toast.error('Failed to save order') }
     finally { setSaving(false) }
   }

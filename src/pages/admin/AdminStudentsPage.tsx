@@ -6,6 +6,7 @@ import { Card } from '../../components/ui/Card'
 import { Badge } from '../../components/ui/Badge'
 import { formatNPR } from '../../utils/currency'
 import { getStudents, createStudent, updateStudent, deleteStudent } from '../../services/students'
+import { sponsorshipVariant, sponsorshipLabel } from '../../utils/sponsorship'
 import type { Student } from '../../types/database'
 import { TableSkeleton } from '../../components/ui/LoadingSkeleton'
 
@@ -160,7 +161,7 @@ export function AdminStudentsPage() {
                       <td className="px-6 py-4 text-sm text-gray-600">{student.age}</td>
                       <td className="px-6 py-4 text-sm text-gray-600">{student.grade}</td>
                       <td className="px-6 py-4">
-                        <Badge variant={student.sponsorship_status as 'success' | 'warning' | 'default'}>{student.sponsorship_status}</Badge>
+                        <Badge variant={sponsorshipVariant(student.sponsorship_status)}>{sponsorshipLabel(student.sponsorship_status)}</Badge>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600">{formatNPR(student.sponsorship_amount)}/mo</td>
                       <td className="px-6 py-4 text-right">

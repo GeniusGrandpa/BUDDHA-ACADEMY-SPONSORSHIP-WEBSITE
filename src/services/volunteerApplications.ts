@@ -20,7 +20,7 @@ export async function submitVolunteerApplication(
     .insert({
       ...data,
       status: 'pending',
-    })
+    } as never)
 
   if (error) {
     if (error.code === 'PGRST116') {

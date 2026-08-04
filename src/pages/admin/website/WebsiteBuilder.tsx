@@ -9,19 +9,13 @@ import { Select } from '../../../components/ui/Select'
 import { DashboardSkeleton } from '../../../components/ui/LoadingSkeleton'
 import { StatusBadge } from '../../../components/ui/StatusBadge'
 import { SectionContentEditor } from './components/SectionContentEditor'
-import { LivePreview, UnsavedChangesIndicator, DraftBadge, PublishedBadge } from './components/LivePreview'
+import { LivePreview } from './components/LivePreview'
 import { SECTION_TYPE_LABELS, FONT_SIZE_OPTIONS, LAYOUT_PRESET_OPTIONS, PADDING_OPTIONS, BORDER_RADIUS_OPTIONS } from '../../../types/website-builder'
 import type { WebsitePage, WebsiteSection, PageStatus, SectionSettings } from '../../../types/website-builder'
 
 type ViewMode = 'list' | 'editor'
 type PreviewDevice = 'desktop' | 'tablet' | 'mobile'
 type EditorTab = 'content' | 'design' | 'seo' | 'comparison'
-
-const previewWidths: Record<PreviewDevice, string> = {
-  desktop: '100%',
-  tablet: '768px',
-  mobile: '375px',
-}
 
 export function WebsiteBuilder() {
   const {
@@ -32,15 +26,12 @@ export function WebsiteBuilder() {
     handleReorderSections, handlePublish, handleSaveDraft,
     handleChangeStatus, refreshPages,
   } = useWebsiteBuilder()
-  const { refreshTheme } = useTheme()
 
   const [viewMode, setViewMode] = useState<ViewMode>('list')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<PageStatus | 'all'>('all')
   const [previewDevice, setPreviewDevice] = useState<PreviewDevice>('desktop')
   const [editorTab, setEditorTab] = useState<EditorTab>('content')
-  const [showPreviewBeforePublish, setShowPreviewBeforePublish] = useState(false)
-  const [originalSections, setOriginalSections] = useState<WebsiteSection[]>([])
 
   const filteredPages = useMemo(() => {
     return pages.filter(p => {
@@ -57,13 +48,6 @@ export function WebsiteBuilder() {
   }, [selectPage])
 
   const selectedSection = activeSections.find(s => s.id === selectedSectionId) || null
-
-  const hasUnsavedChanges = useMemo(() => {
-    if (!activePage) return false
-    if (activePage.status === 'published' && activePage.is_draft) return true
-    return originalSections.length !== activeSections.length ||
-      JSON.stringify(originalSections) !== JSON.stringify(activeSections)
-  }, [activePage, originalSections, activeSections])
 
   if (loading) {
     return (
@@ -626,64 +610,6 @@ function SeoEditorPanel({ page, metaTitle, metaDesc, onMetaTitleChange, onMetaDe
       <button onClick={onSave} className="w-full px-4 py-2 text-sm font-medium rounded-lg text-white bg-amber-500 hover:bg-amber-600 transition-colors">
         Save SEO
       </button>
-    </div>
-  )
-}
-
-function SectionPreview({ section, isSelected, onSelect }: { section: WebsiteSection; isSelected: boolean; onSelect: () => void }) {
-  const s = section.settings || {}
-  const style: React.CSSProperties = {
-    color: s.text_color || undefined,
-    backgroundColor: s.background_color || undefined,
-    borderRadius: s.border_radius || undefined,
-    paddingTop: s.padding_top || undefined,
-    paddingBottom: s.padding_bottom || undefined,
-    textAlign: s.text_alignment || undefined,
-  }
-
-  if (s.background_image) {
-    style.backgroundImage = `url(${s.background_image})`
-    style.backgroundSize = 'cover'
-    style.backgroundPosition = 'center'
-    style.position = 'relative'
-  }
-
-  const label = SECTION_TYPE_LABELS[section.section_type] || section.section_key
-
-  if (!section.is_visible) {
-    return (
-      <div
-        onClick={onSelect}
-        className={`border-2 border-dashed border-gray-200 cursor-pointer transition-colors hover:border-amber-300 ${isSelected ? 'border-amber-400 ring-2 ring-amber-200' : ''}`}
-      >
-        <div className="h-20 flex items-center justify-center text-gray-300 text-sm">
-          <EyeOff className="w-4 h-4 mr-2" /> {label} (hidden)
-        </div>
-      </div>
-    )
-  }
-
-  return (
-    <div
-      onClick={onSelect}
-      className={`relative cursor-pointer border-2 transition-all ${isSelected ? 'border-amber-400 ring-2 ring-amber-200' : 'border-transparent hover:border-amber-200/50'
-        }`}
-    >
-      {s.overlay_color && s.overlay_opacity && (
-        <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: s.overlay_color, opacity: s.overlay_opacity }} />
-      )}
-      <div className={`absolute top-2 right-2 z-10 px-2 py-1 rounded-md text-xs font-medium ${isSelected ? 'bg-amber-500 text-white' : 'bg-white/90 text-gray-600 shadow-sm border opacity-0 group-hover:opacity-100'
-        }`}>
-        {label}
-      </div>
-      <div style={style} className="relative z-[1] min-h-[60px] p-4">
-        {section.title && <h2 className="text-base font-bold mb-1" style={{ color: s.text_color }}>{section.title}</h2>}
-        {section.subtitle && <p className="text-sm mb-1 opacity-80" style={{ color: s.text_color }}>{section.subtitle}</p>}
-        {section.description && <p className="text-xs opacity-70" style={{ color: s.text_color }}>{section.description}</p>}
-        {!section.title && !section.subtitle && !section.description && (
-          <p className="text-xs text-gray-300 italic">Empty section — click to edit content</p>
-        )}
-      </div>
     </div>
   )
 }

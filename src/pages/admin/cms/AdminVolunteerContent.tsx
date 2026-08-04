@@ -23,8 +23,16 @@ export function AdminVolunteerContent() {
       const { data } = await db('volunteer_content')
         .select('*').order('created_at', { ascending: false }).limit(1).maybeSingle()
       if (data) {
-
-        const d = data as unknown as Record<string, unknown> 
+        const d = data as {
+          id?: string
+          hero_title?: string | null
+          hero_subtitle?: string | null
+          section_title?: string | null
+          section_description?: string | null
+          success_message?: string | null
+          opportunities?: VolunteerOpportunity[] | null
+          skill_options?: SkillOption[] | null
+        }
         setContentId(d.id)
         setHeroTitle(d.hero_title || '')
         setHeroSubtitle(d.hero_subtitle || '')

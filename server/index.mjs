@@ -2,6 +2,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import http from 'node:http';
+import { gzip } from 'node:zlib';
+import { promisify } from 'node:util';
+
+const gzipAsync = promisify(gzip);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const host = process.env.HOST || '0.0.0.0';
@@ -37,6 +41,24 @@ const template = fs.readFileSync(
 const serverEntry = await import(pathToFileURL(path.resolve(root, 'dist', 'server', 'entry-server.mjs')));
 const { render } = serverEntry;
 
+async function send(req, res, status, headers, body) {
+  const accepts = (req.headers['accept-encoding'] || '').toLowerCase();
+  const compressed = accepts.includes('gzip') && (typeof body === 'string' ? Buffer.byteLength(body) : body.length) > 512;
+  if (compressed) {
+    const buf = await gzipAsync(body);
+    res.writeHead(status, {
+      ...headers,
+      'Content-Encoding': 'gzip',
+      'Content-Length': buf.length,
+      'Vary': 'Accept-Encoding',
+    });
+    res.end(buf);
+    return;
+  }
+  res.writeHead(status, { ...headers, 'Content-Length': typeof body === 'string' ? Buffer.byteLength(body) : body.length });
+  res.end(body);
+}
+
 const server = http.createServer(async (req, res) => {
   const reqUrl = req.url || '/';
 
@@ -44,8 +66,7 @@ const server = http.createServer(async (req, res) => {
     const favPath = path.resolve(clientDist, reqUrl.slice(1));
     if (fs.existsSync(favPath)) {
       const ext = path.extname(favPath);
-      res.writeHead(200, { 'Content-Type': MIME_TYPES[ext] || 'application/octet-stream' });
-      res.end(fs.readFileSync(favPath));
+      await send(req, res, 200, { 'Content-Type': MIME_TYPES[ext] || 'application/octet-stream' }, fs.readFileSync(favPath));
       return;
     }
   }
@@ -56,11 +77,10 @@ const server = http.createServer(async (req, res) => {
     if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
       const mime = MIME_TYPES[ext] || 'application/octet-stream';
       const isStatic = ext === '.js' || ext === '.css' || ext === '.map';
-      res.writeHead(200, {
+      await send(req, res, 200, {
         'Content-Type': mime,
         'Cache-Control': isStatic ? 'public, max-age=31536000, immutable' : 'public, max-age=3600',
-      });
-      res.end(fs.readFileSync(filePath));
+      }, fs.readFileSync(filePath));
       return;
     }
   }
@@ -68,17 +88,15 @@ const server = http.createServer(async (req, res) => {
   try {
     const appUrl = `http://localhost:${port}${reqUrl}`;
     const result = await render(appUrl, template);
-    res.writeHead(200, {
+    await send(req, res, 200, {
       'Content-Type': 'text/html; charset=utf-8',
       'X-Content-Type-Options': 'nosniff',
       'X-Frame-Options': 'DENY',
       'Referrer-Policy': 'strict-origin-when-cross-origin',
-    });
-    res.end(result.html);
+    }, result.html);
   } catch (err) {
     console.error('SSR render error:', err);
-    res.writeHead(500, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(template);
+    await send(req, res, 500, { 'Content-Type': 'text/html; charset=utf-8' }, template);
   }
 });
 

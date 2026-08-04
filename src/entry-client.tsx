@@ -10,16 +10,17 @@ if (import.meta.env.PROD) {
   window.addEventListener('unhandledrejection', (event) => {
     event.preventDefault()
   })
-  window.addEventListener('error', (event) => {
-    if (event.error) {
-    }
-  })
 }
 
 const router = createBrowserRouter(routeDefinitions)
 
 const rootElement = document.getElementById('root')!
-if (rootElement.hasChildNodes()) {
+// In dev the server does not render, so `#root` only contains the
+// `<!--ssr-outlet-->` placeholder comment (a child node). Only hydrate when
+// an actual SSR render produced real DOM elements; otherwise do a plain
+// client render. Hydrating an empty placeholder causes hydration errors.
+const hasServerContent = rootElement.children.length > 0
+if (hasServerContent) {
   ReactDOM.hydrateRoot(
     rootElement,
     <React.StrictMode>

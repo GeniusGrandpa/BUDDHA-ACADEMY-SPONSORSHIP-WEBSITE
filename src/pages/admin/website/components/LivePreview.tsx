@@ -74,7 +74,7 @@ function HeroPreview({ hero }: { hero: { title?: string; highlight?: string; des
 
 function SectionPreviewRenderer({ section }: { section: WebsiteSection }) {
   const s = section.settings || {}
-  const content = section.content || {}
+  const content = (section.content || {}) as Record<string, React.ReactNode>
   
   const style: React.CSSProperties = {
     color: s.text_color || undefined,
@@ -105,7 +105,6 @@ function SectionPreviewRenderer({ section }: { section: WebsiteSection }) {
     case 'hero': {
       return (
         <HeroPreview hero={{
-          id: section.id,
           title: section.title || '',
           highlight: content.highlight as string || '',
           description: section.description || '',
@@ -198,7 +197,7 @@ function SectionPreviewRenderer({ section }: { section: WebsiteSection }) {
   }
 }
 
-export function LivePreview({ page, sections, device = 'desktop' }: LivePreviewProps) {
+export function LivePreview({ sections, device = 'desktop' }: LivePreviewProps) {
   const sortedSections = useMemo(() => {
     return [...sections].sort((a, b) => a.sort_order - b.sort_order)
   }, [sections])

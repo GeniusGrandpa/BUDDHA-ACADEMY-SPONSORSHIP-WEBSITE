@@ -1,12 +1,46 @@
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+
+function devSsrMiddleware(): Plugin {
+  return {
+    name: 'dev-ssr',
+    apply: 'serve',
+    configureServer(server) {
+      // Register directly (not via returned post-hook) so this runs before
+      // Vite's internal index-html/fallback middlewares.
+      server.middlewares.use(async (req, res, next) => {
+        const url = (req.url || '/').split('?')[0]
+        if (req.method !== 'GET') return next()
+        if (url !== '/' && (url.includes('.') || url.startsWith('/@') || url.startsWith('/src/') || url.startsWith('/node_modules/'))) {
+          return next()
+        }
+
+        try {
+          const { render } = await server.ssrLoadModule('/src/entry-server.tsx')
+          let template = readFileSync(new URL('./index.html', import.meta.url), 'utf-8')
+          template = await server.transformIndexHtml(url, template)
+          const appUrl = `${req.headers['x-forwarded-proto'] || 'http'}://${req.headers.host || `localhost:${server.config.server.port}`}${url}`
+          const result = await render(appUrl, template)
+          res.statusCode = 200
+          res.setHeader('Content-Type', 'text/html; charset=utf-8')
+          res.end(result.html)
+        } catch (err) {
+          server.ssrFixStacktrace(err as Error)
+          console.error('Dev SSR render error:', err)
+          next(err)
+        }
+      })
+    },
+  }
+}
 
 export default defineConfig(({ mode }) => {
   const isSsrBuild = mode === 'ssr' || process.env.SSR_BUILD === 'true'
 
   return {
-    plugins: [react()],
+    plugins: [react(), devSsrMiddleware()],
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url)),

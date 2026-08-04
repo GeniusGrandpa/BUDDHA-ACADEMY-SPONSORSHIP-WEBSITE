@@ -18,13 +18,14 @@ function getStripe(): Promise<Stripe | null> {
 interface StripePaymentWrapperProps {
   amount: number
   frequency: 'one-time' | 'monthly' | 'annual'
+  sessionId?: string | null
   studentId?: string | null
   message?: string | null
   onSuccess: (paymentIntentId: string) => void
   onCancel: () => void
 }
 
-export function StripePaymentWrapper({ amount, frequency, onSuccess, onCancel }: StripePaymentWrapperProps) {
+export function StripePaymentWrapper({ amount, frequency, sessionId, onSuccess, onCancel }: StripePaymentWrapperProps) {
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -37,7 +38,7 @@ export function StripePaymentWrapper({ amount, frequency, onSuccess, onCancel }:
         const secret = await createPaymentIntent(
           amount * 100,
           'npr',
-          { frequency },
+          { frequency, ...(sessionId ? { session_id: sessionId } : {}) },
         )
         if (!cancelled) setClientSecret(secret)
       } catch (err) {
@@ -51,7 +52,7 @@ export function StripePaymentWrapper({ amount, frequency, onSuccess, onCancel }:
 
     init()
     return () => { cancelled = true }
-  }, [amount, frequency])
+  }, [amount, frequency, sessionId])
 
   if (loading) {
     return (

@@ -131,6 +131,9 @@ function canonicalBase(): string {
   if (typeof window !== 'undefined') {
     return window.location.origin
   }
-  const env = process.env.VITE_PUBLIC_BASE_URL || 'http://localhost:5174'
+  // import.meta.env is statically inlined by Vite in the SSR bundle and is
+  // available in the dev SSR middleware, unlike process.env which Node does
+  // not populate for this project.
+  const env = import.meta.env.VITE_PUBLIC_BASE_URL || 'http://localhost:5174'
   return env.replace(/\/$/, '')
 }

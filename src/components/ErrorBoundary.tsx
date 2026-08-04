@@ -1,10 +1,6 @@
 import { Component, type ReactNode } from 'react'
 import { RefreshCw, Home, AlertTriangle } from 'lucide-react'
 
-interface ErrorInfo {
-  componentStack: string
-}
-
 interface Props {
   children: ReactNode
   fallback?: ReactNode
@@ -24,11 +20,6 @@ export class ErrorBoundary extends Component<Props, State> {
 
   static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error }
-  }
-
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    if (import.meta.env.DEV) {
-    }
   }
 
   render() {

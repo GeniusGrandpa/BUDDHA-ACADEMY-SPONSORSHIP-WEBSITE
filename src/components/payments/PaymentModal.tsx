@@ -232,6 +232,7 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
                       <StripePaymentWrapper
                         amount={amount}
                         frequency={frequency}
+                        sessionId={checkout.sessionId}
                         studentId={studentId}
                         message={message}
                         onSuccess={handleStripeSuccess}

@@ -138,10 +138,10 @@ export function canAccessSection(userRole: Role | undefined | null, section: str
 }
 
 export async function fetchUserPermissions(userId: string): Promise<PermissionCode[]> {
-
-  const { data, error } = await supabase.rpc<{ data: PermissionCode[]; error: unknown }>('get_user_permissions', { user_id: userId })
-if (error) {
-      return []
-    }
+  const rpc = supabase.rpc as unknown as (fn: string, args?: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>
+  const { data, error } = await rpc('get_user_permissions', { user_id: userId })
+  if (error) {
+    return []
+  }
   return data as unknown as PermissionCode[]
 }
