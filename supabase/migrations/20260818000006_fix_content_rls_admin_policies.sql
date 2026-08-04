@@ -1,3 +1,12 @@
+INSERT INTO public.user_role_cache (id, role, role_level, status, updated_at)
+SELECT p.id, p.role, public.compute_role_level(p.role), p.status, now()
+FROM public.profiles p
+ON CONFLICT (id) DO UPDATE SET
+  role = EXCLUDED.role,
+  role_level = EXCLUDED.role_level,
+  status = EXCLUDED.status,
+  updated_at = now();
+
 DROP POLICY IF EXISTS "Admin full access donation_content" ON public.donation_content;
 CREATE POLICY "Admin full access donation_content" ON public.donation_content
   FOR ALL USING (public.get_user_role_level() >= 90)
