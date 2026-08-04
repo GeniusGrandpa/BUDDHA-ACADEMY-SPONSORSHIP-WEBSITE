@@ -84,11 +84,11 @@ export function StudentsPage() {
                 <Card key={student.id} variant="bordered" className="overflow-hidden hover:shadow-lg transition-shadow">
                   <div className="aspect-w-4 aspect-h-3">
                     <img
-                      src={optimizeImageUrl(student.photo_url, { width: 640, height: 480, resize: 'cover', quality: 75 }) || STUDENT_PLACEHOLDER}
+                      src={optimizeImageUrl(student.photo_url, { width: 480, height: 360, resize: 'cover', quality: 70 }) || STUDENT_PLACEHOLDER}
                       alt={student.name}
                       className="w-full h-full object-cover"
-                      width={640}
-                      height={480}
+                      width={480}
+                      height={360}
                       loading="lazy" decoding="async"
                       onError={e => { (e.target as HTMLImageElement).src = STUDENT_PLACEHOLDER }}
                     />

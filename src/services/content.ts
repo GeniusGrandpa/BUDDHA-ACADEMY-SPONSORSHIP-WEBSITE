@@ -140,6 +140,33 @@ export async function getVideoById(id: string): Promise<Video | null> {
   return data
 }
 
+const VIDEO_MIME = ['video/mp4', 'video/webm', 'video/ogg']
+const THUMB_MIME = ['image/jpeg', 'image/png', 'image/webp']
+
+export async function uploadVideoFile(file: File, folder: 'videos' | 'thumbnails'): Promise<string> {
+  const isThumbnail = folder === 'thumbnails'
+  const allowed = isThumbnail ? THUMB_MIME : VIDEO_MIME
+  if (!allowed.includes(file.type)) {
+    throw new Error(`Invalid file type: ${file.type}. Allowed: ${allowed.join(', ')}`)
+  }
+  const maxBytes = isThumbnail ? 10 * 1024 * 1024 : 50 * 1024 * 1024
+  if (file.size > maxBytes) {
+    throw new Error(`File size exceeds ${isThumbnail ? '10MB' : '50MB'} limit`)
+  }
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+  const filePath = `${folder}/${Date.now()}_${safeName}`
+  const { error: uploadError } = await supabase.storage
+    .from('videos')
+    .upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: false,
+      contentType: file.type,
+    })
+  if (uploadError) throw uploadError
+  const { data: urlData } = supabase.storage.from('videos').getPublicUrl(filePath)
+  return urlData.publicUrl
+}
+
 export async function createVideo(video: Omit<Video, 'id' | 'created_at' | 'updated_at'>): Promise<Video> {
   const userId = (await supabase.auth.getSession()).data.session?.user?.id
   const { data, error } = await supabase

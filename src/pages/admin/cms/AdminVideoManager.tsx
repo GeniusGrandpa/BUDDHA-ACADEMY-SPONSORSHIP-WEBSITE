@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
-import { getVideos, createVideo, updateVideo, deleteVideo } from '../../../services/content'
+import { Upload, Loader2 } from 'lucide-react'
+import { getVideos, createVideo, updateVideo, deleteVideo, uploadVideoFile } from '../../../services/content'
 import type { Video } from '../../../types/database'
 import { GallerySkeleton } from '../../../components/ui/LoadingSkeleton'
 
@@ -17,6 +18,7 @@ export function AdminVideoManager() {
   const [showModal, setShowModal] = useState(false)
   const [editing, setEditing] = useState<Video | null>(null)
   const [filterFeatured, setFilterFeatured] = useState(false)
+  const [uploading, setUploading] = useState<'video' | 'thumbnail' | null>(null)
 
 const [form, setForm] = useState({
      title: '', url: '', video_type: 'youtube' as VideoType,
@@ -86,6 +88,32 @@ const [form, setForm] = useState({
     }
   }
 
+  const handleVideoUpload = async (file: File) => {
+    setUploading('video')
+    try {
+      const url = await uploadVideoFile(file, 'videos')
+      setForm(prev => ({ ...prev, url, video_type: 'upload' }))
+      toast.success('Video uploaded')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Video upload failed')
+    } finally {
+      setUploading(null)
+    }
+  }
+
+  const handleThumbnailUpload = async (file: File) => {
+    setUploading('thumbnail')
+    try {
+      const url = await uploadVideoFile(file, 'thumbnails')
+      setForm(prev => ({ ...prev, thumbnail_url: url }))
+      toast.success('Thumbnail uploaded')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Thumbnail upload failed')
+    } finally {
+      setUploading(null)
+    }
+  }
+
   const toggleFeatured = async (v: Video) => {
     const original = videos
     const updated = videos.map(i => i.id === v.id ? { ...i, is_featured: !i.is_featured } : i)
@@ -109,7 +137,7 @@ const [form, setForm] = useState({
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Video Management</h1>
-          <p className="text-gray-500 mt-1">Manage YouTube embeds, thumbnails & featured videos</p>
+          <p className="text-gray-500 mt-1">Upload videos & thumbnails, or embed YouTube/Vimeo, and feature them</p>
         </div>
         <button onClick={openCreate}
           className="px-4 py-2 rounded-lg text-sm bg-amber-500 hover:bg-amber-600 text-white transition-colors">
@@ -142,7 +170,7 @@ const [form, setForm] = useState({
                 <div className="relative aspect-video bg-stone-100">
                   {v.thumbnail_url ? (
                           <img
-                            src={`https://img.youtube.com/vi/${getYoutubeId(v.url)}/mqdefault.jpg`}
+                            src={v.thumbnail_url}
                             alt={v.title}
                             className="w-full h-full object-cover"
                             loading="lazy" decoding="async"
@@ -208,13 +236,70 @@ const [form, setForm] = useState({
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1">Video URL *</label>
                   <input value={form.url} onChange={e => setForm({ ...form, url: e.target.value })}
-                    placeholder="https://youtube.com/watch?v=..."
-                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
+                    placeholder={form.video_type === 'upload' ? 'Uploaded video file URL' : 'https://youtube.com/watch?v=...'}
+                    disabled={form.video_type === 'upload' && uploading === 'video'}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50 disabled:opacity-60" />
+                  {form.video_type === 'upload' && (
+                    <label className="mt-2 flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-amber-500/60 hover:bg-amber-50/40 transition-colors text-sm text-gray-600">
+                      {uploading === 'video' ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Uploading video...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="w-4 h-4" />
+                          Upload Video File (MP4 / WebM / OGG, max 50MB)
+                        </>
+                      )}
+                      <input
+                        type="file"
+                        accept="video/mp4,video/webm,video/ogg"
+                        className="hidden"
+                        disabled={uploading !== null}
+                        onChange={e => {
+                          const file = e.target.files?.[0]
+                          if (file) handleVideoUpload(file)
+                          e.target.value = ''
+                        }}
+                      />
+                    </label>
+                  )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-1">Thumbnail URL</label>
-                  <input value={form.thumbnail_url} onChange={e => setForm({ ...form, thumbnail_url: e.target.value })}
-                    placeholder="https://..." className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
+                  <label className="block text-sm font-medium text-gray-600 mb-1">Thumbnail</label>
+                  <div className="flex items-center gap-2">
+                    <input value={form.thumbnail_url} onChange={e => setForm({ ...form, thumbnail_url: e.target.value })}
+                      placeholder="https://... or upload an image"
+                      className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
+                    <label className="flex items-center gap-1.5 px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 text-sm text-gray-600 whitespace-nowrap">
+                      {uploading === 'thumbnail' ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Upload className="w-4 h-4" />
+                      )}
+                      {uploading === 'thumbnail' ? 'Uploading...' : 'Upload'}
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        className="hidden"
+                        disabled={uploading !== null}
+                        onChange={e => {
+                          const file = e.target.files?.[0]
+                          if (file) handleThumbnailUpload(file)
+                          e.target.value = ''
+                        }}
+                      />
+                    </label>
+                  </div>
+                  {form.thumbnail_url && (
+                    <img
+                      src={form.thumbnail_url}
+                      alt="Thumbnail preview"
+                      className="mt-2 w-40 rounded-lg border border-gray-200 aspect-video object-cover"
+                      loading="lazy" decoding="async"
+                    />
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1">Description</label>
