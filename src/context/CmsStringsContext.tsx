@@ -149,7 +149,7 @@ const DEFAULT_STRINGS: Record<string, string> = {
   news_tab_updates: 'Updates',
   notfound_home_button: 'Go Home',
   sponsorship_browse_button: 'Browse Students',
-  sponsorship_impact_desc1: 'Your monthly sponsorship provides a child with access to quality education, nutritious meals, and a safe learning environment.',
+  sponsorship_impact_desc1: 'When you sponsor a child, you are not just providing financial support you are giving them hope, opportunity, and a chance to break the cycle of poverty.',
   sponsorship_impact_desc2: 'Together, we can break the cycle of poverty through education. Your support changes lives.',
   sponsorship_impact_heading: 'Your Impact',
   sponsorship_provides_heading: 'What Your Sponsorship Provides',

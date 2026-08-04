@@ -1,5 +1,5 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import Stripe from 'https://esm.sh/stripe@17.7.0?target=deno'
+import { serve } from 'std/http/server'
+import Stripe from 'stripe'
 import { corsHeaders, jsonOk, jsonError, handleError, safeMessage, logError } from '../_shared/response.ts'
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') ?? '', {

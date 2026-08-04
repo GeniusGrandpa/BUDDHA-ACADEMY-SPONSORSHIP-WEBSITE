@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { CheckCircle, ArrowRight } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { Button } from '../components/ui/Button'
 import { getSponsorshipContent, getSiteImage, getSectionContent } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
@@ -100,7 +100,7 @@ export function SponsorshipPage() {
   ]
 
   const DEFAULT_HERO_TITLE = 'Sponsor a Child\'s Education'
-  const DEFAULT_HERO_SUBTITLE = 'For just a small monthly contribution, you can transform a child\'s life through the power of education.'
+  const DEFAULT_HERO_SUBTITLE = 'For just NPR 5,000 per month, you can transform a child\'s life through the power of education at Buddha Academy in Kathmandu.'
   const DEFAULT_SECTION_TITLE = 'How Sponsorship Works'
   const DEFAULT_SECTION_DESC = 'Our sponsorship program connects you directly with a child, creating a personal bond while funding their education.'
   const DEFAULT_CTA_TITLE = 'Ready to Change a Life?'
@@ -112,7 +112,7 @@ export function SponsorshipPage() {
 
   return (
     <div>
-      <section className="relative py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-[var(--color-primary-light)]/20 to-[var(--color-secondary-light)]/20">
+      <section className="relative py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-amber-50 to-orange-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[var(--color-text-primary)] mb-4 sm:mb-6">{content?.hero_title || DEFAULT_HERO_TITLE}</h1>
@@ -147,7 +147,7 @@ export function SponsorshipPage() {
                 <div className="space-y-3">
                   {benefits.map((benefit, idx) => (
                     <div key={idx} className="flex items-center gap-3">
-                      <CheckCircle className="w-5 h-5 text-emerald-500 flex-shrink-0" />
+                      <span className="w-6 h-6 rounded-full bg-[var(--color-primary)] text-white text-xs font-bold flex items-center justify-center flex-shrink-0">{idx + 1}</span>
                       <span className="text-[var(--color-text-secondary)] text-sm sm:text-base">{benefit.text}</span>
                     </div>
                   ))}
