@@ -152,6 +152,30 @@ These dedicated editors remain at their `/admin/website/*` routes:
 | Footer Content | `/admin/website/footer` | Columns, links, copyright, social |
 | Transparency Content | `/admin/website/transparency` | Donation allocation, impact stats |
 
+## Preview Mode (`/preview/:page`)
+
+Content editors no longer embed the live site in an iframe. Instead, the "Preview" button opens a dedicated,
+admin-only route `/preview/:page` (e.g. `/preview/home`, `/preview/about`) in a new tab.
+
+- The route renders the **same React page component** used on the public site, wrapped in the site Header/Footer,
+  so the preview matches the live page exactly.
+- Preview mode is enabled for the lifetime of that tab (`src/lib/preview-mode.ts`). While active, the content
+  services return the **latest row regardless of `is_published`/`is_visible`/`status`** — i.e. drafts, hidden
+  sections, and unpublished design settings — using the authenticated admin's Supabase session. No cross-origin
+  requests or CORS changes are involved; everything is served same-origin through the admin's session.
+- A sticky amber banner labels the tab as a preview and links back to `/admin/website`. Leaving the tab
+  (`/preview` → public route) disables preview mode so production content is never polluted.
+- Preview only ever issues read-only queries; it cannot mutate production content.
+
+### How it works
+
+1. `src/lib/preview-mode.ts` — module-level `setPreviewMode`/`isPreviewMode` flag + `openPreview(slug)` helper.
+2. `src/entry-client.tsx` enables preview mode early (before render) when the URL starts with `/preview`.
+3. `src/features/preview/PreviewProvider.tsx` keeps the flag in sync and resets it on unmount.
+4. `src/pages/preview/PreviewPage.tsx` maps `:page` → the matching public page component.
+5. Service getters in `content.ts`, `cms-content.ts`, `news.ts`, `gallery.ts`, `legal-pages.ts` and
+   `ThemeContext` (design) consult `isPreviewMode()` and skip the published-only filters when active.
+
 ## Tables
 
 | Table | Purpose |

@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { useCmsStrings } from '../../context/CmsStringsContext'
 import { formatNPR } from '../../utils/currency'
 import type { DonationGoal } from '../../types/database'
 
@@ -18,6 +19,7 @@ function getCampaignColor(color: string | null): string {
 }
 
 export function DonationCampaignCard({ goal }: DonationCampaignCardProps) {
+  const { t } = useCmsStrings()
   const percentage = Math.min(100, Math.round((goal.raised_amount / goal.target_amount) * 100))
   const palette = getCampaignColor(goal.color)
 
@@ -47,7 +49,7 @@ export function DonationCampaignCard({ goal }: DonationCampaignCardProps) {
 
         <div className="space-y-3">
           <div className="flex justify-between text-sm">
-            <span className="text-gray-500">Raised</span>
+            <span className="text-gray-500">{t('campaign_raised')}</span>
             <span className="font-semibold text-gray-900">
               {formatNPR(goal.raised_amount)}
             </span>
@@ -64,8 +66,8 @@ export function DonationCampaignCard({ goal }: DonationCampaignCardProps) {
           </div>
 
           <div className="flex justify-between text-xs text-gray-500">
-            <span>{percentage}% of {formatNPR(goal.target_amount)}</span>
-            <span>{goal.donor_count || 0} donors</span>
+            <span>{t('campaign_percentage_of_goal', { percentage, goal: formatNPR(goal.target_amount) })}</span>
+            <span>{t('campaign_donors', { count: goal.donor_count || 0 })}</span>
           </div>
         </div>
       </div>
@@ -74,11 +76,11 @@ export function DonationCampaignCard({ goal }: DonationCampaignCardProps) {
         <div className="flex items-center justify-between">
           <span className="text-xs text-gray-500">
             {goal.end_date
-              ? `${Math.max(0, Math.ceil((new Date(goal.end_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))} days remaining`
-              : 'Ongoing campaign'}
+              ? t('campaign_days_remaining', { days: Math.max(0, Math.ceil((new Date(goal.end_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24))) })
+              : t('campaign_ongoing')}
           </span>
           <button className="text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors">
-            Donate Now
+            {t('campaign_donate_now')}
           </button>
         </div>
       </div>

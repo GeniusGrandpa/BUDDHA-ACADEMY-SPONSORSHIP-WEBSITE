@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, type ReactNode } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 import { FormSkeleton } from '../../../../components/ui/LoadingSkeleton'
 import { getHeroContent, upsertHeroContent, getSectionContent, upsertSectionContent, getSectionVisibility, updateSectionVisibility } from '../../../../services/cms-content'
-import { PreviewModal } from '../shared/PreviewModal'
+import { openPreview } from '../../../../lib/preview-mode'
 import { PublishToggle } from '../shared/PublishToggle'
 import { SaveButton } from '../shared/SaveButton'
 import { hasRole } from '../../../../lib/permissions'
@@ -23,7 +23,6 @@ export function HomePageEditor() {
   const { profile } = useAuth()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [previewOpen, setPreviewOpen] = useState(false)
   const [published, setPublished] = useState(true)
   const [validationErrors, setValidationErrors] = useState<string[]>([])
 
@@ -176,7 +175,7 @@ export function HomePageEditor() {
           <p className="text-gray-500 mt-1">Edit your homepage content — hero, welcome text, statistics, and calls to action</p>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={() => setPreviewOpen(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm bg-white border border-gray-200 hover:border-amber-300 text-gray-700 transition-colors">
+          <button onClick={() => openPreview('home')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm bg-white border border-gray-200 hover:border-amber-300 text-gray-700 transition-colors">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" /></svg>
             Preview
           </button>
@@ -263,7 +262,6 @@ export function HomePageEditor() {
         </div>
       </SectionCard>
 
-      <PreviewModal open={previewOpen} onClose={() => setPreviewOpen(false)} url="/" title="Home Page" />
     </div>
   )
 }

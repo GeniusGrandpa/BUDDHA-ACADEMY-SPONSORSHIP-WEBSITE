@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase'
+import { isPreviewMode } from '../lib/preview-mode'
 import type {
   DonationContent,
   SponsorshipContent,
@@ -19,12 +20,12 @@ export function db(table: string) {
 }
 
 export async function getDonationContent(): Promise<DonationContent | null> {
-  const { data } = await db('donation_content')
+  let query = db('donation_content')
     .select('id, hero_title, hero_subtitle, hero_background_image, currency_label, impact_cards, impact_stories, process_steps, sections, is_published, created_at')
-    .eq('is_published', true)
     .order('created_at', { ascending: false })
     .limit(1)
-    .maybeSingle()
+  if (!isPreviewMode()) query = query.eq('is_published', true)
+  const { data } = await query.maybeSingle()
   return data as DonationContent | null
 }
 
@@ -49,12 +50,12 @@ export async function upsertDonationContent(content: Partial<DonationContent>): 
 }
 
 export async function getSponsorshipContent(): Promise<SponsorshipContent | null> {
-  const { data } = await db('sponsorship_content')
+  let query = db('sponsorship_content')
     .select('id, hero_title, hero_subtitle, hero_background_image, hero_image, section_title, section_description, steps, benefits, cta_title, cta_description, cta_button_text, cta_button_link, is_published, created_at')
-    .eq('is_published', true)
     .order('created_at', { ascending: false })
     .limit(1)
-    .maybeSingle()
+  if (!isPreviewMode()) query = query.eq('is_published', true)
+  const { data } = await query.maybeSingle()
   return data as SponsorshipContent | null
 }
 
@@ -71,12 +72,12 @@ export async function upsertSponsorshipContent(content: Partial<SponsorshipConte
 }
 
 export async function getVolunteerContent(): Promise<VolunteerContent | null> {
-  const { data } = await db('volunteer_content')
+  let query = db('volunteer_content')
     .select('id, hero_title, hero_subtitle, hero_background_image, section_title, section_description, opportunities, skill_options, form_fields, success_message, is_published, created_at')
-    .eq('is_published', true)
     .order('created_at', { ascending: false })
     .limit(1)
-    .maybeSingle()
+  if (!isPreviewMode()) query = query.eq('is_published', true)
+  const { data } = await query.maybeSingle()
   return data as VolunteerContent | null
 }
 
@@ -93,12 +94,12 @@ export async function upsertVolunteerContent(content: Partial<VolunteerContent>)
 }
 
 export async function getTransparencyContent(): Promise<TransparencyContent | null> {
-  const { data } = await db('transparency_content')
+  let query = db('transparency_content')
     .select('id, hero_title, hero_subtitle, allocation_title, allocation_description, allocation_data, verification_title, verification_description, verification_steps, impact_report_title, impact_report_items, receipt_policy_title, receipt_policy_text, donor_privacy_title, donor_privacy_text, is_published, created_at')
-    .eq('is_published', true)
     .order('created_at', { ascending: false })
     .limit(1)
-    .maybeSingle()
+  if (!isPreviewMode()) query = query.eq('is_published', true)
+  const { data } = await query.maybeSingle()
   return data as TransparencyContent | null
 }
 
@@ -115,12 +116,12 @@ export async function upsertTransparencyContent(content: Partial<TransparencyCon
 }
 
 export async function getHeroContent(): Promise<HeroContent | null> {
-  const { data } = await db('hero_content')
+  let query = db('hero_content')
     .select('id, title, highlight, description, background_image, overlay_color, overlay_opacity, cta_primary_text, cta_primary_link, cta_secondary_text, cta_secondary_link, statistics, badges, layout, display_order, is_visible, animation_enabled')
-    .eq('is_visible', true)
     .order('display_order', { ascending: true })
     .limit(1)
-    .maybeSingle()
+  if (!isPreviewMode()) query = query.eq('is_visible', true)
+  const { data } = await query.maybeSingle()
   return data as HeroContent | null
 }
 
@@ -197,12 +198,12 @@ export async function deleteSiteImage(id: string): Promise<void> {
 }
 
 export async function getFooterContent(): Promise<FooterContent | null> {
-  const { data } = await db('footer_content')
+  let query = db('footer_content')
     .select('id, description, copyright_text, nonprofit_text, social_links, quick_links, contact_info, is_published, created_at')
-    .eq('is_published', true)
     .order('created_at', { ascending: false })
     .limit(1)
-    .maybeSingle()
+  if (!isPreviewMode()) query = query.eq('is_published', true)
+  const { data } = await query.maybeSingle()
   return data as FooterContent | null
 }
 
@@ -219,11 +220,11 @@ export async function upsertFooterContent(content: Partial<FooterContent>): Prom
 }
 
 export async function getSeoContent(pageSlug: string): Promise<SeoContent | null> {
-  const { data } = await db('seo_content')
+  let query = db('seo_content')
     .select('id, page_slug, meta_title, meta_description, is_published')
     .eq('page_slug', pageSlug)
-    .eq('is_published', true)
-    .maybeSingle()
+  if (!isPreviewMode()) query = query.eq('is_published', true)
+  const { data } = await query.maybeSingle()
   return data as SeoContent | null
 }
 
@@ -246,11 +247,11 @@ export async function upsertSeoContent(content: Partial<SeoContent>): Promise<vo
 }
 
 export async function getPageHeader(pageSlug: string): Promise<PageHeader | null> {
-  const { data } = await db('page_headers')
+  let query = db('page_headers')
     .select('id, page_slug, title, subtitle, is_visible')
     .eq('page_slug', pageSlug)
-    .eq('is_visible', true)
-    .maybeSingle()
+  if (!isPreviewMode()) query = query.eq('is_visible', true)
+  const { data } = await query.maybeSingle()
   return data as PageHeader | null
 }
 
@@ -310,11 +311,11 @@ export async function getAllCmsStrings(): Promise<CmsStringMap> {
 }
 
 export async function getCmsString(key: string): Promise<string | null> {
-  const { data } = await db('cms_strings')
+  let query = db('cms_strings')
     .select('value')
     .eq('key', key)
-    .eq('is_published', true)
-    .maybeSingle()
+  if (!isPreviewMode()) query = query.eq('is_published', true)
+  const { data } = await query.maybeSingle()
   if (!data) return null
   return (data as { value: string }).value
 }

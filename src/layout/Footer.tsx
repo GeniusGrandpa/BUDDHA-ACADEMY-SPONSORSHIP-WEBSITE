@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useLanguage } from '../context/LanguageContext'
+import { useCmsStrings } from '../context/CmsStringsContext'
 import { Tr } from '../components/Translated'
 import { useTheme } from '../context/ThemeContext'
 import { getFooterContent } from '../services/cms-content'
@@ -16,7 +16,7 @@ const SOCIAL_ICONS: Record<string, React.ReactNode> = {
 }
 
 export function Footer() {
-  const { t } = useLanguage()
+  const { t } = useCmsStrings()
   const { branding } = useTheme()
   const [footerContent, setFooterContent] = useState<FooterContent | null>(null)
   const [siteSettings, setSiteSettings] = useState<{ contact_address?: string; contact_phone?: string; contact_email?: string }>({})

@@ -1,4 +1,5 @@
 import { getSupabaseClient } from '../lib/supabase'
+import { isPreviewMode } from '../lib/preview-mode'
 import type { GalleryItem } from '../types/database'
 const supabase = getSupabaseClient()
 
@@ -12,7 +13,7 @@ export async function getGalleryItems(options?: { type?: string; publishedOnly?:
     query = query.eq('type', options.type as GalleryItem['type'])
   }
 
-  if (options?.publishedOnly) {
+  if (options?.publishedOnly && !isPreviewMode()) {
     query = query.eq('is_published', true)
   }
 

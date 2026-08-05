@@ -142,7 +142,7 @@ export function SuccessStoriesCarousel() {
               )}
               <div className="p-6 md:p-8 md:w-1/2 flex flex-col justify-center">
                 <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full self-start mb-3">
-                  Success Story
+                  {t('stories_badge_success')}
                 </span>
                 <h3 className="text-xl font-bold text-gray-900 mb-1">{story.title}</h3>
                 <p className="text-sm text-emerald-600 font-medium mb-3">{story.student_name}</p>
@@ -163,14 +163,14 @@ export function SuccessStoriesCarousel() {
           <button
             onClick={prevStory}
             className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-md flex items-center justify-center hover:bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            aria-label="Previous story"
+            aria-label={t('story_previous')}
           >
             <ChevronLeft className="w-5 h-5 text-gray-600" />
           </button>
           <button
             onClick={nextStory}
             className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-md flex items-center justify-center hover:bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            aria-label="Next story"
+            aria-label={t('story_next')}
           >
             <ChevronRight className="w-5 h-5 text-gray-600" />
           </button>
@@ -184,7 +184,7 @@ export function SuccessStoriesCarousel() {
                     ? 'bg-emerald-500 w-6'
                     : 'bg-gray-300 hover:bg-gray-400'
                   }`}
-                aria-label={`Go to story ${index + 1}`}
+                aria-label={t('story_go_to', { index: index + 1 })}
               />
             ))}
           </div>

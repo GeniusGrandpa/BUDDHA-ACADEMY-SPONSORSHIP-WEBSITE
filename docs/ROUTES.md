@@ -38,6 +38,8 @@ All routes defined in `src/routes.tsx` via `createBrowserRouter`.
 | `/dashboard` | donor/volunteer/teacher/donor/finance_manager/admin/super_admin | DashboardPage |
 | `/donations` | donor/admin/super_admin | DonationHistoryPage |
 | `/teacher` | teacher | TeacherDashboard |
+| `/preview` | super_admin/admin | PreviewPage |
+| `/preview/:page` | super_admin/admin | PreviewPage (draft content preview) |
 
 ## Admin Routes (under `ProtectedRoute` with `super_admin`, `admin`, `finance_manager`)
 

@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase'
+import { isPreviewMode } from '../lib/preview-mode'
 import { logAuditEvent } from '../lib/audit'
 import type { LegalPage, LegalPageSection, LegalPageVersion } from '../types/database'
 
@@ -31,6 +32,10 @@ export async function getLegalPageByType(type: LegalPageType): Promise<LegalPage
 }
 
 export async function getPublishedLegalPageByType(type: LegalPageType): Promise<LegalPageWithSections | null> {
+  if (isPreviewMode()) {
+    return getLegalPageByType(type)
+  }
+
   const { data: page, error } = await supabase
     .from('legal_pages')
     .select('id, type, title, slug, meta_title, meta_description, status, effective_date, published_at, created_at')

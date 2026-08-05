@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { loadStripe, type Stripe } from '@stripe/stripe-js'
 import { Elements } from '@stripe/react-stripe-js'
 import { AlertCircle } from 'lucide-react'
+import { useCmsStrings } from '../../../context/CmsStringsContext'
 import { createPaymentIntent } from '../../../services/stripePayment'
 import { getErrorMessage } from '../../../lib/errors'
 import { StripeCheckoutForm } from './StripeCheckoutForm'
@@ -27,6 +28,7 @@ interface StripePaymentWrapperProps {
 }
 
 export function StripePaymentWrapper({ amount, frequency, sessionId, onSuccess, onCancel }: StripePaymentWrapperProps) {
+  const { t } = useCmsStrings()
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -44,7 +46,7 @@ export function StripePaymentWrapper({ amount, frequency, sessionId, onSuccess, 
         if (!cancelled) setClientSecret(secret)
       } catch (err) {
         if (!cancelled) {
-          setError(getErrorMessage(err, 'Failed to initialize payment'))
+          setError(getErrorMessage(err, t('payment_stripe_initialize_failed')))
         }
       } finally {
         if (!cancelled) setLoading(false)
@@ -59,7 +61,7 @@ export function StripePaymentWrapper({ amount, frequency, sessionId, onSuccess, 
     return (
       <div className="flex flex-col items-center justify-center py-12">
         <div className="w-12 h-12 border-2 border-amber-500 border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-sm text-gray-500">Initializing secure payment...</p>
+        <p className="text-sm text-gray-500">{t('payment_stripe_initializing')}</p>
       </div>
     )
   }
@@ -69,7 +71,7 @@ export function StripePaymentWrapper({ amount, frequency, sessionId, onSuccess, 
       <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3 text-sm text-red-700">
         <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
         <div>
-          <p className="font-medium">Payment Initialization Failed</p>
+          <p className="font-medium">{t('payment_stripe_init_error_title')}</p>
           <p>{error}</p>
         </div>
       </div>

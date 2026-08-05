@@ -215,7 +215,7 @@ function PageListView({ pages, searchQuery, onSearchChange, statusFilter, onStat
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Link to={`/${page.slug}`} target="_blank" className="p-1.5 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600" title="Preview">
+                        <Link to={`/preview/${page.slug}`} target="_blank" className="p-1.5 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600" title="Preview">
                           <Eye className="w-4 h-4" />
                         </Link>
                         <button onClick={() => onEditPage(page.id)} className="px-3 py-1.5 text-xs font-medium text-amber-600 hover:bg-amber-50 rounded-lg transition-colors">

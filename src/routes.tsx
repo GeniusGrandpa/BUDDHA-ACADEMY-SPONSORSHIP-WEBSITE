@@ -177,6 +177,8 @@ const AdminComponentsPage = lazy(() => import('./pages/admin/design/AdminCompone
 const AdminConfigPage = lazy(() => import('./pages/admin/design/AdminConfigPage').then(m => ({ default: m.AdminConfigPage })))
 const AdminThemePresetsPage = lazy(() => import('./pages/admin/design/AdminThemePresetsPage').then(m => ({ default: m.AdminThemePresetsPage })))
 
+const PreviewPage = lazy(() => import('./pages/preview/PreviewPage').then(m => ({ default: m.PreviewPage })))
+
 function AdminIndexRedirect() {
   const { profile, loading, user } = useAuth()
   if (loading) return (
@@ -344,6 +346,24 @@ export const routeDefinitions = [
     ),
     errorElement: <RouteErrorPage />,
     },
+  {
+    path: '/preview',
+    element: (
+      <ProtectedRoute requiredRoles={['super_admin', 'admin']}>
+        <LazyPage Component={PreviewPage} />
+      </ProtectedRoute>
+    ),
+    errorElement: <RouteErrorPage />,
+  },
+  {
+    path: '/preview/:page',
+    element: (
+      <ProtectedRoute requiredRoles={['super_admin', 'admin']}>
+        <LazyPage Component={PreviewPage} />
+      </ProtectedRoute>
+    ),
+    errorElement: <RouteErrorPage />,
+  },
     ],
   },
 ]

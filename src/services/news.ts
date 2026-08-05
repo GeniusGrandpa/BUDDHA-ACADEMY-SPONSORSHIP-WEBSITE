@@ -1,4 +1,5 @@
 import { getSupabaseClient } from '../lib/supabase'
+import { isPreviewMode } from '../lib/preview-mode'
 import { requireRole } from '../lib/auth/secureService'
 import type { News } from '../types/database'
 const supabase = getSupabaseClient()
@@ -7,8 +8,11 @@ export async function getNews(category?: string): Promise<News[]> {
   let query = supabase
     .from('news')
     .select('id, slug, title, excerpt, content, image_url, category, tags, published, published_at, updated_by, created_at, updated_at')
-    .eq('published', true)
     .order('published_at', { ascending: false })
+
+  if (!isPreviewMode()) {
+    query = query.eq('published', true)
+  }
 
   if (category && category !== 'all') {
     query = query.eq('category', category as News['category'])

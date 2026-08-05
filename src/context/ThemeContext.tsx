@@ -1,7 +1,8 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from 'react'
 import type { DesignSettings, DesignColors, DesignBranding, DesignTypography, DesignLayout, DesignTokens, DesignComponentStyles } from '../types/design'
 import { DEFAULT_COLORS, DEFAULT_BRANDING, DEFAULT_TYPOGRAPHY, DEFAULT_LAYOUT, DEFAULT_TOKENS, DEFAULT_COMPONENT_STYLES } from '../types/design'
-import { getPublishedDesignSettings } from '../services/design'
+import { getPublishedDesignSettings, getDesignSettings } from '../services/design'
+import { isPreviewMode } from '../lib/preview-mode'
 import { useAuth } from './AuthContext'
 
 interface ThemeContextValue {
@@ -188,7 +189,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const refreshTheme = useCallback(async () => {
     try {
-      const data = await getPublishedDesignSettings()
+      const data = isPreviewMode() ? await getDesignSettings() : await getPublishedDesignSettings()
       setSettings(data)
       applyTheme(data)
       applyFavicon(data?.branding as DesignBranding | undefined)

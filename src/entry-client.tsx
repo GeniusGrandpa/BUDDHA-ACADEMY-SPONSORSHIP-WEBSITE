@@ -8,6 +8,11 @@ import './index.css'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { logger } from './lib/logger'
 import { getErrorMessage } from './lib/errors'
+import { setPreviewMode } from './lib/preview-mode'
+
+if (typeof window !== 'undefined' && window.location.pathname.startsWith('/preview')) {
+  setPreviewMode(true)
+}
 
 function setupGlobalErrorHandlers(): void {
   let lastToastAt = 0

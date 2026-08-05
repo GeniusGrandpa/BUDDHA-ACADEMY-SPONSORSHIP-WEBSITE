@@ -1,4 +1,5 @@
 import { getSupabaseClient } from '../lib/supabase'
+import { isPreviewMode } from '../lib/preview-mode'
 import { logAuditEvent } from '../lib/audit'
 import type {
   Page, HomepageSection, Video, Faq, StudentStory, MediaItem,
@@ -200,7 +201,7 @@ export async function deleteVideo(id: string): Promise<void> {
 
 export async function getFaqs(publishedOnly?: boolean): Promise<Faq[]> {
   let query = supabase.from('faqs').select(FAQ_COLS).order('sort_order', { ascending: true })
-  if (publishedOnly) query = query.eq('is_published', true)
+  if (publishedOnly && !isPreviewMode()) query = query.eq('is_published', true)
   const { data, error } = await query
   if (error) throw error
   return data || []
@@ -240,7 +241,7 @@ export async function reorderFaqs(items: { id: string; sort_order: number }[]): 
 
 export async function getStudentStories(publishedOnly?: boolean): Promise<StudentStory[]> {
   let query = supabase.from('student_stories').select(STORY_COLS).order('created_at', { ascending: false })
-  if (publishedOnly) query = query.eq('is_published', true)
+  if (publishedOnly && !isPreviewMode()) query = query.eq('is_published', true)
   const { data, error } = await query
   if (error) throw error
   return data || []
@@ -274,7 +275,7 @@ export async function deleteStudentStory(id: string): Promise<void> {
 
 export async function getMedia(publishedOnly?: boolean): Promise<MediaItem[]> {
   let query = supabase.from('media_library').select(MEDIA_COLS).order('created_at', { ascending: false })
-  if (publishedOnly) query = query.eq('is_published', true)
+  if (publishedOnly && !isPreviewMode()) query = query.eq('is_published', true)
   const { data, error } = await query
   if (error) throw error
   return data || []
@@ -342,7 +343,7 @@ export async function deleteMedia(id: string, url: string): Promise<void> {
 export async function getGalleryItemsWithCategory(category?: string, publishedOnly = true): Promise<GalleryItem[]> {
   let query = supabase.from('gallery_items').select(GALLERY_COLS).order('created_at', { ascending: false })
   if (category && category !== 'all') query = query.eq('category', category)
-  if (publishedOnly) query = query.eq('is_published', true)
+  if (publishedOnly && !isPreviewMode()) query = query.eq('is_published', true)
   const { data, error } = await query
   if (error) throw error
   return data || []
@@ -371,7 +372,8 @@ export async function updateGalleryItemWithCategory(id: string, updates: Partial
 
 export async function getAllNews(includeUnpublished?: boolean): Promise<News[]> {
   let query = supabase.from('news').select(NEWS_COLS).order('created_at', { ascending: false })
-  if (!includeUnpublished) query = query.eq('published', true)
+  const includeAll = includeUnpublished || isPreviewMode()
+  if (!includeAll) query = query.eq('published', true)
   const { data, error } = await query
   if (error) throw error
   return data || []

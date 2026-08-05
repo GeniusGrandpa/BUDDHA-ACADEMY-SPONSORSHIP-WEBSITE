@@ -1,44 +1,34 @@
 import { motion } from 'framer-motion'
+import { useCmsStrings } from '../../context/CmsStringsContext'
 import { formatNPR } from '../../utils/currency'
 
-const impacts = [
-  {
-    perAmount: 200,
-    narrative: (count: number) =>
-      count > 1
-        ? `nutritious meals for ${count} months`
-        : 'nutritious meals for one month',
-  },
-  {
-    perAmount: 500,
-    narrative: (count: number) =>
-      count > 1
-        ? `books & supplies for ${count} terms`
-        : 'books & supplies for one term',
-  },
-  {
-    perAmount: 1000,
-    narrative: (count: number) =>
-      count > 1
-        ? `quality education for ${count} months`
-        : 'quality education for one month',
-  },
-  {
-    perAmount: 5000,
-    narrative: () => 'full sponsorship for a student for one month',
-  },
-]
+const impactAmounts = [200, 500, 1000, 5000]
 
 interface DonationImpactCardProps {
   amount: number
 }
 
 export function DonationImpactCard({ amount }: DonationImpactCardProps) {
-  const applicableImpacts = impacts
-    .filter(i => amount >= i.perAmount)
-    .map(i => ({
-      ...i,
-      count: Math.floor(amount / i.perAmount),
+  const { t } = useCmsStrings()
+
+  const narrative = (perAmount: number, count: number) => {
+    if (perAmount === 200) {
+      return count > 1 ? t('impact_meals_months', { count }) : t('impact_meals_month')
+    }
+    if (perAmount === 500) {
+      return count > 1 ? t('impact_books_terms', { count }) : t('impact_books_term')
+    }
+    if (perAmount === 1000) {
+      return count > 1 ? t('impact_education_months', { count }) : t('impact_education_month')
+    }
+    return t('impact_full_month')
+  }
+
+  const applicableImpacts = impactAmounts
+    .filter(perAmount => amount >= perAmount)
+    .map(perAmount => ({
+      perAmount,
+      count: Math.floor(amount / perAmount),
     }))
 
   if (applicableImpacts.length === 0) return null
@@ -51,9 +41,9 @@ export function DonationImpactCard({ amount }: DonationImpactCardProps) {
       animate={{ opacity: 1, y: 0 }}
       className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-5"
     >
-      <h3 className="font-semibold text-gray-900 mb-1">Your Impact</h3>
+      <h3 className="font-semibold text-gray-900 mb-1">{t('impact_your_impact')}</h3>
       <p className="text-sm text-gray-500 mb-4">
-        <span className="font-medium text-amber-700">{formatNPR(amount)}</span> helps provide:
+        <span className="font-medium text-amber-700">{formatNPR(amount)}</span> {t('impact_helps_provide')}
       </p>
 
       <div className="space-y-2.5">
@@ -66,7 +56,7 @@ export function DonationImpactCard({ amount }: DonationImpactCardProps) {
               className="bg-white/80 rounded-lg p-3"
             >
               <p className="text-sm font-medium text-gray-900">
-                {impact.narrative(impact.count)}
+                {narrative(impact.perAmount, impact.count)}
               </p>
             </motion.div>
           ))}
@@ -75,7 +65,7 @@ export function DonationImpactCard({ amount }: DonationImpactCardProps) {
       {progressToFullSponsorship < 100 && (
         <div className="mt-4 pt-4 border-t border-amber-200">
           <div className="flex justify-between text-xs text-gray-500 mb-1.5">
-            <span>Progress to full sponsorship</span>
+            <span>{t('impact_progress_to_full')}</span>
             <span>{progressToFullSponsorship}%</span>
           </div>
           <div className="h-2 bg-amber-200/50 rounded-full overflow-hidden">
@@ -87,7 +77,7 @@ export function DonationImpactCard({ amount }: DonationImpactCardProps) {
             />
           </div>
           <p className="text-xs text-gray-400 mt-1.5">
-            Full sponsorship for one student is NPR 5,000/month
+            {t('impact_full_sponsorship_note')}
           </p>
         </div>
       )}

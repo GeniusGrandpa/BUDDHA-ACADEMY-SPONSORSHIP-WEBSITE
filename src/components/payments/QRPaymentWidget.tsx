@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { Copy, Check } from 'lucide-react'
 import { useState } from 'react'
+import { useCmsStrings } from '../../context/CmsStringsContext'
 import type { PaymentSetting } from '../../types/payments'
 
 interface QRPaymentWidgetProps {
@@ -10,6 +11,7 @@ interface QRPaymentWidgetProps {
 }
 
 export function QRPaymentWidget({ setting, transactionId, amount }: QRPaymentWidgetProps) {
+  const { t } = useCmsStrings()
   const [copied, setCopied] = useState<string | null>(null)
 
   const copyToClipboard = (text: string, label: string) => {
@@ -26,7 +28,7 @@ export function QRPaymentWidget({ setting, transactionId, amount }: QRPaymentWid
     >
       <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
         <div>
-            <p className="font-medium mb-1">Complete your payment</p>
+            <p className="font-medium mb-1">{t('payment_qr_complete_title')}</p>
             <p className="text-amber-700">{setting.instructions}</p>
         </div>
       </div>
@@ -40,23 +42,23 @@ export function QRPaymentWidget({ setting, transactionId, amount }: QRPaymentWid
               className="w-48 h-48 object-contain"
               loading="lazy" decoding="async"
             />
-            <p className="text-center text-xs text-gray-500 mt-2">Scan to pay</p>
+            <p className="text-center text-xs text-gray-500 mt-2">{t('payment_scan_to_pay')}</p>
           </div>
         </div>
       ) : (
         <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm text-gray-600">
-          <p className="font-medium text-gray-700 mb-1">Pay using account details below</p>
-          <p>No QR code is configured for this payment method. Please use the account name and number to make your transfer.</p>
+          <p className="font-medium text-gray-700 mb-1">{t('payment_qr_use_account_details')}</p>
+          <p>{t('payment_qr_no_qr_configured')}</p>
         </div>
       )}
 
       <div className="bg-gray-50 rounded-xl p-4 space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-600">Account Name</span>
+          <span className="text-sm text-gray-600">{t('payment_account_name')}</span>
           <span className="text-sm font-medium text-gray-900">{setting.account_name}</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-600">Account Number</span>
+          <span className="text-sm text-gray-600">{t('payment_account_number')}</span>
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-gray-900">{setting.account_number}</span>
             <button
@@ -72,11 +74,11 @@ export function QRPaymentWidget({ setting, transactionId, amount }: QRPaymentWid
           </div>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-600">Amount</span>
+          <span className="text-sm text-gray-600">{t('payment_qr_amount')}</span>
           <span className="text-lg font-bold text-gray-900">NPR {amount.toLocaleString()}</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-600">Transaction ID</span>
+          <span className="text-sm text-gray-600">{t('payment_qr_transaction_id')}</span>
           <div className="flex items-center gap-2">
             <span className="text-sm font-mono font-medium text-gray-900">{transactionId}</span>
             <button
@@ -94,12 +96,12 @@ export function QRPaymentWidget({ setting, transactionId, amount }: QRPaymentWid
       </div>
 
       <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-600">
-        <p className="font-medium text-gray-700 mb-1">After making payment:</p>
+        <p className="font-medium text-gray-700 mb-1">{t('payment_after_payment')}</p>
         <ol className="list-decimal list-inside space-y-1">
-          <li>Note the transaction ID from your payment app</li>
-          <li>Click "I have completed the payment" below</li>
-          <li>Enter your transaction ID and optionally upload a screenshot</li>
-          <li>Our finance team will verify your payment within 24 hours</li>
+          <li>{t('payment_qr_step_1')}</li>
+          <li>{t('payment_qr_step_2')}</li>
+          <li>{t('payment_qr_step_3')}</li>
+          <li>{t('payment_qr_step_4')}</li>
         </ol>
       </div>
     </motion.div>

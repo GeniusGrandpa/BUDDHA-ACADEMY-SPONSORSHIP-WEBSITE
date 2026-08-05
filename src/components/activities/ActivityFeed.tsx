@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Loader2 } from 'lucide-react'
+import { useCmsStrings } from '../../context/CmsStringsContext'
 import { getPublicActivities } from '../../services/activities'
 import type { ActivityRow } from '../../types/database'
 
 export function ActivityFeed() {
+  const { t } = useCmsStrings()
   const [activities, setActivities] = useState<ActivityRow[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -40,10 +42,10 @@ export function ActivityFeed() {
     const diffHours = Math.floor(diffMs / 3600000)
     const diffDays = Math.floor(diffMs / 86400000)
 
-    if (diffMins < 1) return 'Just now'
-    if (diffMins < 60) return `${diffMins} minutes ago`
-    if (diffHours < 24) return `${diffHours} hours ago`
-    if (diffDays < 7) return `${diffDays} days ago`
+    if (diffMins < 1) return t('activity_just_now')
+    if (diffMins < 60) return t('activity_minutes_ago', { count: diffMins })
+    if (diffHours < 24) return t('activity_hours_ago', { count: diffHours })
+    if (diffDays < 7) return t('activity_days_ago', { count: diffDays })
     return date.toLocaleDateString()
   }
 
@@ -59,10 +61,10 @@ export function ActivityFeed() {
     return (
       <div className="text-center py-12 px-4">
         <h3 className="text-lg font-semibold text-gray-900 mb-1">
-          No recent activity
+          {t('activity_empty_title')}
         </h3>
         <p className="text-sm text-gray-500 max-w-sm mx-auto">
-          Activity updates will appear here as donations are made, students achieve milestones, and teachers share progress reports.
+          {t('activity_empty_desc')}
         </p>
       </div>
     )

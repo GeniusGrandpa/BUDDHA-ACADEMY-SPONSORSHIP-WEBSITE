@@ -81,6 +81,7 @@ function sponsorshipLabel(status: string) {
 }
 
 function HeroSection({ hero, visible }: { hero: HeroContent; visible: boolean }) {
+  const { t } = useCmsStrings()
    if (!visible) return null
    return (
      <section 
@@ -116,7 +117,7 @@ function HeroSection({ hero, visible }: { hero: HeroContent; visible: boolean })
               <p className="text-base sm:text-lg md:text-xl text-white/80 mb-6 sm:mb-8 leading-relaxed"><Tr text={hero.description} /></p>
             )}
             {(hero.cta_primary_text || hero.cta_secondary_text) && (
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4" role="group" aria-label="Call to action buttons">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4" role="group" aria-label={t('home_cta_group_aria')}>
                 {hero.cta_primary_text && (
                   <Link 
                     to={hero.cta_primary_link || '/students'}
@@ -125,7 +126,7 @@ function HeroSection({ hero, visible }: { hero: HeroContent; visible: boolean })
                     <Button 
                       size="lg" 
                       className="w-full sm:w-auto"
-                      aria-label={`${hero.cta_primary_text} - Navigate to ${hero.cta_primary_link || '/students'}`}
+                      aria-label={t('home_navigate_to', { label: hero.cta_primary_text, route: hero.cta_primary_link || '/students' })}
                     >
                       <Tr text={hero.cta_primary_text} />
                     </Button>
@@ -140,7 +141,7 @@ function HeroSection({ hero, visible }: { hero: HeroContent; visible: boolean })
                       size="lg" 
                       variant="glass" 
                       className="w-full sm:w-auto"
-                      aria-label={`${hero.cta_secondary_text} - Navigate to ${hero.cta_secondary_link || '/donate'}`}
+                      aria-label={t('home_navigate_to', { label: hero.cta_secondary_text, route: hero.cta_secondary_link || '/donate' })}
                     >
                       <Tr text={hero.cta_secondary_text} />
                     </Button>
@@ -149,7 +150,7 @@ function HeroSection({ hero, visible }: { hero: HeroContent; visible: boolean })
               </div>
             )}
             {hero.badges && (hero.badges as { text: string }[]).length > 0 && (
-              <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-white/20" role="list" aria-label="Key statistics">
+              <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-white/20" role="list" aria-label={t('home_key_stats_aria')}>
                 {(hero.badges as { text: string }[]).map((badge, idx) => (
                   <span key={idx} className="text-xs sm:text-sm text-white/80" role="listitem"><Tr text={badge.text} /></span>
                 ))}
@@ -162,25 +163,26 @@ function HeroSection({ hero, visible }: { hero: HeroContent; visible: boolean })
  }
 
 function StatsSection({ hero, statsSection, visible }: { hero: HeroContent; statsSection: SectionContent | null; visible: boolean }) {
-   const stats = (hero.statistics as { value: string; label: string }[]) || []
-   if (!visible || stats.length === 0) return null
-   const content = statsSection?.content as { title?: string }
-   return (
-     <section className="bg-gradient-to-br from-[var(--color-primary)] via-[var(--color-accent)] to-[var(--color-secondary)] py-12 sm:py-16" aria-label="Statistics and impact metrics">
-       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-         {content?.title && <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white text-center mb-8 sm:mb-12">{content.title}</h2>}
-         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-8 text-white text-center" role="list" aria-label="Statistics">
-           {stats.map((stat, idx) => (
-             <div key={idx} role="listitem">
-               <div className="text-2xl sm:text-3xl md:text-4xl font-bold mb-1">{stat.value}</div>
-               <div className="text-white/80 sm:text-white/90 text-xs sm:text-sm">{stat.label}</div>
-             </div>
-           ))}
-         </div>
-       </div>
-     </section>
-   )
- }
+  const { t } = useCmsStrings()
+  const stats = (hero.statistics as { value: string; label: string }[]) || []
+  if (!visible || stats.length === 0) return null
+  const content = statsSection?.content as { title?: string }
+  return (
+    <section className="bg-gradient-to-br from-[var(--color-primary)] via-[var(--color-accent)] to-[var(--color-secondary)] py-12 sm:py-16" aria-label={t('home_stats_impact_aria')}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {content?.title && <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white text-center mb-8 sm:mb-12">{content.title}</h2>}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-8 text-white text-center" role="list" aria-label={t('home_stats_aria')}>
+          {stats.map((stat, idx) => (
+            <div key={idx} role="listitem">
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold mb-1">{stat.value}</div>
+              <div className="text-white/80 sm:text-white/90 text-xs sm:text-sm"><Tr text={stat.label} /></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
 
 function WelcomeSection({ welcome, visible }: { welcome: SectionContent; visible: boolean }) {
   if (!visible) return null
@@ -208,10 +210,10 @@ function AboutSection({ about, visible, t }: { about: SectionContent | null; vis
       <div className="px-4 sm:px-6 lg:px-12">
         <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center max-w-7xl mx-auto">
           <div>
-            {title && <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text-primary)] mb-4 sm:mb-6">{title}</h2>}
-            {description && <p className="text-[var(--color-text-secondary)] mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">{description}</p>}
+            {title && <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text-primary)] mb-4 sm:mb-6"><Tr text={title} /></h2>}
+            {description && <p className="text-[var(--color-text-secondary)] mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base"><Tr text={description} /></p>}
             {about?.content && (about.content as Record<string, string>).mission_description && (
-              <p className="text-[var(--color-text-secondary)] mb-6 sm:mb-8 leading-relaxed text-sm sm:text-base">{(about.content as Record<string, string>).mission_description}</p>
+              <p className="text-[var(--color-text-secondary)] mb-6 sm:mb-8 leading-relaxed text-sm sm:text-base"><Tr text={(about.content as Record<string, string>).mission_description} /></p>
             )}
             <Link to="/about">
               <Button variant="outline">
@@ -230,7 +232,7 @@ function AboutSection({ about, visible, t }: { about: SectionContent | null; vis
                         <span className="text-white text-xs font-bold">{idx + 1}</span>
                       </div>
                       <div className="text-xs sm:text-sm text-[var(--color-primary-dark)] font-semibold mb-1">{milestone.year}</div>
-                      <div className="text-sm sm:text-base text-[var(--color-text-primary)] font-medium">{milestone.event}</div>
+                      <div className="text-sm sm:text-base text-[var(--color-text-primary)] font-medium"><Tr text={milestone.event} /></div>
                     </div>
                   ))}
                 </div>

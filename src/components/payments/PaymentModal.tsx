@@ -2,6 +2,7 @@ import { useState, useEffect, type ChangeEvent } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, AlertCircle, Upload, Check } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
+import { useCmsStrings } from '../../context/CmsStringsContext'
 import { formatNPR } from '../../utils/currency'
 import { usePayment } from '../../hooks/usePayment'
 import { getActivePaymentSettings } from '../../services/paymentSettings'
@@ -27,6 +28,7 @@ interface PaymentModalProps {
 
 export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, message }: PaymentModalProps) {
   const { user } = useAuth()
+  const { t } = useCmsStrings()
   const { checkout, loading, error, startCheckout, confirmPayment, abandonCheckout } = usePayment()
   const [paymentSettings, setPaymentSettings] = useState<PaymentSetting[]>([])
   const [selectedGateway, setSelectedGateway] = useState<PaymentGateway | null>(null)
@@ -51,7 +53,7 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
       setPaymentSettings(settings)
       setSelectedGateway(null)
     } catch (err) {
-      setSettingsError(getErrorMessage(err, 'Could not load payment settings. Please try again later.'))
+      setSettingsError(getErrorMessage(err, t('payment_settings_load_error')))
     } finally {
       setSettingsLoading(false)
     }
@@ -87,7 +89,7 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
         const url = await uploadPaymentScreenshot(checkout.sessionId, screenshot)
         screenshots = [url]
       } catch (err) {
-        toast.error(getErrorMessage(err, 'Failed to upload payment screenshot. Please try again.'))
+        toast.error(getErrorMessage(err, t('payment_screenshot_upload_error')))
       }
       setUploadProgress(false)
     }
@@ -163,14 +165,14 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
           >
             <div className="sticky top-0 bg-warm-50 z-10 flex items-center justify-between p-4 border-b border-amber-200 rounded-t-2xl">
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">Complete Your Donation</h2>
-                <p className="text-sm text-gray-500">Secure payment processing</p>
+                <h2 className="text-lg font-semibold text-gray-900">{t('payment_complete_title')}</h2>
+                <p className="text-sm text-gray-500">{t('payment_secure_processing')}</p>
               </div>
               <button
                 type="button"
                 onClick={handleClose}
-                aria-label="Close payment modal"
-                title="Close payment modal"
+                aria-label={t('payment_close_modal')}
+                title={t('payment_close_modal')}
                 className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
               >
                 <X className="w-5 h-5 text-gray-500" />
@@ -186,7 +188,7 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
                 >
                   <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="font-medium">Payment Error</p>
+                    <p className="font-medium">{t('payment_error_title')}</p>
                     <p>{error}</p>
                   </div>
                 </motion.div>
@@ -208,23 +210,23 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
                       <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4">
                         <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
                       </div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Processing Payment</h3>
-                      <p className="text-sm text-gray-500">Your payment confirmation is being processed...</p>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('payment_processing_title')}</h3>
+                      <p className="text-sm text-gray-500">{t('payment_processing_msg')}</p>
                     </motion.div>
                   ) : checkout.step === 'failed' ? (
                     <div className="text-center py-8">
                       <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
                         <X className="w-8 h-8 text-red-600" />
                       </div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Payment Failed</h3>
-                      <p className="text-sm text-gray-500 mb-4">{error || 'Something went wrong. Please try again.'}</p>
-                      <Button onClick={handleClose}>Close</Button>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('payment_failed_title')}</h3>
+                      <p className="text-sm text-gray-500 mb-4">{error || t('login_generic_error')}</p>
+                      <Button onClick={handleClose}>{t('payment_close')}</Button>
                     </div>
                   ) : selectedGateway === 'stripe' ? (
                     <div className="space-y-6">
                       <div className="bg-gray-50 rounded-xl p-4">
                         <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">Donation Amount</span>
+                          <span className="text-sm text-gray-600">{t('payment_donation_amount')}</span>
                           <span className="text-xl font-bold text-gray-900">{formatNPR(amount)}</span>
                         </div>
                       </div>
@@ -242,11 +244,11 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
                     <>
                       <div className="bg-gray-50 rounded-xl p-4">
                         <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">Donation Amount</span>
+                          <span className="text-sm text-gray-600">{t('payment_donation_amount')}</span>
                           <span className="text-xl font-bold text-gray-900">{formatNPR(amount)}</span>
                         </div>
                         <div className="flex justify-between items-center mt-2">
-                          <span className="text-sm text-gray-600">Transaction ID</span>
+                          <span className="text-sm text-gray-600">{t('payment_transaction_id')}</span>
                           <span className="text-sm font-mono font-medium text-gray-900">{checkout.transactionId}</span>
                         </div>
                       </div>
@@ -262,30 +264,30 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
                       <DonationImpactCard amount={amount} />
 
                       <div className="bg-warm-50 border border-amber-200 rounded-xl p-4 space-y-4">
-                        <h3 className="font-medium text-gray-900">Confirm Your Payment</h3>
+                        <h3 className="font-medium text-gray-900">{t('payment_confirm_title')}</h3>
 
                         <div className="space-y-3">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Transaction ID from your payment app
+                              {t('payment_reference_label')}
                             </label>
                             <input
                               type="text"
                               value={paymentReference}
                               onChange={(e) => setPaymentReference(e.target.value)}
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                              placeholder="Enter the transaction ID from your payment"
+                              placeholder={t('payment_reference_placeholder')}
                             />
                           </div>
 
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Payment Screenshot (optional)
+                              {t('payment_screenshot_label')}
                             </label>
                             <div className="flex items-center gap-3">
                               <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 text-sm text-gray-600">
                                 <Upload className="w-4 h-4" />
-                                {screenshot ? 'Change file' : 'Upload screenshot'}
+                                {screenshot ? t('payment_change_file') : t('payment_upload_screenshot')}
                                 <input
                                   type="file"
                                   accept="image/jpeg,image/png,image/webp"
@@ -303,13 +305,13 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
                             {screenshotPreview && (
                               <img
                                 src={screenshotPreview}
-                                alt="Payment screenshot preview"
+                                alt={t('payment_screenshot_preview_alt')}
                                 className="mt-2 w-32 h-32 object-cover rounded-lg border border-gray-200"
                                 loading="lazy" decoding="async"
                               />
                             )}
                             <p className="text-xs text-gray-400 mt-1">
-                              Max 5MB. Accepted: JPEG, PNG, WebP
+                              {t('payment_max_size')}
                             </p>
                           </div>
                         </div>
@@ -323,16 +325,15 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
                           {loading || uploadProgress ? (
                             <span className="flex items-center gap-2">
                               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                              Processing...
+                              {t('payment_processing')}
                             </span>
                           ) : (
-                            'I Have Completed the Payment'
+                            t('payment_completed_button')
                           )}
                         </Button>
 
                         <p className="text-xs text-gray-400 text-center">
-                          By confirming, you agree that the payment information provided is accurate.
-                          Your payment will be verified by our finance team.
+                          {t('payment_confirm_disclaimer')}
                         </p>
                       </div>
                     </>
@@ -343,7 +344,7 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
                   <DonationImpactCard amount={amount} />
 
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-3">Select Payment Method</h3>
+                    <h3 className="font-semibold text-gray-900 mb-3">{t('payment_select_method')}</h3>
                     {settingsLoading ? (
                       <div className="space-y-3">
                         {[1, 2, 3].map(i => (
@@ -352,13 +353,13 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
                       </div>
                     ) : settingsError ? (
                       <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700">
-                        <p className="font-medium mb-1">Failed to load payment settings</p>
+                        <p className="font-medium mb-1">{t('payment_settings_error_title')}</p>
                         <p>{settingsError}</p>
                       </div>
                     ) : paymentSettings.length === 0 ? (
                       <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-700">
-                        <p className="font-medium">No payment methods available</p>
-                        <p className="mt-1">No active payment gateways are configured. Please contact the administrator.</p>
+                        <p className="font-medium">{t('payment_no_methods_title')}</p>
+                        <p className="mt-1">{t('payment_no_methods_desc')}</p>
                       </div>
                     ) : (
                       <div className="space-y-3">
@@ -384,15 +385,15 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
                             className="w-48 h-48 object-contain"
                             loading="lazy" decoding="async"
                           />
-                          <p className="text-center text-xs text-gray-500 mt-2">Scan to pay</p>
+                          <p className="text-center text-xs text-gray-500 mt-2">{t('payment_scan_to_pay')}</p>
                         </div>
                       </div>
                     )}
                   </div>
 
                   <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-600">
-                    <p className="font-medium text-gray-700 mb-1">Secure Checkout</p>
-                    <p>All transactions are processed securely. Your payment information is encrypted and our finance team verifies every donation manually to ensure transparency.</p>
+                    <p className="font-medium text-gray-700 mb-1">{t('payment_secure_checkout')}</p>
+                    <p>{t('payment_secure_checkout_desc')}</p>
                   </div>
 
                   <Button
@@ -404,16 +405,16 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
                     {loading ? (
                       <span className="flex items-center gap-2">
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Processing...
+                        {t('payment_processing')}
                       </span>
                     ) : (
-                      <>Donate {formatNPR(amount)}</>
+                      <>{t('donate_confirm_button', { amount: formatNPR(amount) })}</>
                     )}
                   </Button>
 
                   {!user && (
                     <p className="text-center text-sm text-gray-500">
-                      Please sign in to complete your donation
+                      {t('payment_sign_in_required')}
                     </p>
                   )}
                 </div>

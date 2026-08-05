@@ -275,7 +275,7 @@ export function AdminPageEditor() {
         </div>
         <div className="flex items-center gap-3">
           <a
-            href={`/${slug}`}
+            href={`/preview/${slug}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors"
