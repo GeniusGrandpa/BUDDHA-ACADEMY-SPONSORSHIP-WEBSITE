@@ -22,6 +22,8 @@ export const DEFAULT_ERROR_MESSAGE = 'Something went wrong. Please refresh the p
 export const GENERIC_FALLBACK = 'Unable to process your request. Please try again later.'
 export const NETWORK_MESSAGE = 'Unable to connect to the server. Please check your connection and try again.'
 export const SESSION_EXPIRED_MESSAGE = 'Your session has expired. Please sign in again.'
+export const SESSION_REFRESH_MESSAGE = 'Unable to refresh your session. Please sign in again.'
+export const AUTH_REQUIRED_MESSAGE = 'You are not signed in. Please sign in to continue.'
 
 export interface AppErrorOptions {
   code?: ErrorCode
@@ -164,7 +166,13 @@ function keywordMessage(lower: string): { message: string; code: ErrorCode } | n
   if (lower.includes('rate limit') || lower.includes('too many requests') || lower.includes('rate_limit')) {
     return { message: 'Too many attempts. Please wait a moment and try again.', code: ErrorCodes.RATE_LIMITED }
   }
-  if (lower.includes('token expired') || lower.includes('expired token') || lower.includes('jwt') || lower.includes('session')) {
+  if (lower.includes('authentication required') || lower.includes('not authenticated') || lower.includes('not logged in') || lower.includes('not signed in') || lower.includes('no session') || lower.includes('session not found') || lower.includes('no payment session')) {
+    return { message: AUTH_REQUIRED_MESSAGE, code: ErrorCodes.AUTH_REQUIRED }
+  }
+  if (lower.includes('refresh token')) {
+    return { message: SESSION_REFRESH_MESSAGE, code: ErrorCodes.SESSION_EXPIRED }
+  }
+  if (lower.includes('token expired') || lower.includes('expired token') || lower.includes('jwt expired') || lower.includes('session expired')) {
     return { message: SESSION_EXPIRED_MESSAGE, code: ErrorCodes.SESSION_EXPIRED }
   }
   if (lower.includes('email provider') || lower.includes('smtp') || lower.includes('confirmation mail')) {

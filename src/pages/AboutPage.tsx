@@ -87,11 +87,11 @@ export function AboutPage() {
   return (
     <div>
       {header && (
-        <section className="relative py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-[var(--color-primary-light)]/20 to-[var(--color-secondary-light)]/20">
+        <section className="relative py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-[var(--color-primary)] via-[var(--color-accent)] to-[var(--color-secondary)]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto">
-              {header.title && <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[var(--color-text-primary)] mb-4 sm:mb-6">{header.title}</h1>}
-              {header.subtitle && <p className="text-base sm:text-lg md:text-xl text-[var(--color-text-secondary)] leading-relaxed">{header.subtitle}</p>}
+              {header.title && <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 sm:mb-6">{header.title}</h1>}
+              {header.subtitle && <p className="text-base sm:text-lg md:text-xl text-white/90 leading-relaxed">{header.subtitle}</p>}
             </div>
           </div>
         </section>

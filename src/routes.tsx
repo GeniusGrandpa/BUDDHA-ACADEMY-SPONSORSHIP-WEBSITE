@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, Outlet } from 'react-router-dom'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import { ScrollToTop } from './components/ScrollToTop'
 import { Layout } from './layout/Layout'
 import { useAuth } from './context/AuthContext'
 import { DashboardSkeleton } from './components/ui/LoadingSkeleton'
@@ -195,6 +196,14 @@ function AdminIndexRedirect() {
 
 export const routeDefinitions = [
   {
+    element: (
+      <>
+        <ScrollToTop />
+        <Outlet />
+      </>
+    ),
+    children: [
+  {
     path: '/',
     element: <Layout />,
     errorElement: <RouteErrorPage />,
@@ -334,5 +343,7 @@ export const routeDefinitions = [
       </ProtectedRoute>
     ),
     errorElement: <RouteErrorPage />,
+    },
+    ],
   },
 ]

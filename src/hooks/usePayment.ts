@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react'
 import type { PaymentGateway, CheckoutState } from '../types/payments'
 import { initiatePaymentCheckout, cancelPaymentSession, submitPaymentConfirmation } from '../services/payments'
 import { getErrorMessage } from '../lib/errors'
+import { logger } from '../lib/logger'
 
 interface UsePaymentReturn {
   checkout: CheckoutState
@@ -46,6 +47,8 @@ export function usePayment(): UsePaymentReturn {
     setError(null)
 
     try {
+      logger.info('payment.checkout.started', { gateway: params.gateway, amount: params.amount, frequency: params.frequency })
+
       const result = await initiatePaymentCheckout(
         params.amount,
         params.frequency,
@@ -53,6 +56,8 @@ export function usePayment(): UsePaymentReturn {
         params.studentId,
         params.message,
       )
+
+      logger.info('payment.checkout.success', { sessionId: result.sessionId })
 
       setCheckout({
         step: 'payment',
@@ -63,6 +68,7 @@ export function usePayment(): UsePaymentReturn {
         transactionId: result.transactionId,
       })
     } catch (err: unknown) {
+      logger.error('payment.checkout.failed', { error: getErrorMessage(err, 'Failed to start payment') })
       setError(getErrorMessage(err, 'Failed to start payment'))
     } finally {
       setLoading(false)
@@ -78,7 +84,11 @@ export function usePayment(): UsePaymentReturn {
     setError(null)
 
     try {
+      logger.info('payment.confirm.started', { sessionId })
+
       await submitPaymentConfirmation(sessionId, screenshots || [], paymentReference)
+
+      logger.info('payment.confirm.submitted', { sessionId, screenshots: (screenshots || []).length })
 
       setCheckout(prev => ({
         ...prev,
@@ -92,6 +102,7 @@ export function usePayment(): UsePaymentReturn {
         step: 'success',
       }))
     } catch (err: unknown) {
+      logger.error('payment.confirm.failed', { sessionId, error: getErrorMessage(err, 'Failed to confirm payment') })
       setError(getErrorMessage(err, 'Failed to confirm payment'))
       setCheckout(prev => ({ ...prev, step: 'failed' }))
     } finally {

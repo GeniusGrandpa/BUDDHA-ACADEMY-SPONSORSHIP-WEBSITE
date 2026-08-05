@@ -1,6 +1,7 @@
 import { getSupabaseClient } from '../lib/supabase'
 import { logAuditEvent } from '../lib/audit'
 import { markDonorAsVerified } from './profiles'
+import { logger } from '../lib/logger'
 import { AppError, ErrorCodes, getErrorMessage } from '../lib/errors'
 import type {
   PaymentSession,
@@ -13,6 +14,27 @@ import type {
 } from '../types/payments'
 const supabase = getSupabaseClient()
 
+function extractCheckoutResponse(data: unknown): PaymentCheckoutResponse {
+  if (!data) return {}
+  const rows = Array.isArray(data) ? data : [data]
+  for (const row of rows) {
+    if (!row || typeof row !== 'object') continue
+    const record = row as Record<string, unknown>
+    if (typeof record.session_id === 'string' || typeof record.payment_id === 'string') {
+      return record as unknown as PaymentCheckoutResponse
+    }
+    for (const value of Object.values(record)) {
+      if (typeof value === 'object' && value !== null) {
+        const nested = value as Record<string, unknown>
+        if (typeof nested.session_id === 'string' || typeof nested.payment_id === 'string') {
+          return nested as unknown as PaymentCheckoutResponse
+        }
+      }
+    }
+  }
+  return {}
+}
+
 export async function initiatePaymentCheckout(
   amount: number,
   frequency: 'one-time' | 'monthly' | 'annual',
@@ -21,6 +43,8 @@ export async function initiatePaymentCheckout(
   message?: string | null,
   idempotencyKey?: string | null,
 ): Promise<{ sessionId: string; transactionId: string | null }> {
+  logger.info('payment.checkout.start', { gateway, amount, frequency, hasStudentId: !!studentId })
+
   const { data, error } = await supabase.rpc('initiate_payment_checkout', {
     p_amount: amount,
     p_frequency: frequency,
@@ -30,23 +54,32 @@ export async function initiatePaymentCheckout(
     p_student_id: studentId || null,
   })
 
-  if (error) throw error
+  if (error) {
+    logger.error('payment.checkout.rpc_error', { code: error.code, message: error.message })
+    throw error
+  }
 
-  const response = data as PaymentCheckoutResponse
+  const response = extractCheckoutResponse(data)
 
-  if (response && response.success === false) {
+  if (response.success === false) {
+    logger.warn('payment.checkout.rejected', { message: response.message ?? 'Payment initiation failed' })
     throw new AppError(getErrorMessage(response.message, 'Payment initiation failed'), {
       code: ErrorCodes.PAYMENT_FAILED,
       retryable: true,
     })
   }
 
-  const sessionId = (response?.payment_id || response?.session_id) as string
-  const transactionId = (response?.transaction_id) as string | null
+  const sessionId = (response.payment_id || response.session_id) as string
+  const transactionId = (response.transaction_id) as string | null
 
   if (!sessionId) {
+    logger.error('payment.checkout.no_session_id', {
+      responseShape: Array.isArray(data) ? 'array' : typeof data,
+    })
     throw new Error('No payment session ID returned')
   }
+
+  logger.info('payment.checkout.created', { sessionId, hasTransactionId: !!transactionId })
 
   await logAuditEvent({
     action: 'payment_session.created',
