@@ -7,6 +7,5 @@ node_modules
 supabase/.temp/
 dist/
 
-# TypeScript build artifacts
 *.tsbuildinfo
 vite.config.d.ts

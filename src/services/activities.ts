@@ -17,6 +17,20 @@ export async function getPublicActivities(limit = 20): Promise<ActivityRow[]> {
   return data || []
 }
 
+export async function getRecentActivities(limit = 15): Promise<ActivityRow[]> {
+  const { data, error } = await supabase
+    .from('activities')
+    .select('id, user_id, activity_type, title, description, metadata, entity_type, entity_id, is_public, created_at')
+    .order('created_at', { ascending: false })
+    .limit(limit)
+
+  if (error) {
+    return []
+  }
+
+  return data || []
+}
+
 export async function getUserActivities(userId: string, limit = 20): Promise<ActivityRow[]> {
   const { data, error } = await supabase
     .from('activities')

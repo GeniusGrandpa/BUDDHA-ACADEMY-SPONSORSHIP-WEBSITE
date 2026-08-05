@@ -36,7 +36,10 @@ export function Footer() {
   const address = contactInfo?.address || siteSettings.contact_address
   const phone = contactInfo?.phone || siteSettings.contact_phone
   const email = contactInfo?.email || siteSettings.contact_email
-  const copyrightText = footerContent?.copyright_text
+  const copyrightText = footerContent?.copyright_text || `© ${new Date().getFullYear()} ${branding.footer_branding || ''}`.replace(/^\s*©\s*/, '').trim()
+  const rights = t('footer.rights')
+  const hasRights = copyrightText.toLowerCase().includes('all rights reserved')
+  const finalCopyright = `${copyrightText.startsWith('©') ? '' : '© '}${copyrightText}${hasRights ? '' : ` ${rights}`}`
 
   return (
     <footer className="bg-[var(--color-footer-bg)] border-t border-[var(--color-border)]">
@@ -117,7 +120,7 @@ export function Footer() {
         <div className="h-px bg-[var(--color-border)] my-8" />
 
         <div className="flex flex-col md:flex-row justify-between items-center text-sm text-[var(--color-text-muted)]">
-          <p>{copyrightText || `© ${new Date().getFullYear()} ${branding.footer_branding || ''}`} {t('footer.rights')}</p>
+          <p>{finalCopyright}</p>
         </div>
       </div>
     </footer>

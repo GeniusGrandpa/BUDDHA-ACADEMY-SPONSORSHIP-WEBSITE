@@ -282,6 +282,10 @@ export async function getMedia(publishedOnly?: boolean): Promise<MediaItem[]> {
 
 export async function uploadMedia(file: File, altText?: string, folder?: string): Promise<MediaItem> {
   const userId = (await supabase.auth.getSession()).data.session?.user?.id
+  const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'video/mp4', 'video/webm', 'application/pdf']
+  if (!validTypes.includes(file.type)) {
+    throw new Error(`Invalid file type: ${file.type}. Allowed types: ${validTypes.join(', ')}`)
+  }
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
   const folderPath = folder && folder !== '/' ? `${folder}/` : ''
   const filePath = `cms/${folderPath}${Date.now()}_${safeName}`
@@ -294,11 +298,6 @@ export async function uploadMedia(file: File, altText?: string, folder?: string)
 
   const { data: urlData } = supabase.storage.from('media').getPublicUrl(filePath)
   const url = urlData.publicUrl
-
-  const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'video/mp4', 'video/webm', 'application/pdf']
-  if (!validTypes.includes(file.type)) {
-    throw new Error(`Invalid file type: ${file.type}. Allowed types: ${validTypes.join(', ')}`)
-  }
 
   const { data, error } = await supabase
     .from('media_library')

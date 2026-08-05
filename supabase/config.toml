@@ -1,4 +1,9 @@
+# Supabase project configuration.
+# Live project:  fmfrzctotgkgegatwtbq
+# App base URL (auth redirects must match the frontend).
+
 project_id = "fmfrzctotgkgegatwtbq"
+
 
 [api]
 enabled = true
@@ -10,6 +15,7 @@ max_rows = 1000
 [api.tls]
 enabled = false
 
+
 [db]
 port = 54322
 shadow_port = 54320
@@ -17,6 +23,7 @@ major_version = 15
 health_timeout = "2m"
 
 [db.pooler]
+
 enabled = false
 port = 54329
 pool_mode = "transaction"
@@ -31,12 +38,15 @@ schema_paths = []
 enabled = false
 
 [db.network_restrictions]
+# Database network access (applies to hosted Supabase).
 enabled = false
 allowed_cidrs = ["0.0.0.0/0"]
 allowed_cidrs_v6 = ["::/0"]
 
+
 [realtime]
 enabled = true
+
 
 [studio]
 enabled = true
@@ -44,9 +54,11 @@ port = 54323
 api_url = "http://127.0.0.1"
 openai_api_key = "env(OPENAI_API_KEY)"
 
+
 [inbucket]
 enabled = true
 port = 54324
+
 
 [storage]
 enabled = true
@@ -62,9 +74,11 @@ max_tables = 10
 max_catalogs = 2
 
 [storage.vector]
+# Vector search support.
 enabled = true
 max_buckets = 10
 max_indexes = 5
+
 
 [auth]
 enabled = true
@@ -148,9 +162,11 @@ enabled = false
 enabled = false
 
 [auth.oauth_server]
+# Native OAuth authorization server.
 enabled = false
 authorization_url_path = "/oauth/consent"
 allow_dynamic_registration = false
+
 
 [edge_runtime]
 enabled = true
@@ -158,10 +174,12 @@ policy = "per_worker"
 inspector_port = 8083
 deno_version = 2
 
+
 [analytics]
 enabled = true
 port = 54327
 backend = "postgres"
+
 
 [experimental]
 orioledb_version = ""

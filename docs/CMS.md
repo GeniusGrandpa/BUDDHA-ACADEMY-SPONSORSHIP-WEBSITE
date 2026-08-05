@@ -133,8 +133,8 @@ These dedicated editors remain at their `/admin/website/*` routes:
 | Manager | Route | Purpose |
 |---------|-------|---------|
 | News | `/admin/website/news` | Create/edit/publish news articles |
-| Gallery | `/admin/website/gallery` | Upload images, create albums |
-| Videos | `/admin/website/videos` | YouTube embeds, descriptions |
+| Gallery | `/admin/website/gallery` | Photos, videos, and testimonials with thumbnail previews |
+| Videos | `/admin/website/videos` | YouTube/Vimeo embeds, or video file uploads (MP4/WebM/Ogg with MIME validation), descriptions |
 | Testimonials | `/admin/website/testimonials` | Donor/teacher/student testimonials |
 | Student Stories | `/admin/website/stories` | Success stories, achievements |
 | FAQs | `/admin/website/faqs` | FAQ CRUD + reorder |

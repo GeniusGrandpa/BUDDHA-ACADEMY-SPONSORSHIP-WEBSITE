@@ -95,7 +95,7 @@ server/
 
 supabase/
   ├── functions/     # Edge functions: create-payment-intent, stripe-webhook, _shared helpers
-  ├── migrations/    # 75 database migrations (applied in timestamp order)
+  ├── migrations/    # 80 database migrations (applied in timestamp order)
   └── config.toml    # Supabase project config (auth, storage, API, etc.)
 ```
 

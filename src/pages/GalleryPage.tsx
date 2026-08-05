@@ -62,7 +62,7 @@ export function GalleryPage() {
       ])
       if (header) setPageHeader(header)
       if (fallbackImg?.image_url) setFallbackImage(fallbackImg.image_url)
-      const mappedVideos: GalleryItem[] = videoData.map((v: Video) => {
+      const mappedVideos: GalleryVideo[] = videoData.map((v: Video) => {
         const ytThumb = getYoutubeThumbnail(v.url)
         return {
           id: v.id,
@@ -78,6 +78,7 @@ export function GalleryPage() {
           uploaded_by: v.uploaded_by,
           created_at: v.created_at,
           updated_at: v.updated_at,
+          video_type: v.video_type,
         }
       })
       setItems([...galleryData, ...mappedVideos])

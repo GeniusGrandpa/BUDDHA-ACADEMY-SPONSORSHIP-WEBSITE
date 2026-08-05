@@ -97,7 +97,7 @@ Deploy with `supabase functions deploy <name>`. Set secrets with `supabase secre
 
 ## Migrations
 
-All schema changes in `supabase/migrations/` (75 files), applied in timestamp order. Each migration is idempotent. Cumulative migration at `all_migrations.sql`.
+All schema changes in `supabase/migrations/` (80 files), applied in timestamp order. Each migration is idempotent and intentionally comment-free. Cumulative migration at `all_migrations.sql`.
 
 ## RPC Functions
 

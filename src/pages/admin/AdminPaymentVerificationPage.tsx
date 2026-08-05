@@ -45,8 +45,12 @@ export function AdminPaymentVerificationPage() {
     try {
       const data = await getPendingVerifications()
       setSessions(data as unknown as SessionWithDonor[])
-    } catch {
-      setLoadError('Failed to load pending verifications. Please try again.')
+    } catch (err) {
+      const detail = typeof err === 'object' && err !== null && 'message' in err
+        ? String((err as { message?: unknown }).message || '')
+        : ''
+      setLoadError(detail || 'Failed to load pending verifications. Please try again.')
+      console.error('[payment] load pending verifications failed:', err)
     } finally {
       setLoading(false)
     }

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../../lib/supabase'
+import { getRecentActivities } from '../../../services/activities'
+import type { ActivityRow } from '../../../types/database'
 import { DashboardCard } from '../../../components/ui/DashboardCard'
 import { DashboardStatCard } from '../../../components/ui/DashboardStatCard'
 
@@ -15,6 +17,8 @@ export function SuperAdminDashboard() {
   const [stats, setStats] = useState<SystemStats>({
     totalUsers: 0, totalStudents: 0, totalDonations: 0, totalSponsorships: 0, activeSessions: 0,
   })
+  const [activities, setActivities] = useState<ActivityRow[]>([])
+  const [activitiesError, setActivitiesError] = useState(false)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -41,8 +45,38 @@ export function SuperAdminDashboard() {
         setLoading(false)
       }
     }
+
+    async function loadActivities() {
+      const data = await getRecentActivities(8)
+      if (data.length === 0) {
+        // getRecentActivities returns [] both for a clean state and on error.
+        const probe = await supabase.from('activities').select('id').limit(1)
+        if (probe.error) {
+          setActivitiesError(true)
+          return
+        }
+      }
+      setActivities(data)
+    }
+
     loadStats()
+    loadActivities()
   }, [])
+
+  function getTimeAgo(dateStr: string): string {
+    const date = new Date(dateStr)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMs / 3600000)
+    const diffDays = Math.floor(diffMs / 86400000)
+
+    if (diffMins < 1) return 'Just now'
+    if (diffMins < 60) return `${diffMins} min ago`
+    if (diffHours < 24) return `${diffHours} hours ago`
+    if (diffDays < 7) return `${diffDays} days ago`
+    return date.toLocaleDateString()
+  }
 
   return (
     <div className="space-y-8">
@@ -97,17 +131,18 @@ export function SuperAdminDashboard() {
 
         <DashboardCard title="Recent Activity" description="Latest system-wide actions">
           <div className="space-y-3">
-            {[
-              { action: 'User login', time: '2 min ago' },
-              { action: 'Donation received', time: '15 min ago' },
-              { action: 'New student added', time: '1 hour ago' },
-              { action: 'Sponsorship renewed', time: '3 hours ago' },
-            ].map((item, i) => (
-              <div key={i} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
-                <span className="text-sm text-gray-700">{item.action}</span>
-                <span className="text-xs text-gray-400">{item.time}</span>
-              </div>
-            ))}
+            {activitiesError ? (
+              <p className="text-sm text-gray-500">Unable to load recent activity.</p>
+            ) : activities.length > 0 ? (
+              activities.map((activity) => (
+                <div key={activity.id} className="flex items-center justify-between gap-3 py-2 border-b border-gray-100 last:border-0">
+                  <span className="text-sm text-gray-700 truncate">{activity.title}</span>
+                  <span className="text-xs text-gray-400 whitespace-nowrap">{getTimeAgo(activity.created_at)}</span>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-gray-500">No recent activity yet.</p>
+            )}
           </div>
         </DashboardCard>
       </div>

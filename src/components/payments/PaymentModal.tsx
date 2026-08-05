@@ -198,7 +198,6 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
                 <PaymentSuccess
                   amount={amount}
                   transactionId={checkout.transactionId || ''}
-                  sessionId={checkout.sessionId || ''}
                 />
               ) : checkout.step === 'payment' || checkout.step === 'processing' || checkout.step === 'failed' ? (
                 <div className="space-y-6">

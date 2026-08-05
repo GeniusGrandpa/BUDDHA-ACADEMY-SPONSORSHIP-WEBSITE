@@ -247,7 +247,10 @@ export async function getPendingVerifications(): Promise<PaymentSession[]> {
     .eq('status', 'processing')
     .order('created_at', { ascending: false })
 
-  if (error) throw error
+  if (error) {
+    logger.error('payment.verifications.load_failed', { code: error.code, message: error.message, details: error.details, hint: error.hint })
+    throw error
+  }
   return (data || []) as unknown as PaymentSession[]
 }
 

@@ -6,10 +6,9 @@ import { Button } from '../ui/Button'
 interface PaymentSuccessProps {
   amount: number
   transactionId: string
-  sessionId: string
 }
 
-export function PaymentSuccess({ amount, transactionId, sessionId }: PaymentSuccessProps) {
+export function PaymentSuccess({ amount, transactionId }: PaymentSuccessProps) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -41,10 +40,6 @@ export function PaymentSuccess({ amount, transactionId, sessionId }: PaymentSucc
         <div className="flex justify-between text-sm">
           <span className="text-gray-600">Reference ID</span>
           <span className="font-mono font-medium text-gray-900">{transactionId}</span>
-        </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-600">Session</span>
-          <span className="font-mono text-xs text-gray-500">{sessionId.slice(0, 8)}...</span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-gray-600">Status</span>
