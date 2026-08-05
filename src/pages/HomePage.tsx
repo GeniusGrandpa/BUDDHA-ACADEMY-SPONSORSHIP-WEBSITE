@@ -10,6 +10,7 @@ import { getStudents } from '../services/students'
 import { getHeroContent, getSectionContent, getSectionVisibility } from '../services/cms-content'
 import { getTestimonialsWithType } from '../services/content'
 import { useCmsStrings } from '../context/CmsStringsContext'
+import { Tr } from '../components/Translated'
 import type { Student, Testimonial } from '../types/database'
 import type { HeroContent, SectionContent } from '../types/cms-content'
 
@@ -105,55 +106,55 @@ function HeroSection({ hero, visible }: { hero: HeroContent; visible: boolean })
        />
        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
          <div className={`max-w-2xl ${hero.layout === 'center' ? 'mx-auto text-center' : ''}`}>
-           {hero.title && (
-             <h1 id="hero-heading" className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6 leading-tight animate-fade-in text-balance">
-               {hero.title}
-               {hero.highlight && <><br /><span className="text-[var(--color-accent)]">{hero.highlight}</span></>}
-             </h1>
-           )}
-           {hero.description && (
-             <p className="text-base sm:text-lg md:text-xl text-white/80 mb-6 sm:mb-8 leading-relaxed">{hero.description}</p>
-           )}
-           {(hero.cta_primary_text || hero.cta_secondary_text) && (
-             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4" role="group" aria-label="Call to action buttons">
-               {hero.cta_primary_text && (
-                 <Link 
-                   to={hero.cta_primary_link || '/students'}
-                   className="focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-white/40 rounded-full"
-                 >
-                   <Button 
-                     size="lg" 
-                     className="w-full sm:w-auto"
-                     aria-label={`${hero.cta_primary_text} - Navigate to ${hero.cta_primary_link || '/students'}`}
-                   >
-                     {hero.cta_primary_text}
-                   </Button>
-                 </Link>
-               )}
-               {hero.cta_secondary_text && (
-                 <Link 
-                   to={hero.cta_secondary_link || '/donate'}
-                   className="focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-white/40 rounded-full"
-                 >
-                   <Button 
-                     size="lg" 
-                     variant="glass" 
-                     className="w-full sm:w-auto"
-                     aria-label={`${hero.cta_secondary_text} - Navigate to ${hero.cta_secondary_link || '/donate'}`}
-                   >
-                     {hero.cta_secondary_text}
-                   </Button>
-                 </Link>
-               )}
-             </div>
-           )}
-           {hero.badges && (hero.badges as { text: string }[]).length > 0 && (
-             <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-white/20" role="list" aria-label="Key statistics">
-               {(hero.badges as { text: string }[]).map((badge, idx) => (
-                 <span key={idx} className="text-xs sm:text-sm text-white/80" role="listitem">{badge.text}</span>
-               ))}
-             </div>
-           )}
+            {hero.title && (
+              <h1 id="hero-heading" className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6 leading-tight animate-fade-in text-balance">
+                <Tr text={hero.title} />
+                {hero.highlight && <><br /><span className="text-[var(--color-accent)]"><Tr text={hero.highlight} /></span></>}
+              </h1>
+            )}
+            {hero.description && (
+              <p className="text-base sm:text-lg md:text-xl text-white/80 mb-6 sm:mb-8 leading-relaxed"><Tr text={hero.description} /></p>
+            )}
+            {(hero.cta_primary_text || hero.cta_secondary_text) && (
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4" role="group" aria-label="Call to action buttons">
+                {hero.cta_primary_text && (
+                  <Link 
+                    to={hero.cta_primary_link || '/students'}
+                    className="focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-white/40 rounded-full"
+                  >
+                    <Button 
+                      size="lg" 
+                      className="w-full sm:w-auto"
+                      aria-label={`${hero.cta_primary_text} - Navigate to ${hero.cta_primary_link || '/students'}`}
+                    >
+                      <Tr text={hero.cta_primary_text} />
+                    </Button>
+                  </Link>
+                )}
+                {hero.cta_secondary_text && (
+                  <Link 
+                    to={hero.cta_secondary_link || '/donate'}
+                    className="focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-white/40 rounded-full"
+                  >
+                    <Button 
+                      size="lg" 
+                      variant="glass" 
+                      className="w-full sm:w-auto"
+                      aria-label={`${hero.cta_secondary_text} - Navigate to ${hero.cta_secondary_link || '/donate'}`}
+                    >
+                      <Tr text={hero.cta_secondary_text} />
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            )}
+            {hero.badges && (hero.badges as { text: string }[]).length > 0 && (
+              <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-white/20" role="list" aria-label="Key statistics">
+                {(hero.badges as { text: string }[]).map((badge, idx) => (
+                  <span key={idx} className="text-xs sm:text-sm text-white/80" role="listitem"><Tr text={badge.text} /></span>
+                ))}
+              </div>
+            )}
          </div>
        </div>
      </section>

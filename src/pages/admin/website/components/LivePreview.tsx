@@ -15,6 +15,8 @@ interface LivePreviewProps {
   sections: WebsiteSection[]
   device: PreviewDevice
   isPreview?: boolean
+  selectedSectionId?: string | null
+  onSelectSection?: (id: string) => void
 }
 
 function HeroPreview({ hero }: { hero: { title?: string; highlight?: string; description?: string; background_image?: string; overlay_color?: string; overlay_opacity?: number; cta_primary_text?: string; cta_secondary_text?: string; is_visible?: boolean } | null }) {
@@ -197,7 +199,7 @@ function SectionPreviewRenderer({ section }: { section: WebsiteSection }) {
   }
 }
 
-export function LivePreview({ sections, device = 'desktop' }: LivePreviewProps) {
+export function LivePreview({ sections, device = 'desktop', selectedSectionId, onSelectSection }: LivePreviewProps) {
   const sortedSections = useMemo(() => {
     return [...sections].sort((a, b) => a.sort_order - b.sort_order)
   }, [sections])
@@ -220,7 +222,14 @@ export function LivePreview({ sections, device = 'desktop' }: LivePreviewProps) 
         </div>
       ) : (
         sortedSections.map(section => (
-          <SectionPreviewRenderer key={section.id} section={section} />
+          <div
+            key={section.id}
+            className={`transition-all cursor-pointer group/preview ${selectedSectionId === section.id ? 'ring-2 ring-amber-500 ring-inset' : 'hover:ring-2 hover:ring-amber-300/70 hover:ring-inset'}`}
+            onClick={() => onSelectSection?.(section.id)}
+            title="Click to edit this section"
+          >
+            <SectionPreviewRenderer key={section.id} section={section} />
+          </div>
         ))
       )}
     </div>

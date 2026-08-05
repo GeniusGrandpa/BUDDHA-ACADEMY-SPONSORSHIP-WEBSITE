@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import { useCmsStrings } from '../context/CmsStringsContext'
+import { Tr } from '../components/Translated'
 import { LanguageSwitcher } from '../components/LanguageSwitcher'
 import { getNavigationItems } from '../services/navigation'
 import { getSiteSettings } from '../services/settings'
@@ -66,7 +67,7 @@ export function Header() {
                 return (
                   <Link key={item.href} to={item.href} target={item.target}
                     className="px-5 py-2.5 rounded-full font-medium text-sm transition-colors hover:opacity-90 bg-[var(--color-button-primary-bg)] text-[var(--color-button-primary-text)]">
-                    {item.name}
+                    <Tr text={item.name} />
                   </Link>
                 )
               }
@@ -77,7 +78,7 @@ export function Header() {
                   target={item.target}
                   className={`text-sm font-medium transition-colors hover:opacity-80 ${isActive(item.href) ? 'text-[var(--color-navbar-active)]' : 'text-[var(--color-navbar-text)]'}`}
                 >
-                  {item.name}
+                  <Tr text={item.name} />
                 </Link>
               )
             })}
@@ -133,7 +134,7 @@ export function Header() {
                     isActive(item.href) ? 'bg-[var(--color-navbar-hover)] text-[var(--color-navbar-active)]' : 'bg-transparent text-[var(--color-navbar-text)]'
                   }`}
                 >
-                  {item.name}
+                  <Tr text={item.name} />
                 </Link>
               ))}
               <Link to="/donate" onClick={() => setIsMenuOpen(false)}

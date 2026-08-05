@@ -65,6 +65,8 @@ interface LanguageContextType {
   language: LanguageCode
   setLanguage: (language: LanguageCode) => void
   t: (key: TranslationKey) => string
+  tr: (text: string) => Promise<string>
+  trBatch: (texts: string[]) => Promise<string[]>
 }
 
 interface LanguageOption {
@@ -397,83 +399,57 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 const rtlLanguages = new Set(['ar', 'fa', 'he', 'ur'])
-const googleTranslateElementId = 'google_translate_element'
 
-declare global {
-  interface Window {
-    google?: {
-      translate?: {
-        TranslateElement: new (
-          options: { pageLanguage: string; autoDisplay: boolean },
-          elementId: string
-        ) => void
-      }
-    }
-    googleTranslateElementInit?: () => void
+function readCache(target: string): Record<string, string> {
+  try {
+    return JSON.parse(window.localStorage.getItem(`ba_translations_${target}`) || '{}')
+  } catch {
+    return {}
   }
+}
+
+function writeCache(target: string, entries: Record<string, string>) {
+  try {
+    const current = readCache(target)
+    const merged: Record<string, string> = { ...current }
+    for (const k in entries) if (typeof entries[k] === 'string' && entries[k]) merged[k] = entries[k]
+    window.localStorage.setItem(`ba_translations_${target}`, JSON.stringify(merged))
+  } catch {
+  }
+}
+
+async function requestTranslate(text: string, target: string): Promise<string> {
+  const { supabase } = await import('../lib/supabase')
+  const { data, error } = await supabase.functions.invoke('translate', { body: { text, target } })
+  if (error) throw error
+  const t = (data as { success?: boolean; translated?: string } | null)?.translated
+  if (!t) throw new Error('empty translation')
+  return t
 }
 
 function getGoogleLanguageCode(language: LanguageCode) {
   return languages.find((item) => item.code === language)?.googleCode ?? language
 }
 
-function setGoogleTranslateCookie(language: LanguageCode) {
-  const googleLanguage = getGoogleLanguageCode(language)
-  const cookieValue = language === 'en' ? '/en/en' : `/en/${googleLanguage}`
-  const expires = 'expires=Fri, 31 Dec 9999 23:59:59 GMT'
-
-  const secure = window.location.protocol === 'https:' ? '; Secure' : ''
-  document.cookie = `googtrans=${cookieValue}; path=/; SameSite=Lax${secure}; ${expires}`
-  document.cookie = `googtrans=${cookieValue}; path=/; domain=${window.location.hostname}; SameSite=Lax${secure}; ${expires}`
+function protectPlaceholders(text: string): { text: string; placeholders: string[] } {
+  const placeholders: string[] = []
+  const protectedText = text.replace(/\{(\w+)\}/g, (match) => {
+    placeholders.push(match)
+    return `{{P${placeholders.length - 1}}}`
+  })
+  return { text: protectedText, placeholders }
 }
 
-function applyGoogleTranslate(language: LanguageCode) {
-  const googleLanguage = getGoogleLanguageCode(language)
-  setGoogleTranslateCookie(language)
-
-  const combo = document.querySelector<HTMLSelectElement>('.goog-te-combo')
-  if (!combo) return false
-
-  combo.value = language === 'en' ? '' : googleLanguage
-  combo.dispatchEvent(new Event('change'))
-  return true
-}
-
-function loadGoogleTranslate(language: LanguageCode) {
-  if (!document.getElementById(googleTranslateElementId)) {
-    const container = document.createElement('div')
-    container.id = googleTranslateElementId
-    container.style.display = 'none'
-    container.style.visibility = 'hidden'
-    document.body.appendChild(container)
-  }
-
-  window.googleTranslateElementInit = () => {
-    if (window.google?.translate?.TranslateElement) {
-      new window.google.translate.TranslateElement(
-        { pageLanguage: 'en', autoDisplay: false },
-        googleTranslateElementId
-      )
-      window.setTimeout(() => applyGoogleTranslate(language), 500)
-    }
-  }
-
-  if (!document.getElementById('google-translate-script')) {
-    const script = document.createElement('script')
-    script.id = 'google-translate-script'
-    script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit'
-    script.async = true
-    script.crossOrigin = 'anonymous'
-    document.body.appendChild(script)
-    return
-  }
-
-  window.setTimeout(() => applyGoogleTranslate(language), 300)
+function restorePlaceholders(text: string, placeholders: string[]): string {
+  let restored = text
+  placeholders.forEach((value, index) => {
+    restored = restored.replaceAll(`{{P${index}}}`, value)
+  })
+  return restored
 }
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<LanguageCode>('en')
-  const previousLanguageRef = useRef(language)
 
   useEffect(() => {
     window.localStorage.setItem('language', language)
@@ -481,24 +457,91 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.dir = rtlLanguages.has(language) ? 'rtl' : 'ltr'
   }, [language])
 
-  useEffect(() => {
-    if (!languages.some((item) => item.code === language)) return
-    if (language === 'en') {
-      document.cookie = 'googtrans=/en/en; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
-      document.cookie = `googtrans=/en/en; path=/; domain=${window.location.hostname}; expires=Thu, 01 Jan 1970 00:00:00 GMT`
-      return
-    }
-    try {
-      loadGoogleTranslate(language)
-    } catch {
-      setLanguageState(previousLanguageRef.current)
-    }
-  }, [language])
-
   const setLanguage = useCallback((newLanguage: LanguageCode) => {
     if (!languages.some((item) => item.code === newLanguage)) return
-    previousLanguageRef.current = language
     setLanguageState(newLanguage)
+  }, [])
+
+  const inFlightRef = useRef<Map<string, Promise<string>>>(new Map())
+
+  const tr = useCallback(async (text: string): Promise<string> => {
+    if (!text || !text.trim() || language === 'en') return text
+    const target = getGoogleLanguageCode(language)
+    const cached = readCache(target)[text]
+    if (cached) return cached
+    const existing = inFlightRef.current.get(text)
+    if (existing) return existing
+    const { text: protectedText, placeholders } = protectPlaceholders(text)
+    const promise = requestTranslate(protectedText, target)
+      .then((translated) => {
+        const restored = restorePlaceholders(translated, placeholders)
+        if (restored && restored !== text) writeCache(target, { [text]: restored })
+        return restored
+      })
+      .finally(() => {
+        inFlightRef.current.delete(text)
+      })
+    inFlightRef.current.set(text, promise)
+    return promise
+  }, [language])
+
+  const trBatch = useCallback(async (texts: string[]): Promise<string[]> => {
+    if (language === 'en') return texts
+    const target = getGoogleLanguageCode(language)
+    const results = new Array<string>(texts.length)
+    const pending: number[] = []
+    texts.forEach((text, index) => {
+      const cached = readCache(target)[text]
+      if (cached) {
+        results[index] = cached
+      } else {
+        pending.push(index)
+      }
+    })
+    if (pending.length === 0) return results
+
+    const CHUNK_SIZE = 3000
+    const chunks: number[][] = []
+    let current: number[] = []
+    let currentLength = 0
+    for (const index of pending) {
+      const len = texts[index].length
+      if (currentLength + len > CHUNK_SIZE && current.length > 0) {
+        chunks.push(current)
+        current = []
+        currentLength = 0
+      }
+      current.push(index)
+      currentLength += len
+    }
+    if (current.length > 0) chunks.push(current)
+
+    await Promise.all(chunks.map(async (chunk) => {
+      try {
+        const translated = await requestTranslate(
+          chunk.map((index) => protectPlaceholders(texts[index]).text).join('\n'),
+          target
+        )
+        const lines = translated.split('\n')
+        chunk.forEach((index, offset) => {
+          const raw = lines[offset]?.trim()
+          if (!raw) return
+          const { placeholders } = protectPlaceholders(texts[index])
+          const restored = restorePlaceholders(raw, placeholders)
+          if (restored && restored !== texts[index]) {
+            results[index] = restored
+            writeCache(target, { [texts[index]]: restored })
+          }
+        })
+      } catch {
+        // leave those as original text
+      }
+    }))
+
+    pending.forEach((index) => {
+      if (!results[index]) results[index] = texts[index]
+    })
+    return results
   }, [language])
 
   const value = useMemo(
@@ -506,8 +549,10 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       language,
       setLanguage,
       t: (key: TranslationKey) => translations[language]?.[key] ?? translations.en[key] ?? key,
+      tr,
+      trBatch,
     }),
-    [language, setLanguage]
+    [language, setLanguage, tr, trBatch]
   )
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>

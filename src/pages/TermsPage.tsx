@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Card } from '../components/ui/Card'
+import { Tr } from '../components/Translated'
 import { getPublishedLegalPageByType, type LegalPageWithSections } from '../services/legal-pages'
 import { getSectionContent } from '../services/cms-content'
 import { DetailPageSkeleton } from '../components/ui/LoadingSkeleton'
@@ -119,7 +120,7 @@ export function TermsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[var(--color-text-primary)] mb-4 sm:mb-6">
-              {legalPage?.title || 'Terms & Conditions'}
+              <Tr text={legalPage?.title || 'Terms & Conditions'} />
             </h1>
             {lastUpdated && (
               <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">
@@ -135,10 +136,10 @@ export function TermsPage() {
           {sections.map((section, idx) => (
             <Card key={idx} variant="bordered" padding="lg" className="max-w-none">
               {section.heading && (
-                <h2 className="text-xl font-semibold text-[var(--color-text-primary)] mb-4">{section.heading}</h2>
+                <h2 className="text-xl font-semibold text-[var(--color-text-primary)] mb-4"><Tr text={section.heading} /></h2>
               )}
               <div className="text-[var(--color-text-secondary)] leading-relaxed whitespace-pre-line">
-                {section.content}
+                <Tr text={section.content} />
               </div>
             </Card>
           ))}

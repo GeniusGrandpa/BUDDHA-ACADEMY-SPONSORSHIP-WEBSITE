@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { ChevronDown } from 'lucide-react'
 
 interface AccordionItemProps {
-  title: string
+  title: ReactNode
   children: React.ReactNode
   defaultOpen?: boolean
 }

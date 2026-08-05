@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '../components/ui/Button'
+import { Tr } from '../components/Translated'
 import { getNewsById } from '../services/news'
 import { getPageHeader } from '../services/cms-content'
 import type { PageHeader } from '../types/cms-content'
@@ -39,8 +40,8 @@ export function NewsDetailPage() {
   if (!article) return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Article Not Found</h1>
-        <Link to="/news"><Button variant="outline"><ArrowLeft className="w-4 h-4 mr-2" />Back to News</Button></Link>
+        <h1 className="text-2xl font-bold text-gray-900 mb-4"><Tr text="Article Not Found" /></h1>
+        <Link to="/news"><Button variant="outline"><ArrowLeft className="w-4 h-4 mr-2" /><Tr text="Back to News" /></Button></Link>
       </div>
     </div>
   )
@@ -66,7 +67,7 @@ export function NewsDetailPage() {
 
       <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         <Link to="/news" className="inline-flex items-center text-amber-600 hover:text-amber-700 mb-6 sm:mb-8 text-sm sm:text-base">
-          <ArrowLeft className="w-4 h-4 mr-2" />Back to News
+          <ArrowLeft className="w-4 h-4 mr-2" /><Tr text="Back to News" />
         </Link>
 
         {!heroBg && (
@@ -81,10 +82,10 @@ export function NewsDetailPage() {
         {article.content && (
           <div className="prose prose-sm sm:prose-base lg:prose-lg max-w-none text-gray-700 leading-relaxed">
             {typeof article.content === 'string' ? (
-              <p>{article.content}</p>
+              <p><Tr text={article.content} /></p>
             ) : (
               Object.entries(article.content).map(([key, val]) => (
-                <p key={key}>{val as string}</p>
+                <p key={key}><Tr text={val as string} /></p>
               ))
             )}
           </div>

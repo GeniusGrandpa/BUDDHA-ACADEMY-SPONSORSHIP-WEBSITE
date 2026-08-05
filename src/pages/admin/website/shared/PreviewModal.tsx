@@ -51,7 +51,6 @@ export function PreviewModal({ open, onClose, url, title }: PreviewModalProps) {
           src={url}
           title={`Preview: ${title}`}
           className="w-full h-full border-0"
-          sandbox="allow-scripts allow-same-origin allow-forms"
           loading="eager"
         />
       </div>

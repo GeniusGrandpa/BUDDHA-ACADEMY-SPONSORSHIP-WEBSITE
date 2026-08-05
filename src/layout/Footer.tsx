@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useLanguage } from '../context/LanguageContext'
+import { Tr } from '../components/Translated'
 import { useTheme } from '../context/ThemeContext'
 import { getFooterContent } from '../services/cms-content'
 import { getSiteSettings } from '../services/settings'
@@ -58,7 +59,7 @@ export function Footer() {
               </div>
             </div>
             {footerContent?.description && (
-              <p className="text-sm mb-4 text-[var(--color-footer-text)]">{footerContent.description}</p>
+              <p className="text-sm mb-4 text-[var(--color-footer-text)]"><Tr text={footerContent.description} /></p>
             )}
              {socialLinks.length > 0 && (
               <div className="flex space-x-4">
@@ -86,7 +87,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm text-[var(--color-footer-text)]">
               {quickLinks.map((link, idx) => (
                 <li key={idx}>
-                  <Link to={link.url} className="transition-colors hover:opacity-80 text-inherit">{link.label}</Link>
+                  <Link to={link.url} className="transition-colors hover:opacity-80 text-inherit"><Tr text={link.label} /></Link>
                 </li>
               ))}
             </ul>

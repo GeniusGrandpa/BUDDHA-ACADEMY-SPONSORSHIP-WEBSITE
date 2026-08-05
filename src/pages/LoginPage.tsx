@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Mail, CheckCircle, ArrowRight, AlertCircle, Eye, EyeOff, Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext'
+import { Tr } from '../components/Translated'
 import { Input } from '../components/ui/Input'
 import { Button } from '../components/ui/Button'
 import { validateEmail, validateName, validatePassword, validateConfirmPassword } from '../lib/auth/validation'
@@ -267,23 +268,23 @@ export function LoginPage() {
               <motion.h1 {...fadeUp(0.15)} className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
                 {mode === 'signin' ? (
                   <>
-                    Continue Supporting
+                    <Tr text="Continue Supporting" />
                     <br />
-                    <span className="text-[#fed7aa]">Student Futures</span>
+                    <span className="text-[#fed7aa]"><Tr text="Student Futures" /></span>
                   </>
                 ) : (
                   <>
-                    Join Us in
+                    <Tr text="Join Us in" />
                     <br />
-                    <span className="text-[#fed7aa]">Changing Lives</span>
+                    <span className="text-[#fed7aa]"><Tr text="Changing Lives" /></span>
                   </>
                 )}
               </motion.h1>
 
               <motion.p {...fadeUp(0.25)} className="text-lg sm:text-xl text-white/90 max-w-lg leading-relaxed">
                 {mode === 'signin'
-                  ? 'Sign in to track your sponsorship impact, connect with your sponsored student, and be part of a community transforming lives through education in Nepal.'
-                  : 'Create an account to sponsor a child, track your impact, and join a community dedicated to providing education and hope to children in Nepal.'
+                  ? <Tr text="Sign in to track your sponsorship impact, connect with your sponsored student, and be part of a community transforming lives through education in Nepal." />
+                  : <Tr text="Create an account to sponsor a child, track your impact, and join a community dedicated to providing education and hope to children in Nepal." />
                 }
               </motion.p>
 
@@ -324,10 +325,10 @@ export function LoginPage() {
                   <Mail className="w-8 h-8 text-[#f59e0b]" />
                 </motion.div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-[#0f172a] mb-2">
-                  Check Your Email
+                  <Tr text="Check Your Email" />
                 </h1>
                 <p className="text-gray-600 text-sm">
-                  We sent a verification link to<br />
+                  <Tr text="We sent a verification link to" /><br />
                   <span className="font-medium text-[#0f172a]">{email}</span>
                 </p>
               </div>
@@ -336,11 +337,11 @@ export function LoginPage() {
                 <div className="flex items-start gap-3">
                   <CheckCircle className="w-5 h-5 text-[#f59e0b] shrink-0 mt-0.5" />
                   <div className="text-sm text-gray-600">
-                    <p className="font-medium text-[#0f172a] mb-1">What happens next?</p>
+                    <p className="font-medium text-[#0f172a] mb-1"><Tr text="What happens next?" /></p>
                     <ol className="space-y-1.5 list-decimal list-inside">
-                      <li>Click the verification link in your email</li>
-                      <li>Return here and sign in to your account</li>
-                      <li>Start exploring sponsorship opportunities</li>
+                      <li><Tr text="Click the verification link in your email" /></li>
+                      <li><Tr text="Return here and sign in to your account" /></li>
+                      <li><Tr text="Start exploring sponsorship opportunities" /></li>
                     </ol>
                   </div>
                 </div>
@@ -349,7 +350,7 @@ export function LoginPage() {
                   onClick={() => { setRegistered(false); switchMode('signin') }}
                   className="w-full bg-amber-500 hover:bg-amber-600 text-white py-3 px-4 rounded-xl font-medium text-sm transition-colors inline-flex items-center justify-center gap-2"
                 >
-                  Go to sign in
+                  <Tr text="Go to sign in" />
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
@@ -365,7 +366,7 @@ export function LoginPage() {
                       : 'text-gray-600 hover:text-[#0f172a]'
                   }`}
                 >
-                  Sign In
+                  <Tr text="Sign In" />
                 </button>
                 <button
                   onClick={() => switchMode('signup')}
@@ -375,18 +376,18 @@ export function LoginPage() {
                       : 'text-gray-600 hover:text-[#0f172a]'
                   }`}
                 >
-                  Sign Up
+                  <Tr text="Sign Up" />
                 </button>
               </div>
 
               <div className="space-y-3">
                 <h1 className="text-2xl sm:text-3xl font-bold text-[#0f172a] tracking-tight">
-                  {mode === 'signin' ? 'Welcome Back' : 'Create Account'}
+                  {mode === 'signin' ? <Tr text="Welcome Back" /> : <Tr text="Create Account" />}
                 </h1>
                 <p className="text-gray-600 text-sm leading-relaxed">
                   {mode === 'signin'
-                    ? 'Sign in to continue supporting education and community growth.'
-                    : 'Join Buddha Academy Sponsorship Platform and support education.'
+                    ? <Tr text="Sign in to continue supporting education and community growth." />
+                    : <Tr text="Join Buddha Academy Sponsorship Platform and support education." />
                   }
                 </p>
               </div>
@@ -422,7 +423,7 @@ export function LoginPage() {
                 <form onSubmit={handleSignIn} className="space-y-6" noValidate>
                   <Input
                     id="signin-email"
-                    label="Email"
+                    label={<Tr text="Email" />}
                     type="email"
                     value={email}
                     onChange={(e) => {
@@ -438,7 +439,7 @@ export function LoginPage() {
                   <div className="relative">
                     <Input
                       id="signin-password"
-                      label="Password"
+                      label={<Tr text="Password" />}
                       type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => {
@@ -466,13 +467,13 @@ export function LoginPage() {
                       onClick={() => { setShowResendForm(!showResendForm); setResendEmail(email) }}
                       className="text-xs font-medium text-gray-500 hover:text-[#f59e0b] transition-colors"
                     >
-                      Didn't receive verification email?
+                      <Tr text="Didn't receive verification email?" />
                     </button>
                     <Link
                       to="/forgot-password"
                       className="text-xs font-medium text-[#f59e0b] hover:text-[#d97706] transition-colors"
                     >
-                      Forgot password?
+                      <Tr text="Forgot password?" />
                     </Link>
                   </div>
 
@@ -488,7 +489,7 @@ export function LoginPage() {
                       className="w-4 h-4 rounded border-gray-300 text-[#f59e0b] focus:ring-[#f59e0b]/30 transition-all"
                     />
                     <span className="text-sm text-gray-600 group-hover:text-[#0f172a] transition-colors">
-                      Remember me
+                      <Tr text="Remember me" />
                     </span>
                   </label>
 
@@ -496,11 +497,11 @@ export function LoginPage() {
                     {loading ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Signing in...
+                        <Tr text="Signing in..." />
                       </>
                     ) : (
                       <>
-                        Sign In
+                        <Tr text="Sign In" />
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </>
                     )}
@@ -511,8 +512,8 @@ export function LoginPage() {
                       <div className="flex items-start gap-2.5">
                         <AlertCircle className="w-4 h-4 mt-0.5 text-amber-600 flex-shrink-0" />
                         <div className="text-sm text-amber-800">
-                          <p className="font-medium">Email not verified</p>
-                          <p className="text-amber-600 mt-0.5">Please verify your email before continuing.</p>
+                          <p className="font-medium"><Tr text="Email not verified" /></p>
+                          <p className="text-amber-600 mt-0.5"><Tr text="Please verify your email before continuing." /></p>
                         </div>
                       </div>
                       <div className="flex gap-2">
@@ -523,14 +524,14 @@ export function LoginPage() {
                           className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium transition-colors disabled:opacity-50"
                         >
                           <Mail size={14} />
-                          {resending ? 'Sending...' : 'Resend verification email'}
+                          {resending ? <Tr text="Sending..." /> : <Tr text="Resend verification email" />}
                         </button>
                         <button
                           type="button"
                           onClick={() => { setShowResend(false); setShowResendForm(true) }}
                           className="py-2 px-3 rounded-lg border border-amber-300 text-amber-700 text-sm font-medium hover:bg-amber-100 transition-colors"
                         >
-                          Change email
+                          <Tr text="Change email" />
                         </button>
                       </div>
                     </div>
@@ -538,8 +539,8 @@ export function LoginPage() {
 
                   {showResendForm && (
                     <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 space-y-3">
-                      <p className="text-sm font-medium text-gray-700">Resend verification email</p>
-                      <p className="text-xs text-gray-500">Enter your email address to receive a new verification link.</p>
+                      <p className="text-sm font-medium text-gray-700"><Tr text="Resend verification email" /></p>
+                      <p className="text-xs text-gray-500"><Tr text="Enter your email address to receive a new verification link." /></p>
                       <input
                         type="email"
                         value={resendEmail}
@@ -554,14 +555,14 @@ export function LoginPage() {
                           disabled={resending || !resendEmail}
                           className="flex-1 py-2 px-3 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium transition-colors disabled:opacity-50"
                         >
-                          {resending ? 'Sending...' : 'Send'}
+                          {resending ? <Tr text="Sending..." /> : <Tr text="Send" />}
                         </button>
                         <button
                           type="button"
                           onClick={() => { setShowResendForm(false); if (error.includes('verify') || error.includes('Verify')) setShowResend(true) }}
                           className="py-2 px-3 rounded-lg border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-100 transition-colors"
                         >
-                          Cancel
+                          <Tr text="Cancel" />
                         </button>
                       </div>
                     </div>
@@ -586,7 +587,7 @@ export function LoginPage() {
 
                   <Input
                     id="signup-email"
-                    label="Email"
+                    label={<Tr text="Email" />}
                     type="email"
                     value={email}
                     onChange={(e) => {
@@ -600,7 +601,7 @@ export function LoginPage() {
 
                   <div className="space-y-1.5">
                     <label htmlFor="signup-country" className="block text-sm font-medium text-gray-700">
-                      Country <span className="text-red-500">*</span>
+                      <Tr text="Country" /> <span className="text-red-500">*</span>
                     </label>
                     <select
                       id="signup-country"
@@ -609,7 +610,7 @@ export function LoginPage() {
                       className="w-full px-4 py-2.5 rounded-xl text-sm bg-gray-50 border border-gray-200 hover:border-gray-300 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none transition-all duration-200 text-gray-900"
                       required
                     >
-                      <option value="" disabled>Select your country</option>
+                      <option value="" disabled><Tr text="Select your country" /></option>
                       {countryOptions.map((opt) => (
                         <option key={opt.value} value={opt.value}>{opt.label}</option>
                       ))}
@@ -622,7 +623,7 @@ export function LoginPage() {
                   <div className="relative">
                     <Input
                       id="signup-password"
-                      label="Password"
+                      label={<Tr text="Password" />}
                       type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => {
@@ -647,7 +648,7 @@ export function LoginPage() {
                   <div className="relative">
                     <Input
                       id="signup-confirm-password"
-                      label="Confirm Password"
+                      label={<Tr text="Confirm Password" />}
                       type={showConfirmPassword ? 'text' : 'password'}
                       value={confirmPassword}
                       onChange={(e) => {
@@ -682,13 +683,13 @@ export function LoginPage() {
                         className="mt-0.5 w-4 h-4 rounded border-gray-300 text-[#f59e0b] focus:ring-[#f59e0b]/30 focus:ring-2 transition-all cursor-pointer"
                       />
                       <span className="text-sm text-gray-600 group-hover:text-[#0f172a] transition-colors leading-relaxed">
-                        I agree to the{' '}
+                        <Tr text="I agree to the" />{' '}
                         <Link to="/terms" className="text-[#f59e0b] hover:text-[#d97706] font-medium transition-colors">
-                          Terms & Conditions
+                          <Tr text="Terms & Conditions" />
                         </Link>{' '}
-                        and{' '}
+                        <Tr text="and" />{' '}
                         <Link to="/privacy" className="text-[#f59e0b] hover:text-[#d97706] font-medium transition-colors">
-                          Privacy Policy
+                          <Tr text="Privacy Policy" />
                         </Link>
                       </span>
                     </label>
@@ -698,10 +699,10 @@ export function LoginPage() {
                     {loading ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Creating account...
+                        <Tr text="Creating account..." />
                       </>
                     ) : (
-                      'Create Account'
+                      <Tr text="Create Account" />
                     )}
                   </Button>
                 </form>
@@ -710,36 +711,38 @@ export function LoginPage() {
               <p className="text-center text-sm text-gray-600 pt-1">
                 {mode === 'signin' ? (
                   <>
-                    New to Buddha Academy?{' '}
+                    <Tr text="New to Buddha Academy?" />{' '}
                     <button
                       onClick={() => switchMode('signup')}
                       className="text-[#f59e0b] hover:text-[#d97706] font-medium inline-flex items-center gap-1 transition-colors"
                     >
-                      Join our community
+                      <Tr text="Join our community" />
                       <ArrowRight size={14} />
                     </button>
                   </>
                 ) : (
                   <>
-                    Already have an account?{' '}
+                    <Tr text="Already have an account?" />{' '}
                     <button
                       onClick={() => switchMode('signin')}
                       className="text-[#f59e0b] hover:text-[#d97706] font-medium transition-colors"
                     >
-                      Sign in
+                      <Tr text="Sign in" />
                     </button>
                   </>
                 )}
               </p>
 
               <p className="text-xs text-gray-600 text-center leading-relaxed pt-1">
-                By {mode === 'signin' ? 'signing in' : 'creating an account'}, you agree to our{' '}
+                {mode === 'signin'
+                  ? <Tr text="By signing in, you agree to our" />
+                  : <Tr text="By creating an account, you agree to our" />}{' '}
                 <Link to="/terms" className="text-[#f59e0b] hover:text-[#d97706] font-medium transition-colors">
-                  Terms
+                  <Tr text="Terms" />
                 </Link>{' '}
-                and{' '}
+                <Tr text="and" />{' '}
                 <Link to="/privacy" className="text-[#f59e0b] hover:text-[#d97706] font-medium transition-colors">
-                  Privacy Policy
+                  <Tr text="Privacy Policy" />
                 </Link>
                 .
               </p>

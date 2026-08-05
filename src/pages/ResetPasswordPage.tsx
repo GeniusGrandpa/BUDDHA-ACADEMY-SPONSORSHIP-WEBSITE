@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase'
 import { Card } from '../components/ui/Card'
 import { Input } from '../components/ui/Input'
 import { Button } from '../components/ui/Button'
+import { Tr } from '../components/Translated'
 import { validatePassword, validateConfirmPassword } from '../lib/auth/validation'
 import { getAuthErrorMessage } from '../lib/auth/authErrors'
 
@@ -92,7 +93,7 @@ export function ResetPasswordPage() {
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce-delay-2" />
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce-delay-3" />
           </div>
-          <p className="text-gray-500 text-sm">Verifying your reset link...</p>
+          <p className="text-gray-500 text-sm"><Tr text="Verifying your reset link..." /></p>
         </div>
       </div>
     )
@@ -107,17 +108,17 @@ export function ResetPasswordPage() {
               <CheckCircle className="w-8 h-8 text-emerald-600" />
             </div>
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-              Password Updated
+              <Tr text="Password Updated" />
             </h1>
             <p className="text-gray-600">
-              Your password has been reset successfully.
+              <Tr text="Your password has been reset successfully." />
             </p>
           </div>
 
           <Card variant="bordered" padding="lg">
             <div className="space-y-5 text-center">
               <p className="text-sm text-gray-500">
-                Redirecting you to sign in...
+                <Tr text="Redirecting you to sign in..." />
               </p>
               <div className="flex justify-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce-delay-1" />
@@ -136,10 +137,10 @@ export function ResetPasswordPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-            New Password
+            <Tr text="New Password" />
           </h1>
           <p className="text-gray-600">
-            Choose a strong password to keep your account secure.
+            <Tr text="Choose a strong password to keep your account secure." />
           </p>
         </div>
 
@@ -157,7 +158,7 @@ export function ResetPasswordPage() {
 
             <div className="relative">
               <Input
-                label="New password"
+                label={<Tr text="New password" />}
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => { setPassword(e.target.value); setFieldErrors((prev) => ({ ...prev, password: '' })) }}
@@ -179,7 +180,7 @@ export function ResetPasswordPage() {
 
             <div className="relative">
               <Input
-                label="Confirm new password"
+                label={<Tr text="Confirm new password" />}
                 type={showConfirmPassword ? 'text' : 'password'}
                 value={confirmPassword}
                 onChange={(e) => { setConfirmPassword(e.target.value); setFieldErrors((prev) => ({ ...prev, confirmPassword: '' })) }}
@@ -200,7 +201,7 @@ export function ResetPasswordPage() {
             </div>
 
             <Button type="submit" className="w-full" size="lg" disabled={loading}>
-              {loading ? 'Updating password...' : 'Update password'}
+              {loading ? <Tr text="Updating password..." /> : <Tr text="Update password" />}
             </Button>
           </form>
         </Card>

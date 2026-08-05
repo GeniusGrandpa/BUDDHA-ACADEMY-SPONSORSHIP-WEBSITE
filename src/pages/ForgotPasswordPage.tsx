@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase'
 import { Card } from '../components/ui/Card'
 import { Input } from '../components/ui/Input'
 import { Button } from '../components/ui/Button'
+import { Tr } from '../components/Translated'
 import { validateEmail } from '../lib/auth/validation'
 import { getAuthErrorMessage } from '../lib/auth/authErrors'
 import { getAuthRedirectUrl } from '../lib/auth/redirectUrl'
@@ -51,12 +52,12 @@ export function ForgotPasswordPage() {
               <CheckCircle className="w-8 h-8 text-emerald-600" />
             </div>
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-              Check Your Inbox
+              <Tr text="Check Your Inbox" />
             </h1>
             <p className="text-gray-600">
-              If an account exists for{' '}
-              <span className="font-medium text-gray-900">{email}</span>,
-              you will receive a reset link shortly.
+              <Tr text="If an account exists for" />{' '}
+              <span className="font-medium text-gray-900">{email}</span>
+              , <Tr text="you will receive a reset link shortly." />
             </p>
           </div>
 
@@ -64,14 +65,14 @@ export function ForgotPasswordPage() {
             <div className="space-y-5">
               <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 text-center">
                 <p className="text-sm text-gray-500">
-                  Didn't receive the email? Check your spam folder or try again.
+                  <Tr text="Didn't receive the email? Check your spam folder or try again." />
                 </p>
               </div>
 
               <Link to="/login">
                 <Button className="w-full" size="lg">
                   <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to sign in
+                  <Tr text="Back to sign in" />
                 </Button>
               </Link>
             </div>
@@ -86,10 +87,10 @@ export function ForgotPasswordPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-            Reset Password
+            <Tr text="Reset Password" />
           </h1>
           <p className="text-gray-600">
-            Enter your email and we will send you a reset link.
+            <Tr text="Enter your email and we will send you a reset link." />
           </p>
         </div>
 
@@ -106,7 +107,7 @@ export function ForgotPasswordPage() {
             )}
 
             <Input
-              label="Email"
+              label={<Tr text="Email" />}
               type="email"
               value={email}
               onChange={(e) => { setEmail(e.target.value); setFieldError('') }}
@@ -118,7 +119,7 @@ export function ForgotPasswordPage() {
             />
 
             <Button type="submit" className="w-full" size="lg" disabled={loading}>
-              {loading ? 'Sending reset link...' : 'Send reset link'}
+              {loading ? <Tr text="Sending reset link..." /> : <Tr text="Send reset link" />}
             </Button>
 
             <div className="text-center">
@@ -127,7 +128,7 @@ export function ForgotPasswordPage() {
                 className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors"
               >
                 <ArrowLeft size={14} />
-                Back to sign in
+                <Tr text="Back to sign in" />
               </Link>
             </div>
           </form>

@@ -413,6 +413,8 @@ function PageEditorView({ page, sections, selectedSection, selectedSectionId, on
               sections={sectionOrder}
               device={previewDevice}
               isPreview={true}
+              selectedSectionId={selectedSectionId}
+              onSelectSection={onSelectSection}
             />
           </div>
         </div>

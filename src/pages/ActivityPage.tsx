@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 
 import { ActivityFeed } from '../components/activities/ActivityFeed'
+import { Tr } from '../components/Translated'
 
 export function ActivityPage() {
   return (
@@ -13,10 +14,10 @@ export function ActivityPage() {
             className="text-center max-w-3xl mx-auto"
           >
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 sm:mb-6 leading-tight">
-              Recent Activity
+              <Tr text="Recent Activity" />
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-gray-300 leading-relaxed">
-              Stay connected with the latest happenings at Buddha Academy — from donations and sponsorships to student achievements.
+              <Tr text="Stay connected with the latest happenings at Buddha Academy — from donations and sponsorships to student achievements." />
             </p>
           </motion.div>
         </div>
