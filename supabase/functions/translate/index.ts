@@ -4,6 +4,10 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
+const NL_SENTINEL = '\uE000'
+const MAX_TEXT_LENGTH = 5000
+const CHUNK_CHAR_LIMIT = 4500
+
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
@@ -28,12 +32,7 @@ async function translateOfficial(text: string, target: string): Promise<string> 
   const resp = await fetch(`${url}?key=${apiKey}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      q: text,
-      target,
-      source: 'en',
-      format: 'text',
-    }),
+    body: JSON.stringify({ q: text, target, source: 'en', format: 'text' }),
   })
   if (!resp.ok) return ''
   const data = await resp.json()
@@ -42,42 +41,78 @@ async function translateOfficial(text: string, target: string): Promise<string> 
   return translated.replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&').trim()
 }
 
-async function translateFree(text: string, target: string): Promise<string> {
-  const resp = await fetch('https://translate.googleapis.com/translate_a/single?client=gtx', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ sl: 'en', tl: target, dt: 't', q: text }),
-  })
-  if (!resp.ok) throw new Error('TRANSLATION_SERVICE_UNAVAILABLE')
-  const data = await resp.json()
-  const translated = safeSingleTranslation(data)
-  if (!translated) throw new Error('TRANSLATION_EMPTY')
-  return translated
+async function translateFreeWithRetry(text: string, target: string, attempts = 3): Promise<string> {
+  let lastError: Error | null = null
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    try {
+      const resp = await fetch('https://translate.googleapis.com/translate_a/single?client=gtx', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ sl: 'en', tl: target, dt: 't', q: text }),
+      })
+      if (!resp.ok) throw new Error(`gtx returned ${resp.status}`)
+      const data = await resp.json()
+      const translated = safeSingleTranslation(data)
+      if (!translated) throw new Error('TRANSLATION_EMPTY')
+      return translated
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error('translation failed')
+      if (attempt < attempts - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 200 * (attempt + 1)))
+      }
+    }
+  }
+  throw lastError
 }
 
 async function translateOne(text: string, target: string): Promise<string> {
   const official = await translateOfficial(text, target)
   if (official) return official
-  return translateFree(text, target)
+  return translateFreeWithRetry(text, target)
 }
 
-async function translateMany(texts: string[], target: string, concurrency = 6): Promise<string[]> {
-  const results = new Array<string>(texts.length)
-  let index = 0
+function chunkTexts(texts: string[]): string[][] {
+  const chunks: string[][] = []
+  let current: string[] = []
+  let currentLength = 0
+  for (const text of texts) {
+    if (currentLength + text.length > CHUNK_CHAR_LIMIT && current.length > 0) {
+      chunks.push(current)
+      current = []
+      currentLength = 0
+    }
+    current.push(text)
+    currentLength += text.length
+  }
+  if (current.length > 0) chunks.push(current)
+  return chunks
+}
 
-  const worker = async () => {
-    while (index < texts.length) {
-      const current = index++
-      try {
-        results[current] = await translateOne(texts[current], target)
-      } catch {
-        results[current] = texts[current]
+async function translateMany(texts: string[], target: string): Promise<string[]> {
+  const results = new Array<string>(texts.length)
+  const chunks = chunkTexts(texts)
+
+  for (const chunk of chunks) {
+    const chunkResult = await translateOne(chunk.join('\n'), target)
+    const lines = chunkResult.split('\n')
+    if (lines.length !== chunk.length) {
+      // gtx did not preserve line count — fall back to per-text translation
+      for (let i = 0; i < chunk.length; i++) {
+        const offset = texts.indexOf(chunk[i])
+        try {
+          results[offset] = await translateOne(chunk[i], target)
+        } catch {
+          results[offset] = chunk[i]
+        }
       }
+      continue
+    }
+    for (let i = 0; i < chunk.length; i++) {
+      const offset = texts.indexOf(chunk[i])
+      results[offset] = lines[i].trim()
     }
   }
 
-  const workers = Array.from({ length: Math.min(concurrency, texts.length) }, () => worker())
-  await Promise.all(workers)
   return results
 }
 
@@ -98,28 +133,34 @@ Deno.serve(async (req) => {
     }
 
     if (Array.isArray(body?.texts)) {
-      const texts = body.texts.filter((t: unknown): t is string => typeof t === 'string')
+      const texts = body.texts
+        .filter((t: unknown): t is string => typeof t === 'string')
+        .map((t) => t.replaceAll('\n', NL_SENTINEL))
       if (texts.length === 0) {
         return json({ success: false, message: 'texts must not be empty', errorCode: 'VALIDATION_ERROR' }, 400)
       }
-      const tooLong = texts.find((t) => t.length > 5000)
+      const tooLong = texts.find((t) => t.length > MAX_TEXT_LENGTH)
       if (tooLong) {
         return json({ success: false, message: 'text too long (max 5000 chars)', errorCode: 'VALIDATION_ERROR' }, 400)
       }
       const translations = await translateMany(texts, target)
-      return json({ success: true, translations, target }, 200)
+      return json({
+        success: true,
+        translations: translations.map((t) => t.replaceAll(NL_SENTINEL, '\n')),
+        target,
+      }, 200)
     }
 
     const text = typeof body?.text === 'string' ? body.text : ''
     if (!text.trim()) {
       return json({ success: false, message: 'text and target are required', errorCode: 'VALIDATION_ERROR' }, 400)
     }
-    if (text.length > 5000) {
+    if (text.length > MAX_TEXT_LENGTH) {
       return json({ success: false, message: 'text too long (max 5000 chars)', errorCode: 'VALIDATION_ERROR' }, 400)
     }
 
-    const translated = await translateOne(text, target)
-    return json({ success: true, translated, target }, 200)
+    const translated = await translateOne(text.replaceAll('\n', NL_SENTINEL), target)
+    return json({ success: true, translated: translated.replaceAll(NL_SENTINEL, '\n'), target }, 200)
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Translation failed'
     const status = message === 'TRANSLATION_SERVICE_UNAVAILABLE' ? 502 : 500
