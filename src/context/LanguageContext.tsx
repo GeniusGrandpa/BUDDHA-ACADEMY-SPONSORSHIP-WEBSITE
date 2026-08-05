@@ -400,9 +400,10 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 const rtlLanguages = new Set(['ar', 'fa', 'he', 'ur'])
 
+const CACHE_VERSION = 'v2'
 function readCache(target: string): Record<string, string> {
   try {
-    return JSON.parse(window.localStorage.getItem(`ba_translations_${target}`) || '{}')
+    return JSON.parse(window.localStorage.getItem(`ba_translations_${CACHE_VERSION}_${target}`) || '{}')
   } catch {
     return {}
   }
@@ -413,7 +414,7 @@ function writeCache(target: string, entries: Record<string, string>) {
     const current = readCache(target)
     const merged: Record<string, string> = { ...current }
     for (const k in entries) if (typeof entries[k] === 'string' && entries[k]) merged[k] = entries[k]
-    window.localStorage.setItem(`ba_translations_${target}`, JSON.stringify(merged))
+    window.localStorage.setItem(`ba_translations_${CACHE_VERSION}_${target}`, JSON.stringify(merged))
   } catch {
   }
 }
@@ -425,6 +426,17 @@ async function requestTranslate(text: string, target: string): Promise<string> {
   const t = (data as { success?: boolean; translated?: string } | null)?.translated
   if (!t) throw new Error('empty translation')
   return t
+}
+
+async function requestTranslateMany(texts: string[], target: string): Promise<string[]> {
+  const { supabase } = await import('../lib/supabase')
+  const { data, error } = await supabase.functions.invoke('translate', { body: { texts, target } })
+  if (error) throw error
+  const translations = (data as { success?: boolean; translations?: string[] } | null)?.translations
+  if (!translations || translations.length !== texts.length) {
+    throw new Error('translation batch mismatch')
+  }
+  return translations
 }
 
 function getGoogleLanguageCode(language: LanguageCode) {
@@ -490,53 +502,34 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     const target = getGoogleLanguageCode(language)
     const results = new Array<string>(texts.length)
     const pending: number[] = []
+    const protectedList: { text: string; placeholders: string[]; original: string }[] = []
+
     texts.forEach((text, index) => {
       const cached = readCache(target)[text]
       if (cached) {
         results[index] = cached
       } else {
         pending.push(index)
+        protectedList.push({ ...protectPlaceholders(text), original: text })
       }
     })
     if (pending.length === 0) return results
 
-    const CHUNK_SIZE = 3000
-    const chunks: number[][] = []
-    let current: number[] = []
-    let currentLength = 0
-    for (const index of pending) {
-      const len = texts[index].length
-      if (currentLength + len > CHUNK_SIZE && current.length > 0) {
-        chunks.push(current)
-        current = []
-        currentLength = 0
-      }
-      current.push(index)
-      currentLength += len
+    try {
+      const translations = await requestTranslateMany(
+        protectedList.map((p) => p.text),
+        target
+      )
+      protectedList.forEach((item, offset) => {
+        const restored = restorePlaceholders(translations[offset], item.placeholders)
+        if (restored && restored !== item.original) {
+          results[pending[offset]] = restored
+          writeCache(target, { [item.original]: restored })
+        }
+      })
+    } catch {
+      // leave those as original text
     }
-    if (current.length > 0) chunks.push(current)
-
-    await Promise.all(chunks.map(async (chunk) => {
-      try {
-        const translated = await requestTranslate(
-          chunk.map((index) => protectPlaceholders(texts[index]).text).join('\n'),
-          target
-        )
-        const lines = translated.split('\n')
-        chunk.forEach((index, offset) => {
-          const raw = lines[offset]?.trim()
-          if (!raw) return
-          const { placeholders } = protectPlaceholders(texts[index])
-          const restored = restorePlaceholders(raw, placeholders)
-          if (restored && restored !== texts[index]) {
-            results[index] = restored
-            writeCache(target, { [texts[index]]: restored })
-          }
-        })
-      } catch {
-        // leave those as original text
-      }
-    }))
 
     pending.forEach((index) => {
       if (!results[index]) results[index] = texts[index]

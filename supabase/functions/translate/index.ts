@@ -55,6 +55,32 @@ async function translateFree(text: string, target: string): Promise<string> {
   return translated
 }
 
+async function translateOne(text: string, target: string): Promise<string> {
+  const official = await translateOfficial(text, target)
+  if (official) return official
+  return translateFree(text, target)
+}
+
+async function translateMany(texts: string[], target: string, concurrency = 6): Promise<string[]> {
+  const results = new Array<string>(texts.length)
+  let index = 0
+
+  const worker = async () => {
+    while (index < texts.length) {
+      const current = index++
+      try {
+        results[current] = await translateOne(texts[current], target)
+      } catch {
+        results[current] = texts[current]
+      }
+    }
+  }
+
+  const workers = Array.from({ length: Math.min(concurrency, texts.length) }, () => worker())
+  await Promise.all(workers)
+  return results
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -65,22 +91,34 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json()
-    const text = typeof body?.text === 'string' ? body.text : ''
     const target = typeof body?.target === 'string' ? body.target : ''
 
-    if (!text.trim() || !target) {
+    if (!/^[a-zA-Z-]{2,24}$/.test(target)) {
+      return json({ success: false, message: 'invalid target language', errorCode: 'VALIDATION_ERROR' }, 400)
+    }
+
+    if (Array.isArray(body?.texts)) {
+      const texts = body.texts.filter((t: unknown): t is string => typeof t === 'string')
+      if (texts.length === 0) {
+        return json({ success: false, message: 'texts must not be empty', errorCode: 'VALIDATION_ERROR' }, 400)
+      }
+      const tooLong = texts.find((t) => t.length > 5000)
+      if (tooLong) {
+        return json({ success: false, message: 'text too long (max 5000 chars)', errorCode: 'VALIDATION_ERROR' }, 400)
+      }
+      const translations = await translateMany(texts, target)
+      return json({ success: true, translations, target }, 200)
+    }
+
+    const text = typeof body?.text === 'string' ? body.text : ''
+    if (!text.trim()) {
       return json({ success: false, message: 'text and target are required', errorCode: 'VALIDATION_ERROR' }, 400)
     }
     if (text.length > 5000) {
       return json({ success: false, message: 'text too long (max 5000 chars)', errorCode: 'VALIDATION_ERROR' }, 400)
     }
-    if (!/^[a-zA-Z-]{2,24}$/.test(target)) {
-      return json({ success: false, message: 'invalid target language', errorCode: 'VALIDATION_ERROR' }, 400)
-    }
 
-    const official = await translateOfficial(text, target)
-    const translated = official || await translateFree(text, target)
-
+    const translated = await translateOne(text, target)
     return json({ success: true, translated, target }, 200)
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Translation failed'
