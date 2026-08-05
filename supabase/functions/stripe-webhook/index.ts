@@ -1,6 +1,5 @@
-import { serve } from 'std/http/server'
-import Stripe from 'stripe'
-import { createClient } from '@supabase/supabase-js'
+import Stripe from 'npm:stripe@18.0.0'
+import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders, jsonOk, jsonError, handleError, logError } from '../_shared/response.ts'
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') ?? '', {
@@ -30,7 +29,7 @@ function rpcOrThrow(name: string, payload: Record<string, unknown>) {
   })
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
