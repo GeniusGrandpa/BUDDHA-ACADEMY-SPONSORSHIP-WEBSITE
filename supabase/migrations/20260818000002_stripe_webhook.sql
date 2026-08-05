@@ -214,6 +214,7 @@ REVOKE ALL ON FUNCTION public.stripe_fail_payment FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.stripe_confirm_payment TO service_role;
 GRANT EXECUTE ON FUNCTION public.stripe_fail_payment TO service_role;
 
+DROP FUNCTION IF EXISTS public.initiate_payment_checkout(text, numeric, text, uuid, text, text);
 DROP FUNCTION IF EXISTS public.initiate_payment_checkout(numeric, text, text, text, text, uuid);
 CREATE OR REPLACE FUNCTION public.initiate_payment_checkout(
   p_amount numeric,

@@ -242,6 +242,7 @@ The service layer keeps Supabase access organized by domain:
 - Verified payments create donation records through controlled RPC logic.
 - Automatic Stripe card verification: `create-payment-intent` Edge Function creates a PaymentIntent; the `stripe-webhook` Edge Function verifies `payment_intent.succeeded` events and completes the session without manual review.
 - Every payment action is audit-logged; card failures surface sanitized, user-friendly error messages.
+- **Stripe is geo-restricted and does not support Nepal** — Nepal IPs are blocked from Stripe's domains (Dashboard and the browser-based Payment Element). Nepal-based donors should use the manual gateways (bank, eSewa, Khalti); use a VPN in a supported region for Stripe testing. See [`docs/PAYMENTS.md`](docs/PAYMENTS.md).
 
 ### CMS
 

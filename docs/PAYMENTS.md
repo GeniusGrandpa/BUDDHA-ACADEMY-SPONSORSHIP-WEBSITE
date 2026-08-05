@@ -67,6 +67,29 @@ Hybrid flow: manual confirmation + admin verification for bank / eSewa / Khalti,
 
 Both edge functions return a standardized JSON envelope — `{ success, message, errorCode }` — via `supabase/functions/_shared/response.ts`. The client (`src/services/stripePayment.ts`, `src/hooks/usePayment.ts`, `src/lib/errors.ts`) parses this envelope, maps Stripe card errors to friendly messages (e.g. "Your card was declined"), and never surfaces raw server/Stripe messages to the UI.
 
+### Important: Stripe is geo-restricted and does not support Nepal
+
+Stripe does not operate in Nepal. When a request is made from a Nepal IP address to any Stripe domain
+(`dashboard.stripe.com`, `js.stripe.com`, or a hosted Checkout page), Stripe returns an `AccessDenied` XML error
+and the card form / dashboard will not load. This affects:
+
+- **Stripe Dashboard** — blocked outright from Nepal IPs.
+- **Card payments in the browser** — the Stripe Payment Element loads `js.stripe.com` in the *donor's* browser.
+  A donor located in Nepal will be blocked even if the app server is hosted in a supported region, because
+  Stripe.js runs client-side on the donor's machine.
+
+Practical implications:
+
+- **For development/testing:** use a VPN in a supported region (US/EU/UK) and keep it on for the whole
+  checkout flow, or you will get intermittent failures mid-payment.
+- **For real donors in Nepal:** Stripe card payments are unreliable/blocked. Bank, eSewa, and Khalti (the
+  manual verification gateways) are the reliable path for Nepal-based donors and are fully supported by this
+  platform.
+- **Server-side:** `STRIPE_SECRET_KEY` calls from Supabase Edge Functions work if the Supabase region is in a
+  supported country — only client-side browser access from Nepal is blocked. `STRIPE_SECRET_KEY` and
+  `STRIPE_WEBHOOK_SECRET` are never exposed to the browser.
+- Do not market the Stripe card option to Nepal-based donors as a primary payment path.
+
 ## Key Design Decisions
 
 - `initiate_payment_checkout()` creates `payment_sessions` independently — no pre-existing donation required
