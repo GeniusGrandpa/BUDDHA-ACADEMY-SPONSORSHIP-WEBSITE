@@ -49,9 +49,7 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
     try {
       const settings = await getActivePaymentSettings()
       setPaymentSettings(settings)
-      if (settings.length > 0) {
-        setSelectedGateway(settings[0].gateway_name as PaymentGateway)
-      }
+      setSelectedGateway(null)
     } catch (err) {
       setSettingsError(getErrorMessage(err, 'Could not load payment settings. Please try again later.'))
     } finally {
