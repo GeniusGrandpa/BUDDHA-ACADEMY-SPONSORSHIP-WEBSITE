@@ -10,6 +10,7 @@
     "serve:ssr": "node server/index.mjs",
     "lint": "eslint .",
     "test:translation": "tsx scripts/test-translation.ts",
+    "translate:locale": "node scripts/translate-locale.mjs",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },

@@ -3,12 +3,15 @@ import { getAllCmsStrings } from '../services/cms-content'
 import { useTranslation } from './TranslationContext'
 import type { CmsStringMap } from '../types/cms-content'
 import { CmsStringsContext, DEFAULT_STRINGS } from './CmsStringsContext'
+import { getStaticDictionary } from '../locales'
 
 export function CmsStringsProvider({ children }: { children: ReactNode }) {
   const [strings, setStrings] = useState<CmsStringMap>({})
   const [loading, setLoading] = useState(true)
   const [translatedMap, setTranslatedMap] = useState<Record<string, string>>({})
   const { language, isHydrated, translateTexts } = useTranslation()
+
+  const staticDict = useMemo(() => getStaticDictionary(language), [language])
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -36,7 +39,11 @@ export function CmsStringsProvider({ children }: { children: ReactNode }) {
       return
     }
     let cancelled = false
-    const unique = Array.from(new Set(Object.values(merged)))
+    const missing = new Set<string>()
+    for (const key of Object.keys(merged)) {
+      if (!(key in staticDict)) missing.add(merged[key])
+    }
+    const unique = Array.from(missing)
     translateTexts(unique).then((results) => {
       if (cancelled) return
       const map: Record<string, string> = {}
@@ -49,17 +56,18 @@ export function CmsStringsProvider({ children }: { children: ReactNode }) {
       if (!cancelled) setTranslatedMap({})
     })
     return () => { cancelled = true }
-  }, [language, merged, translateTexts, isHydrated])
+  }, [language, merged, translateTexts, isHydrated, staticDict])
 
   const t = useCallback((key: string, replacements?: Record<string, string | number>) => {
-    let value = translatedMap[merged[key]] || merged[key] || key
+    const staticValue = staticDict[key]
+    let value = staticValue ?? translatedMap[merged[key]] ?? merged[key] ?? key
     if (replacements) {
       for (const [k, v] of Object.entries(replacements)) {
         value = value.replaceAll(`{${k}}`, String(v))
       }
     }
     return value
-  }, [merged, translatedMap])
+  }, [merged, translatedMap, staticDict])
 
   return (
     <CmsStringsContext.Provider value={{ strings, t, loading, refresh: load }}>
