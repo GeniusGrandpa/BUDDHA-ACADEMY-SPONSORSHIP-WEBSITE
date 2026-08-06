@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders, jsonOk, jsonError, handleError } from '../_shared/response.ts'
 import { getTranslationProvider } from '../_shared/translation-provider.ts'
 import {
