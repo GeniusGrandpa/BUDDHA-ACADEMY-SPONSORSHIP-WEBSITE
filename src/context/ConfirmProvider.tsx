@@ -1,62 +1,6 @@
-import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react'
+import { useCallback, useRef, useState, type ReactNode } from 'react'
 import { AlertTriangle } from 'lucide-react'
-
-export interface ConfirmOptions {
-  title?: string
-  message: string
-  confirmLabel?: string
-  cancelLabel?: string
-  danger?: boolean
-}
-
-interface ConfirmContextValue {
-  confirm: (options: string | ConfirmOptions) => Promise<boolean>
-}
-
-const ConfirmContext = createContext<ConfirmContextValue>({
-  confirm: async () => false,
-})
-
-export function ConfirmProvider({ children }: { children: ReactNode }) {
-  const [options, setOptions] = useState<ConfirmOptions | null>(null)
-  const resolverRef = useRef<((value: boolean) => void) | null>(null)
-
-  const confirm = useCallback((input: string | ConfirmOptions) => {
-    return new Promise<boolean>((resolve) => {
-      resolverRef.current = resolve
-      setOptions(typeof input === 'string' ? { message: input } : input)
-    })
-  }, [])
-
-  const resolve = (value: boolean) => {
-    const fn = resolverRef.current
-    resolverRef.current = null
-    setOptions(null)
-    fn?.(value)
-  }
-
-  return (
-    <ConfirmContext.Provider value={{ confirm }}>
-      {children}
-      {options && (
-        <ConfirmDialog
-          title={options.title}
-          message={options.message}
-          confirmLabel={options.confirmLabel}
-          cancelLabel={options.cancelLabel}
-          danger={options.danger}
-          onConfirm={() => resolve(true)}
-          onCancel={() => resolve(false)}
-        />
-      )}
-    </ConfirmContext.Provider>
-  )
-}
-
-export function useConfirm() {
-  const { confirm } = useContext(ConfirmContext)
-  return { confirm }
-}
+import { ConfirmContext, type ConfirmOptions } from './ConfirmContext'
 
 interface ConfirmDialogProps {
   title?: string
@@ -110,5 +54,41 @@ function ConfirmDialog({
         </div>
       </div>
     </div>
+  )
+}
+
+export function ConfirmProvider({ children }: { children: ReactNode }) {
+  const [options, setOptions] = useState<ConfirmOptions | null>(null)
+  const resolverRef = useRef<((value: boolean) => void) | null>(null)
+
+  const confirm = useCallback((input: string | ConfirmOptions) => {
+    return new Promise<boolean>((resolve) => {
+      resolverRef.current = resolve
+      setOptions(typeof input === 'string' ? { message: input } : input)
+    })
+  }, [])
+
+  const resolve = (value: boolean) => {
+    const fn = resolverRef.current
+    resolverRef.current = null
+    setOptions(null)
+    fn?.(value)
+  }
+
+  return (
+    <ConfirmContext.Provider value={{ confirm }}>
+      {children}
+      {options && (
+        <ConfirmDialog
+          title={options.title}
+          message={options.message}
+          confirmLabel={options.confirmLabel}
+          cancelLabel={options.cancelLabel}
+          danger={options.danger}
+          onConfirm={() => resolve(true)}
+          onCancel={() => resolve(false)}
+        />
+      )}
+    </ConfirmContext.Provider>
   )
 }

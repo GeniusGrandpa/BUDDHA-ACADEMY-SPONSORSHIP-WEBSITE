@@ -1,8 +1,9 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { getGoogleLanguageCode, useLanguage } from './LanguageContext'
 import { requestPageTranslation } from '../lib/translation/translateService'
 import { isTranslatableText, translationCacheKey } from '../lib/translation/translatable'
 import { logger } from '../lib/logger'
+import { TranslationContext, type TranslationContextValue } from './TranslationContext'
 
 const CHUNK_SIZE = 80
 
@@ -16,18 +17,6 @@ interface QueuedText {
   generation: number
   resolve: (value: string) => void
 }
-
-interface TranslationContextValue {
-  language: string
-  isHydrated: boolean
-  translate: (text: string) => Promise<string>
-  translateTexts: (texts: string[]) => Promise<string[]>
-  translateCMS: <T extends Record<string, string>>(obj: T) => Promise<T>
-  translateMissingStrings: (texts: string[]) => Promise<string[]>
-  clearCache: () => void
-}
-
-const TranslationContext = createContext<TranslationContextValue | null>(null)
 
 export function TranslationProvider({ children }: { children: ReactNode }) {
   const { language } = useLanguage()
@@ -189,12 +178,4 @@ export function TranslationProvider({ children }: { children: ReactNode }) {
   )
 
   return <TranslationContext.Provider value={value}>{children}</TranslationContext.Provider>
-}
-
-export function useTranslation(): TranslationContextValue {
-  const context = useContext(TranslationContext)
-  if (!context) {
-    throw new Error('useTranslation must be used within TranslationProvider')
-  }
-  return context
 }

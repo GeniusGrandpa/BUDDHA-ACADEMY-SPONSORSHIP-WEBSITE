@@ -1,23 +1,10 @@
-import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from 'react'
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import type { DesignSettings, DesignColors, DesignBranding, DesignTypography, DesignLayout, DesignTokens, DesignComponentStyles } from '../types/design'
 import { DEFAULT_COLORS, DEFAULT_BRANDING, DEFAULT_TYPOGRAPHY, DEFAULT_LAYOUT, DEFAULT_TOKENS, DEFAULT_COMPONENT_STYLES } from '../types/design'
 import { getPublishedDesignSettings, getDesignSettings } from '../services/design'
 import { isPreviewMode } from '../lib/preview-mode'
 import { useAuth } from './AuthContext'
-
-interface ThemeContextValue {
-  settings: DesignSettings | null
-  colors: DesignColors
-  typography: DesignTypography
-  layout: DesignLayout
-  branding: DesignBranding
-  tokens: DesignTokens
-  componentStyles: DesignComponentStyles
-  isLoaded: boolean
-  refreshTheme: () => Promise<void>
-}
-
-const ThemeContext = createContext<ThemeContextValue | null>(null)
+import { ThemeContext, type ThemeContextValue } from './ThemeContext'
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
   const clean = hex.replace('#', '')
@@ -230,10 +217,4 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       {children}
     </ThemeContext.Provider>
   )
-}
-
-export function useTheme(): ThemeContextValue {
-  const ctx = useContext(ThemeContext)
-  if (!ctx) throw new Error('useTheme must be used within ThemeProvider')
-  return ctx
 }

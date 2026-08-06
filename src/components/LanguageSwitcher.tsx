@@ -10,7 +10,12 @@ const sortedLanguages = [...languages].sort((a, b) =>
 export function LanguageSwitcher({ mobile = false }: { mobile?: boolean }) {
   const { language, setLanguage } = useLanguage()
   const [open, setOpen] = useState(false)
+  const [ready, setReady] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    setReady(true)
+  }, [])
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -32,7 +37,7 @@ export function LanguageSwitcher({ mobile = false }: { mobile?: boolean }) {
     }
   }, [open])
 
-  const current = languages.find((l) => l.code === language)
+  const current = ready ? languages.find((l) => l.code === language) : undefined
 
   const select = (code: LanguageCode) => {
     setLanguage(code)
@@ -79,7 +84,7 @@ export function LanguageSwitcher({ mobile = false }: { mobile?: boolean }) {
               className="max-h-72 overflow-y-auto"
             >
               {sortedLanguages.map((lang) => {
-                const active = lang.code === language
+                const active = ready && lang.code === language
                 return (
                   <li
                     key={lang.code}

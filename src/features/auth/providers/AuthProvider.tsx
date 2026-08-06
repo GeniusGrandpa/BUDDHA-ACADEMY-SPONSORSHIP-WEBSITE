@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { type Session, type User } from '@supabase/supabase-js'
 import { getSupabaseClient } from '../../../lib/supabase'
 import type { Profile } from '../../../types/database'
@@ -7,39 +7,8 @@ import { fetchUserPermissions } from '../services/permissions'
 import { classifyAuthError } from '../utils/authErrors'
 import { getAuthRedirectUrl } from '../utils/redirectUrl'
 import { checkRateLimit, resetRateLimit } from '../../../lib/auth/rateLimiter'
+import { AuthContext, type AuthContextType } from './AuthContext'
 const supabase = getSupabaseClient()
-
-interface SignUpResult {
-  error: { message: string; category: string } | null
-  needsVerification?: boolean
-  verificationSent?: boolean
-  message?: string
-}
-
-interface SignInResult {
-  error: { message: string; category: string } | null
-  needsVerification?: boolean
-}
-
-interface ResendResult {
-  error: { message: string; category: string } | null
-  success?: boolean
-}
-
-interface AuthContextType {
-  user: User | null
-  profile: Profile | null
-  permissions: PermissionCode[]
-  loading: boolean
-  signIn: (email: string, password: string) => Promise<SignInResult>
-  signUp: (email: string, password: string, fullName: string, country: string) => Promise<SignUpResult>
-  resendVerificationEmail: (email: string) => Promise<ResendResult>
-  signOut: () => Promise<void>
-  refreshProfile: () => Promise<Profile | null>
-  refreshPermissions: (userId?: string) => Promise<void>
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 async function fetchOrCreateProfile(user: User, retries = 1): Promise<Profile | null> {
   for (let attempt = 0; attempt <= retries; attempt++) {
@@ -360,28 +329,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setPermissions([])
   }
 
+  const value: AuthContextType = {
+    user,
+    profile,
+    permissions,
+    loading,
+    signIn,
+    signUp,
+    resendVerificationEmail,
+    signOut,
+    refreshProfile,
+    refreshPermissions,
+  }
+
   return (
-    <AuthContext.Provider value={{
-      user,
-      profile,
-      permissions,
-      loading,
-      signIn,
-      signUp,
-      resendVerificationEmail,
-      signOut,
-      refreshProfile,
-      refreshPermissions,
-    }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   )
-}
-
-export function useAuth() {
-  const context = useContext(AuthContext)
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider')
-  }
-  return context
 }
