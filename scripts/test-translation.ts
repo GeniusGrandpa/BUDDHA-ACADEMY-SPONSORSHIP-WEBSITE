@@ -1,4 +1,8 @@
-import { getTranslationProvider } from '../supabase/functions/_shared/translation-provider.ts'
+import {
+  cloudflareSupports,
+  cloudflareTargetCode,
+  getTranslationProvider,
+} from '../supabase/functions/_shared/translation-provider.ts'
 import {
   chunkTexts,
   protectNewlines,
@@ -37,6 +41,32 @@ async function main() {
   assert(mock.name === 'mock', 'TRANSLATION_PROVIDER=mock selects the mock provider')
   const single = await mock.translate('Hello world', 'ne')
   assert(single === 'Hello world->ne', `mock translates with marker (got ${single})`)
+
+  console.log('translation-provider / routing')
+  const router = getTranslationProvider({
+    TRANSLATION_PROVIDER: 'cloudflare-google',
+    CLOUDFLARE_ACCOUNT_ID: 'acct',
+    CLOUDFLARE_API_TOKEN: 'tok',
+    GOOGLE_API_KEY: 'test-google',
+  })
+  assert(router.name === 'cloudflare-google', 'cloudflare-google selects the routing provider')
+  assert(
+    cloudflareSupports('es') && cloudflareSupports('ne'),
+    'es and ne both route to cloudflare',
+  )
+
+  console.log('translation-provider / cloudflare')
+  const cf = getTranslationProvider({
+    TRANSLATION_PROVIDER: 'cloudflare',
+    CLOUDFLARE_ACCOUNT_ID: 'acct',
+    CLOUDFLARE_API_TOKEN: 'tok',
+  })
+  assert(cf.name === 'cloudflare', 'TRANSLATION_PROVIDER=cloudflare selects the cloudflare provider')
+  assert(cloudflareTargetCode('zh-CN') === 'zh', 'cloudflare maps zh-CN to zh')
+  assert(cloudflareTargetCode('iw') === 'he', 'cloudflare maps iw to he')
+  assert(cloudflareTargetCode('ne') === 'ne', 'cloudflare keeps ne as-is')
+  assert(cloudflareSupports('ne') && cloudflareSupports('hi'), 'cloudflare covers ne and hi')
+  assert(!cloudflareSupports('xx'), 'unsupported cloudflare code is excluded')
 
   console.log('translation-core / translateBatch')
   const texts = ['Home', 'About us', 'Donate now']

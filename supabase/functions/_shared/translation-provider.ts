@@ -198,6 +198,72 @@ function huggingFaceProvider(env?: TranslationEnv): TranslationProvider {
   }
 }
 
+const CLOUDFLARE_TARGET_CODES: Record<string, string> = {
+  'zh-cn': 'zh',
+  'zh-hans': 'zh',
+  'zh-hant': 'zh',
+  'zh-tw': 'zh',
+  'zh-hk': 'zh',
+  iw: 'he',
+  fil: 'tl',
+  nb: 'no',
+  nn: 'no',
+}
+
+const M2M100_CODES = new Set<string>([
+  'af', 'am', 'ar', 'ast', 'az', 'ba', 'be', 'bg', 'bn', 'br', 'bs', 'ca',
+  'ceb', 'cs', 'cy', 'da', 'de', 'el', 'en', 'es', 'et', 'fa', 'ff', 'fi',
+  'fr', 'fy', 'ga', 'gd', 'gl', 'gu', 'ha', 'he', 'hi', 'hr', 'ht', 'hu',
+  'hy', 'id', 'ig', 'ilo', 'is', 'it', 'ja', 'jv', 'ka', 'kk', 'km', 'kn',
+  'ko', 'lb', 'lg', 'ln', 'lo', 'lt', 'lv', 'mg', 'mk', 'ml', 'mn', 'mr',
+  'ms', 'my', 'ne', 'nl', 'no', 'ns', 'oc', 'or', 'pa', 'pl', 'ps', 'pt',
+  'ro', 'ru', 'sd', 'si', 'sk', 'sl', 'so', 'sq', 'sr', 'ss', 'su', 'sv',
+  'sw', 'ta', 'th', 'tl', 'tr', 'uk', 'ur', 'uz', 'vi', 'wo', 'xh', 'yi',
+  'yo', 'zh', 'zu',
+])
+
+export function cloudflareTargetCode(target: string): string {
+  return CLOUDFLARE_TARGET_CODES[target.toLowerCase()] ?? simpleCode(target)
+}
+
+export function cloudflareSupports(target: string): boolean {
+  return M2M100_CODES.has(cloudflareTargetCode(target))
+}
+
+function cloudflareProvider(env?: TranslationEnv): TranslationProvider {
+  return {
+    name: 'cloudflare',
+    async translate(text, target) {
+      const accountId = readEnv('CLOUDFLARE_ACCOUNT_ID', env)
+      const token = readEnv('CLOUDFLARE_API_TOKEN', env)
+      if (!accountId || !token) throw error('CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN are required')
+      const model = readEnv('CLOUDFLARE_AI_MODEL', env) ?? '@cf/meta/m2m100-1.2b'
+      const resp = await fetch(
+        `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${model}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({
+            text,
+            source_lang: 'en',
+            target_lang: cloudflareTargetCode(target),
+          }),
+        },
+      )
+      if (!resp.ok) throw error(`cloudflare workers ai returned ${resp.status}`)
+      const data = (await resp.json()) as {
+        success?: boolean
+        result?: { translated_text?: string }
+        errors?: Array<{ message?: string }>
+      }
+      if (data.success !== true || !data.result?.translated_text) {
+        throw error(`cloudflare workers ai failed: ${data.errors?.[0]?.message ?? 'unknown error'}`)
+      }
+      return data.result.translated_text.trim()
+    },
+  }
+}
+
 function mockProvider(): TranslationProvider {
   return {
     name: 'mock',
@@ -206,6 +272,27 @@ function mockProvider(): TranslationProvider {
         .split('\n')
         .map((line) => `${line}->${target}`)
         .join('\n')
+    },
+  }
+}
+
+function routingProvider(env?: TranslationEnv): TranslationProvider {
+  const cloudflare = cloudflareProvider(env)
+  const google = googleCloudProvider(env)
+  return {
+    name: 'cloudflare-google',
+    async translate(text, target) {
+      if (
+        cloudflareSupports(target) &&
+        readEnv('CLOUDFLARE_ACCOUNT_ID', env) &&
+        readEnv('CLOUDFLARE_API_TOKEN', env)
+      ) {
+        return cloudflare.translate(text, target)
+      }
+      if (readEnv('GOOGLE_API_KEY', env)) {
+        return google.translate(text, target)
+      }
+      throw error(`no translation provider configured for target ${target}`)
     },
   }
 }
@@ -220,6 +307,15 @@ export function getTranslationProvider(env?: TranslationEnv): TranslationProvide
     case 'libretranslate':
     case 'libre':
       return libreTranslateProvider(env)
+    case 'cloudflare-google':
+    case 'routing':
+    case 'auto':
+    case 'hybrid':
+      return routingProvider(env)
+    case 'cloudflare':
+    case 'workers-ai':
+    case 'cf':
+      return cloudflareProvider(env)
     case 'openai':
       return openaiProvider(env)
     case 'huggingface':

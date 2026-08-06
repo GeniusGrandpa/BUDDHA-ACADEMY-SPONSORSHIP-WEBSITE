@@ -1,5 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
-import { requestPageTranslation } from '../lib/translation/translateService'
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
 export type LanguageCode = string
 
@@ -401,43 +400,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
-const rtlLanguages = new Set(['ar', 'fa', 'he', 'ur'])
-
-const CACHE_VERSION = 'v2'
-function readCache(target: string): Record<string, string> {
-  try {
-    return JSON.parse(window.localStorage.getItem(`ba_translations_${CACHE_VERSION}_${target}`) || '{}')
-  } catch {
-    return {}
-  }
-}
-
-function writeCache(target: string, entries: Record<string, string>) {
-  try {
-    const current = readCache(target)
-    const merged: Record<string, string> = { ...current }
-    for (const k in entries) if (typeof entries[k] === 'string' && entries[k]) merged[k] = entries[k]
-    window.localStorage.setItem(`ba_translations_${CACHE_VERSION}_${target}`, JSON.stringify(merged))
-  } catch {
-  }
-}
-
-function protectPlaceholders(text: string): { text: string; placeholders: string[] } {
-  const placeholders: string[] = []
-  const protectedText = text.replace(/\{(\w+)\}/g, (match) => {
-    placeholders.push(match)
-    return `{{P${placeholders.length - 1}}}`
-  })
-  return { text: protectedText, placeholders }
-}
-
-function restorePlaceholders(text: string, placeholders: string[]): string {
-  let restored = text
-  placeholders.forEach((value, index) => {
-    restored = restored.replaceAll(`{{P${index}}}`, value)
-  })
-  return restored
-}
+const rtlLanguages = new Set(['ar', 'fa', 'he', 'ur', 'ps', 'sd'])
 
 export function getGoogleLanguageCode(language: LanguageCode) {
   return languages.find((item) => item.code === language)?.googleCode ?? language
@@ -471,137 +434,13 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     setPageId(id || 'global')
   }, [])
 
-  const inFlightRef = useRef<Map<string, Promise<string>>>(new Map())
-  const batchInFlightRef = useRef<Map<string, Promise<string[]>>>(new Map())
+  const tr = useCallback(async (text: string): Promise<string> => {
+    return text
+  }, [])
 
-  const tr = useCallback(
-    async (text: string, scope?: string): Promise<string> => {
-      if (!text || !text.trim() || language === 'en') return text
-      const target = getGoogleLanguageCode(language)
-      const page = scope || pageId
-      const cached = readCache(target)[text]
-      if (cached) return cached
-      const key = `${page}|${target}|${text}`
-      const existing = inFlightRef.current.get(key)
-      if (existing) return existing
-      const { text: protectedText, placeholders } = protectPlaceholders(text)
-      const promise = requestPageTranslation({
-        pageId: page,
-        language,
-        target,
-        texts: [protectedText],
-      })
-        .then((result) => {
-          const translated = result?.translations?.[0]
-          const restored = translated ? restorePlaceholders(translated, placeholders) : ''
-          if (restored && restored !== text) writeCache(target, { [text]: restored })
-          return restored || text
-        })
-        .catch(() => text)
-        .finally(() => {
-          inFlightRef.current.delete(key)
-        })
-      inFlightRef.current.set(key, promise)
-      return promise
-    },
-    [language, pageId]
-  )
-
-  const trBatch = useCallback(
-    async (texts: string[], scope?: string): Promise<string[]> => {
-      if (language === 'en') return texts
-      const target = getGoogleLanguageCode(language)
-      const page = scope || pageId
-      const results = new Array<string>(texts.length)
-      const pending: number[] = []
-      const protectedList: { text: string; placeholders: string[]; original: string }[] = []
-
-      texts.forEach((text, index) => {
-        if (!text || !text.trim()) {
-          results[index] = text
-          return
-        }
-        const cached = readCache(target)[text]
-        if (cached) {
-          results[index] = cached
-        } else {
-          pending.push(index)
-          protectedList.push({ ...protectPlaceholders(text), original: text })
-        }
-      })
-      if (pending.length === 0) return results
-
-      const source = protectedList.map((p) => p.text)
-      const batchKey = `${page}|${target}|${source.join('\u0001')}`
-      const apply = (translations: string[]) => {
-        protectedList.forEach((item, offset) => {
-          const restored = translations[offset]
-            ? restorePlaceholders(translations[offset], item.placeholders)
-            : ''
-          if (restored && restored !== item.original) {
-            results[pending[offset]] = restored
-            writeCache(target, { [item.original]: restored })
-          }
-        })
-      }
-
-      const existing = batchInFlightRef.current.get(batchKey)
-      if (existing) {
-        apply(await existing)
-      } else {
-        const promise = requestPageTranslation({ pageId: page, language, target, texts: source })
-          .then((result) => result?.translations ?? source)
-          .catch(() => source)
-          .finally(() => {
-            batchInFlightRef.current.delete(batchKey)
-          })
-        batchInFlightRef.current.set(batchKey, promise)
-        apply(await promise)
-      }
-
-      pending.forEach((index) => {
-        if (!results[index]) results[index] = texts[index]
-      })
-      return results
-    },
-    [language, pageId]
-  )
-
-  const [dynamicDict, setDynamicDict] = useState<Partial<Record<TranslationKey, string>>>({})
-
-  useEffect(() => {
-    if (language === 'en' || translations[language]) {
-      setDynamicDict({})
-      return
-    }
-    let cancelled = false
-    const entries = Object.entries(translations.en) as [TranslationKey, string][]
-    const prepared = entries.map(([, value]) => protectPlaceholders(value))
-    const target = getGoogleLanguageCode(language)
-    requestPageTranslation({
-      pageId: 'dictionary',
-      language,
-      target,
-      texts: prepared.map((item) => item.text),
-    })
-      .then((result) => {
-        if (cancelled) return
-        const map: Partial<Record<TranslationKey, string>> = {}
-        if (result) {
-          entries.forEach(([key, original], index) => {
-            const restored = restorePlaceholders(result.translations[index] ?? '', prepared[index].placeholders)
-            if (restored && restored !== original) map[key] = restored
-          })
-        }
-        setDynamicDict(map)
-      })
-      .catch(() => {
-        if (!cancelled) setDynamicDict({})
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [language])
+  const trBatch = useCallback(async (texts: string[]): Promise<string[]> => {
+    return texts
+  }, [])
 
   const value = useMemo(
     () => ({
@@ -609,12 +448,11 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       setLanguage,
       pageId,
       setPage,
-      t: (key: TranslationKey) =>
-        translations[language]?.[key] ?? dynamicDict[key] ?? translations.en[key] ?? key,
+      t: (key: TranslationKey) => translations.en[key] ?? key,
       tr,
       trBatch,
     }),
-    [language, setLanguage, pageId, setPage, tr, trBatch, dynamicDict]
+    [language, setLanguage, pageId, setPage, tr, trBatch]
   )
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>

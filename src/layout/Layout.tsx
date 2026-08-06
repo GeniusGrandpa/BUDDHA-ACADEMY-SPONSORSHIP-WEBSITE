@@ -7,6 +7,7 @@ import { ErrorBoundary } from '../components/ErrorBoundary'
 import { SeoMetadata } from '../lib/seo-metadata'
 import { useLanguage } from '../context/LanguageContext'
 import { getPageIdFromPath } from '../lib/translation/page'
+import { PageTranslator } from '../components/PageTranslator'
 
 export function Layout() {
   const location = useLocation()
@@ -30,6 +31,7 @@ export function Layout() {
       </main>
       <Footer />
       {!isAdminRoute && <AdminPageToolbar pageSlug={pageSlug} />}
+      <PageTranslator />
     </div>
   )
 }
