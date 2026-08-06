@@ -13,6 +13,7 @@ import { ThemeProvider } from './context/ThemeContext'
 import { CmsStringsProvider } from './context/CmsStringsContext'
 import { ConfirmProvider } from './context/ConfirmContext'
 import { SiteBranding } from './components/SiteBranding'
+import { parseLanguageCookie } from './lib/locale'
 import './index.css'
 
 export interface SsrResult {
@@ -22,7 +23,8 @@ export interface SsrResult {
 
 const handler = createStaticHandler(routeDefinitions)
 
-export async function render(_url: string, template: string): Promise<SsrResult> {
+export async function render(_url: string, template: string, cookieHeader?: string): Promise<SsrResult> {
+  const initialLanguage = parseLanguageCookie(cookieHeader)
   const fetchRequest = new Request(_url)
   const context = await handler.query(fetchRequest)
 
@@ -45,7 +47,7 @@ export async function render(_url: string, template: string): Promise<SsrResult>
   const app = (
     <React.StrictMode>
       <HelmetProvider context={helmetContext}>
-        <LanguageProvider>
+        <LanguageProvider initialLanguage={initialLanguage}>
           <TranslationProvider>
           <QueryClientProvider client={queryClient}>
             <AuthProvider>

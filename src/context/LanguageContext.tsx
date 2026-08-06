@@ -1,4 +1,5 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import React, { createContext, startTransition, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { setLanguageCookie } from '../lib/locale'
 
 export type LanguageCode = string
 
@@ -162,20 +163,13 @@ export function getGoogleLanguageCode(language: LanguageCode) {
   return languages.find((item) => item.code === language)?.googleCode ?? language
 }
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<LanguageCode>('en')
+export function LanguageProvider({ children, initialLanguage }: { children: React.ReactNode; initialLanguage?: LanguageCode }) {
+  const [language, setLanguageState] = useState<LanguageCode>(
+    initialLanguage && languages.some((item) => item.code === initialLanguage) ? initialLanguage : 'en',
+  )
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
-    try {
-      const saved = window.localStorage.getItem('language')
-      if (saved && languages.some((item) => item.code === saved)) setLanguageState(saved)
-    } catch {
-      // ignore
-    }
-  }, [])
-
-  useEffect(() => {
+    setLanguageCookie(language)
     window.localStorage.setItem('language', language)
     document.documentElement.lang = language
     document.documentElement.dir = rtlLanguages.has(language) ? 'rtl' : 'ltr'
@@ -183,7 +177,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   const setLanguage = useCallback((newLanguage: LanguageCode) => {
     if (!languages.some((item) => item.code === newLanguage)) return
-    setLanguageState(newLanguage)
+    startTransition(() => setLanguageState(newLanguage))
   }, [])
 
   const value = useMemo(

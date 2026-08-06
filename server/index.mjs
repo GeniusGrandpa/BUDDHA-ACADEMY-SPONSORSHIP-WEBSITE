@@ -165,7 +165,7 @@ const server = http.createServer(async (req, res) => {
     let result;
     try {
       const appUrl = `http://localhost:${port}${reqUrl}`;
-      result = await render(appUrl, template);
+      result = await render(appUrl, template, req.headers.cookie || '');
     } catch (err) {
       log('error', { requestId, message: 'SSR render error', error: err.message, stack: err.stack });
       await send(req, res, 500, {

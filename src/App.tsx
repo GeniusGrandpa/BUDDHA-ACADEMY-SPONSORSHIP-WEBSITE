@@ -53,12 +53,13 @@ function ClientToaster() {
 
 interface AppProps {
   router: RouterProviderProps['router']
+  initialLanguage?: string
 }
 
-function App({ router }: AppProps) {
+function App({ router, initialLanguage }: AppProps) {
   return (
     <HelmetProvider>
-    <LanguageProvider>
+    <LanguageProvider initialLanguage={initialLanguage}>
       <TranslationProvider>
       <QueryClientProvider client={queryClient}>
       <ClientToaster />
