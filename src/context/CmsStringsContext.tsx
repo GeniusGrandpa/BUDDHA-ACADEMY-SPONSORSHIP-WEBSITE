@@ -404,7 +404,7 @@ export function CmsStringsProvider({ children }: { children: ReactNode }) {
   const [strings, setStrings] = useState<CmsStringMap>({})
   const [loading, setLoading] = useState(true)
   const [translatedMap, setTranslatedMap] = useState<Record<string, string>>({})
-  const { language, translateTexts } = useTranslation()
+  const { language, isHydrated, translateTexts } = useTranslation()
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -423,6 +423,10 @@ export function CmsStringsProvider({ children }: { children: ReactNode }) {
   const merged = useMemo(() => ({ ...DEFAULT_STRINGS, ...strings }), [strings])
 
   useEffect(() => {
+    if (!isHydrated) {
+      setTranslatedMap({})
+      return
+    }
     if (language === 'en') {
       setTranslatedMap({})
       return
@@ -441,7 +445,7 @@ export function CmsStringsProvider({ children }: { children: ReactNode }) {
       if (!cancelled) setTranslatedMap({})
     })
     return () => { cancelled = true }
-  }, [language, merged, translateTexts])
+  }, [language, merged, translateTexts, isHydrated])
 
   const t = useCallback((key: string, replacements?: Record<string, string | number>) => {
     let value = translatedMap[merged[key]] || merged[key] || key

@@ -7,10 +7,11 @@ export interface TranslatedContent {
 }
 
 export function useTranslatedContent(original: string): TranslatedContent {
-  const { language, translate } = useTranslation()
+  const { language, isHydrated, translate } = useTranslation()
   const [state, setState] = useState<TranslatedContent>({ content: original, isLoading: false })
 
   useEffect(() => {
+    if (!isHydrated) return
     let cancelled = false
     if (!original || language === 'en') {
       setState((prev) => (prev.content === original ? prev : { content: original, isLoading: false }))
@@ -27,7 +28,7 @@ export function useTranslatedContent(original: string): TranslatedContent {
     return () => {
       cancelled = true
     }
-  }, [original, language, translate])
+  }, [original, language, isHydrated, translate])
 
   return state
 }

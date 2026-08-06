@@ -1,4 +1,4 @@
-import React, { createContext, startTransition, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import React, { createContext, startTransition, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { setLanguageCookie } from '../lib/locale'
 
 export type LanguageCode = string
@@ -168,7 +168,27 @@ export function LanguageProvider({ children, initialLanguage }: { children: Reac
     initialLanguage && languages.some((item) => item.code === initialLanguage) ? initialLanguage : 'en',
   )
 
+  const [hydrated, setHydrated] = useState(false)
   useEffect(() => {
+    setHydrated(true)
+  }, [])
+
+  const restoredFallback = useRef(false)
+  useEffect(() => {
+    if (!hydrated || restoredFallback.current) return
+    restoredFallback.current = true
+    try {
+      const saved = window.localStorage.getItem('language')
+      if (saved && languages.some((item) => item.code === saved)) {
+        startTransition(() => setLanguageState(saved))
+      }
+    } catch {
+      // ignore
+    }
+  }, [hydrated])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
     setLanguageCookie(language)
     window.localStorage.setItem('language', language)
     document.documentElement.lang = language
