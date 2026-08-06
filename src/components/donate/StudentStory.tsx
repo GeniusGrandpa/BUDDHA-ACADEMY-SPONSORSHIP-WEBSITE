@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { useCmsStrings } from '../../context/CmsStringsContext'
+import { Tr } from '../Translated'
 
 interface StudentStoryProps {
   student: {
@@ -47,7 +48,7 @@ export function StudentStory({ student }: StudentStoryProps) {
               <div>
                 <blockquote className="pl-3 sm:pl-4 border-l-2 border-amber-200">
                   <p className="text-gray-600 leading-relaxed italic text-sm sm:text-base">
-                    {student.bio}
+                    <Tr text={student.bio} />
                   </p>
                 </blockquote>
               </div>
@@ -56,7 +57,7 @@ export function StudentStory({ student }: StudentStoryProps) {
                 <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 px-4 py-3 rounded-lg bg-amber-50 border border-amber-100">
                   <span className="text-xs sm:text-sm text-gray-600">{t('student_story_dreams')}</span>
                   <span className="text-sm font-medium text-[#0f172a]">
-                    {student.dream_career}
+                    <Tr text={student.dream_career} />
                   </span>
                 </div>
               )}

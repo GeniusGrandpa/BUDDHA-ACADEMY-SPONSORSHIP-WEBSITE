@@ -4,6 +4,7 @@ import { getUpcomingEvents } from '../services/volunteerEvents'
 import { submitVolunteerApplication } from '../services/volunteerApplications'
 import { getErrorMessage } from '../lib/errors'
 import { useCmsStrings } from '../context/CmsStringsContext'
+import { Tr } from '../components/Translated'
 import type { VolunteerContent, PageHeader } from '../types/cms-content'
 import type { VolunteerEvent } from '../types/database'
 
@@ -66,8 +67,8 @@ export function VolunteerPage() {
         <section className="relative py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-amber-50 to-orange-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto">
-              {heroTitle && <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">{heroTitle}</h1>}
-              {heroSubtitle && <p className="text-base sm:text-lg md:text-xl text-gray-600">{heroSubtitle}</p>}
+              {heroTitle && <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6"><Tr text={heroTitle} /></h1>}
+              {heroSubtitle && <p className="text-base sm:text-lg md:text-xl text-gray-600"><Tr text={heroSubtitle} /></p>}
             </div>
           </div>
         </section>
@@ -78,16 +79,16 @@ export function VolunteerPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {(content?.section_title || content?.section_description) && (
               <div className="text-center mb-10 sm:mb-16">
-                {content.section_title && <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">{content.section_title}</h2>}
-                {content.section_description && <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">{content.section_description}</p>}
+                {content.section_title && <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4"><Tr text={content.section_title} /></h2>}
+                {content.section_description && <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto"><Tr text={content.section_description} /></p>}
               </div>
             )}
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
               {opportunities.map((opp, idx) => (
                 <div key={idx} className="bg-gray-50 rounded-xl p-6 hover:shadow-lg transition-shadow">
-                  <h3 className="font-semibold text-gray-900 mb-2">{opp.title}</h3>
-                  <p className="text-gray-600 text-sm">{opp.description}</p>
+                  <h3 className="font-semibold text-gray-900 mb-2"><Tr text={opp.title} /></h3>
+                  <p className="text-gray-600 text-sm"><Tr text={opp.description} /></p>
                 </div>
               ))}
             </div>
@@ -103,8 +104,8 @@ export function VolunteerPage() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
               {events.map((event) => (
                 <div key={event.id} className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
-                  <h3 className="font-semibold text-gray-900 mb-2">{event.title}</h3>
-                  <p className="text-gray-600 text-sm">{event.description}</p>
+                  <h3 className="font-semibold text-gray-900 mb-2"><Tr text={event.title} /></h3>
+                  {event.description && <p className="text-gray-600 text-sm"><Tr text={event.description} /></p>}
                 </div>
               ))}
             </div>
@@ -120,7 +121,7 @@ export function VolunteerPage() {
                 <svg className="w-7 h-7 sm:w-8 sm:h-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
               </div>
               <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">{t('volunteer_app_submitted_title')}</h3>
-              <p className="text-sm sm:text-base text-gray-600">{content?.success_message}</p>
+              {content?.success_message && <p className="text-sm sm:text-base text-gray-600"><Tr text={content.success_message} /></p>}
             </div>
           ) : (
             <>

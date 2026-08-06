@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { useCmsStrings } from '../../context/CmsStringsContext'
 import { formatNPR } from '../../utils/currency'
+import { Tr } from '../Translated'
 import type { ImpactBreakdown } from './types'
 
 interface ImpactCardsProps {
@@ -61,8 +62,8 @@ export function ImpactCards({ amounts, selectedAmount, onSelect }: ImpactCardsPr
                     {formatNPR(item.amount)}
                   </p>
 
-                  <p className="text-sm font-medium text-[#0f172a] mb-1.5">{item.label}</p>
-                  <p className="text-xs text-gray-600 leading-relaxed">{item.description}</p>
+                  <p className="text-sm font-medium text-[#0f172a] mb-1.5"><Tr text={item.label} /></p>
+                  <p className="text-xs text-gray-600 leading-relaxed"><Tr text={item.description} /></p>
                 </div>
               </motion.button>
             )

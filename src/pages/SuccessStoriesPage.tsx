@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { getPageHeader } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
+import { Tr } from '../components/Translated'
 import { SuccessStoriesCarousel } from '../components/success-stories/SuccessStoriesCarousel'
 import type { StudentStory } from '../types/database'
 import type { PageHeader } from '../types/cms-content'
@@ -45,11 +46,11 @@ export function SuccessStoriesPage() {
               className="text-center max-w-3xl mx-auto"
             >
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 sm:mb-6 leading-tight">
-                {pageHeader.title}
+                <Tr text={pageHeader.title} />
               </h1>
               {pageHeader.subtitle && (
                 <p className="text-base sm:text-lg md:text-xl text-gray-300 leading-relaxed">
-                  {pageHeader.subtitle}
+                  <Tr text={pageHeader.subtitle} />
                 </p>
               )}
             </motion.div>
@@ -99,19 +100,19 @@ export function SuccessStoriesPage() {
                         </span>
                       )}
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">{story.title}</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-1"><Tr text={story.title} /></h3>
                     <p className="text-sm text-emerald-600 font-medium mb-2">{story.student_name}</p>
-                    <p className="text-sm text-gray-600 leading-relaxed line-clamp-3">{story.content}</p>
+                    <p className="text-sm text-gray-600 leading-relaxed line-clamp-3"><Tr text={story.content} /></p>
                     {story.quote && (
                       <div className="mt-4 p-4 bg-amber-50 rounded-lg">
-                        <p className="text-sm text-amber-800 italic">{story.quote}</p>
+                        <p className="text-sm text-amber-800 italic"><Tr text={story.quote} /></p>
                       </div>
                     )}
                     {story.achievements && story.achievements.length > 0 && (
                       <div className="mt-4 flex flex-wrap gap-2">
                         {story.achievements.map((achievement, i) => (
                           <span key={i} className="text-xs bg-purple-50 text-purple-600 px-2 py-1 rounded-full">
-                            {achievement}
+                            <Tr text={achievement} />
                           </span>
                         ))}
                       </div>

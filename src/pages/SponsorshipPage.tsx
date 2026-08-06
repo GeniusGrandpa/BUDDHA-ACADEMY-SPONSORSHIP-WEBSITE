@@ -4,6 +4,7 @@ import { ArrowRight } from 'lucide-react'
 import { Button } from '../components/ui/Button'
 import { getSponsorshipContent, getSiteImage, getSectionContent } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
+import { Tr } from '../components/Translated'
 import type { SponsorshipContent } from '../types/cms-content'
 
 const TREE_STEPS = [
@@ -34,9 +35,9 @@ function SponsorshipTree({ steps }: { steps: { title: string; desc: string }[] }
               <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border-accent)]/30 p-3 sm:p-4 shadow-sm hover:shadow-md hover:border-[var(--color-primary-light)]/60 transition-all">
                 <div className={`flex items-center gap-2 mb-1.5 ${isLeft ? 'md:flex-row-reverse' : ''}`}>
                   <span className="inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-accent)] text-white text-xs sm:text-sm font-bold shrink-0">{i + 1}</span>
-                  <h3 className="text-sm sm:text-base font-bold text-[var(--color-text-primary)]">{item.title}</h3>
+                  <h3 className="text-sm sm:text-base font-bold text-[var(--color-text-primary)]"><Tr text={item.title} /></h3>
                 </div>
-                <p className={`text-xs sm:text-sm text-[var(--color-text-secondary)] leading-relaxed ${isLeft ? 'md:text-right' : ''}`}>{item.desc}</p>
+                <p className={`text-xs sm:text-sm text-[var(--color-text-secondary)] leading-relaxed ${isLeft ? 'md:text-right' : ''}`}><Tr text={item.desc} /></p>
               </div>
             </div>
           </div>
@@ -115,8 +116,8 @@ export function SponsorshipPage() {
       <section className="relative py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-amber-50 to-orange-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[var(--color-text-primary)] mb-4 sm:mb-6">{content?.hero_title || DEFAULT_HERO_TITLE}</h1>
-            <p className="text-base sm:text-lg md:text-xl text-[var(--color-text-secondary)]">{content?.hero_subtitle || DEFAULT_HERO_SUBTITLE}</p>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[var(--color-text-primary)] mb-4 sm:mb-6"><Tr text={content?.hero_title || DEFAULT_HERO_TITLE} /></h1>
+            <p className="text-base sm:text-lg md:text-xl text-[var(--color-text-secondary)]"><Tr text={content?.hero_subtitle || DEFAULT_HERO_SUBTITLE} /></p>
           </div>
         </div>
       </section>
@@ -124,8 +125,8 @@ export function SponsorshipPage() {
       <section className="py-12 sm:py-16 lg:py-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10 sm:mb-14">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text-primary)] mb-4">{content?.section_title || DEFAULT_SECTION_TITLE}</h2>
-            <p className="text-sm sm:text-base text-[var(--color-text-secondary)] max-w-2xl mx-auto">{content?.section_description || DEFAULT_SECTION_DESC}</p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text-primary)] mb-4"><Tr text={content?.section_title || DEFAULT_SECTION_TITLE} /></h2>
+            <p className="text-sm sm:text-base text-[var(--color-text-secondary)] max-w-2xl mx-auto"><Tr text={content?.section_description || DEFAULT_SECTION_DESC} /></p>
           </div>
             <SponsorshipTree steps={steps} />
           </div>
@@ -148,7 +149,7 @@ export function SponsorshipPage() {
                   {benefits.map((benefit, idx) => (
                     <div key={idx} className="flex items-center gap-3">
                       <span className="w-6 h-6 rounded-full bg-[var(--color-primary)] text-white text-xs font-bold flex items-center justify-center flex-shrink-0">{idx + 1}</span>
-                      <span className="text-[var(--color-text-secondary)] text-sm sm:text-base">{benefit.text}</span>
+                      <span className="text-[var(--color-text-secondary)] text-sm sm:text-base"><Tr text={benefit.text} /></span>
                     </div>
                   ))}
                 </div>
@@ -171,10 +172,10 @@ export function SponsorshipPage() {
 
       <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-[var(--color-primary)] via-[var(--color-accent)] to-[var(--color-secondary)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 sm:mb-6">{content?.cta_title || DEFAULT_CTA_TITLE}</h2>
-          <p className="text-white/80 max-w-2xl mx-auto mb-6 sm:mb-8 text-sm sm:text-base">{content?.cta_description || DEFAULT_CTA_DESC}</p>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 sm:mb-6"><Tr text={content?.cta_title || DEFAULT_CTA_TITLE} /></h2>
+          <p className="text-white/80 max-w-2xl mx-auto mb-6 sm:mb-8 text-sm sm:text-base"><Tr text={content?.cta_description || DEFAULT_CTA_DESC} /></p>
           <Link to={content?.cta_button_link || '/students'}>
-            <Button size="lg" className="w-full sm:w-auto">{content?.cta_button_text || DEFAULT_CTA_BUTTON} <ArrowRight className="w-4 h-4 ml-2" /></Button>
+            <Button size="lg" className="w-full sm:w-auto"><Tr text={content?.cta_button_text || DEFAULT_CTA_BUTTON} /> <ArrowRight className="w-4 h-4 ml-2" /></Button>
           </Link>
         </div>
       </section>

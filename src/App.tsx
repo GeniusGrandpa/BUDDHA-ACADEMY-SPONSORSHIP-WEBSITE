@@ -5,6 +5,7 @@ import { HelmetProvider } from 'react-helmet-async'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from './context/AuthContext'
 import { LanguageProvider } from './context/LanguageContext'
+import { TranslationProvider } from './context/TranslationContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { CmsStringsProvider } from './context/CmsStringsContext'
 import { ConfirmProvider } from './context/ConfirmContext'
@@ -58,6 +59,7 @@ function App({ router }: AppProps) {
   return (
     <HelmetProvider>
     <LanguageProvider>
+      <TranslationProvider>
       <QueryClientProvider client={queryClient}>
       <ClientToaster />
       <AuthProvider>
@@ -71,6 +73,7 @@ function App({ router }: AppProps) {
         </ThemeProvider>
       </AuthProvider>
       </QueryClientProvider>
+      </TranslationProvider>
     </LanguageProvider>
     </HelmetProvider>
   )

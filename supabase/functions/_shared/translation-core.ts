@@ -99,7 +99,7 @@ export async function resolvePageTranslation(
   })
 
   const mergedMap: Record<string, string> = { ...cachedMap }
-  let cached = missingTexts.length === 0
+  const cached = missingTexts.length === 0
 
   if (missingTexts.length > 0) {
     const translated = await translateBatch(provider, missingTexts, target)

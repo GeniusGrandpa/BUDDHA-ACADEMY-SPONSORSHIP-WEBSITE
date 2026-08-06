@@ -5,6 +5,7 @@ import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { getPageHeader, getSiteImagesBySection } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
+import { Tr } from '../components/Translated'
 import type { PageHeader, SiteImage } from '../types/cms-content'
 
 interface TimelineItem { year: string; title: string; desc: string }
@@ -90,8 +91,8 @@ export function AboutPage() {
         <section className="relative py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-[var(--color-primary)] via-[var(--color-accent)] to-[var(--color-secondary)]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto">
-              {header.title && <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 sm:mb-6">{header.title}</h1>}
-              {header.subtitle && <p className="text-base sm:text-lg md:text-xl text-white/90 leading-relaxed">{header.subtitle}</p>}
+              {header.title && <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 sm:mb-6"><Tr text={header.title} /></h1>}
+              {header.subtitle && <p className="text-base sm:text-lg md:text-xl text-white/90 leading-relaxed"><Tr text={header.subtitle} /></p>}
             </div>
           </div>
         </section>
@@ -102,9 +103,9 @@ export function AboutPage() {
           <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
             <div>
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text-primary)] mb-4 sm:mb-6">{t('about_mission_heading')}</h2>
-              <p className="text-[var(--color-text-secondary)] mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">{content?.mission || DEFAULT_MISSION}</p>
-              <p className="text-[var(--color-text-secondary)] mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">{content?.vision || DEFAULT_VISION}</p>
-              <p className="text-[var(--color-text-secondary)] leading-relaxed text-sm sm:text-base">{content?.description || DEFAULT_DESCRIPTION}</p>
+              <p className="text-[var(--color-text-secondary)] mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base"><Tr text={content?.mission || DEFAULT_MISSION} /></p>
+              <p className="text-[var(--color-text-secondary)] mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base"><Tr text={content?.vision || DEFAULT_VISION} /></p>
+              <p className="text-[var(--color-text-secondary)] leading-relaxed text-sm sm:text-base"><Tr text={content?.description || DEFAULT_DESCRIPTION} /></p>
             </div>
             {images.length > 0 && (
               <div className="grid grid-cols-2 gap-3 sm:gap-4">
@@ -130,7 +131,7 @@ export function AboutPage() {
               {stats.map((stat, idx) => (
                 <div key={idx}>
                   <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2">{stat.value}</div>
-                  <div className="text-white/80 text-xs sm:text-sm">{stat.label}</div>
+                  <div className="text-white/80 text-xs sm:text-sm"><Tr text={stat.label} /></div>
                 </div>
               ))}
             </div>
@@ -148,8 +149,8 @@ export function AboutPage() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
               {values.map((value, idx) => (
                 <Card key={idx} variant="bordered" className="text-center hover:shadow-lg transition-shadow">
-                  <h3 className="font-semibold text-[var(--color-text-primary)] mb-2">{value.title}</h3>
-                  <p className="text-[var(--color-text-secondary)] text-sm">{value.desc}</p>
+                  <h3 className="font-semibold text-[var(--color-text-primary)] mb-2"><Tr text={value.title} /></h3>
+                  <p className="text-[var(--color-text-secondary)] text-sm"><Tr text={value.desc} /></p>
                 </Card>
               ))}
             </div>
@@ -188,8 +189,8 @@ export function AboutPage() {
                           <span className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)] text-white text-xs font-bold uppercase tracking-wider mb-3">
                             {item.year}
                           </span>
-                          <h3 className="text-[var(--color-text-primary)] text-lg font-semibold mb-2">{item.title}</h3>
-                          <p className="text-[var(--color-text-muted)] text-sm leading-relaxed">{item.desc}</p>
+                          <h3 className="text-[var(--color-text-primary)] text-lg font-semibold mb-2"><Tr text={item.title} /></h3>
+                          <p className="text-[var(--color-text-muted)] text-sm leading-relaxed"><Tr text={item.desc} /></p>
                         </div>
                       </div>
                       <div className="hidden md:flex items-center justify-center w-12 shrink-0 relative z-10">

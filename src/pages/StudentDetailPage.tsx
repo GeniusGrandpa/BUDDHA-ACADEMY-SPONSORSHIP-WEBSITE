@@ -7,6 +7,7 @@ import { Card } from '../components/ui/Card'
 import { getStudentById } from '../services/students'
 import { getSiteImage } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
+import { Tr } from '../components/Translated'
 import { sponsorshipVariant, sponsorshipLabel } from '../utils/sponsorship'
 import type { Student } from '../types/database'
 import { formatNPR } from '../utils/currency'
@@ -161,7 +162,7 @@ export function StudentDetailPage() {
             <Card variant="bordered" padding="lg">
               <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">{t('student_about_heading', { name: student.name })}</h2>
               <p className="text-gray-600 leading-relaxed whitespace-pre-line text-sm sm:text-base">
-                {student.bio}
+                <Tr text={student.bio} />
               </p>
             </Card>
 
@@ -169,7 +170,7 @@ export function StudentDetailPage() {
               <Card variant="bordered" padding="lg">
                 <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">{t('student_family_heading')}</h2>
                 <p className="text-gray-600 leading-relaxed whitespace-pre-line text-sm sm:text-base">
-                  {student.family_background}
+                  <Tr text={student.family_background} />
                 </p>
               </Card>
             )}

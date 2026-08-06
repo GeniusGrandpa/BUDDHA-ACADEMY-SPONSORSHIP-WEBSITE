@@ -170,7 +170,7 @@ function StatsSection({ hero, statsSection, visible }: { hero: HeroContent; stat
   return (
     <section className="bg-gradient-to-br from-[var(--color-primary)] via-[var(--color-accent)] to-[var(--color-secondary)] py-12 sm:py-16" aria-label={t('home_stats_impact_aria')}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {content?.title && <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white text-center mb-8 sm:mb-12">{content.title}</h2>}
+        {content?.title && <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white text-center mb-8 sm:mb-12"><Tr text={content.title} /></h2>}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-8 text-white text-center" role="list" aria-label={t('home_stats_aria')}>
           {stats.map((stat, idx) => (
             <div key={idx} role="listitem">
@@ -191,8 +191,8 @@ function WelcomeSection({ welcome, visible }: { welcome: SectionContent; visible
   return (
     <section className="py-12 sm:py-16 lg:py-24">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        {content.title && <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text-primary)] mb-4 sm:mb-6">{content.title}</h2>}
-        {content.content && <p className="text-base sm:text-lg text-[var(--color-text-secondary)] leading-relaxed">{content.content}</p>}
+        {content.title && <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text-primary)] mb-4 sm:mb-6"><Tr text={content.title} /></h2>}
+        {content.content && <p className="text-base sm:text-lg text-[var(--color-text-secondary)] leading-relaxed"><Tr text={content.content} /></p>}
       </div>
     </section>
   )
@@ -261,7 +261,7 @@ function StudentsSection({ students, brokenPhotos, setBrokenPhotos, visible, loa
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8 sm:mb-12">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text-primary)] mb-4">
-            {content?.title || t('home_students_heading')}
+            {content?.title ? <Tr text={content.title} /> : t('home_students_heading')}
           </h2>
           <p className="text-sm sm:text-base text-[var(--color-text-secondary)] max-w-2xl mx-auto">
             {t('home_students_description')}
@@ -303,7 +303,7 @@ function StudentsSection({ students, brokenPhotos, setBrokenPhotos, visible, loa
                       <span>{t('home_age_label', { age: student.age })}</span>
                       <span>{t('home_grade_label', { grade: student.grade })}</span>
                     </div>
-                    {student.bio && <p className="text-[var(--color-text-secondary)] text-sm mb-4 line-clamp-2">{student.bio}</p>}
+                    {student.bio && <p className="text-[var(--color-text-secondary)] text-sm mb-4 line-clamp-2"><Tr text={student.bio} /></p>}
                     <Link to={`/students/${student.id}`}>
                       <Button variant="outline" className="w-full">{t('home_view_profile')}</Button>
                     </Link>
@@ -351,9 +351,9 @@ function SponsorshipTree({ steps }: { steps: { title: string; desc: string }[] }
               <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border-accent)]/30 p-3 sm:p-4 shadow-sm hover:shadow-md hover:border-[var(--color-primary-light)]/60 transition-all">
                 <div className={`flex items-center gap-2 mb-1.5 ${isLeft ? 'md:flex-row-reverse' : ''}`}>
                   <span className="inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[var(--color-primary)] text-white text-xs sm:text-sm font-bold shrink-0">{i + 1}</span>
-                  <h3 className="text-sm sm:text-base font-bold text-[var(--color-text-primary)]">{item.title}</h3>
+                  <h3 className="text-sm sm:text-base font-bold text-[var(--color-text-primary)]"><Tr text={item.title} /></h3>
                 </div>
-                <p className={`text-xs sm:text-sm text-[var(--color-text-secondary)] leading-relaxed ${isLeft ? 'md:text-right' : ''}`}>{item.desc}</p>
+                <p className={`text-xs sm:text-sm text-[var(--color-text-secondary)] leading-relaxed ${isLeft ? 'md:text-right' : ''}`}><Tr text={item.desc} /></p>
               </div>
             </div>
           </div>
@@ -373,8 +373,8 @@ function SponsorshipStepsSection({ sponsorshipSteps, visible }: { sponsorshipSte
     <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-[var(--color-primary-light)]/10 via-[var(--color-surface)] to-[var(--color-secondary-light)]/10">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-10 sm:mb-14">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text-primary)] mb-4">{title}</h2>
-          <p className="text-sm sm:text-base text-[var(--color-text-secondary)] max-w-2xl mx-auto">{description}</p>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text-primary)] mb-4"><Tr text={title} /></h2>
+          <p className="text-sm sm:text-base text-[var(--color-text-secondary)] max-w-2xl mx-auto"><Tr text={description} /></p>
         </div>
         <SponsorshipTree steps={steps} />
       </div>
@@ -389,7 +389,7 @@ function TestimonialsSection({ testimonials, testimonialList, visible }: { testi
   return (
     <section className="py-12 sm:py-16 lg:py-24 bg-[var(--color-background)]">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {content?.title && <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text-primary)] mb-8 sm:mb-12 text-center">{content.title}</h2>}
+        {content?.title && <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text-primary)] mb-8 sm:mb-12 text-center"><Tr text={content.title} /></h2>}
         <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
           {items.length > 0 ? items.map((t) => (
             <div key={t.id} className="bg-[var(--color-surface)] rounded-xl p-6 border border-[var(--color-border)] shadow-sm">
@@ -399,10 +399,10 @@ function TestimonialsSection({ testimonials, testimonialList, visible }: { testi
                 </div>
                 <div>
                   <div className="text-sm font-medium text-[var(--color-text-secondary)]">{t.author_name}</div>
-                  {t.author_role && <div className="text-xs text-[var(--color-text-muted)]">{t.author_role}</div>}
+                  {t.author_role && <div className="text-xs text-[var(--color-text-muted)]"><Tr text={t.author_role} /></div>}
                 </div>
               </div>
-              <p className="text-sm text-[var(--color-text-secondary)] italic">"{t.content || t.quote}"</p>
+              <p className="text-sm text-[var(--color-text-secondary)] italic">"<Tr text={t.content || t.quote || ''} />"</p>
             </div>
           )) : (
             <div className="col-span-2 text-center py-8 text-[var(--color-text-muted)] text-sm">Testimonials will appear here once added.</div>

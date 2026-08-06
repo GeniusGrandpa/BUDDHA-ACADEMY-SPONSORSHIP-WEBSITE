@@ -7,6 +7,7 @@ import { Button } from '../components/ui/Button'
 import { getStudents } from '../services/students'
 import { getPageHeader } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
+import { Tr } from '../components/Translated'
 import { sponsorshipVariant, sponsorshipLabel } from '../utils/sponsorship'
 import { optimizeImageUrl } from '../utils/image'
 import type { Student } from '../types/database'
@@ -58,11 +59,11 @@ export function StudentsPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto">
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">
-                {pageHeader.title}
+                <Tr text={pageHeader.title} />
               </h1>
               {pageHeader.subtitle && (
                 <p className="text-base sm:text-lg md:text-xl text-gray-600">
-                  {pageHeader.subtitle}
+                  <Tr text={pageHeader.subtitle} />
                 </p>
               )}
             </div>
@@ -103,7 +104,7 @@ export function StudentsPage() {
                       <span>{t('students_grade_label', { grade: student.grade })}</span>
                     </div>
                     <p className="text-gray-600 text-xs sm:text-sm mb-4 line-clamp-3">
-                      {student.bio}
+                      <Tr text={student.bio} />
                     </p>
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs sm:text-sm text-gray-500 mb-4 gap-1 sm:gap-0">
                       <span>{t('students_sponsorship_label', { amount: formatNPR(student.sponsorship_amount) })}</span>

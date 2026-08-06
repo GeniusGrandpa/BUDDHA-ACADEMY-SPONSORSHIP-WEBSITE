@@ -11,6 +11,7 @@ import { ImpactPanel } from '../components/donate/ImpactPanel'
 import { AuthPrompt } from '../components/donate/AuthPrompt'
 import { StudentStory } from '../components/donate/StudentStory'
 import { useCmsStrings } from '../context/CmsStringsContext'
+import { Tr } from '../components/Translated'
 import type { Student } from '../types/database'
 import type { StudentSummary } from '../components/donate/types'
 import type { DonationContent, PageHeader } from '../types/cms-content'
@@ -120,13 +121,13 @@ export function DonatePage() {
             >
               <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-white/80 text-sm font-light tracking-wide mb-6">
                 <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-accent)]" />
-                {pageHeader?.title || 'Donation Program'}
+                <Tr text={pageHeader?.title || 'Donation Program'} />
               </span>
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-white leading-tight tracking-tight mb-4 sm:mb-6">
-                {content?.hero_title || 'Make a Donation'}
+                <Tr text={content?.hero_title || 'Make a Donation'} />
               </h1>
               <p className="text-base sm:text-lg lg:text-xl text-white/90 font-light leading-relaxed max-w-2xl mb-8 sm:mb-10">
-                {content?.hero_subtitle}
+                {content?.hero_subtitle ? <Tr text={content.hero_subtitle} /> : null}
               </p>
             </motion.div>
           </div>
@@ -170,8 +171,8 @@ export function DonatePage() {
                   <div className="w-10 h-10 rounded-full bg-[var(--color-primary-light)]/20 text-[var(--color-primary-dark)] flex items-center justify-center text-lg font-medium mx-auto mb-4">
                     {index + 1}
                   </div>
-                  <h3 className="text-base font-medium text-[var(--color-text-primary)] mb-2">{step.title}</h3>
-                  <p className="text-sm text-[var(--color-text-secondary)]">{step.desc}</p>
+                  <h3 className="text-base font-medium text-[var(--color-text-primary)] mb-2"><Tr text={step.title} /></h3>
+                  <p className="text-sm text-[var(--color-text-secondary)]"><Tr text={step.desc} /></p>
                 </motion.div>
               ))}
             </div>

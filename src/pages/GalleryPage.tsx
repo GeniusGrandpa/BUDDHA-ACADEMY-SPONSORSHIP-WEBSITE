@@ -6,6 +6,7 @@ import { getGalleryItems } from '../services/gallery'
 import { getVideos } from '../services/content'
 import { getPageHeader, getSiteImage } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
+import { Tr } from '../components/Translated'
 import type { GalleryItem, Video } from '../types/database'
 import type { PageHeader } from '../types/cms-content'
 import { GallerySkeleton } from '../components/ui/LoadingSkeleton'
@@ -106,11 +107,11 @@ export function GalleryPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto">
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">
-                {pageHeader.title}
+                <Tr text={pageHeader.title} />
               </h1>
               {pageHeader.subtitle && (
                 <p className="text-base sm:text-lg md:text-xl text-gray-600">
-                  {pageHeader.subtitle}
+                  <Tr text={pageHeader.subtitle} />
                 </p>
               )}
             </div>
@@ -139,8 +140,8 @@ export function GalleryPage() {
                         onError={() => setBrokenImages(prev => new Set(prev).add(item.id))}
                       />
                       <div className="p-4">
-                        <h3 className="font-semibold text-gray-900 mb-1">{item.title}</h3>
-                        {item.caption && <p className="text-sm text-gray-600">{item.caption}</p>}
+                        <h3 className="font-semibold text-gray-900 mb-1"><Tr text={item.title} /></h3>
+                        {item.caption && <p className="text-sm text-gray-600"><Tr text={item.caption} /></p>}
                       </div>
                     </>
                   )}
@@ -168,8 +169,8 @@ export function GalleryPage() {
                         </div>
                       </div>
                       <div className="p-4">
-                        <h3 className="font-semibold text-gray-900 mb-1">{item.title}</h3>
-                        {item.caption && <p className="text-sm text-gray-600">{item.caption}</p>}
+                        <h3 className="font-semibold text-gray-900 mb-1"><Tr text={item.title} /></h3>
+                        {item.caption && <p className="text-sm text-gray-600"><Tr text={item.caption} /></p>}
                       </div>
                     </div>
                   )}
@@ -187,10 +188,10 @@ export function GalleryPage() {
                         </div>
                       </div>
                       <p className="text-gray-700 italic leading-relaxed">
-                        "{item.url}"
+                        "<Tr text={item.url} />"
                       </p>
                       {item.caption && (
-                        <p className="text-sm text-gray-500 mt-4">{item.caption}</p>
+                        <p className="text-sm text-gray-500 mt-4"><Tr text={item.caption} /></p>
                       )}
                     </div>
                   )}

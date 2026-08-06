@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, useCallback, useMemo, type ReactNode } from 'react'
 import { getAllCmsStrings } from '../services/cms-content'
-import { useLanguage } from './LanguageContext'
+import { useTranslation } from './TranslationContext'
 import type { CmsStringMap } from '../types/cms-content'
 
 const DEFAULT_STRINGS: Record<string, string> = {
@@ -404,7 +404,7 @@ export function CmsStringsProvider({ children }: { children: ReactNode }) {
   const [strings, setStrings] = useState<CmsStringMap>({})
   const [loading, setLoading] = useState(true)
   const [translatedMap, setTranslatedMap] = useState<Record<string, string>>({})
-  const { language, trBatch } = useLanguage()
+  const { language, translateTexts } = useTranslation()
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -429,7 +429,7 @@ export function CmsStringsProvider({ children }: { children: ReactNode }) {
     }
     let cancelled = false
     const unique = Array.from(new Set(Object.values(merged)))
-    trBatch(unique, 'cms').then((results) => {
+    translateTexts(unique).then((results) => {
       if (cancelled) return
       const map: Record<string, string> = {}
       unique.forEach((value, index) => {
@@ -441,7 +441,7 @@ export function CmsStringsProvider({ children }: { children: ReactNode }) {
       if (!cancelled) setTranslatedMap({})
     })
     return () => { cancelled = true }
-  }, [language, merged, trBatch])
+  }, [language, merged, translateTexts])
 
   const t = useCallback((key: string, replacements?: Record<string, string | number>) => {
     let value = translatedMap[merged[key]] || merged[key] || key

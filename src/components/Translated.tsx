@@ -1,28 +1,7 @@
-import { useEffect, useState } from 'react'
-import { useLanguage } from '../context/LanguageContext'
+import { useTranslatedText } from '../hooks/useTranslatedText'
 
-export function useTranslatedText(text: string): string {
-  const { language, tr } = useLanguage()
-  const [translated, setTranslated] = useState(text)
+export { useTranslatedText, useTranslatedContent } from '../hooks/useTranslatedText'
 
-  useEffect(() => {
-    let cancelled = false
-    if (!text || language === 'en') {
-      setTranslated(text)
-      return
-    }
-    setTranslated(text)
-    tr(text).then((result) => {
-      if (!cancelled) setTranslated(result)
-    }).catch(() => {})
-    return () => { cancelled = true }
-  }, [text, language, tr])
-
-  return translated
-}
-
-export function Tr({ text, as = 'span' }: { text: string; as?: keyof JSX.IntrinsicElements }) {
-  const translated = useTranslatedText(text)
-  if (as === 'span') return <span>{translated}</span>
-  return <>{translated}</>
+export function Tr({ text }: { text: string }) {
+  return <>{useTranslatedText(text)}</>
 }

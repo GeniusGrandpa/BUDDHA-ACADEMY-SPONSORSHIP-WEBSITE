@@ -2,73 +2,9 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 
 export type LanguageCode = string
 
-type TranslationKey =
-  | 'language.label'
-  | 'nav.home'
-  | 'nav.about'
-  | 'nav.students'
-  | 'nav.gallery'
-  | 'nav.news'
-  | 'nav.contact'
-  | 'nav.admin'
-  | 'nav.dashboard'
-  | 'auth.signIn'
-  | 'auth.signUp'
-  | 'auth.signOut'
-  | 'auth.donorSignIn'
-  | 'auth.signInSubtitle'
-  | 'auth.email'
-  | 'auth.password'
-  | 'auth.signingIn'
-  | 'auth.invalidCredentials'
-  | 'auth.verifyBeforeSignIn'
-  | 'auth.verificationSent'
-  | 'auth.resendVerification'
-  | 'auth.sendingVerification'
-  | 'auth.noAccount'
-  | 'auth.createAccount'
-  | 'auth.forgotPassword'
-  | 'auth.alreadyAccount'
-  | 'auth.fullName'
-  | 'auth.confirmPassword'
-  | 'auth.country'
-  | 'auth.registerTitle'
-  | 'auth.registerSubtitle'
-  | 'auth.creatingAccount'
-  | 'auth.registrationSuccess'
-  | 'auth.passwordMismatch'
-  | 'auth.passwordTooShort'
-  | 'auth.registrationFailed'
-  | 'auth.emailVerified'
-  | 'auth.callbackChecking'
-  | 'auth.callbackVerified'
-  | 'auth.callbackFailed'
-  | 'auth.callbackMissingCode'
-  | 'auth.backToSignIn'
-  | 'footer.ctaTitle'
-  | 'footer.ctaText'
-  | 'footer.sponsorChild'
-  | 'footer.makeDonation'
-  | 'footer.description'
-  | 'footer.getInvolved'
-  | 'footer.volunteer'
-  | 'footer.information'
-  | 'footer.aboutUs'
-  | 'footer.transparency'
-  | 'footer.privacy'
-  | 'footer.terms'
-  | 'footer.contact'
-  | 'footer.rights'
-  | 'footer.nonprofit'
-
 interface LanguageContextType {
   language: LanguageCode
   setLanguage: (language: LanguageCode) => void
-  pageId: string
-  setPage: (pageId: string) => void
-  t: (key: TranslationKey) => string
-  tr: (text: string, pageId?: string) => Promise<string>
-  trBatch: (texts: string[], pageId?: string) => Promise<string[]>
 }
 
 interface LanguageOption {
@@ -219,186 +155,6 @@ export function getLanguageFlagAlt(language: LanguageCode) {
   return `${country.name} flag`
 }
 
-const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>> = {
-  en: {
-    'language.label': 'Language',
-    'nav.home': 'Home',
-    'nav.about': 'About',
-    'nav.students': 'Students',
-    'nav.gallery': 'Gallery',
-    'nav.news': 'News',
-    'nav.contact': 'Contact',
-    'nav.admin': 'Admin',
-    'nav.dashboard': 'Dashboard',
-    'auth.signIn': 'Sign In',
-    'auth.signUp': 'Sign Up',
-    'auth.signOut': 'Sign Out',
-    'auth.donorSignIn': 'Donor Sign In',
-    'auth.signInSubtitle': 'Access your dashboard and track your sponsored children',
-    'auth.email': 'Email Address',
-    'auth.password': 'Password',
-    'auth.signingIn': 'Signing in...',
-    'auth.invalidCredentials': 'Invalid email or password',
-    'auth.verifyBeforeSignIn': 'Please verify your email before signing in. Check your Gmail inbox for the confirmation message.',
-    'auth.verificationSent': 'Verification email sent. Please check your Gmail inbox and spam folder.',
-    'auth.resendVerification': 'Resend Verification Email',
-    'auth.sendingVerification': 'Sending verification...',
-    'auth.noAccount': "Don't have an account? ",
-    'auth.createAccount': 'Create account',
-    'auth.forgotPassword': 'Forgot password?',
-    'auth.alreadyAccount': 'Already have an account? ',
-    'auth.fullName': 'Full Name',
-    'auth.confirmPassword': 'Confirm Password',
-    'auth.country': 'Country',
-    'auth.registerTitle': 'Create Account',
-    'auth.registerSubtitle': 'Join our community of donors and sponsors',
-    'auth.creatingAccount': 'Creating account...',
-    'auth.registrationSuccess': 'Verification email sent. Please check your Gmail inbox and confirm your account before signing in.',
-    'auth.passwordMismatch': 'Passwords do not match',
-    'auth.passwordTooShort': 'Password must be at least 6 characters',
-    'auth.registrationFailed': 'Registration failed',
-    'auth.emailVerified': 'Email verified. You can now sign in.',
-    'auth.callbackChecking': 'Checking verification',
-    'auth.callbackVerified': 'Email verified',
-    'auth.callbackFailed': 'Verification failed',
-    'auth.callbackMissingCode': 'The verification link is missing a valid session code. Please request a new verification email.',
-    'auth.backToSignIn': 'Back to Sign In',
-    'footer.ctaTitle': 'Be the reason a child smiles today',
-    'footer.ctaText': 'Your sponsorship provides education, meals, healthcare, and hope to underprivileged children in Nepal.',
-    'footer.sponsorChild': 'Sponsor a Child',
-    'footer.makeDonation': 'Make a Donation',
-    'footer.description': 'Providing free education to underprivileged children in Nepal since 1977.',
-    'footer.getInvolved': 'Get Involved',
-    'footer.volunteer': 'Volunteer',
-    'footer.information': 'Information',
-    'footer.aboutUs': 'About Us',
-    'footer.transparency': 'Transparency',
-    'footer.privacy': 'Privacy Policy',
-    'footer.terms': 'Terms & Conditions',
-    'footer.contact': 'Contact',
-    'footer.rights': 'All rights reserved.',
-    'footer.nonprofit': 'A registered nonprofit organization in Nepal',
-  },
-  ne: {
-    'language.label': 'भाषा',
-    'nav.home': 'गृहपृष्ठ',
-    'nav.about': 'हाम्रो बारेमा',
-    'nav.students': 'विद्यार्थी',
-    'nav.gallery': 'ग्यालरी',
-    'nav.news': 'समाचार',
-    'nav.contact': 'सम्पर्क',
-    'nav.admin': 'प्रशासन',
-    'nav.dashboard': 'ड्यासबोर्ड',
-    'auth.signIn': 'साइन इन',
-    'auth.signUp': 'साइन अप',
-    'auth.signOut': 'साइन आउट',
-    'auth.donorSignIn': 'दाता साइन इन',
-    'auth.signInSubtitle': 'आफ्नो ड्यासबोर्ड हेर्नुहोस् र प्रायोजित बालबालिकाको प्रगति ट्र्याक गर्नुहोस्',
-    'auth.email': 'इमेल ठेगाना',
-    'auth.password': 'पासवर्ड',
-    'auth.signingIn': 'साइन इन हुँदै...',
-    'auth.invalidCredentials': 'इमेल वा पासवर्ड मिलेन',
-    'auth.verifyBeforeSignIn': 'साइन इन गर्नु अघि इमेल पुष्टि गर्नुहोस्। पुष्टिकरण सन्देशका लागि आफ्नो Gmail इनबक्स जाँच गर्नुहोस्।',
-    'auth.verificationSent': 'पुष्टिकरण इमेल पठाइयो। कृपया Gmail इनबक्स र स्पाम फोल्डर जाँच गर्नुहोस्।',
-    'auth.resendVerification': 'पुष्टिकरण इमेल पुनः पठाउनुहोस्',
-    'auth.sendingVerification': 'पुष्टिकरण पठाइँदै...',
-    'auth.noAccount': 'खाता छैन? ',
-    'auth.createAccount': 'खाता बनाउनुहोस्',
-    'auth.forgotPassword': 'पासवर्ड बिर्सनुभयो?',
-    'auth.alreadyAccount': 'पहिल्यै खाता छ? ',
-    'auth.fullName': 'पूरा नाम',
-    'auth.confirmPassword': 'पासवर्ड पुष्टि गर्नुहोस्',
-    'auth.country': 'देश',
-    'auth.registerTitle': 'खाता बनाउनुहोस्',
-    'auth.registerSubtitle': 'दाता र प्रायोजकहरूको हाम्रो समुदायमा जोडिनुहोस्',
-    'auth.creatingAccount': 'खाता बनाउँदै...',
-    'auth.registrationSuccess': 'पुष्टिकरण इमेल पठाइयो। साइन इन गर्नु अघि Gmail खोलेर आफ्नो खाता पुष्टि गर्नुहोस्।',
-    'auth.passwordMismatch': 'पासवर्डहरू मिलेनन्',
-    'auth.passwordTooShort': 'पासवर्ड कम्तीमा ६ अक्षरको हुनुपर्छ',
-    'auth.registrationFailed': 'दर्ता असफल भयो',
-    'auth.emailVerified': 'इमेल पुष्टि भयो। अब साइन इन गर्न सक्नुहुन्छ।',
-    'auth.callbackChecking': 'पुष्टिकरण जाँच हुँदै',
-    'auth.callbackVerified': 'इमेल पुष्टि भयो',
-    'auth.callbackFailed': 'पुष्टिकरण असफल भयो',
-    'auth.callbackMissingCode': 'पुष्टिकरण लिंकमा मान्य सेसन कोड छैन। कृपया नयाँ पुष्टिकरण इमेल अनुरोध गर्नुहोस्।',
-    'auth.backToSignIn': 'साइन इनमा फर्कनुहोस्',
-    'footer.ctaTitle': 'आज एउटा बालबालिकाको मुस्कानको कारण बन्नुहोस्',
-    'footer.ctaText': 'तपाईंको प्रायोजनले नेपालका वञ्चित बालबालिकालाई शिक्षा, खाना, स्वास्थ्य सेवा र आशा दिन्छ।',
-    'footer.sponsorChild': 'बालबालिका प्रायोजन गर्नुहोस्',
-    'footer.makeDonation': 'दान गर्नुहोस्',
-    'footer.description': 'सन् १९७७ देखि नेपालका वञ्चित बालबालिकालाई निःशुल्क शिक्षा प्रदान गर्दै।',
-    'footer.getInvolved': 'सहभागी हुनुहोस्',
-    'footer.volunteer': 'स्वयंसेवा',
-    'footer.information': 'जानकारी',
-    'footer.aboutUs': 'हाम्रो बारेमा',
-    'footer.transparency': 'पारदर्शिता',
-    'footer.privacy': 'गोपनीयता नीति',
-    'footer.terms': 'नियम र सर्तहरू',
-    'footer.contact': 'सम्पर्क',
-    'footer.rights': 'सबै अधिकार सुरक्षित।',
-    'footer.nonprofit': 'नेपालमा दर्ता भएको गैरनाफामूलक संस्था',
-  },
-  hi: {
-    'language.label': 'भाषा',
-    'nav.home': 'होम',
-    'nav.about': 'हमारे बारे में',
-    'nav.students': 'विद्यार्थी',
-    'nav.gallery': 'गैलरी',
-    'nav.news': 'समाचार',
-    'nav.contact': 'संपर्क',
-    'nav.admin': 'एडमिन',
-    'nav.dashboard': 'डैशबोर्ड',
-    'auth.signIn': 'साइन इन',
-    'auth.signUp': 'साइन अप',
-    'auth.signOut': 'साइन आउट',
-    'auth.donorSignIn': 'दाता साइन इन',
-    'auth.signInSubtitle': 'अपना डैशबोर्ड खोलें और प्रायोजित बच्चों की प्रगति देखें',
-    'auth.email': 'ईमेल पता',
-    'auth.password': 'पासवर्ड',
-    'auth.signingIn': 'साइन इन हो रहा है...',
-    'auth.invalidCredentials': 'ईमेल या पासवर्ड गलत है',
-    'auth.verifyBeforeSignIn': 'साइन इन करने से पहले अपना ईमेल सत्यापित करें। पुष्टि संदेश के लिए Gmail इनबॉक्स देखें।',
-    'auth.verificationSent': 'सत्यापन ईमेल भेजा गया। कृपया Gmail इनबॉक्स और स्पैम फ़ोल्डर देखें।',
-    'auth.resendVerification': 'सत्यापन ईमेल फिर भेजें',
-    'auth.sendingVerification': 'सत्यापन भेजा जा रहा है...',
-    'auth.noAccount': 'खाता नहीं है? ',
-    'auth.createAccount': 'खाता बनाएं',
-    'auth.forgotPassword': 'पासवर्ड भूल गए?',
-    'auth.alreadyAccount': 'पहले से खाता है? ',
-    'auth.fullName': 'पूरा नाम',
-    'auth.confirmPassword': 'पासवर्ड पुष्टि करें',
-    'auth.country': 'देश',
-    'auth.registerTitle': 'खाता बनाएं',
-    'auth.registerSubtitle': 'दाताओं और प्रायोजकों के हमारे समुदाय से जुड़ें',
-    'auth.creatingAccount': 'खाता बन रहा है...',
-    'auth.registrationSuccess': 'सत्यापन ईमेल भेजा गया। साइन इन करने से पहले Gmail खोलकर अपना खाता पुष्टि करें।',
-    'auth.passwordMismatch': 'पासवर्ड मेल नहीं खाते',
-    'auth.passwordTooShort': 'पासवर्ड कम से कम 6 अक्षरों का होना चाहिए',
-    'auth.registrationFailed': 'पंजीकरण विफल रहा',
-    'auth.emailVerified': 'ईमेल सत्यापित हो गया। अब आप साइन इन कर सकते हैं।',
-    'auth.callbackChecking': 'सत्यापन जांचा जा रहा है',
-    'auth.callbackVerified': 'ईमेल सत्यापित',
-    'auth.callbackFailed': 'सत्यापन विफल',
-    'auth.callbackMissingCode': 'सत्यापन लिंक में मान्य सेशन कोड नहीं है। कृपया नया सत्यापन ईमेल मांगें।',
-    'auth.backToSignIn': 'साइन इन पर वापस जाएं',
-    'footer.ctaTitle': 'आज किसी बच्चे की मुस्कान की वजह बनें',
-    'footer.ctaText': 'आपका प्रायोजन नेपाल के वंचित बच्चों को शिक्षा, भोजन, स्वास्थ्य सेवा और आशा देता है।',
-    'footer.sponsorChild': 'बच्चे को प्रायोजित करें',
-    'footer.makeDonation': 'दान करें',
-    'footer.description': '1977 से नेपाल के वंचित बच्चों को निःशुल्क शिक्षा प्रदान कर रहे हैं।',
-    'footer.getInvolved': 'जुड़ें',
-    'footer.volunteer': 'स्वयंसेवा',
-    'footer.information': 'जानकारी',
-    'footer.aboutUs': 'हमारे बारे में',
-    'footer.transparency': 'पारदर्शिता',
-    'footer.privacy': 'गोपनीयता नीति',
-    'footer.terms': 'नियम और शर्तें',
-    'footer.contact': 'संपर्क',
-    'footer.rights': 'सभी अधिकार सुरक्षित।',
-    'footer.nonprofit': 'नेपाल में पंजीकृत गैर-लाभकारी संस्था',
-  },
-}
-
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 const rtlLanguages = new Set(['ar', 'fa', 'he', 'ur', 'ps', 'sd'])
 
@@ -407,17 +163,17 @@ export function getGoogleLanguageCode(language: LanguageCode) {
 }
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<LanguageCode>(() => {
-    if (typeof window === 'undefined') return 'en'
+  const [language, setLanguageState] = useState<LanguageCode>('en')
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
     try {
       const saved = window.localStorage.getItem('language')
-      if (saved && languages.some((item) => item.code === saved)) return saved
+      if (saved && languages.some((item) => item.code === saved)) setLanguageState(saved)
     } catch {
-      return 'en'
+      // ignore
     }
-    return 'en'
-  })
-  const [pageId, setPageId] = useState<string>('global')
+  }, [])
 
   useEffect(() => {
     window.localStorage.setItem('language', language)
@@ -430,29 +186,9 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     setLanguageState(newLanguage)
   }, [])
 
-  const setPage = useCallback((id: string) => {
-    setPageId(id || 'global')
-  }, [])
-
-  const tr = useCallback(async (text: string): Promise<string> => {
-    return text
-  }, [])
-
-  const trBatch = useCallback(async (texts: string[]): Promise<string[]> => {
-    return texts
-  }, [])
-
   const value = useMemo(
-    () => ({
-      language,
-      setLanguage,
-      pageId,
-      setPage,
-      t: (key: TranslationKey) => translations.en[key] ?? key,
-      tr,
-      trBatch,
-    }),
-    [language, setLanguage, pageId, setPage, tr, trBatch]
+    () => ({ language, setLanguage }),
+    [language, setLanguage],
   )
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>

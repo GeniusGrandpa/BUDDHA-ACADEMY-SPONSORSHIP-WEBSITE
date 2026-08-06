@@ -6,6 +6,7 @@ import { Tabs } from '../components/ui/Tabs'
 import { getNews } from '../services/news'
 import { getPageHeader } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
+import { Tr } from '../components/Translated'
 import type { News } from '../types/database'
 import type { PageHeader } from '../types/cms-content'
 import { NewsCardSkeleton } from '../components/ui/LoadingSkeleton'
@@ -67,11 +68,11 @@ export function NewsPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto">
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">
-                {pageHeader.title}
+                <Tr text={pageHeader.title} />
               </h1>
               {pageHeader.subtitle && (
                 <p className="text-base sm:text-lg md:text-xl text-gray-600">
-                  {pageHeader.subtitle}
+                  <Tr text={pageHeader.subtitle} />
                 </p>
               )}
             </div>
@@ -109,10 +110,10 @@ export function NewsPage() {
                       </div>
                     </div>
                     <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
-                      {article.title}
+                      <Tr text={article.title} />
                     </h3>
                     <p className="text-gray-600 text-sm line-clamp-3 mb-4">
-                      {article.excerpt}
+                      <Tr text={article.excerpt} />
                     </p>
                     <Link
                       to={`/news/${article.id}`}

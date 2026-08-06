@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Loader2 } from 'lucide-react'
 import { useCmsStrings } from '../../context/CmsStringsContext'
+import { Tr } from '../Translated'
 import { getPublicActivities } from '../../services/activities'
 import type { ActivityRow } from '../../types/database'
 
@@ -83,14 +84,13 @@ export function ActivityFeed() {
           >
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900">
-                {activity.title}
+                <Tr text={activity.title} />
               </p>
               {activity.description && (
                 <p className="text-sm text-gray-500 mt-0.5 line-clamp-2">
-                  {activity.description}
+                  <Tr text={activity.description} />
                 </p>
-              )}
-              <p className="text-xs text-gray-400 mt-1">
+              )}<p className="text-xs text-gray-400 mt-1">
                 {getTimeAgo(activity.created_at)}
               </p>
             </div>

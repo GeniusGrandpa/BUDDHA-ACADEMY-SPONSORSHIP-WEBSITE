@@ -7,6 +7,7 @@ import { PassThrough } from 'stream'
 import { routeDefinitions } from './routes'
 import { createQueryClient } from './lib/query-client'
 import { LanguageProvider } from './context/LanguageContext'
+import { TranslationProvider } from './context/TranslationContext'
 import { AuthProvider } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { CmsStringsProvider } from './context/CmsStringsContext'
@@ -45,6 +46,7 @@ export async function render(_url: string, template: string): Promise<SsrResult>
     <React.StrictMode>
       <HelmetProvider context={helmetContext}>
         <LanguageProvider>
+          <TranslationProvider>
           <QueryClientProvider client={queryClient}>
             <AuthProvider>
               <ThemeProvider>
@@ -57,6 +59,7 @@ export async function render(_url: string, template: string): Promise<SsrResult>
               </ThemeProvider>
             </AuthProvider>
           </QueryClientProvider>
+          </TranslationProvider>
         </LanguageProvider>
       </HelmetProvider>
     </React.StrictMode>

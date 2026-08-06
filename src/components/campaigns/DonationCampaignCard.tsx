@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { useCmsStrings } from '../../context/CmsStringsContext'
 import { formatNPR } from '../../utils/currency'
+import { Tr } from '../Translated'
 import type { DonationGoal } from '../../types/database'
 
 interface DonationCampaignCardProps {
@@ -33,17 +34,17 @@ export function DonationCampaignCard({ goal }: DonationCampaignCardProps) {
       <div className="p-6">
         <div className="flex items-start justify-between mb-4">
           <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${palette}`}>
-            {goal.category}
+            <Tr text={goal.category} />
           </span>
         </div>
 
         <h3 className="text-lg font-semibold text-gray-900 mb-2">
-          {goal.title}
+          <Tr text={goal.title} />
         </h3>
 
         {goal.description && (
           <p className="text-sm text-gray-500 mb-4 line-clamp-2">
-            {goal.description}
+            <Tr text={goal.description} />
           </p>
         )}
 

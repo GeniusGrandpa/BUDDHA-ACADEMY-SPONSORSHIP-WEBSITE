@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCmsStrings } from '../../context/CmsStringsContext'
+import { Tr } from '../Translated'
 import { supabase } from '../../lib/supabase'
 import type { StudentStory } from '../../types/database'
 
@@ -92,19 +93,19 @@ export function SuccessStoriesCarousel() {
             <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full self-start mb-3">
               {t('stories_badge_success')}
             </span>
-            <h3 className="text-xl font-bold text-gray-900 mb-1">{story.title}</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-1"><Tr text={story.title} /></h3>
             <p className="text-sm text-emerald-600 font-medium mb-3">{story.student_name}</p>
-            <p className="text-gray-600 text-sm leading-relaxed">{story.content}</p>
+            <p className="text-gray-600 text-sm leading-relaxed"><Tr text={story.content} /></p>
             {story.quote && (
               <div className="mt-4 p-4 bg-amber-50 rounded-lg">
-                <p className="text-sm text-amber-800 italic">{story.quote}</p>
+                <p className="text-sm text-amber-800 italic"><Tr text={story.quote} /></p>
               </div>
             )}
             {story.achievements && story.achievements.length > 0 && (
               <div className="mt-4 flex flex-wrap gap-2">
                 {story.achievements.map((achievement, i) => (
                   <span key={i} className="text-xs bg-purple-50 text-purple-600 px-2 py-1 rounded-full">
-                    {achievement}
+                    <Tr text={achievement} />
                   </span>
                 ))}
               </div>
@@ -144,12 +145,12 @@ export function SuccessStoriesCarousel() {
                 <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full self-start mb-3">
                   {t('stories_badge_success')}
                 </span>
-                <h3 className="text-xl font-bold text-gray-900 mb-1">{story.title}</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-1"><Tr text={story.title} /></h3>
                 <p className="text-sm text-emerald-600 font-medium mb-3">{story.student_name}</p>
-                <p className="text-gray-600 text-sm leading-relaxed line-clamp-4">{story.content}</p>
+                <p className="text-gray-600 text-sm leading-relaxed line-clamp-4"><Tr text={story.content} /></p>
                 {story.quote && (
                   <div className="mt-4 p-4 bg-amber-50 rounded-lg">
-                    <p className="text-sm text-amber-800 italic">{story.quote}</p>
+                    <p className="text-sm text-amber-800 italic"><Tr text={story.quote} /></p>
                   </div>
                 )}
               </div>
