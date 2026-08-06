@@ -9,6 +9,7 @@
     "build:ssr": "vite build && vite build --mode ssr",
     "serve:ssr": "node server/index.mjs",
     "lint": "eslint .",
+    "test:translation": "tsx scripts/test-translation.ts",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
@@ -58,6 +59,7 @@
     "react-refresh": "^0.18.0",
     "strip-comments": "^2.0.1",
     "tailwindcss": "^3.4.1",
+    "tsx": "^4.19.2",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.60.1",
     "vite": "^8.0.14"

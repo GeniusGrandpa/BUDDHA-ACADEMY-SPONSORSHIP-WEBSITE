@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { requestPageTranslation } from '../lib/translation/translateService'
 
 export type LanguageCode = string
 
@@ -64,9 +65,11 @@ type TranslationKey =
 interface LanguageContextType {
   language: LanguageCode
   setLanguage: (language: LanguageCode) => void
+  pageId: string
+  setPage: (pageId: string) => void
   t: (key: TranslationKey) => string
-  tr: (text: string) => Promise<string>
-  trBatch: (texts: string[]) => Promise<string[]>
+  tr: (text: string, pageId?: string) => Promise<string>
+  trBatch: (texts: string[], pageId?: string) => Promise<string[]>
 }
 
 interface LanguageOption {
@@ -419,30 +422,6 @@ function writeCache(target: string, entries: Record<string, string>) {
   }
 }
 
-async function requestTranslate(text: string, target: string): Promise<string> {
-  const { supabase } = await import('../lib/supabase')
-  const { data, error } = await supabase.functions.invoke('translate', { body: { text, target } })
-  if (error) throw error
-  const t = (data as { success?: boolean; translated?: string } | null)?.translated
-  if (!t) throw new Error('empty translation')
-  return t
-}
-
-async function requestTranslateMany(texts: string[], target: string): Promise<string[]> {
-  const { supabase } = await import('../lib/supabase')
-  const { data, error } = await supabase.functions.invoke('translate', { body: { texts, target } })
-  if (error) throw error
-  const translations = (data as { success?: boolean; translations?: string[] } | null)?.translations
-  if (!translations || translations.length !== texts.length) {
-    throw new Error('translation batch mismatch')
-  }
-  return translations
-}
-
-function getGoogleLanguageCode(language: LanguageCode) {
-  return languages.find((item) => item.code === language)?.googleCode ?? language
-}
-
 function protectPlaceholders(text: string): { text: string; placeholders: string[] } {
   const placeholders: string[] = []
   const protectedText = text.replace(/\{(\w+)\}/g, (match) => {
@@ -460,8 +439,13 @@ function restorePlaceholders(text: string, placeholders: string[]): string {
   return restored
 }
 
+export function getGoogleLanguageCode(language: LanguageCode) {
+  return languages.find((item) => item.code === language)?.googleCode ?? language
+}
+
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<LanguageCode>('en')
+  const [pageId, setPageId] = useState<string>('global')
 
   useEffect(() => {
     window.localStorage.setItem('language', language)
@@ -474,78 +458,117 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     setLanguageState(newLanguage)
   }, [])
 
+  const setPage = useCallback((id: string) => {
+    setPageId(id || 'global')
+  }, [])
+
   const inFlightRef = useRef<Map<string, Promise<string>>>(new Map())
+  const batchInFlightRef = useRef<Map<string, Promise<string[]>>>(new Map())
 
-  const tr = useCallback(async (text: string): Promise<string> => {
-    if (!text || !text.trim() || language === 'en') return text
-    const target = getGoogleLanguageCode(language)
-    const cached = readCache(target)[text]
-    if (cached) return cached
-    const existing = inFlightRef.current.get(text)
-    if (existing) return existing
-    const { text: protectedText, placeholders } = protectPlaceholders(text)
-    const promise = requestTranslate(protectedText, target)
-      .then((translated) => {
-        const restored = restorePlaceholders(translated, placeholders)
-        if (restored && restored !== text) writeCache(target, { [text]: restored })
-        return restored
-      })
-      .finally(() => {
-        inFlightRef.current.delete(text)
-      })
-    inFlightRef.current.set(text, promise)
-    return promise
-  }, [language])
-
-  const trBatch = useCallback(async (texts: string[]): Promise<string[]> => {
-    if (language === 'en') return texts
-    const target = getGoogleLanguageCode(language)
-    const results = new Array<string>(texts.length)
-    const pending: number[] = []
-    const protectedList: { text: string; placeholders: string[]; original: string }[] = []
-
-    texts.forEach((text, index) => {
+  const tr = useCallback(
+    async (text: string, scope?: string): Promise<string> => {
+      if (!text || !text.trim() || language === 'en') return text
+      const target = getGoogleLanguageCode(language)
+      const page = scope || pageId
       const cached = readCache(target)[text]
-      if (cached) {
-        results[index] = cached
-      } else {
-        pending.push(index)
-        protectedList.push({ ...protectPlaceholders(text), original: text })
-      }
-    })
-    if (pending.length === 0) return results
+      if (cached) return cached
+      const key = `${page}|${target}|${text}`
+      const existing = inFlightRef.current.get(key)
+      if (existing) return existing
+      const { text: protectedText, placeholders } = protectPlaceholders(text)
+      const promise = requestPageTranslation({
+        pageId: page,
+        language,
+        target,
+        texts: [protectedText],
+      })
+        .then((result) => {
+          const translated = result?.translations?.[0]
+          const restored = translated ? restorePlaceholders(translated, placeholders) : ''
+          if (restored && restored !== text) writeCache(target, { [text]: restored })
+          return restored || text
+        })
+        .catch(() => text)
+        .finally(() => {
+          inFlightRef.current.delete(key)
+        })
+      inFlightRef.current.set(key, promise)
+      return promise
+    },
+    [language, pageId]
+  )
 
-    try {
-      const translations = await requestTranslateMany(
-        protectedList.map((p) => p.text),
-        target
-      )
-      protectedList.forEach((item, offset) => {
-        const restored = restorePlaceholders(translations[offset], item.placeholders)
-        if (restored && restored !== item.original) {
-          results[pending[offset]] = restored
-          writeCache(target, { [item.original]: restored })
+  const trBatch = useCallback(
+    async (texts: string[], scope?: string): Promise<string[]> => {
+      if (language === 'en') return texts
+      const target = getGoogleLanguageCode(language)
+      const page = scope || pageId
+      const results = new Array<string>(texts.length)
+      const pending: number[] = []
+      const protectedList: { text: string; placeholders: string[]; original: string }[] = []
+
+      texts.forEach((text, index) => {
+        if (!text || !text.trim()) {
+          results[index] = text
+          return
+        }
+        const cached = readCache(target)[text]
+        if (cached) {
+          results[index] = cached
+        } else {
+          pending.push(index)
+          protectedList.push({ ...protectPlaceholders(text), original: text })
         }
       })
-    } catch {
-      // leave those as original text
-    }
+      if (pending.length === 0) return results
 
-    pending.forEach((index) => {
-      if (!results[index]) results[index] = texts[index]
-    })
-    return results
-  }, [language])
+      const source = protectedList.map((p) => p.text)
+      const batchKey = `${page}|${target}|${source.join('\u0001')}`
+      const apply = (translations: string[]) => {
+        protectedList.forEach((item, offset) => {
+          const restored = translations[offset]
+            ? restorePlaceholders(translations[offset], item.placeholders)
+            : ''
+          if (restored && restored !== item.original) {
+            results[pending[offset]] = restored
+            writeCache(target, { [item.original]: restored })
+          }
+        })
+      }
+
+      const existing = batchInFlightRef.current.get(batchKey)
+      if (existing) {
+        apply(await existing)
+      } else {
+        const promise = requestPageTranslation({ pageId: page, language, target, texts: source })
+          .then((result) => result?.translations ?? source)
+          .catch(() => source)
+          .finally(() => {
+            batchInFlightRef.current.delete(batchKey)
+          })
+        batchInFlightRef.current.set(batchKey, promise)
+        apply(await promise)
+      }
+
+      pending.forEach((index) => {
+        if (!results[index]) results[index] = texts[index]
+      })
+      return results
+    },
+    [language, pageId]
+  )
 
   const value = useMemo(
     () => ({
       language,
       setLanguage,
+      pageId,
+      setPage,
       t: (key: TranslationKey) => translations[language]?.[key] ?? translations.en[key] ?? key,
       tr,
       trBatch,
     }),
-    [language, setLanguage, tr, trBatch]
+    [language, setLanguage, pageId, setPage, tr, trBatch]
   )
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>

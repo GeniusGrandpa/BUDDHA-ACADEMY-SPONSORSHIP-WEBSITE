@@ -1,119 +1,99 @@
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-}
+import { createClient } from '@supabase/supabase-js'
+import { corsHeaders, jsonOk, jsonError, handleError } from '../_shared/response.ts'
+import { getTranslationProvider } from '../_shared/translation-provider.ts'
+import {
+  NL_SENTINEL,
+  protectNewlines,
+  restoreNewlines,
+  resolvePageTranslation,
+} from '../_shared/translation-core.ts'
 
-const NL_SENTINEL = '\uE000'
+const LANGUAGE_REGEX = /^[a-zA-Z-]{2,24}$/
 const MAX_TEXT_LENGTH = 5000
-const CHUNK_CHAR_LIMIT = 4500
+const MAX_PAGE_ID_LENGTH = 120
 
-function json(body: unknown, status = 200): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-  })
+const serviceClient = createClient(
+  Deno.env.get('SUPABASE_URL') ?? '',
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+  { auth: { persistSession: false } },
+)
+
+interface StoredRow {
+  translated_title: string | null
+  translated_description: string | null
+  translated_content: Record<string, string> | null
 }
 
-function safeSingleTranslation(data: unknown[] | null): string {
-  if (!Array.isArray(data) || !Array.isArray(data[0])) return ''
-  const segments: string[] = []
-  for (const row of data[0] as unknown[][]) {
-    if (typeof row?.[0] === 'string' && row[0]) segments.push(row[0])
+function normalizeRow(data: Record<string, unknown> | null): StoredRow | null {
+  if (!data) return null
+  const content = data.translated_content
+  const map: Record<string, string> =
+    content && typeof content === 'object' && !Array.isArray(content)
+      ? (content as Record<string, string>)
+      : {}
+  return {
+    translated_title: typeof data.translated_title === 'string' ? data.translated_title : null,
+    translated_description:
+      typeof data.translated_description === 'string' ? data.translated_description : null,
+    translated_content: map,
   }
-  return segments.join('').trim()
 }
 
-async function translateOfficial(text: string, target: string): Promise<string> {
-  const apiKey = Deno.env.get('GOOGLE_API_KEY') ?? ''
-  if (!apiKey) return ''
-
-  const url = 'https://translation.googleapis.com/language/translate/v2'
-  const resp = await fetch(`${url}?key=${apiKey}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ q: text, target, source: 'en', format: 'text' }),
-  })
-  if (!resp.ok) return ''
-  const data = await resp.json()
-  const translated = data?.data?.translations?.[0]?.translatedText as string | undefined
-  if (!translated) return ''
-  return translated.replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&').trim()
+async function loadRow(pageId: string, language: string): Promise<StoredRow | null> {
+  const { data, error } = await serviceClient
+    .from('page_translations')
+    .select('translated_title, translated_description, translated_content')
+    .eq('page_id', pageId)
+    .eq('language', language)
+    .maybeSingle()
+  if (error) throw error
+  return normalizeRow(data as Record<string, unknown> | null)
 }
 
-async function translateFreeWithRetry(text: string, target: string, attempts = 3): Promise<string> {
-  let lastError: Error | null = null
-  for (let attempt = 0; attempt < attempts; attempt++) {
-    try {
-      const resp = await fetch('https://translate.googleapis.com/translate_a/single?client=gtx', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ sl: 'en', tl: target, dt: 't', q: text }),
-      })
-      if (!resp.ok) throw new Error(`gtx returned ${resp.status}`)
-      const data = await resp.json()
-      const translated = safeSingleTranslation(data)
-      if (!translated) throw new Error('TRANSLATION_EMPTY')
-      return translated
-    } catch (err) {
-      lastError = err instanceof Error ? err : new Error('translation failed')
-      if (attempt < attempts - 1) {
-        await new Promise((resolve) => setTimeout(resolve, 200 * (attempt + 1)))
-      }
-    }
+async function saveRow(
+  pageId: string,
+  language: string,
+  content: Record<string, string>,
+  title: string | null,
+  description: string | null,
+): Promise<void> {
+  const now = new Date().toISOString()
+  const { error } = await serviceClient
+    .from('page_translations')
+    .upsert(
+      {
+        page_id: pageId,
+        language,
+        translated_content: content,
+        translated_title: title,
+        translated_description: description,
+        translated_at: now,
+        updated_at: now,
+      },
+      { onConflict: 'page_id,language' },
+    )
+  if (error) throw error
+}
+
+function extractTexts(body: unknown): string[] | null {
+  const b = body as { texts?: unknown; text?: unknown } | null
+  let texts: string[] = []
+  if (Array.isArray(b?.texts)) {
+    texts = b.texts.filter((t): t is string => typeof t === 'string' && t.trim() !== '')
+  } else if (typeof b?.text === 'string' && b.text.trim()) {
+    texts = [b.text]
   }
-  throw lastError
+  if (texts.length === 0) return null
+  if (texts.some((t) => t.length > MAX_TEXT_LENGTH)) return null
+  return texts
 }
 
-async function translateOne(text: string, target: string): Promise<string> {
-  const official = await translateOfficial(text, target)
-  if (official) return official
-  return translateFreeWithRetry(text, target)
-}
-
-function chunkTexts(texts: string[]): string[][] {
-  const chunks: string[][] = []
-  let current: string[] = []
-  let currentLength = 0
-  for (const text of texts) {
-    if (currentLength + text.length > CHUNK_CHAR_LIMIT && current.length > 0) {
-      chunks.push(current)
-      current = []
-      currentLength = 0
-    }
-    current.push(text)
-    currentLength += text.length
-  }
-  if (current.length > 0) chunks.push(current)
-  return chunks
-}
-
-async function translateMany(texts: string[], target: string): Promise<string[]> {
-  const results = new Array<string>(texts.length)
-  const chunks = chunkTexts(texts)
-
-  for (const chunk of chunks) {
-    const chunkResult = await translateOne(chunk.join('\n'), target)
-    const lines = chunkResult.split('\n')
-    if (lines.length !== chunk.length) {
-      // gtx did not preserve line count — fall back to per-text translation
-      for (let i = 0; i < chunk.length; i++) {
-        const offset = texts.indexOf(chunk[i])
-        try {
-          results[offset] = await translateOne(chunk[i], target)
-        } catch {
-          results[offset] = chunk[i]
-        }
-      }
-      continue
-    }
-    for (let i = 0; i < chunk.length; i++) {
-      const offset = texts.indexOf(chunk[i])
-      results[offset] = lines[i].trim()
-    }
-  }
-
-  return results
+function stringField(body: unknown, name: string, maxLength: number): string | undefined {
+  const value = (body as Record<string, unknown> | null)?.[name]
+  if (typeof value !== 'string') return undefined
+  const trimmed = value.trim()
+  if (!trimmed) return undefined
+  return trimmed.slice(0, maxLength)
 }
 
 Deno.serve(async (req) => {
@@ -121,49 +101,77 @@ Deno.serve(async (req) => {
     return new Response('ok', { headers: corsHeaders })
   }
   if (req.method !== 'POST') {
-    return json({ success: false, message: 'Method not allowed', errorCode: 'METHOD_NOT_ALLOWED' }, 405)
+    return jsonError('Method not allowed', 'METHOD_NOT_ALLOWED', 405)
   }
 
   try {
     const body = await req.json()
-    const target = typeof body?.target === 'string' ? body.target : ''
+    const pageId =
+      typeof body?.pageId === 'string' && body.pageId
+        ? body.pageId.slice(0, MAX_PAGE_ID_LENGTH)
+        : 'global'
+    const language =
+      typeof body?.language === 'string' && body.language
+        ? body.language
+        : typeof body?.target === 'string'
+          ? body.target
+          : ''
+    const target =
+      typeof body?.target === 'string' && body.target ? body.target : language
 
-    if (!/^[a-zA-Z-]{2,24}$/.test(target)) {
-      return json({ success: false, message: 'invalid target language', errorCode: 'VALIDATION_ERROR' }, 400)
+    if (!LANGUAGE_REGEX.test(language)) {
+      return jsonError('Invalid language', 'VALIDATION_ERROR', 400)
+    }
+    if (!LANGUAGE_REGEX.test(target)) {
+      return jsonError('Invalid target language', 'VALIDATION_ERROR', 400)
     }
 
-    if (Array.isArray(body?.texts)) {
-      const texts = body.texts
-        .filter((t: unknown): t is string => typeof t === 'string')
-        .map((t) => t.replaceAll('\n', NL_SENTINEL))
-      if (texts.length === 0) {
-        return json({ success: false, message: 'texts must not be empty', errorCode: 'VALIDATION_ERROR' }, 400)
-      }
-      const tooLong = texts.find((t) => t.length > MAX_TEXT_LENGTH)
-      if (tooLong) {
-        return json({ success: false, message: 'text too long (max 5000 chars)', errorCode: 'VALIDATION_ERROR' }, 400)
-      }
-      const translations = await translateMany(texts, target)
-      return json({
-        success: true,
-        translations: translations.map((t) => t.replaceAll(NL_SENTINEL, '\n')),
-        target,
-      }, 200)
+    const rawTexts = extractTexts(body)
+    if (!rawTexts) {
+      return jsonError('texts must be non-empty and each at most 5000 characters', 'VALIDATION_ERROR', 400)
+    }
+    const texts = rawTexts.map(protectNewlines)
+
+    if (language === 'en' || target === 'en') {
+      return jsonOk({ cached: true, translations: texts.map(restoreNewlines) })
     }
 
-    const text = typeof body?.text === 'string' ? body.text : ''
-    if (!text.trim()) {
-      return json({ success: false, message: 'text and target are required', errorCode: 'VALIDATION_ERROR' }, 400)
-    }
-    if (text.length > MAX_TEXT_LENGTH) {
-      return json({ success: false, message: 'text too long (max 5000 chars)', errorCode: 'VALIDATION_ERROR' }, 400)
+    const title = stringField(body, 'title', 1000)
+    const description = stringField(body, 'description', MAX_TEXT_LENGTH)
+
+    const provider = getTranslationProvider()
+    const row = await loadRow(pageId, language)
+
+    const result = await resolvePageTranslation({
+      texts,
+      cachedMap: row?.translated_content ?? {},
+      target,
+      provider,
+      title,
+      description,
+    })
+
+    const shouldWrite =
+      Object.keys(result.mergedMap).length > 0 ||
+      result.translatedTitle !== undefined ||
+      result.translatedDescription !== undefined
+    if (shouldWrite) {
+      await saveRow(
+        pageId,
+        language,
+        result.mergedMap,
+        result.translatedTitle ?? row?.translated_title ?? null,
+        result.translatedDescription ?? row?.translated_description ?? null,
+      )
     }
 
-    const translated = await translateOne(text.replaceAll('\n', NL_SENTINEL), target)
-    return json({ success: true, translated: translated.replaceAll(NL_SENTINEL, '\n'), target }, 200)
+    return jsonOk({
+      cached: result.cached,
+      translations: result.translations.map(restoreNewlines),
+      translatedTitle: result.translatedTitle,
+      translatedDescription: result.translatedDescription,
+    })
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Translation failed'
-    const status = message === 'TRANSLATION_SERVICE_UNAVAILABLE' ? 502 : 500
-    return json({ success: false, message, errorCode: 'TRANSLATION_FAILED' }, status)
+    return handleError('translate', err)
   }
 })

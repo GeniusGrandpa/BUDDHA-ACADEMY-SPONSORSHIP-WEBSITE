@@ -429,7 +429,7 @@ export function CmsStringsProvider({ children }: { children: ReactNode }) {
     }
     let cancelled = false
     const unique = Array.from(new Set(Object.values(merged)))
-    trBatch(unique).then((results) => {
+    trBatch(unique, 'cms').then((results) => {
       if (cancelled) return
       const map: Record<string, string> = {}
       unique.forEach((value, index) => {
