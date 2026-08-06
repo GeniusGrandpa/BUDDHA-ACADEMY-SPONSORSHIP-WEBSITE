@@ -444,7 +444,16 @@ export function getGoogleLanguageCode(language: LanguageCode) {
 }
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<LanguageCode>('en')
+  const [language, setLanguageState] = useState<LanguageCode>(() => {
+    if (typeof window === 'undefined') return 'en'
+    try {
+      const saved = window.localStorage.getItem('language')
+      if (saved && languages.some((item) => item.code === saved)) return saved
+    } catch {
+      return 'en'
+    }
+    return 'en'
+  })
   const [pageId, setPageId] = useState<string>('global')
 
   useEffect(() => {
@@ -558,17 +567,54 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     [language, pageId]
   )
 
+  const [dynamicDict, setDynamicDict] = useState<Partial<Record<TranslationKey, string>>>({})
+
+  useEffect(() => {
+    if (language === 'en' || translations[language]) {
+      setDynamicDict({})
+      return
+    }
+    let cancelled = false
+    const entries = Object.entries(translations.en) as [TranslationKey, string][]
+    const prepared = entries.map(([, value]) => protectPlaceholders(value))
+    const target = getGoogleLanguageCode(language)
+    requestPageTranslation({
+      pageId: 'dictionary',
+      language,
+      target,
+      texts: prepared.map((item) => item.text),
+    })
+      .then((result) => {
+        if (cancelled) return
+        const map: Partial<Record<TranslationKey, string>> = {}
+        if (result) {
+          entries.forEach(([key, original], index) => {
+            const restored = restorePlaceholders(result.translations[index] ?? '', prepared[index].placeholders)
+            if (restored && restored !== original) map[key] = restored
+          })
+        }
+        setDynamicDict(map)
+      })
+      .catch(() => {
+        if (!cancelled) setDynamicDict({})
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [language])
+
   const value = useMemo(
     () => ({
       language,
       setLanguage,
       pageId,
       setPage,
-      t: (key: TranslationKey) => translations[language]?.[key] ?? translations.en[key] ?? key,
+      t: (key: TranslationKey) =>
+        translations[language]?.[key] ?? dynamicDict[key] ?? translations.en[key] ?? key,
       tr,
       trBatch,
     }),
-    [language, setLanguage, pageId, setPage, tr, trBatch]
+    [language, setLanguage, pageId, setPage, tr, trBatch, dynamicDict]
   )
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>
