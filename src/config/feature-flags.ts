@@ -1,0 +1,4 @@
+export const ENABLE_VISUAL_BUILDER = false
+
+export const ENABLE_VISUAL_BUILDER_ROUTES =
+  import.meta.env.VITE_ENABLE_VISUAL_BUILDER === 'true' || ENABLE_VISUAL_BUILDER

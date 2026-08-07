@@ -1,5 +1,6 @@
 import type { Role, PermissionCode } from '../types/permissions'
 import { DEFAULT_ROLE_PERMISSIONS } from '../types/permissions'
+import { ENABLE_VISUAL_BUILDER } from './feature-flags'
 
 export interface NavItem {
   label: string
@@ -61,11 +62,15 @@ export const navigationConfig: NavSection[] = [
         href: '/admin/website',
         permission: 'content.homepage',
       },
-      {
-        label: 'Visual Builder',
-        href: '/admin/website/builder',
-        permission: 'content.homepage',
-      },
+      ...((ENABLE_VISUAL_BUILDER
+        ? [
+            {
+              label: 'Visual Builder',
+              href: '/admin/website/builder',
+              permission: 'content.homepage',
+            } satisfies NavItem,
+          ]
+        : []) as NavItem[]),
       {
         label: 'Homepage',
         href: '/admin/website/homepage',

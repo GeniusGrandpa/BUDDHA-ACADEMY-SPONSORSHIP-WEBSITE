@@ -1,18 +1,10 @@
 import React from 'react'
 import { renderToPipeableStream } from 'react-dom/server'
 import { createStaticHandler, createStaticRouter, StaticRouterProvider } from 'react-router-dom'
-import { HelmetProvider } from 'react-helmet-async'
-import { I18nextProvider } from 'react-i18next'
-import { QueryClientProvider } from '@tanstack/react-query'
 import { PassThrough } from 'stream'
 import { routeDefinitions } from './routes'
 import { createQueryClient } from './lib/query-client'
-import { LanguageProvider } from './context/LanguageProvider'
-import { AuthProvider } from './features/auth/providers/AuthProvider'
-import { ThemeProvider } from './context/ThemeProvider'
-import { CmsStringsProvider } from './context/CmsStringsProvider'
-import { ConfirmProvider } from './context/ConfirmProvider'
-import { SiteBranding } from './components/SiteBranding'
+import { AppProviders } from './AppProviders'
 import { parseLanguageCookie, localeFromPath, toLocale } from './lib/locale'
 import i18n, { DEFAULT_LOCALE } from './i18n'
 import './index.css'
@@ -52,24 +44,9 @@ export async function render(_url: string, template: string, cookieHeader?: stri
 
   const app = (
     <React.StrictMode>
-      <HelmetProvider context={helmetContext}>
-        <LanguageProvider initialLanguage={initialLanguage}>
-          <I18nextProvider i18n={i18n}>
-          <QueryClientProvider client={queryClient}>
-            <AuthProvider>
-              <ThemeProvider>
-                <SiteBranding />
-                <CmsStringsProvider>
-                  <ConfirmProvider>
-                    <StaticRouterProvider router={router} context={context} />
-                  </ConfirmProvider>
-                </CmsStringsProvider>
-              </ThemeProvider>
-            </AuthProvider>
-          </QueryClientProvider>
-          </I18nextProvider>
-        </LanguageProvider>
-      </HelmetProvider>
+      <AppProviders initialLanguage={initialLanguage} queryClient={queryClient} helmetContext={helmetContext}>
+        <StaticRouterProvider router={router} context={context} />
+      </AppProviders>
     </React.StrictMode>
   )
 

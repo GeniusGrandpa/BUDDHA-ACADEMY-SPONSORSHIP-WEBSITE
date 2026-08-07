@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
+import { ENABLE_VISUAL_BUILDER } from '../../../config/feature-flags'
 
 interface QuickLink {
   name: string
@@ -8,7 +9,9 @@ interface QuickLink {
 }
 
 const quickLinks: QuickLink[] = [
-  { name: 'Visual Builder', href: '/admin/website/builder', desc: 'Manage all website pages visually', color: 'bg-amber-500' },
+  ...(ENABLE_VISUAL_BUILDER
+    ? [{ name: 'Visual Builder', href: '/admin/website/builder', desc: 'Manage all website pages visually', color: 'bg-amber-500' }]
+    : []),
   { name: 'Media Library', href: '/admin/website/media', desc: 'Upload and manage images and files', color: 'bg-blue-500' },
   { name: 'Navigation', href: '/admin/website/navigation', desc: 'Manage header and footer menus', color: 'bg-purple-500' },
   { name: 'News & Updates', href: '/admin/website/news', desc: 'Create and publish news articles', color: 'bg-green-500' },
@@ -83,12 +86,14 @@ export function WebsiteDashboard() {
           <h1 className="text-2xl font-bold text-gray-900">Website Management</h1>
           <p className="text-gray-500 mt-1">Manage your entire website from one place</p>
         </div>
-        <Link
-          to="/admin/website/builder"
-          className="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-lg transition-colors"
-        >
-          Open Visual Builder
-        </Link>
+        {ENABLE_VISUAL_BUILDER && (
+          <Link
+            to="/admin/website/builder"
+            className="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-lg transition-colors"
+          >
+            Open Visual Builder
+          </Link>
+        )}
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
@@ -107,7 +112,7 @@ export function WebsiteDashboard() {
         ))}
       </div>
 
-      {pageGroups.map(group => (
+      {ENABLE_VISUAL_BUILDER && pageGroups.map(group => (
         <div key={group.title}>
           <div className="flex items-center gap-3 mb-4">
             <div>

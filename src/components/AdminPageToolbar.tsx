@@ -1,6 +1,7 @@
 import { useAuth } from '../context/AuthContext'
 import { Link } from 'react-router-dom'
 import { Settings, ExternalLink } from 'lucide-react'
+import { ENABLE_VISUAL_BUILDER } from '../config/feature-flags'
 
 interface AdminPageToolbarProps {
   pageSlug: string
@@ -11,6 +12,7 @@ export function AdminPageToolbar({ pageSlug, sectionKey }: AdminPageToolbarProps
   const { profile } = useAuth()
   const isAdmin = profile && (profile.role === 'admin' || profile.role === 'super_admin')
 
+  if (!ENABLE_VISUAL_BUILDER) return null
   if (!isAdmin) return null
 
   return (

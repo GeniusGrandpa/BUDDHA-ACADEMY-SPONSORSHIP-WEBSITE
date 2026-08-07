@@ -7,6 +7,8 @@ import { LocaleGuard } from './components/LocaleGuard'
 import { RouteErrorPage } from './components/pages/RouteErrorPage'
 import { AdminErrorPage } from './components/pages/AdminErrorPage'
 import { DEFAULT_LOCALE } from './i18n'
+import { ENABLE_VISUAL_BUILDER } from './config/feature-flags'
+import { Navigate } from 'react-router-dom'
 import { LazyPage, AdminIndexRedirect, HomePage, AboutPage, SponsorshipPage, StudentsPage, StudentDetailPage, GalleryPage, NewsPage, NewsDetailPage, ContactPage, DonatePage, TransparencyPage, FAQPage, VolunteerPage, PrivacyPage, TermsPage, LoginPage, ForgotPasswordPage, ResetPasswordPage, AuthCallbackPage, NotFoundPage, DashboardPage, CampaignsPage, SuccessStoriesPage, ActivityPage, DonationHistoryPage, AdminLayout, AdminStudentsPage, AdminDonationsPage, AdminNewsPage, AdminGalleryPage, AdminContactsPage, AdminDonorsPage, AdminPaymentVerificationPage, AdminPaymentSettingsPage, AdminEventsPage, AdminNotificationsPage, AdminReportsPage, AdminUsersPage, SuperAdminLayout, SuperAdminUsersPage, SuperAdminRolesPage, SuperAdminAuditLogsPage, SuperAdminNotificationsPage, FinanceDashboard, SponsorshipDashboard, VolunteerDashboard, TeacherDashboard, WebsiteDashboard, WebsiteBuilder, MediaLibrary, BrandingEditor, SEOEditor, AboutPageEditor, ContactPageEditor, CampaignsEditor, PrivacyPageEditor, TermsPageEditor, HomePageEditor, AdminContentGallery, AdminVideoManager, AdminContentTestimonials, AdminContentNews, AdminStudentStories, AdminTransparencyContent, AdminFaqManager, AdminPageEditor, AdminVersionHistory, AdminSiteSettings, AdminNavigationManager, AdminAnnouncements, AdminPartners, AdminDonationContent, AdminSponsorshipContent, AdminVolunteerContent, AdminFooterContent, AdminSiteImages, AdminSectionVisibility, AdminDesignDashboard, AdminBrandingPage, AdminColorsPage, AdminTypographyPage, AdminLayoutPage, AdminComponentsPage, AdminConfigPage, AdminThemePresetsPage, PreviewPage } from './route-pages'
 
 export const routeDefinitions: RouteObject[] = [
@@ -98,7 +100,29 @@ export const routeDefinitions: RouteObject[] = [
           { path: 'reports', element: <LazyPage Component={AdminReportsPage} />, errorElement: <AdminErrorPage /> },
           { path: 'users', element: <LazyPage Component={AdminUsersPage} />, errorElement: <AdminErrorPage /> },
           { path: 'website', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={WebsiteDashboard} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
-          { path: 'website/builder', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={WebsiteBuilder} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
+          ...(ENABLE_VISUAL_BUILDER
+            ? [
+                {
+                  path: 'website/builder',
+                  element: (
+                    <ProtectedRoute requiredRoles={['super_admin', 'admin']}>
+                      <LazyPage Component={WebsiteBuilder} />
+                    </ProtectedRoute>
+                  ),
+                  errorElement: <AdminErrorPage />,
+                },
+              ]
+            : [
+                {
+                  path: 'website/builder',
+                  element: (
+                    <ProtectedRoute requiredRoles={['super_admin', 'admin']}>
+                      <Navigate to="/admin/website" replace />
+                    </ProtectedRoute>
+                  ),
+                  errorElement: <AdminErrorPage />,
+                },
+              ]),
           { path: 'website/media', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={MediaLibrary} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
           { path: 'website/homepage', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={HomePageEditor} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
           { path: 'website/about', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={AboutPageEditor} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },

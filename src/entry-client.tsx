@@ -11,8 +11,9 @@ import { getErrorMessage } from './lib/errors'
 import { setPreviewMode } from './lib/preview-mode'
 import { getBrowserLanguage, localeFromPath } from './lib/locale'
 import i18n from './i18n'
+import { ENABLE_VISUAL_BUILDER } from './config/feature-flags'
 
-if (typeof window !== 'undefined' && window.location.pathname.startsWith('/preview')) {
+if (ENABLE_VISUAL_BUILDER && typeof window !== 'undefined' && window.location.pathname.startsWith('/preview')) {
   setPreviewMode(true)
 }
 
