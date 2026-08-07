@@ -74,6 +74,7 @@
   "donate_button_text": "立即捐赠",
   "donate_currency_label": "所有金额均以尼泊尔卢比（NPR）计算",
   "donate_custom_placeholder": "输入自定义金额",
+  "donate_custom_toggle_hint": "切换货币",
   "donate_confirm_button": "捐赠 {amount}",
   "pay_amount_button": "支付 {amount}",
 

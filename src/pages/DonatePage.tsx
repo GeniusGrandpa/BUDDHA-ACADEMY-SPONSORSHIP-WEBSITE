@@ -12,6 +12,7 @@ import { AuthPrompt } from '../components/donate/AuthPrompt'
 import { StudentStory } from '../components/donate/StudentStory'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import { Tr } from '../components/Translated'
+import type { Currency } from '../utils/currency'
 import type { Student } from '../types/database'
 import type { StudentSummary } from '../components/donate/types'
 import type { DonationContent, PageHeader } from '../types/cms-content'
@@ -27,6 +28,7 @@ export function DonatePage() {
 
   const [amount, setAmount] = useState(0)
   const [customAmount, setCustomAmount] = useState('')
+  const [currency, setCurrency] = useState<Currency>('NPR')
   const [frequency, setFrequency] = useState<'one-time' | 'monthly' | 'annual'>('one-time')
   const [studentId, setStudentId] = useState('')
   const [message, setMessage] = useState('')
@@ -184,17 +186,18 @@ export function DonatePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10">
             <div className="lg:col-span-2 space-y-6">
-              <p className="text-xs text-[var(--color-text-muted)]">{t('donate_currency_label')}</p>
               {!user && <AuthPrompt />}
 
               <DonationForm
                 amount={amount}
                 customAmount={customAmount}
+                currency={currency}
                 frequency={frequency}
                 studentId={studentId}
                 message={message}
                 students={studentSummaries}
                 onCustomAmountChange={handleCustomAmount}
+                onCurrencyChange={setCurrency}
                 onPresetClick={handlePresetClick}
                 onFrequencyChange={setFrequency}
                 onStudentChange={setStudentId}
@@ -206,7 +209,7 @@ export function DonatePage() {
             </div>
 
             <div className="lg:col-span-1">
-              <ImpactPanel amount={amount} frequency={frequency} />
+              <ImpactPanel amount={amount} currency={currency} frequency={frequency} />
             </div>
           </div>
         </div>

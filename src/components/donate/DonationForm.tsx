@@ -1,16 +1,19 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useCmsStrings } from '../../context/CmsStringsContext'
+import type { Currency } from '../../utils/currency'
 import type { StudentSummary } from './types'
 
 interface DonationFormProps {
   amount: number
   customAmount: string
+  currency: Currency
   frequency: 'one-time' | 'monthly' | 'annual'
   studentId: string
   message: string
   students: StudentSummary[]
   onCustomAmountChange: (value: string) => void
+  onCurrencyChange: (value: Currency) => void
   onPresetClick: (value: number) => void
   onFrequencyChange: (value: 'one-time' | 'monthly' | 'annual') => void
   onStudentChange: (value: string) => void
@@ -23,11 +26,13 @@ interface DonationFormProps {
 export function DonationForm({
   amount,
   customAmount,
+  currency,
   frequency,
   studentId,
   message,
   students,
   onCustomAmountChange,
+  onCurrencyChange,
   onPresetClick,
   onFrequencyChange,
   onStudentChange,
@@ -85,9 +90,26 @@ export function DonationForm({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-3">
-              {t('donate_amount_label')}
-            </label>
+            <div className="flex items-center justify-between mb-3">
+              <label className="block text-sm font-medium text-[var(--color-text-primary)]">
+                {t('donate_amount_label')}
+              </label>
+              <div className="inline-flex rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-hover)]/50 p-0.5">
+                {(['NPR', 'USD'] as Currency[]).map((cur) => (
+                  <button
+                    key={cur}
+                    type="button"
+                    onClick={() => onCurrencyChange(cur)}
+                    className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 ${currency === cur
+                        ? 'bg-[var(--color-primary-light)]/15 text-[var(--color-primary-dark)]'
+                        : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
+                      }`}
+                  >
+                    {cur}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
               {[1000, 2500, 5000, 10000, 25000].map((preset) => {
                 const isActive = amount === preset && !customAmount && !customFocused
@@ -101,14 +123,25 @@ export function DonationForm({
                         : 'border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-border-accent)]/60 hover:bg-[var(--color-surface-hover)]'
                       }`}
                   >
-                    <span className="text-xs text-[var(--color-text-muted)] mb-1">{t('donate_currency_label')}</span>
+                    <span className="text-xs text-[var(--color-text-muted)] mb-1">{currency}</span>
                     <span>{preset.toLocaleString('en-US')}</span>
                   </button>
                 )
               })}
             </div>
             <div className="relative mt-4">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-medium text-[var(--color-text-secondary)]">{t('donate_currency_label')}</span>
+<div className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-24">
+                <select
+                  value={currency}
+                  onChange={(e) => onCurrencyChange(e.target.value as Currency)}
+                  className="h-10 w-24 rounded-md border border-[var(--color-border)] bg-[var(--color-background)] px-2 pr-7 text-sm font-medium text-[var(--color-text-secondary)] focus:outline-none focus:border-[var(--color-primary-light)] cursor-pointer"
+                  aria-label={t('donate_custom_toggle_hint')}
+                >
+                  {(['NPR', 'USD'] as Currency[]).map((cur) => (
+                    <option key={cur} value={cur}>{cur}</option>
+                  ))}
+                </select>
+              </div>
               <input
                 type="number"
                 min="100"
@@ -117,7 +150,7 @@ export function DonationForm({
                 onFocus={() => setCustomFocused(true)}
                 onBlur={() => setCustomFocused(false)}
                 placeholder={t('donate_custom_placeholder')}
-                className="w-full h-14 pl-14 pr-4 rounded-xl border border-[var(--color-border)] text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-primary-light)] transition-colors"
+                className="w-full h-14 pl-32 pr-4 rounded-xl border border-[var(--color-border)] text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-primary-light)] transition-colors"
               />
             </div>
           </div>

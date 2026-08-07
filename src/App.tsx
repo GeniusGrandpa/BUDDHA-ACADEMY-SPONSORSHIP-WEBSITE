@@ -6,6 +6,7 @@ import { I18nextProvider } from 'react-i18next'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from './features/auth/providers/AuthProvider'
 import { LanguageProvider } from './context/LanguageProvider'
+import { TranslationProvider } from './context/TranslationProvider'
 import { ThemeProvider } from './context/ThemeProvider'
 import { CmsStringsProvider } from './context/CmsStringsProvider'
 import i18n from './i18n'
@@ -62,6 +63,7 @@ function App({ router, initialLanguage }: AppProps) {
   <HelmetProvider>
     <LanguageProvider initialLanguage={initialLanguage}>
       <I18nextProvider i18n={i18n}>
+      <TranslationProvider>
       <QueryClientProvider client={queryClient}>
       <ClientToaster />
       <AuthProvider>
@@ -75,6 +77,7 @@ function App({ router, initialLanguage }: AppProps) {
         </ThemeProvider>
       </AuthProvider>
       </QueryClientProvider>
+      </TranslationProvider>
       </I18nextProvider>
     </LanguageProvider>
     </HelmetProvider>

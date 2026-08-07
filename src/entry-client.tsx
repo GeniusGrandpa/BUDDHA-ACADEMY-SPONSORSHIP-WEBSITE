@@ -10,6 +10,7 @@ import { logger } from './lib/logger'
 import { getErrorMessage } from './lib/errors'
 import { setPreviewMode } from './lib/preview-mode'
 import { getBrowserLanguage, localeFromPath } from './lib/locale'
+import i18n from './i18n'
 
 if (typeof window !== 'undefined' && window.location.pathname.startsWith('/preview')) {
   setPreviewMode(true)
@@ -45,6 +46,10 @@ const router = createBrowserRouter(routeDefinitions)
 const rootElement = document.getElementById('root')!
 
 const initialLanguage = localeFromPath(window.location.pathname) || getBrowserLanguage()
+
+if (i18n.language !== initialLanguage) {
+  void i18n.changeLanguage(initialLanguage)
+}
 
 const hasServerContent = rootElement.children.length > 0
 if (hasServerContent) {

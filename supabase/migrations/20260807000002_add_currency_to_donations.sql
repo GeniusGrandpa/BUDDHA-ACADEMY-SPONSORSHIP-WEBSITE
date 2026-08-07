@@ -1,0 +1,3 @@
+ALTER TABLE donations
+  ADD COLUMN IF NOT EXISTS currency TEXT NOT NULL DEFAULT 'NPR'
+  CHECK (currency IN ('NPR', 'USD'));

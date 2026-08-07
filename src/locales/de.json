@@ -69,6 +69,7 @@
   "donate_button_text": "Jetzt spenden",
   "donate_currency_label": "Alle Beträge in NPR",
   "donate_custom_placeholder": "Individuellen Betrag eingeben",
+  "donate_custom_toggle_hint": "Währung umschalten",
   "donate_confirm_button": "{amount} spenden",
   "pay_amount_button": "{amount} bezahlen",
   "donate_form_description": "Ihre Spende unterstützt Bildungs- und Gemeinschaftsprogramme für Kinder in Nepal.",

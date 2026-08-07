@@ -70,6 +70,7 @@
   "donate_button_text": "今すぐ寄付する",
   "donate_currency_label": "金額はすべてネパールルピー（NPR）です",
   "donate_custom_placeholder": "金額を入力",
+  "donate_custom_toggle_hint": "通貨を切り替える",
   "donate_confirm_button": "{amount} を寄付する",
   "pay_amount_button": "{amount} を支払う",
   "donate_form_description": "あなたの寄付はネパールの子供たちの教育とコミュニティプログラムを支援します。",

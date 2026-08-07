@@ -74,6 +74,7 @@
   "donate_button_text": "अहिले दान गर्नुहोस्",
   "donate_currency_label": "सबै रकम नेपाली रुपैयाँ (NPR) मा",
   "donate_custom_placeholder": "आफ्नो इच्छाअनुसार रकम प्रविष्ट गर्नुहोस्",
+  "donate_custom_toggle_hint": "मुद्रा बदल्नुहोस्",
   "donate_confirm_button": "{amount} दान गर्नुहोस्",
   "pay_amount_button": "{amount} भुक्तानी गर्नुहोस्",
   "donate_form_description": "तपाईंको दानले नेपालका बालबालिकाका लागि शिक्षा तथा सामुदायिक कार्यक्रमहरूलाई सहयोग गर्दछ।",

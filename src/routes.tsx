@@ -1,5 +1,5 @@
 import type { RouteObject } from 'react-router-dom'
-import { Navigate, Outlet } from 'react-router-dom'
+import { Outlet, redirect } from 'react-router-dom'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { ScrollToTop } from './components/ScrollToTop'
 import { Layout } from './layout/Layout'
@@ -18,7 +18,7 @@ export const routeDefinitions: RouteObject[] = [
       </>
     ),
     children: [
-      { path: '/', element: <Navigate to={`/${DEFAULT_LOCALE}`} replace /> },
+      { path: '/', loader: () => redirect(`/${DEFAULT_LOCALE}`) },
       {
         path: '/:locale',
         element: (
@@ -47,7 +47,7 @@ export const routeDefinitions: RouteObject[] = [
           { path: 'privacy', element: <LazyPage Component={PrivacyPage} />, errorElement: <RouteErrorPage simple /> },
           { path: 'terms', element: <LazyPage Component={TermsPage} />, errorElement: <RouteErrorPage simple /> },
           { path: 'login', element: <LazyPage Component={LoginPage} />, errorElement: <RouteErrorPage /> },
-          { path: 'register', element: <Navigate to="/login" replace /> },
+          { path: 'register', loader: () => redirect('/login'), element: null },
           { path: 'forgot-password', element: <LazyPage Component={ForgotPasswordPage} />, errorElement: <RouteErrorPage /> },
           { path: 'reset-password', element: <LazyPage Component={ResetPasswordPage} />, errorElement: <RouteErrorPage /> },
           { path: 'auth/callback', element: <LazyPage Component={AuthCallbackPage} />, errorElement: <RouteErrorPage /> },

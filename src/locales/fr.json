@@ -69,6 +69,7 @@
   "donate_button_text": "Faire un don",
   "donate_currency_label": "Tous les montants en NPR",
   "donate_custom_placeholder": "Saisir un montant personnalisé",
+  "donate_custom_toggle_hint": "Changer de devise",
   "donate_confirm_button": "Donner {amount}",
   "pay_amount_button": "Payer {amount}",
   "donate_form_description": "Votre don soutient les programmes d'éducation et de communauté pour les enfants du Népal.",

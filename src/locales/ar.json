@@ -74,6 +74,7 @@
   "donate_button_text": "تبرع الآن",
   "donate_currency_label": "جميع المبالغ بالروبية النيبالية (NPR)",
   "donate_custom_placeholder": "أدخل مبلغًا مخصصًا",
+  "donate_custom_toggle_hint": "تبديل العملة",
   "donate_confirm_button": "تبرع بـ {amount}",
   "pay_amount_button": "ادفع {amount}",
   "donate_form_description": "يدعم تبرعك برامج التعليم والمجتمع للأطفال في نيبال.",
