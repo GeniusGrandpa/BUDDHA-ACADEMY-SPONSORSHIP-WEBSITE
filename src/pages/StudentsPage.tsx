@@ -8,6 +8,7 @@ import { getStudents } from '../services/students'
 import { getPageHeader } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import { Tr } from '../components/Translated'
+import { useLocalizePath } from '../hooks/useLocalizePath'
 import { sponsorshipVariant, sponsorshipLabel } from '../utils/sponsorship'
 import { optimizeImageUrl } from '../utils/image'
 import type { Student } from '../types/database'
@@ -19,6 +20,7 @@ import { StudentCardSkeleton } from '../components/ui/LoadingSkeleton'
 
 export function StudentsPage() {
   const { t } = useCmsStrings()
+  const localize = useLocalizePath()
   const [students, setStudents] = useState<Student[]>([])
   const [loading, setLoading] = useState(true)
   const [activeFilter, setActiveFilter] = useState('all')
@@ -112,7 +114,7 @@ export function StudentsPage() {
                         <span>{t('students_raised_label', { amount: formatNPR(student.current_sponsorship) })}</span>
                       )}
                     </div>
-                    <Link to={`/students/${student.id}`}>
+                    <Link to={localize(`/students/${student.id}`)}>
                       <Button variant="outline" className="w-full">
                         {t('students_view_profile')}
                       </Button>

@@ -7,11 +7,13 @@ import { Card } from '../components/ui/Card'
 import { Input } from '../components/ui/Input'
 import { Button } from '../components/ui/Button'
 import { Tr } from '../components/Translated'
+import { useLocalizePath } from '../hooks/useLocalizePath'
 import { validatePassword, validateConfirmPassword } from '../lib/auth/validation'
 import { getAuthErrorMessage } from '../lib/auth/authErrors'
 
 export function ResetPasswordPage() {
   const navigate = useNavigate()
+  const localize = useLocalizePath()
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -72,7 +74,7 @@ export function ResetPasswordPage() {
       if (updateError) throw updateError
       setSuccess(true)
       setTimeout(() => {
-        navigate('/login', { replace: true })
+        navigate(localize('/login'), { replace: true })
       }, 3000)
     } catch (err) {
       setError(getAuthErrorMessage(err))

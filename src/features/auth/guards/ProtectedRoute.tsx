@@ -4,6 +4,7 @@ import { useAuth } from '../providers/AuthContext'
 import type { Role, PermissionCode } from '../types/permissions'
 import { hasPermission, hasAnyPermission, isAdminOrAbove } from '../services/permissions'
 import { getRedirectPath } from '../utils/redirectByRole'
+import { useLocalizePath } from '../../../hooks/useLocalizePath'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
@@ -43,6 +44,7 @@ export function ProtectedRoute({
   const { user, profile, loading, signOut } = useAuth()
   const location = useLocation()
   const signedOut = useRef(false)
+  const localize = useLocalizePath()
 
   useEffect(() => {
     if ((profile?.status === 'suspended' || profile?.status === 'banned') && !signedOut.current) {
@@ -63,7 +65,7 @@ export function ProtectedRoute({
   }
 
   if (!user) {
-    return <Navigate to="/login" state={{ from: location }} replace />
+    return <Navigate to={localize('/login')} state={{ from: location }} replace />
   }
 
   if (profile?.status === 'suspended' || profile?.status === 'banned') {
@@ -79,7 +81,7 @@ export function ProtectedRoute({
     (requiredAnyPermission !== undefined && !hasAnyPermission(effectiveRole, requiredAnyPermission))
 
   if (denied) {
-    const redirect = effectiveRole ? getRedirectPath(effectiveRole) : '/login'
+    const redirect = effectiveRole ? getRedirectPath(effectiveRole) : localize('/login')
     return <Navigate to={redirect} replace />
   }
 

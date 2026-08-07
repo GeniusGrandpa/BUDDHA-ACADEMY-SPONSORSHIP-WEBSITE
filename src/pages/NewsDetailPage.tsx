@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '../components/ui/Button'
 import { Tr } from '../components/Translated'
+import { useLocalizePath } from '../hooks/useLocalizePath'
 import { getNewsById } from '../services/news'
 import { getPageHeader } from '../services/cms-content'
 import type { PageHeader } from '../types/cms-content'
@@ -21,6 +22,7 @@ type NewsArticle = Database['public']['Tables']['news']['Row'] & {
 
 export function NewsDetailPage() {
   const { id } = useParams<{ id: string }>()
+  const localize = useLocalizePath()
   const [article, setArticle] = useState<NewsArticle | null>(null)
   const [header, setHeader] = useState<PageHeader | null>(null)
   const [loading, setLoading] = useState(true)
@@ -41,7 +43,7 @@ export function NewsDetailPage() {
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">
         <h1 className="text-2xl font-bold text-gray-900 mb-4"><Tr text="Article Not Found" /></h1>
-        <Link to="/news"><Button variant="outline"><ArrowLeft className="w-4 h-4 mr-2" /><Tr text="Back to News" /></Button></Link>
+        <Link to={localize('/news')}><Button variant="outline"><ArrowLeft className="w-4 h-4 mr-2" /><Tr text="Back to News" /></Button></Link>
       </div>
     </div>
   )
@@ -66,7 +68,7 @@ export function NewsDetailPage() {
       )}
 
       <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-        <Link to="/news" className="inline-flex items-center text-amber-600 hover:text-amber-700 mb-6 sm:mb-8 text-sm sm:text-base">
+        <Link to={localize('/news')} className="inline-flex items-center text-amber-600 hover:text-amber-700 mb-6 sm:mb-8 text-sm sm:text-base">
           <ArrowLeft className="w-4 h-4 mr-2" /><Tr text="Back to News" />
         </Link>
 

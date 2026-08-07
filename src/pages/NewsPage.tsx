@@ -7,12 +7,14 @@ import { getNews } from '../services/news'
 import { getPageHeader } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import { Tr } from '../components/Translated'
+import { useLocalizePath } from '../hooks/useLocalizePath'
 import type { News } from '../types/database'
 import type { PageHeader } from '../types/cms-content'
 import { NewsCardSkeleton } from '../components/ui/LoadingSkeleton'
 
 export function NewsPage() {
   const { t } = useCmsStrings()
+  const localize = useLocalizePath()
   const [news, setNews] = useState<News[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('all')
@@ -116,7 +118,7 @@ export function NewsPage() {
                       <Tr text={article.excerpt} />
                     </p>
                     <Link
-                      to={`/news/${article.id}`}
+                      to={localize(`/news/${article.id}`)}
                       className="text-amber-600 hover:text-amber-700 text-sm font-medium"
                     >
                       {t('news_read_more')}

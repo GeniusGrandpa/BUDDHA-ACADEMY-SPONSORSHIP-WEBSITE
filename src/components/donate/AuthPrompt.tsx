@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useCmsStrings } from '../../context/CmsStringsContext'
+import { useLocalizePath } from '../../hooks/useLocalizePath'
 
 export function AuthPrompt() {
   const { t } = useCmsStrings()
+  const localize = useLocalizePath()
   const benefits = [
     t('auth_benefit_1'),
     t('auth_benefit_2'),
@@ -36,13 +38,13 @@ export function AuthPrompt() {
 
         <div className="flex flex-col sm:flex-row gap-3">
           <Link
-            to="/login"
+            to={localize('/login')}
             className="inline-flex items-center justify-center px-5 py-3 rounded-lg bg-[#f59e0b] text-white text-sm font-medium hover:bg-[#d97706] transition-colors touch-target"
           >
             {t('auth_sign_in')}
           </Link>
           <Link
-            to="/register"
+            to={localize('/register')}
             className="inline-flex items-center justify-center px-5 py-3 rounded-lg border border-gray-300 text-[#0f172a] text-sm font-medium hover:bg-gray-50 transition-colors touch-target"
           >
             {t('auth_create_account')}

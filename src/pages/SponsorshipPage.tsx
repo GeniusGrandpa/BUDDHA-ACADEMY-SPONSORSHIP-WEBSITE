@@ -5,6 +5,7 @@ import { Button } from '../components/ui/Button'
 import { getSponsorshipContent, getSiteImage, getSectionContent } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import { Tr } from '../components/Translated'
+import { useLocalizePath } from '../hooks/useLocalizePath'
 import type { SponsorshipContent } from '../types/cms-content'
 
 const TREE_STEPS = [
@@ -49,6 +50,7 @@ function SponsorshipTree({ steps }: { steps: { title: string; desc: string }[] }
 
 export function SponsorshipPage() {
   const { t } = useCmsStrings()
+  const localize = useLocalizePath()
   const [content, setContent] = useState<SponsorshipContent | null>(null)
   const [heroImage, setHeroImage] = useState('')
 
@@ -174,7 +176,7 @@ export function SponsorshipPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 sm:mb-6"><Tr text={content?.cta_title || DEFAULT_CTA_TITLE} /></h2>
           <p className="text-white/80 max-w-2xl mx-auto mb-6 sm:mb-8 text-sm sm:text-base"><Tr text={content?.cta_description || DEFAULT_CTA_DESC} /></p>
-          <Link to={content?.cta_button_link || '/students'}>
+          <Link to={localize(content?.cta_button_link || '/students')}>
             <Button size="lg" className="w-full sm:w-auto"><Tr text={content?.cta_button_text || DEFAULT_CTA_BUTTON} /> <ArrowRight className="w-4 h-4 ml-2" /></Button>
           </Link>
         </div>

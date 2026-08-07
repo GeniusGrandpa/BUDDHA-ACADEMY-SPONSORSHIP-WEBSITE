@@ -3,9 +3,11 @@ import { Link } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
 import { getPageBySlug } from '../services/content'
 import { useCmsStrings } from '../context/CmsStringsContext'
+import { useLocalizePath } from '../hooks/useLocalizePath'
 
 export function NotFoundPage() {
   const { t } = useCmsStrings()
+  const localize = useLocalizePath()
   const [content, setContent] = useState<{ title?: string; description?: string } | null>(null)
 
   useEffect(() => {
@@ -20,7 +22,7 @@ export function NotFoundPage() {
         <div className="text-9xl font-bold text-amber-500 mb-4">404</div>
         {content?.title && <h1 className="text-3xl font-bold text-gray-900 mb-4">{content.title}</h1>}
         {content?.description && <p className="text-gray-600 mb-8">{content.description}</p>}
-        <Link to="/">
+        <Link to={localize('/')}>
           <Button>{t('notfound_home_button')}</Button>
         </Link>
       </div>

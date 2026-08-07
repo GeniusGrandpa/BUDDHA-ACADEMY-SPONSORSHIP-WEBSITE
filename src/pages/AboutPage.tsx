@@ -6,6 +6,7 @@ import { Card } from '../components/ui/Card'
 import { getPageHeader, getSiteImagesBySection } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import { Tr } from '../components/Translated'
+import { useLocalizePath } from '../hooks/useLocalizePath'
 import type { PageHeader, SiteImage } from '../types/cms-content'
 
 interface TimelineItem { year: string; title: string; desc: string }
@@ -24,6 +25,7 @@ interface AboutContent {
 
 export function AboutPage() {
   const { t } = useCmsStrings()
+  const localize = useLocalizePath()
   const [header, setHeader] = useState<Pick<PageHeader, 'title' | 'subtitle'> | null>(null)
   const [content, setContent] = useState<AboutContent | null>(null)
   const [images, setImages] = useState<SiteImage[]>([])
@@ -213,8 +215,8 @@ export function AboutPage() {
             {t('about_cta_description')}
           </p>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-            <Link to="/students"><Button size="lg" className="w-full sm:w-auto">{t('about_sponsor_button')}</Button></Link>
-            <Link to="/donate"><Button size="lg" variant="glass" className="w-full sm:w-auto">{t('about_donate_button')}</Button></Link>
+            <Link to={localize('/students')}><Button size="lg" className="w-full sm:w-auto">{t('about_sponsor_button')}</Button></Link>
+            <Link to={localize('/donate')}><Button size="lg" variant="glass" className="w-full sm:w-auto">{t('about_donate_button')}</Button></Link>
           </div>
         </div>
       </section>

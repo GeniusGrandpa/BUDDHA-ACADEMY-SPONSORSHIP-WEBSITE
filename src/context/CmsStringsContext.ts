@@ -1,11 +1,7 @@
 import { createContext, useContext } from 'react'
-import en from '../locales/en.json'
-import type { CmsStringMap } from '../types/cms-content'
-
-export const DEFAULT_STRINGS: Record<string, string> = en
 
 export interface CmsStringsContextValue {
-  strings: CmsStringMap
+  strings: Record<string, string>
   t: (key: string, replacements?: Record<string, string | number>) => string
   loading: boolean
   refresh: () => Promise<void>
@@ -13,8 +9,8 @@ export interface CmsStringsContextValue {
 
 export const CmsStringsContext = createContext<CmsStringsContextValue>({
   strings: {},
-  t: (key: string) => DEFAULT_STRINGS[key] ?? key,
-  loading: true,
+  t: (key: string) => key,
+  loading: false,
   refresh: async () => {},
 })
 

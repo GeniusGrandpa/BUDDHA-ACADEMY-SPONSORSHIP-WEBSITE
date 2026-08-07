@@ -10,6 +10,7 @@ import { Button } from '../components/ui/Button'
 import { validateEmail, validateName, validatePassword, validateConfirmPassword } from '../lib/auth/validation'
 import { getAuthErrorMessage } from '../lib/auth/authErrors'
 import { getRedirectPath } from '../lib/auth/redirectByRole'
+import { useLocalizePath } from '../hooks/useLocalizePath'
 import { getRememberMe, setRememberMe } from '../lib/auth/session'
 import type { Role } from '../types/permissions'
 import logo from '../assets/logo.jpg'
@@ -45,6 +46,7 @@ type AuthMode = 'signin' | 'signup'
 
 export function LoginPage() {
   const navigate = useNavigate()
+  const localize = useLocalizePath()
   const [searchParams] = useSearchParams()
   const { signIn, signUp, resendVerificationEmail, user, profile, loading: authLoading } = useAuth()
 
@@ -73,9 +75,9 @@ export function LoginPage() {
   const redirectByRole = useCallback(
     async (role: Role) => {
       const path = getRedirectPath(role)
-      navigate(path, { replace: true })
+      navigate(localize(path), { replace: true })
     },
-    [navigate],
+    [navigate, localize],
   )
 
   useEffect(() => {
@@ -470,7 +472,7 @@ export function LoginPage() {
                       <Tr text="Didn't receive verification email?" />
                     </button>
                     <Link
-                      to="/forgot-password"
+                      to={localize('/forgot-password')}
                       className="text-xs font-medium text-[#f59e0b] hover:text-[#d97706] transition-colors"
                     >
                       <Tr text="Forgot password?" />
@@ -684,11 +686,11 @@ export function LoginPage() {
                       />
                       <span className="text-sm text-gray-600 group-hover:text-[#0f172a] transition-colors leading-relaxed">
                         <Tr text="I agree to the" />{' '}
-                        <Link to="/terms" className="text-[#f59e0b] hover:text-[#d97706] font-medium transition-colors">
+                        <Link to={localize('/terms')} className="text-[#f59e0b] hover:text-[#d97706] font-medium transition-colors">
                           <Tr text="Terms & Conditions" />
                         </Link>{' '}
                         <Tr text="and" />{' '}
-                        <Link to="/privacy" className="text-[#f59e0b] hover:text-[#d97706] font-medium transition-colors">
+                        <Link to={localize('/privacy')} className="text-[#f59e0b] hover:text-[#d97706] font-medium transition-colors">
                           <Tr text="Privacy Policy" />
                         </Link>
                       </span>
@@ -737,11 +739,11 @@ export function LoginPage() {
                 {mode === 'signin'
                   ? <Tr text="By signing in, you agree to our" />
                   : <Tr text="By creating an account, you agree to our" />}{' '}
-                <Link to="/terms" className="text-[#f59e0b] hover:text-[#d97706] font-medium transition-colors">
+                <Link to={localize('/terms')} className="text-[#f59e0b] hover:text-[#d97706] font-medium transition-colors">
                   <Tr text="Terms" />
                 </Link>{' '}
                 <Tr text="and" />{' '}
-                <Link to="/privacy" className="text-[#f59e0b] hover:text-[#d97706] font-medium transition-colors">
+                <Link to={localize('/privacy')} className="text-[#f59e0b] hover:text-[#d97706] font-medium transition-colors">
                   <Tr text="Privacy Policy" />
                 </Link>
                 .

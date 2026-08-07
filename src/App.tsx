@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react'
 import { Toaster } from 'react-hot-toast'
 import { RouterProvider } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
+import { I18nextProvider } from 'react-i18next'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from './features/auth/providers/AuthProvider'
 import { LanguageProvider } from './context/LanguageProvider'
-import { TranslationProvider } from './context/TranslationProvider'
 import { ThemeProvider } from './context/ThemeProvider'
 import { CmsStringsProvider } from './context/CmsStringsProvider'
+import i18n from './i18n'
 import { ConfirmProvider } from './context/ConfirmProvider'
 import { SiteBranding } from './components/SiteBranding'
 import { queryClient } from './lib/query-client'
@@ -58,9 +59,9 @@ interface AppProps {
 
 function App({ router, initialLanguage }: AppProps) {
   return (
-    <HelmetProvider>
+  <HelmetProvider>
     <LanguageProvider initialLanguage={initialLanguage}>
-      <TranslationProvider>
+      <I18nextProvider i18n={i18n}>
       <QueryClientProvider client={queryClient}>
       <ClientToaster />
       <AuthProvider>
@@ -74,7 +75,7 @@ function App({ router, initialLanguage }: AppProps) {
         </ThemeProvider>
       </AuthProvider>
       </QueryClientProvider>
-      </TranslationProvider>
+      </I18nextProvider>
     </LanguageProvider>
     </HelmetProvider>
   )

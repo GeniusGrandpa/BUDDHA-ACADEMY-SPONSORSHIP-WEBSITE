@@ -1,6 +1,7 @@
 import { useRouteError, Link, isRouteErrorResponse } from 'react-router-dom'
 import { AlertTriangle, RefreshCw, Home, ArrowLeft } from 'lucide-react'
 import { Button } from '../ui/Button'
+import { useLocalizePath } from '../../hooks/useLocalizePath'
 
 interface RouteErrorPageProps {
   simple?: boolean
@@ -8,6 +9,7 @@ interface RouteErrorPageProps {
 
 export function RouteErrorPage({ simple = false }: RouteErrorPageProps) {
   const error = useRouteError()
+  const localize = useLocalizePath()
   const isDev = import.meta.env.DEV
 
   const getErrorInfo = () => {
@@ -67,7 +69,7 @@ export function RouteErrorPage({ simple = false }: RouteErrorPageProps) {
               Try Again
             </button>
             <Link
-              to="/"
+              to={localize('/')}
               className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 transition-colors"
             >
               <Home className="w-4 h-4" />
@@ -96,7 +98,7 @@ export function RouteErrorPage({ simple = false }: RouteErrorPageProps) {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Go Back
           </Button>
-          <Link to="/">
+          <Link to={localize('/')}>
             <Button variant="secondary">
               <Home className="w-4 h-4 mr-2" />
               Home

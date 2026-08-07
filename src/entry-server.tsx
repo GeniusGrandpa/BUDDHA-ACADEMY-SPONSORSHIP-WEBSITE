@@ -2,18 +2,19 @@ import React from 'react'
 import { renderToPipeableStream } from 'react-dom/server'
 import { createStaticHandler, createStaticRouter, StaticRouterProvider } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
+import { I18nextProvider } from 'react-i18next'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { PassThrough } from 'stream'
 import { routeDefinitions } from './routes'
 import { createQueryClient } from './lib/query-client'
 import { LanguageProvider } from './context/LanguageProvider'
-import { TranslationProvider } from './context/TranslationProvider'
 import { AuthProvider } from './features/auth/providers/AuthProvider'
 import { ThemeProvider } from './context/ThemeProvider'
 import { CmsStringsProvider } from './context/CmsStringsProvider'
 import { ConfirmProvider } from './context/ConfirmProvider'
 import { SiteBranding } from './components/SiteBranding'
-import { parseLanguageCookie } from './lib/locale'
+import { parseLanguageCookie, localeFromPath, toLocale } from './lib/locale'
+import i18n, { DEFAULT_LOCALE } from './i18n'
 import './index.css'
 
 export interface SsrResult {
@@ -24,7 +25,12 @@ export interface SsrResult {
 const handler = createStaticHandler(routeDefinitions)
 
 export async function render(_url: string, template: string, cookieHeader?: string): Promise<SsrResult> {
-  const initialLanguage = parseLanguageCookie(cookieHeader)
+  const pathLocale = localeFromPath(new URL(_url, 'http://localhost').pathname)
+  const cookieLocale = toLocale(parseLanguageCookie(cookieHeader))
+  const initialLanguage = pathLocale === DEFAULT_LOCALE && cookieLocale !== pathLocale ? cookieLocale : pathLocale
+  if (i18n.isInitialized) {
+    void i18n.changeLanguage(initialLanguage)
+  }
   const fetchRequest = new Request(_url)
   const context = await handler.query(fetchRequest)
 
@@ -48,7 +54,7 @@ export async function render(_url: string, template: string, cookieHeader?: stri
     <React.StrictMode>
       <HelmetProvider context={helmetContext}>
         <LanguageProvider initialLanguage={initialLanguage}>
-          <TranslationProvider>
+          <I18nextProvider i18n={i18n}>
           <QueryClientProvider client={queryClient}>
             <AuthProvider>
               <ThemeProvider>
@@ -61,7 +67,7 @@ export async function render(_url: string, template: string, cookieHeader?: stri
               </ThemeProvider>
             </AuthProvider>
           </QueryClientProvider>
-          </TranslationProvider>
+          </I18nextProvider>
         </LanguageProvider>
       </HelmetProvider>
     </React.StrictMode>

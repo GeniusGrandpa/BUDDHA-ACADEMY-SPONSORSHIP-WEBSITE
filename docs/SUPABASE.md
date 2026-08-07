@@ -77,9 +77,9 @@ All tables have RLS policies enforced:
 ## Audit Logging
 
 Every admin action calls `logAuditEvent()` which inserts into `audit_logs` table with:
-- `action` — description of the action
-- `entity_type` — the affected table/entity
-- `entity_id` — the affected row ID
+- `action` description of the action
+- `entity_type` the affected table/entity
+- `entity_id` the affected row ID
 - Performed by the authenticated user
 
 Audit logs are readable only by `super_admin`.

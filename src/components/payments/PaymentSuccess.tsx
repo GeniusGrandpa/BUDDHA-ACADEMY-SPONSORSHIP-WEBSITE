@@ -3,6 +3,7 @@ import { CheckCircle, ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useCmsStrings } from '../../context/CmsStringsContext'
 import { Button } from '../ui/Button'
+import { useLocalizePath } from '../../hooks/useLocalizePath'
 
 interface PaymentSuccessProps {
   amount: number
@@ -11,6 +12,7 @@ interface PaymentSuccessProps {
 
 export function PaymentSuccess({ amount, transactionId }: PaymentSuccessProps) {
   const { t } = useCmsStrings()
+  const localize = useLocalizePath()
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -58,7 +60,7 @@ export function PaymentSuccess({ amount, transactionId }: PaymentSuccessProps) {
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
-        <Link to="/dashboard">
+        <Link to={localize('/dashboard')}>
           <Button>
             {t('payment_success_go_dashboard')}
             <ArrowRight className="w-4 h-4 ml-2" />

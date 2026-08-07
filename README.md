@@ -45,7 +45,7 @@ It supports:
 - News and announcements for organizational updates.
 - Testimonials, success stories, activity updates, and gallery content.
 - Donation and sponsorship entry points designed for public visitors and returning donors.
-- Multilingual language selector with local translations for English, Nepali, and Hindi, plus browser-loaded translation support for additional languages.
+- Multilingual UI with localized routes (`/en`, `/ne`, ...) and static translations for English, Nepali, Japanese, Chinese, Arabic, French, Spanish, and German via react-i18next.
 
 ### Donor Portal
 
@@ -91,7 +91,7 @@ Browser -> Node SSR Server (server/index.mjs)
 
 - Built with React 18, TypeScript, Vite 8, and Tailwind CSS.
 - Uses React Router with `createBrowserRouter` (client) and static handlers + `renderToPipeableStream` (server).
-- Client entry is `src/entry-client.tsx` (hydration or client render); server entry is `src/entry-server.tsx` (SSR with status codes).
+- Client entry is `src/entry-client.tsx` (hydration or client render); server entry is `src/entry-server.tsx` (SSR with status codes), which sets the i18next language from the URL path before rendering to avoid hydration mismatches.
 - Pages are lazy-loaded with `React.lazy()` and `Suspense`.
 - Shared UI primitives live under `src/components`.
 - Domain-specific dashboards and workflows live under `src/features`.
@@ -114,22 +114,24 @@ ErrorBoundary (client only)
   App
     HelmetProvider
       LanguageProvider
-        QueryClientProvider
-          ClientToaster
-          AuthProvider
-            ThemeProvider
-              SiteBranding
-              CmsStringsProvider
-                ConfirmProvider
-                  RouterProvider
+        I18nextProvider
+          QueryClientProvider
+            ClientToaster
+            AuthProvider
+              ThemeProvider
+                SiteBranding
+                CmsStringsProvider
+                  ConfirmProvider
+                    RouterProvider
 ```
 
 - `HelmetProvider` manages document head tags (title, meta, links) for SEO.
-- `LanguageProvider` manages language state, translation strings, and browser-loaded translation support.
+- `LanguageProvider` manages the active locale, keeps i18next, the cookie, and the `<html lang/dir>` attributes in sync, and drives localized route URLs.
+- `I18nextProvider` supplies the react-i18next instance initialized from the static locale JSON dictionaries in `src/i18n`.
 - `QueryClientProvider` provides the React Query client used by data hooks.
 - `AuthProvider` manages session state, user profile data, and auth actions.
 - `ThemeProvider` loads published design settings and injects CSS variables.
-- `CmsStringsProvider` loads CMS-driven UI string overrides.
+- `CmsStringsProvider` exposes `t()` for UI strings, delegating to the react-i18next instance.
 - `ConfirmProvider` provides a Promise-based `useConfirm()` replacement for native `window.confirm()` dialogs.
 - `RouterProvider` renders public, protected, admin, and super-admin routes.
 
@@ -145,12 +147,14 @@ ErrorBoundary (client only)
 
 Routes are defined in `src/routes.tsx` and grouped into:
 
-- Public routes under the main layout.
+- Public routes under the main layout, prefixed with a locale segment (`/:locale`, e.g. `/en/about`, `/ne/donate`); `/` redirects to the default locale.
 - Protected user routes.
 - Admin routes.
 - Super Admin routes.
 - Auth callback and password recovery routes.
 - Not found fallback route.
+
+Localized routes are driven by `src/i18n` (react-i18next init, supported locales, dictionaries) and helpers in `src/lib/locale.ts`. App-level areas (admin, dashboard, super-admin, teacher) stay at their root paths and are not localized.
 
 ### Service Layer
 
@@ -176,6 +180,7 @@ The service layer keeps Supabase access organized by domain:
 | Frontend | React 18, TypeScript, Vite 8 |
 | Styling | Tailwind CSS, dynamic CSS variables |
 | Routing | React Router (createBrowserRouter + SSR static handlers) |
+| Localization | react-i18next with static JSON dictionaries and localized routes |
 | Server | Node.js HTTP server (`server/index.mjs`) with gzip, request IDs, structured JSON logs |
 | Backend Services | Supabase |
 | Edge Functions | Deno (`create-payment-intent`, `stripe-webhook`) |
@@ -280,23 +285,23 @@ The service layer keeps Supabase access organized by domain:
 
 ## Student Sponsorship Workflow
 
-1. **Student registration** — Admins add student details, academic context, sponsorship needs, background information, and visibility data.
-2. **Sponsorship availability** — Student records are marked as available, partially sponsored, or fully sponsored.
-3. **Sponsor selection** — Donors browse student profiles and select a student whose story aligns with their giving intent.
-4. **Donation process** — Donors begin a donation or sponsorship payment workflow through the donation interface.
-5. **Progress reporting** — Teachers and staff can support future updates about academic progress, milestones, and needs.
-6. **Sponsorship tracking** — Donors and admins review active sponsorship records, donation activity, and status.
-7. **Impact reporting** — Impact content, transparency updates, student stories, and dashboards communicate outcomes back to supporters.
+1. **Student registration** Admins add student details, academic context, sponsorship needs, background information, and visibility data.
+2. **Sponsorship availability** Student records are marked as available, partially sponsored, or fully sponsored.
+3. **Sponsor selection** Donors browse student profiles and select a student whose story aligns with their giving intent.
+4. **Donation process** Donors begin a donation or sponsorship payment workflow through the donation interface.
+5. **Progress reporting** Teachers and staff can support future updates about academic progress, milestones, and needs.
+6. **Sponsorship tracking** Donors and admins review active sponsorship records, donation activity, and status.
+7. **Impact reporting** Impact content, transparency updates, student stories, and dashboards communicate outcomes back to supporters.
 
 
 ## Donation Workflow
 
-1. **Donation creation** — A donor selects a donation amount, sponsorship context, or general donation pathway.
-2. **Payment submission** — The donor pays through an external/manual payment method and submits a transaction reference and proof screenshot.
-3. **Verification process** — Admin or finance staff review payment evidence.
-4. **Financial review** — Finance staff validate records, confirm status, and identify rejected, pending, or verified payments.
-5. **Receipt generation** — Verified payment records support receipt-oriented donor communication and reporting.
-6. **Audit logging** — Sensitive payment and verification actions are logged for accountability.
+1. **Donation creation** A donor selects a donation amount, sponsorship context, or general donation pathway.
+2. **Payment submission** The donor pays through an external/manual payment method and submits a transaction reference and proof screenshot.
+3. **Verification process** Admin or finance staff review payment evidence.
+4. **Financial review** Finance staff validate records, confirm status, and identify rejected, pending, or verified payments.
+5. **Receipt generation** Verified payment records support receipt-oriented donor communication and reporting.
+6. **Audit logging** Sensitive payment and verification actions are logged for accountability.
 
 
 ## Transparency & Accountability
@@ -331,7 +336,7 @@ The [`WebsiteDashboard`](src/pages/admin/website/WebsiteDashboard.tsx) at `/admi
 | **Global Settings** | Branding, Colors, Typography, Layout, Components, Config, Presets, SEO |
 | **Other Pages** | Volunteer, Privacy Policy, Terms of Service, Footer, Transparency, Campaigns |
 
-### WebsiteBuilder — 3-Panel Live Preview
+### WebsiteBuilder 3-Panel Live Preview
 
 The [`WebsiteBuilder`](src/pages/admin/website/WebsiteBuilder.tsx) is the main visual editor at `/admin/website/homepage`:
 
@@ -379,19 +384,19 @@ All CMS content and design settings support controlled publishing patterns so dr
 
 ### Legacy System
 
-The old block-based page builder (`BlockRenderer`, `AdminBlockEditor`) has been removed from the UI layer — all routes redirect to `/admin/website/*`. The `page_blocks` table remains in the schema for backward compatibility. The `content.blocks` permission code is vestigial.
+The old block-based page builder (`BlockRenderer`, `AdminBlockEditor`) has been removed from the UI layer all routes redirect to `/admin/website/*`. The `page_blocks` table remains in the schema for backward compatibility. The `content.blocks` permission code is vestigial.
 
 
 ## Design System
 
 The platform includes a database-driven design management system.
 
-- **Theme management** — Published theme settings are loaded at runtime.
-- **Design tokens** — Colors, typography, layout, component styles, spacing, shadows, radii, and breakpoints are represented as structured settings.
-- **Color management** — Admins can manage a full design palette and generated CSS variables.
-- **Typography** — Font families, sizes, weights, letter spacing, line height, and heading styles can be configured.
-- **Layout customization** — Container widths, spacing, radii, shadows, and animation toggles can be controlled.
-- **Presets** — Theme presets can be saved, restored, and applied.
+- **Theme management** Published theme settings are loaded at runtime.
+- **Design tokens** Colors, typography, layout, component styles, spacing, shadows, radii, and breakpoints are represented as structured settings.
+- **Color management** Admins can manage a full design palette and generated CSS variables.
+- **Typography** Font families, sizes, weights, letter spacing, line height, and heading styles can be configured.
+- **Layout customization** Container widths, spacing, radii, shadows, and animation toggles can be controlled.
+- **Presets** Theme presets can be saved, restored, and applied.
 
 
 ## Dashboards
@@ -415,8 +420,8 @@ The platform includes a database-driven design management system.
 - **Row Level Security** on Supabase tables.
 - **Audit Logging** for sensitive administrative actions.
 - **Secure Payment Verification** through controlled RPC workflows, manual review, and verified Stripe webhooks.
-- **Sanitized Error Handling** — sensitive details (SQL, paths, keys, traces) are never shown to users; errors surface as friendly messages via a centralized error library (`src/lib/errors.ts`).
-- **Structured Logging** — the SSR server writes JSON logs with per-request IDs (`X-Request-Id`) and crash handlers for uncaught exceptions and unhandled rejections.
+- **Sanitized Error Handling** sensitive details (SQL, paths, keys, traces) are never shown to users; errors surface as friendly messages via a centralized error library (`src/lib/errors.ts`).
+- **Structured Logging** the SSR server writes JSON logs with per-request IDs (`X-Request-Id`) and crash handlers for uncaught exceptions and unhandled rejections.
 - **File Upload Validation** for payment screenshots and media assets.
 - **HTTP Security Headers** configured on both the Vite dev server and the production SSR server.
 - **Database hardening** through restricted table/function access and safer function search paths.
@@ -448,8 +453,9 @@ src/
   config/          Navigation configuration and layout definitions
   context/         AuthContext, LanguageContext, ThemeContext, CmsStringsContext, ConfirmContext providers
   features/        Auth flows and role dashboards for donor, finance, sponsorship, volunteer, and staff workflows
-  hooks/           useRole, usePayment, useDebounce, useWebsiteBuilder, and feature hooks
-  lib/             Supabase client, audit logger, error handling, logger, permissions, auth helpers
+  hooks/           useRole, usePayment, useDebounce, useWebsiteBuilder, useLocalizePath, and feature hooks
+  i18n/            react-i18next init, supported locales, and static locale dictionaries
+  lib/             Supabase client, audit logger, error handling, logger, permissions, locale helpers, auth helpers
   pages/           Route pages including public, admin, super-admin, teacher, and auth callback pages
   services/        Domain service layer for Supabase access (23 files)
   types/           Database types, permission types, CMS types, and feature types
@@ -507,7 +513,7 @@ VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...
 STRIPE_SECRET_KEY=sk_test_...
 ```
 
-Do not commit production secrets. Supabase anonymous keys are public by design, but table access must be protected through RLS policies. `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and `SUPABASE_SERVICE_ROLE_KEY` are server-side only — for local Edge Function development set them with `supabase secrets set`.
+Do not commit production secrets. Supabase anonymous keys are public by design, but table access must be protected through RLS policies. `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and `SUPABASE_SERVICE_ROLE_KEY` are server-side only for local Edge Function development set them with `supabase secrets set`.
 
 ---
 
@@ -678,7 +684,7 @@ For any host running the SSR server:
 - Mobile application.
 - Multi-school support.
 - Offline capabilities.
-- Expanded multilingual support with more local translation dictionaries.
+- Additional static locale dictionaries for more languages.
 
 ## Contributing
 

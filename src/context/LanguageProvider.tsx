@@ -1,30 +1,16 @@
-import React, { startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { setLanguageCookie } from '../lib/locale'
+import React, { startTransition, useCallback, useEffect, useMemo, useState } from 'react'
+import { setLanguageCookie, toLocale } from '../lib/locale'
 import { LanguageContext, languages, rtlLanguages, type LanguageCode } from './LanguageContext'
+import i18n from '../i18n'
 
 export function LanguageProvider({ children, initialLanguage }: { children: React.ReactNode; initialLanguage?: LanguageCode }) {
-  const [language, setLanguageState] = useState<LanguageCode>(
-    initialLanguage && languages.some((item) => item.code === initialLanguage) ? initialLanguage : 'en',
-  )
+  const [language, setLanguageState] = useState<LanguageCode>(toLocale(initialLanguage))
 
-  const [hydrated, setHydrated] = useState(false)
   useEffect(() => {
-    setHydrated(true)
-  }, [])
-
-  const restoredFallback = useRef(false)
-  useEffect(() => {
-    if (!hydrated || restoredFallback.current) return
-    restoredFallback.current = true
-    try {
-      const saved = window.localStorage.getItem('language')
-      if (saved && languages.some((item) => item.code === saved)) {
-        startTransition(() => setLanguageState(saved))
-      }
-    } catch {
-    
+    if (i18n.isInitialized && i18n.language !== language) {
+      void i18n.changeLanguage(language)
     }
-  }, [hydrated])
+  }, [language])
 
   useEffect(() => {
     if (typeof window === 'undefined') return

@@ -8,6 +8,7 @@ import { getStudentById } from '../services/students'
 import { getSiteImage } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import { Tr } from '../components/Translated'
+import { useLocalizePath } from '../hooks/useLocalizePath'
 import { sponsorshipVariant, sponsorshipLabel } from '../utils/sponsorship'
 import type { Student } from '../types/database'
 import { formatNPR } from '../utils/currency'
@@ -55,6 +56,7 @@ export function StudentDetailPage() {
   const { t } = useCmsStrings()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const localize = useLocalizePath()
   const [student, setStudent] = useState<Student | null>(null)
   const [loading, setLoading] = useState(true)
   const [photoFallback, setPhotoFallback] = useState('')
@@ -84,7 +86,7 @@ export function StudentDetailPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('student_not_found')}</h2>
-          <Button onClick={() => navigate('/students')}>
+          <Button onClick={() => navigate(localize('/students'))}>
             {t('student_back_to_list')}
           </Button>
         </div>
@@ -148,7 +150,7 @@ export function StudentDetailPage() {
                 </div>
 
                 {student.sponsorship_status !== 'fully_sponsored' && (
-                  <Link to={`/donate?student=${student.id}`} className="block mt-6">
+                  <Link to={localize(`/donate?student=${student.id}`)} className="block mt-6">
                     <Button className="w-full" size="lg">
                       {t('student_sponsor_button', { name: student.name })}
                     </Button>

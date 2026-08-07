@@ -4,7 +4,7 @@ Admin and Super Admin can manage all visible website content dynamically through
 
 ## Website Management Hub (`/admin/website`)
 
-The entry point is `/admin/website` which renders `WebsiteDashboard` — a categorized dashboard organizing all content tools.
+The entry point is `/admin/website` which renders `WebsiteDashboard` a categorized dashboard organizing all content tools.
 
 ### Dashboard Groups
 
@@ -77,7 +77,7 @@ A 3-panel live preview visual builder that replaces the old block-based homepage
 - **Section visibility**: Hover-to-reveal eye icon toggles; hidden sections show dimmed overlay + "Hidden" badge in preview
 - **Add Section**: Button at bottom opens grid of available section types to insert
 - **Right properties panel**: Dynamically shows editable fields per selected section
-- **Theme & Branding panel**: Color pickers, font selectors, button radius slider, button style — instant preview via CSS vars
+- **Theme & Branding panel**: Color pickers, font selectors, button radius slider, button style instant preview via CSS vars
 - **Device preview toggles**: Desktop/Tablet/Mobile with width transitions
 - **Draft/publish workflow**: Unsaved changes indicator (amber pulse dot), Publish Changes button, Discard button, bulk-saves all modified content via `Promise.all(upsert*())`
 - **Data loading**: Fetches ALL real data from ALL service functions on mount into local state
@@ -160,8 +160,8 @@ admin-only route `/preview/:page` (e.g. `/preview/home`, `/preview/about`) in a 
 - The route renders the **same React page component** used on the public site, wrapped in the site Header/Footer,
   so the preview matches the live page exactly.
 - Preview mode is enabled for the lifetime of that tab (`src/lib/preview-mode.ts`). While active, the content
-  services return the **latest row regardless of `is_published`/`is_visible`/`status`** — i.e. drafts, hidden
-  sections, and unpublished design settings — using the authenticated admin's Supabase session. No cross-origin
+  services return the **latest row regardless of `is_published`/`is_visible`/`status`**  i.e. drafts, hidden
+  sections, and unpublished design settings using the authenticated admin's Supabase session. No cross-origin
   requests or CORS changes are involved; everything is served same-origin through the admin's session.
 - A sticky amber banner labels the tab as a preview and links back to `/admin/website`. Leaving the tab
   (`/preview` → public route) disables preview mode so production content is never polluted.
@@ -169,7 +169,7 @@ admin-only route `/preview/:page` (e.g. `/preview/home`, `/preview/about`) in a 
 
 ### How it works
 
-1. `src/lib/preview-mode.ts` — module-level `setPreviewMode`/`isPreviewMode` flag + `openPreview(slug)` helper.
+1. `src/lib/preview-mode.ts` module-level `setPreviewMode`/`isPreviewMode` flag + `openPreview(slug)` helper.
 2. `src/entry-client.tsx` enables preview mode early (before render) when the URL starts with `/preview`.
 3. `src/features/preview/PreviewProvider.tsx` keeps the flag in sync and resets it on unmount.
 4. `src/pages/preview/PreviewPage.tsx` maps `:page` → the matching public page component.

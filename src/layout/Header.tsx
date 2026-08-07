@@ -6,6 +6,7 @@ import { useTheme } from '../context/ThemeContext'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import { Tr } from '../components/Translated'
 import { LanguageSwitcher } from '../components/LanguageSwitcher'
+import { useLocalizePath } from '../hooks/useLocalizePath'
 import { getNavigationItems } from '../services/navigation'
 import { getSiteSettings } from '../services/settings'
 import type { NavigationItem } from '../types/cms'
@@ -18,6 +19,7 @@ export function Header() {
   const { branding } = useTheme()
   const location = useLocation()
   const navigate = useNavigate()
+  const localize = useLocalizePath()
   const [navItems, setNavItems] = useState<NavigationItem[]>([])
   const [siteName, setSiteName] = useState('')
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
@@ -36,7 +38,7 @@ export function Header() {
 
   const navigation = navItems.map(item => ({
     name: item.label,
-    href: item.route || item.url || '/',
+    href: localize(item.route || item.url || '/'),
     target: item.target,
     isCta: item.is_cta,
     ctaStyle: item.cta_style,
@@ -46,14 +48,14 @@ export function Header() {
 
   const handleSignOut = async () => {
     await signOut()
-    navigate('/')
+    navigate(localize('/'))
   }
 
   return (
     <header className="sticky top-0 z-50 bg-[var(--color-navbar-bg)] border-b border-[var(--color-border)]">
       <div className="w-full px-4 sm:px-8 lg:px-16 xl:px-24">
         <div className="flex justify-between items-center h-20">
-          <Link to="/" className="flex items-center space-x-3">
+          <Link to={localize('/')} className="flex items-center space-x-3">
             <img src={headerLogoSrc} alt={siteName || branding.organization_name || ''} className="h-12 w-auto drop-shadow-sm" loading="eager" decoding="async" width="48" height="48" {...{'fetchpriority': 'high'}} />
             <div className="hidden sm:block">
               <div className="font-semibold text-lg text-[var(--color-navbar-text)]">{siteName || branding.organization_name || ''}</div>
@@ -90,12 +92,12 @@ export function Header() {
             {user ? (
               <div className="flex items-center gap-4">
                 {(profile?.role === 'admin' || profile?.role === 'super_admin') && (
-                  <Link to={profile?.role === 'super_admin' ? '/super-admin' : '/admin'}
+                  <Link to={localize(profile?.role === 'super_admin' ? '/super-admin' : '/admin')}
                     className="text-sm font-medium transition-colors hover:opacity-80 text-[var(--color-navbar-text)]">
                     {t('header_admin')}
                   </Link>
                 )}
-                <Link to="/dashboard"
+                <Link to={localize('/dashboard')}
                   className="text-sm font-medium transition-colors hover:opacity-80 text-[var(--color-navbar-text)]">
                   {t('header_dashboard')}
                 </Link>
@@ -105,13 +107,13 @@ export function Header() {
                 </button>
               </div>
             ) : (
-              <Link to="/login"
+              <Link to={localize('/login')}
                 className="text-sm font-medium transition-colors hover:opacity-80 text-[var(--color-navbar-text)]">
                 {t('header_sign_in')}
               </Link>
             )}
 
-            <Link to="/donate"
+            <Link to={localize('/donate')}
               className="px-5 py-2.5 rounded-full font-medium text-sm transition-colors hover:opacity-90 bg-[var(--color-button-primary-bg)] text-[var(--color-button-primary-text)]">
               {t('header_donate')}
             </Link>
@@ -137,7 +139,7 @@ export function Header() {
                   <Tr text={item.name} />
                 </Link>
               ))}
-              <Link to="/donate" onClick={() => setIsMenuOpen(false)}
+              <Link to={localize('/donate')} onClick={() => setIsMenuOpen(false)}
                 className="block px-4 py-3 rounded-lg text-sm font-medium text-center bg-[var(--color-button-primary-bg)] text-[var(--color-button-primary-text)]">
                 {t('header_donate')}
               </Link>
@@ -147,13 +149,13 @@ export function Header() {
               {user ? (
                 <div className="space-y-1 pt-2 border-t border-[var(--color-border)]">
                   {(profile?.role === 'admin' || profile?.role === 'super_admin') && (
-                    <Link to={profile?.role === 'super_admin' ? '/super-admin' : '/admin'}
+                    <Link to={localize(profile?.role === 'super_admin' ? '/super-admin' : '/admin')}
                       onClick={() => setIsMenuOpen(false)}
                       className="block px-4 py-3 rounded-lg text-sm font-medium text-[var(--color-navbar-text)]">
                       {t('header_admin')}
                     </Link>
                   )}
-                  <Link to="/dashboard" onClick={() => setIsMenuOpen(false)}
+                  <Link to={localize('/dashboard')} onClick={() => setIsMenuOpen(false)}
                     className="block px-4 py-3 rounded-lg text-sm font-medium text-[var(--color-navbar-text)]">
                     {t('header_dashboard')}
                   </Link>
@@ -164,7 +166,7 @@ export function Header() {
                 </div>
               ) : (
                 <div className="pt-2 border-t border-[var(--color-border)]">
-                  <Link to="/login" onClick={() => setIsMenuOpen(false)}
+                  <Link to={localize('/login')} onClick={() => setIsMenuOpen(false)}
                     className="block px-4 py-3 rounded-lg text-sm font-medium text-[var(--color-navbar-text)]">
                     {t('header_sign_in')}
                   </Link>

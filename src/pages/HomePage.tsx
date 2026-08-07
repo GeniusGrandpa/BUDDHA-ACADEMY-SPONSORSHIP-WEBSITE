@@ -6,6 +6,7 @@ import { Card } from '../components/ui/Card'
 import { Badge } from '../components/ui/Badge'
 import { StudentCardSkeleton } from '../components/ui/LoadingSkeleton'
 import { CtaBanner } from '../components/CtaBanner'
+import { useLocalizePath } from '../hooks/useLocalizePath'
 import { getStudents } from '../services/students'
 import { getHeroContent, getSectionContent, getSectionVisibility } from '../services/cms-content'
 import { getTestimonialsWithType } from '../services/content'
@@ -82,6 +83,7 @@ function sponsorshipLabel(status: string) {
 
 function HeroSection({ hero, visible }: { hero: HeroContent; visible: boolean }) {
   const { t } = useCmsStrings()
+  const localize = useLocalizePath()
    if (!visible) return null
    return (
      <section 
@@ -120,7 +122,7 @@ function HeroSection({ hero, visible }: { hero: HeroContent; visible: boolean })
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4" role="group" aria-label={t('home_cta_group_aria')}>
                 {hero.cta_primary_text && (
                   <Link 
-                    to={hero.cta_primary_link || '/students'}
+                    to={localize(hero.cta_primary_link || '/students')}
                     className="focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-white/40 rounded-full"
                   >
                     <Button 
@@ -134,7 +136,7 @@ function HeroSection({ hero, visible }: { hero: HeroContent; visible: boolean })
                 )}
                 {hero.cta_secondary_text && (
                   <Link 
-                    to={hero.cta_secondary_link || '/donate'}
+                    to={localize(hero.cta_secondary_link || '/donate')}
                     className="focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-white/40 rounded-full"
                   >
                     <Button 
@@ -199,6 +201,7 @@ function WelcomeSection({ welcome, visible }: { welcome: SectionContent; visible
 }
 
 function AboutSection({ about, visible, t }: { about: SectionContent | null; visible: boolean; t: (k: string) => string }) {
+  const localize = useLocalizePath()
   if (!visible) return null
   const milestones: { year: string; event: string }[] = about
     ? ((about.content as { milestones?: { year: string; event: string }[] })?.milestones || [])
@@ -215,7 +218,7 @@ function AboutSection({ about, visible, t }: { about: SectionContent | null; vis
             {about?.content && (about.content as Record<string, string>).mission_description && (
               <p className="text-[var(--color-text-secondary)] mb-6 sm:mb-8 leading-relaxed text-sm sm:text-base"><Tr text={(about.content as Record<string, string>).mission_description} /></p>
             )}
-            <Link to="/about">
+            <Link to={localize('/about')}>
               <Button variant="outline">
                 {t('home_learn_more')} <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
@@ -254,6 +257,7 @@ function StudentsSection({ students, brokenPhotos, setBrokenPhotos, visible, loa
   t: (k: string, r?: Record<string, string | number>) => string
   featuredContent: SectionContent | null
 }) {
+  const localize = useLocalizePath()
   if (!visible) return null
   const content = featuredContent?.content as { title?: string }
   return (
@@ -304,7 +308,7 @@ function StudentsSection({ students, brokenPhotos, setBrokenPhotos, visible, loa
                       <span>{t('home_grade_label', { grade: student.grade })}</span>
                     </div>
                     {student.bio && <p className="text-[var(--color-text-secondary)] text-sm mb-4 line-clamp-2"><Tr text={student.bio} /></p>}
-                    <Link to={`/students/${student.id}`}>
+                    <Link to={localize(`/students/${student.id}`)}>
                       <Button variant="outline" className="w-full">{t('home_view_profile')}</Button>
                     </Link>
                   </div>
@@ -315,7 +319,7 @@ function StudentsSection({ students, brokenPhotos, setBrokenPhotos, visible, loa
         </div>
         {!loading && students.length > 0 && (
           <div className="text-center mt-8">
-            <Link to="/students">
+            <Link to={localize('/students')}>
               <Button variant="primary">{t('home_view_all_profiles')} <ArrowRight className="w-4 h-4 ml-2" /></Button>
             </Link>
           </div>

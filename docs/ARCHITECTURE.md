@@ -34,31 +34,32 @@ Auth emails (password reset, email verification) are handled by Supabase Auth vi
 ```
 ErrorBoundary (client only)
   App
-    HelmetProvider                      ── document head tags (SEO)
-      LanguageProvider                  ── i18n via Google Translate + manual EN/NP/HI dict
-        QueryClientProvider             ── React Query client
-          ClientToaster                 ── toast notifications (react-hot-toast)
-          AuthProvider                  ── user session, profile, signIn/signUp/signOut
-            ThemeProvider               ── injects :root CSS vars from design_settings
-              SiteBranding              ── dynamic branding (logo, favicon, fonts)
-              CmsStringsProvider        ── CMS-driven UI string overrides
-                ConfirmProvider         ── Promise-based useConfirm() for dialogs
-                  RouterProvider        ── React Router (createBrowserRouter / createStaticRouter)
-                    <Layout />          ── public pages (/, /about, /donate...)
-                    <ProtectedRoute>    ── gated routes (/dashboard, /admin, /teacher...)
-                      <AdminLayout />   ── admin sidebar + Outlet for /admin/*
-                      <SuperAdminLayout /> ── super admin layout + Outlet
-                      <DashboardPage /> ── donor/volunteer dashboard
+    HelmetProvider                       document head tags (SEO)
+      LanguageProvider                active locale, syncs i18next + <html lang/dir>
+        I18nextProvider               react-i18next with static JSON dictionaries
+          QueryClientProvider         React Query client
+          ClientToaster               toast notifications (react-hot-toast)
+          AuthProvider                 user session, profile, signIn/signUp/signOut
+            ThemeProvider               injects :root CSS vars from design_settings
+              SiteBranding               dynamic branding (logo, favicon, fonts)
+              CmsStringsProvider        t() for UI strings via react-i18next
+                ConfirmProvider         Promise-based useConfirm() for dialogs
+                  RouterProvider        React Router (createBrowserRouter / createStaticRouter)
+                    <Layout />          public pages under /:locale (e.g. /en/about, /ne/donate)
+                    <ProtectedRoute>    gated routes (/dashboard, /admin, /teacher...)
+                      <AdminLayout />    admin sidebar + Outlet for /admin/*
+                      <SuperAdminLayout /> super admin layout + Outlet
+                      <DashboardPage /> donor/volunteer dashboard
 ```
 
 ## State Management
 
-- **Server state** — fetched directly from Supabase in service layer functions, called from custom hooks in each dashboard/page
-- **Auth state** — `AuthContext` holds `user`, `profile`, and provides `signIn`/`signUp`/`signOut`/`refreshProfile`
-- **Theme state** — `ThemeContext` generates CSS custom properties from design tokens and injects them into `<head>` (URL-validated)
-- **Language state** — `LanguageContext` manages the active language, provides `t(key)` for translations, and loads Google Translate for non-EN/NP/HI languages
-- **Confirm state** — `ConfirmContext` provides a Promise-based `useConfirm()` used in place of `window.confirm()` for a consistent dialog UX
-- **Local UI state** — React `useState`/`useReducer` in components
+- **Server state** fetched directly from Supabase in service layer functions, called from custom hooks in each dashboard/page
+- **Auth state** `AuthContext` holds `user`, `profile`, and provides `signIn`/`signUp`/`signOut`/`refreshProfile`
+- **Theme state**`ThemeContext` generates CSS custom properties from design tokens and injects them into `<head>` (URL-validated)
+- **Language state** `LanguageContext` holds the active locale and `setLanguage`; `LanguageProvider` keeps react-i18next, the language cookie, and the `<html lang/dir>` attributes in sync, and drives the localized route (`/:locale`). Public URLs are translated via the `useLocalizePath()` hook; switching languages calls `i18n.changeLanguage` and navigates to the localized path. App-level areas (admin, dashboard, super-admin, teacher) remain at root and are not localized.
+- **Confirm state** `ConfirmContext` provides a Promise-based `useConfirm()` used in place of `window.confirm()` for a consistent dialog UX
+- **Local UI state** React `useState`/`useReducer` in components
 
 ## Error Handling
 
@@ -80,8 +81,9 @@ src/
   ├── features/       # Auth, dashboards (donor, finance, sponsorship, volunteer, staff)
   ├── pages/          # Route pages (admin/, super-admin/, teacher/, 20+ public routes)
   ├── context/        # Auth, Language, Theme, CmsStrings, Confirm providers
-  ├── hooks/          # useRole, usePayment, useDebounce, useWebsiteBuilder
-  ├── lib/            # Supabase client, error handling, logger, permissions, audit, auth helpers
+  ├── hooks/          # useRole, usePayment, useDebounce, useWebsiteBuilder, useLocalizePath
+  ├── i18n/           # react-i18next init, supported locales, static JSON dictionaries
+  ├── lib/            # Supabase client, error handling, logger, permissions, audit, locale helpers
   ├── services/       # API layers (donations, payments, design, students, content, etc.)
   ├── types/          # Database, permissions, CMS, feature types
   ├── config/         # Navigation, layout definitions
@@ -104,6 +106,7 @@ supabase/
 | Directory | Contents |
 |-----------|----------|
 | `src/components/ui/` | Reusable primitives: Button, Input, Textarea, Card, Badge, Tabs, LoadingSpinner, etc. |
+| `src/i18n/` | react-i18next initialization, `SUPPORTED_LOCALES`, and the 8 static JSON locale dictionaries |
 | `src/features/auth/` | AuthProvider, ProtectedRoute, permission services, auth error handling |
 | `src/features/donor-dashboard/` | Donor-specific layout, sidebar, topbar, and dashboard components |
 | `src/pages/admin/` | Admin layout, dashboard, and sub-pages (students, donations, payments, website management, design) |

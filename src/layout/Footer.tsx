@@ -6,6 +6,7 @@ import { Tr } from '../components/Translated'
 import { useTheme } from '../context/ThemeContext'
 import { getFooterContent } from '../services/cms-content'
 import { getSiteSettings } from '../services/settings'
+import { useLocalizePath } from '../hooks/useLocalizePath'
 import type { FooterContent } from '../types/cms-content'
 import fallbackLogo from '../assets/logo.jpg'
 
@@ -18,6 +19,7 @@ const SOCIAL_ICONS: Record<string, React.ReactNode> = {
 export function Footer() {
   const { t } = useCmsStrings()
   const { branding } = useTheme()
+  const localize = useLocalizePath()
   const [footerContent, setFooterContent] = useState<FooterContent | null>(null)
   const [siteSettings, setSiteSettings] = useState<{ contact_address?: string; contact_phone?: string; contact_email?: string }>({})
   useEffect(() => {
@@ -76,9 +78,9 @@ export function Footer() {
           <div>
             <h4 className="font-semibold mb-4 text-[var(--color-footer-heading)]">{t('footer.getInvolved')}</h4>
             <ul className="space-y-2 text-sm text-[var(--color-footer-text)]">
-              <li><Link to="/sponsor" className="transition-colors hover:opacity-80 text-inherit">{t('footer.sponsorChild')}</Link></li>
-              <li><Link to="/donate" className="transition-colors hover:opacity-80 text-inherit">{t('footer.makeDonation')}</Link></li>
-              <li><Link to="/volunteer" className="transition-colors hover:opacity-80 text-inherit">{t('footer.volunteer')}</Link></li>
+              <li><Link to={localize('/sponsor')} className="transition-colors hover:opacity-80 text-inherit">{t('footer.sponsorChild')}</Link></li>
+              <li><Link to={localize('/donate')} className="transition-colors hover:opacity-80 text-inherit">{t('footer.makeDonation')}</Link></li>
+              <li><Link to={localize('/volunteer')} className="transition-colors hover:opacity-80 text-inherit">{t('footer.volunteer')}</Link></li>
             </ul>
           </div>
 
@@ -87,7 +89,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm text-[var(--color-footer-text)]">
               {quickLinks.map((link, idx) => (
                 <li key={idx}>
-                  <Link to={link.url} className="transition-colors hover:opacity-80 text-inherit"><Tr text={link.label} /></Link>
+                  <Link to={localize(link.url)} className="transition-colors hover:opacity-80 text-inherit"><Tr text={link.label} /></Link>
                 </li>
               ))}
             </ul>

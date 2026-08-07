@@ -9,7 +9,7 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 import { logger } from './lib/logger'
 import { getErrorMessage } from './lib/errors'
 import { setPreviewMode } from './lib/preview-mode'
-import { getBrowserLanguage } from './lib/locale'
+import { getBrowserLanguage, localeFromPath } from './lib/locale'
 
 if (typeof window !== 'undefined' && window.location.pathname.startsWith('/preview')) {
   setPreviewMode(true)
@@ -44,7 +44,7 @@ const router = createBrowserRouter(routeDefinitions)
 
 const rootElement = document.getElementById('root')!
 
-const initialLanguage = getBrowserLanguage()
+const initialLanguage = localeFromPath(window.location.pathname) || getBrowserLanguage()
 
 const hasServerContent = rootElement.children.length > 0
 if (hasServerContent) {

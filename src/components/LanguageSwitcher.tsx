@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { ChevronDown } from 'lucide-react'
 import { getLanguageFlagAlt, getLanguageFlagUrl, languages, useLanguage } from '../context/LanguageContext'
 import type { LanguageCode } from '../context/LanguageContext'
+import { localizePath, stripLocale } from '../lib/locale'
 
 const sortedLanguages = [...languages].sort((a, b) =>
   a.label.localeCompare(b.label)
@@ -12,6 +14,8 @@ export function LanguageSwitcher({ mobile = false }: { mobile?: boolean }) {
   const [open, setOpen] = useState(false)
   const [ready, setReady] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  const navigate = useNavigate()
+  const location = useLocation()
 
   useEffect(() => {
     setReady(true)
@@ -41,6 +45,7 @@ export function LanguageSwitcher({ mobile = false }: { mobile?: boolean }) {
 
   const select = (code: LanguageCode) => {
     setLanguage(code)
+    navigate(localizePath(stripLocale(location.pathname), code), { replace: true })
     setOpen(false)
   }
 

@@ -7,11 +7,13 @@ import { Card } from '../components/ui/Card'
 import { Input } from '../components/ui/Input'
 import { Button } from '../components/ui/Button'
 import { Tr } from '../components/Translated'
+import { useLocalizePath } from '../hooks/useLocalizePath'
 import { validateEmail } from '../lib/auth/validation'
 import { getAuthErrorMessage } from '../lib/auth/authErrors'
 import { getAuthRedirectUrl } from '../lib/auth/redirectUrl'
 
 export function ForgotPasswordPage() {
+  const localize = useLocalizePath()
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -69,7 +71,7 @@ export function ForgotPasswordPage() {
                 </p>
               </div>
 
-              <Link to="/login">
+              <Link to={localize('/login')}>
                 <Button className="w-full" size="lg">
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   <Tr text="Back to sign in" />
@@ -124,7 +126,7 @@ export function ForgotPasswordPage() {
 
             <div className="text-center">
               <Link
-                to="/login"
+                to={localize('/login')}
                 className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors"
               >
                 <ArrowLeft size={14} />

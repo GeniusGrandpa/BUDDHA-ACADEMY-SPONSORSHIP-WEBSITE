@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { getAuthErrorMessage } from '../lib/auth/authErrors'
+import { useLocalizePath } from '../hooks/useLocalizePath'
 import { getRedirectPath } from '../features/auth/utils/redirectByRole'
 import type { Role } from '../features/auth/types/permissions'
 
@@ -53,6 +54,7 @@ async function getRedirectPathForCurrentUser(): Promise<string> {
 
 export function AuthCallbackPage() {
   const navigate = useNavigate()
+  const localize = useLocalizePath()
   const [searchParams] = useSearchParams()
   const [status, setStatus] = useState<CallbackStatus>('loading')
   const [message, setMessage] = useState('Verifying your request...')
@@ -82,7 +84,7 @@ export function AuthCallbackPage() {
 
       const redirectToDashboard = async () => {
         const path = await getRedirectPathForCurrentUser()
-        if (!cancelled) navigate(path, { replace: true })
+        if (!cancelled) navigate(localize(path), { replace: true })
       }
 
       if (hash && hash.includes('access_token')) {
@@ -137,7 +139,7 @@ export function AuthCallbackPage() {
 
     handleCallback()
     return () => { cancelled = true }
-  }, [navigate, searchParams])
+  }, [navigate, searchParams, localize])
 
   return (
     <div className="min-h-[calc(100vh-80px-300px)] flex items-center justify-center bg-gray-50 px-4 py-12 sm:py-16">
@@ -184,7 +186,7 @@ export function AuthCallbackPage() {
                     <p className="text-gray-500 text-sm mt-2">{message}</p>
                   </div>
                   {!message.includes('Redirecting') && (
-                    <Link to="/login">
+                    <Link to={localize('/login')}>
                       <Button className="w-full" size="lg">
                         Continue to sign in
                         <ArrowRight className="w-4 h-4 ml-2" />
@@ -210,7 +212,7 @@ export function AuthCallbackPage() {
                     <p className="text-gray-400 text-xs mt-2">You can request a new verification email from the sign in page.</p>
                   </div>
                   <div className="space-y-3">
-                    <Link to="/login">
+                    <Link to={localize('/login')}>
                       <Button className="w-full" size="lg" variant="primary">
                         Sign in
                         <ArrowRight className="w-4 h-4 ml-2" />

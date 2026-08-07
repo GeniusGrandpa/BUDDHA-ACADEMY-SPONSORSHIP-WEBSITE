@@ -16,7 +16,7 @@
 
 Access is enforced at three independent layers:
 
-### 1. Route Level — `ProtectedRoute`
+### 1. Route Level `ProtectedRoute`
 
 `ProtectedRoute` (`src/features/auth/guards/ProtectedRoute.tsx`, re-exported from `src/components/ProtectedRoute.tsx`) wraps every gated route in `src/routes.tsx`. It reads the user role from `AuthContext`, handles suspended/banned users by signing them out, and redirects denied users to their role-appropriate dashboard.
 
@@ -26,15 +26,15 @@ Props: `requiredRoles`, `requiredPermission`, `requiredAnyPermission`, `adminOnl
 
 `src/features/auth/services/permissions.ts` (re-exported from `src/lib/permissions.ts`) provides pure helpers used across pages and components:
 
-- `hasRole(role, ...roles)` — checks the user's role
-- `hasPermission(role, code)` / `hasAnyPermission` / `hasAllPermissions` — permission code checks
+- `hasRole(role, ...roles)` checks the user's role
+- `hasPermission(role, code)` / `hasAnyPermission` / `hasAllPermissions` permission code checks
 - `isAdminOrAbove(role)`, `isStaffOrAbove(role)`, `getRoleLevel(role)`
 - `canEdit`, `canDelete`, `canManageUsers`, `canViewFinancials`, `canManageContent`, `canManageRole`, `canAccessSection`
-- `fetchUserPermissions(role)` — fetches custom permissions
+- `fetchUserPermissions(role)`fetches custom permissions
 
 These guard individual buttons, sections, and page-level features (e.g. `HomePageEditor` checks `hasRole(profile?.role, 'super_admin', 'admin')`).
 
-### 3. Server Side — RLS + RPC
+### 3. Server Side RLS + RPC
 
 Row Level Security policies on every table plus guarded RPC functions enforce authorization independently of the client. Sensitive RPCs are `SECURITY DEFINER` and restricted to `service_role`/authorized roles (e.g. `stripe_confirm_payment`, `verify_payment`, `admin_update_user_role`), so the client cannot bypass checks even if it calls them directly.
 
@@ -44,7 +44,7 @@ Row Level Security policies on every table plus guarded RPC functions enforce au
 
 ### Permission Groups
 
-- **CMS & Content**: `content.pages`, `content.seo`, `content.navigation`, `content.settings`, `content.announcements`, `content.partners`, `content.media`, `content.news`, `content.gallery`, `content.testimonials`, `content.stories`, `content.faqs`, `content.videos`, `content.transparency` (vestigial: `content.blocks`, `content.media.folders`, `content.scheduling` — exist in codebase but have no active UI)
+- **CMS & Content**: `content.pages`, `content.seo`, `content.navigation`, `content.settings`, `content.announcements`, `content.partners`, `content.media`, `content.news`, `content.gallery`, `content.testimonials`, `content.stories`, `content.faqs`, `content.videos`, `content.transparency` (vestigial: `content.blocks`, `content.media.folders`, `content.scheduling` exist in codebase but have no active UI)
 - **Design**: `design.colors`, `design.typography`, `design.layout`, `design.components`, `design.presets`, `design.publish`
 - **Students**: `students.read`, `students.create`, `students.update`, `students.delete`
 - **Donations**: `donations.read`, `donations.create`, `donations.update`, `donations.delete`
@@ -60,13 +60,13 @@ Row Level Security policies on every table plus guarded RPC functions enforce au
 
 ## Default Permission Mappings
 
-- **super_admin** — all permissions
-- **admin** — all CMS/content/design/student/donation/finance permissions except user management and audit
-- **finance_manager** — financial, donation, payment verification permissions
-- **teacher** — student read/update, limited content read
-- **donor** — personal dashboard, own sponsorships/donations
-- **volunteer** — events, tasks, own profile
-- **public_user** — public content only
+- **super_admin** : all permissions
+- **admin** :  all CMS/content/design/student/donation/finance permissions except user management and audit
+- **finance_manager** :  financial, donation, payment verification permissions
+- **teacher** : student read/update, limited content read
+- **donor** :  personal dashboard, own sponsorships/donations
+- **volunteer** :  events, tasks, own profile
+- **public_user** : public content only
 
 ## Navigation Filtering
 

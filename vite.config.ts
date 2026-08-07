@@ -67,19 +67,20 @@ export default defineConfig(({ mode }) => {
           modulePreload: {
             polyfill: true,
             resolveDependencies: (_filename, deps) =>
-              deps.filter((dep) => !/\/pdf-|\/animation-|\/charts-|\/editor-|\/dnd-/.test(dep)),
+              deps.filter((dep) => !/\/pdf-|\/animation-|\/charts-|\/editor-|\/dnd-/.test(dep.replace(/\\/g, '/'))),
           },
           rollupOptions: {
             output: {
               manualChunks(id: string) {
-                if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/') || id.includes('node_modules/react-router-dom/')) return 'vendor';
-                if (id.includes('node_modules/@tanstack/react-query')) return 'query';
-                if (id.includes('node_modules/framer-motion')) return 'animation';
-                if (id.includes('node_modules/recharts')) return 'charts';
-                if (id.includes('node_modules/@tiptap')) return 'editor';
-                if (id.includes('node_modules/html2canvas/') || id.includes('node_modules/jspdf')) return 'pdf';
-                if (id.includes('node_modules/@hello-pangea/dnd')) return 'dnd';
-                if (id.includes('node_modules/lucide-react')) return 'icons';
+                const normalized = id.replace(/\\/g, '/')
+                if (normalized.includes('node_modules/react/') || normalized.includes('node_modules/react-dom/') || normalized.includes('node_modules/react-router-dom/')) return 'vendor';
+                if (normalized.includes('node_modules/@tanstack/react-query')) return 'query';
+                if (normalized.includes('node_modules/framer-motion')) return 'animation';
+                if (normalized.includes('node_modules/recharts')) return 'charts';
+                if (normalized.includes('node_modules/@tiptap')) return 'editor';
+                if (normalized.includes('node_modules/html2canvas/') || normalized.includes('node_modules/jspdf')) return 'pdf';
+                if (normalized.includes('node_modules/@hello-pangea/dnd')) return 'dnd';
+                if (normalized.includes('node_modules/lucide-react')) return 'icons';
               },
             },
           },
