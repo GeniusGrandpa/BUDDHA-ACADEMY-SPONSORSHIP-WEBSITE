@@ -277,10 +277,20 @@ UPDATE public.payment_settings
 SET is_automated = true, updated_at = now()
 WHERE gateway_name = 'esewa';
 
--- 8. Delete the payment-screenshots storage bucket, its objects, and policies.
-DELETE FROM storage.objects WHERE bucket_id = 'payment-screenshots';
+-- 8. Remove the payment-screenshots policies and the bucket itself if empty.
+-- Direct DELETE on storage.objects is blocked by Supabase's storage guard
+-- trigger, and this storage version (v1.6x) has no SQL delete function, so any
+-- objects left in the bucket cannot be removed from SQL. Dropping the policies
+-- makes any remaining objects inaccessible (RLS default-deny).
+-- Manual step (if the bucket still contains objects after this migration):
+--   Dashboard -> Storage -> payment-screenshots -> delete all objects -> delete bucket.
 DROP POLICY IF EXISTS "payment_screenshots_insert" ON storage.objects;
 DROP POLICY IF EXISTS "payment_screenshots_select_own" ON storage.objects;
-DELETE FROM storage.buckets WHERE id = 'payment-screenshots';
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM storage.objects WHERE bucket_id = 'payment-screenshots') THEN
+    DELETE FROM storage.buckets WHERE id = 'payment-screenshots';
+  END IF;
+END $$;
 
 NOTIFY pgrst, 'reload schema';
