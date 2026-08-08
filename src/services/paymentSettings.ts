@@ -6,7 +6,7 @@ const supabase = getSupabaseClient()
 export async function getActivePaymentSettings(): Promise<PaymentSetting[]> {
   const { data, error } = await supabase
     .from('payment_settings')
-    .select('id, gateway_name, gateway_display_name, gateway_description, qr_image_url, account_name, account_number, instructions, is_active, sort_order, created_at, updated_at')
+    .select('id, gateway_name, gateway_display_name, gateway_description, qr_image_url, account_name, account_number, instructions, is_active, is_automated, sort_order, created_at, updated_at')
     .eq('is_active', true)
     .order('sort_order', { ascending: true })
 
@@ -17,7 +17,7 @@ export async function getActivePaymentSettings(): Promise<PaymentSetting[]> {
 export async function getAllPaymentSettings(): Promise<PaymentSetting[]> {
   const { data, error } = await supabase
     .from('payment_settings')
-    .select('id, gateway_name, gateway_display_name, gateway_description, qr_image_url, account_name, account_number, instructions, is_active, sort_order, created_at, updated_at')
+    .select('id, gateway_name, gateway_display_name, gateway_description, qr_image_url, account_name, account_number, instructions, is_active, is_automated, sort_order, created_at, updated_at')
     .order('sort_order', { ascending: true })
 
   if (error) throw error
@@ -32,7 +32,7 @@ export async function updatePaymentSetting(
     .from('payment_settings')
     .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', id)
-    .select('id, gateway_name, gateway_display_name, gateway_description, qr_image_url, account_name, account_number, instructions, is_active, sort_order, created_at, updated_at')
+    .select('id, gateway_name, gateway_display_name, gateway_description, qr_image_url, account_name, account_number, instructions, is_active, is_automated, sort_order, created_at, updated_at')
     .single()
 
   if (error) throw error
@@ -53,7 +53,7 @@ export async function createPaymentSetting(
   const { data, error } = await supabase
     .from('payment_settings')
     .insert(setting)
-    .select('id, gateway_name, gateway_display_name, gateway_description, qr_image_url, account_name, account_number, instructions, is_active, sort_order, created_at, updated_at')
+    .select('id, gateway_name, gateway_display_name, gateway_description, qr_image_url, account_name, account_number, instructions, is_active, is_automated, sort_order, created_at, updated_at')
     .single()
 
   if (error) throw error
@@ -116,7 +116,7 @@ export async function getPaymentSettingByGateway(
 ): Promise<PaymentSetting | null> {
   const { data, error } = await supabase
     .from('payment_settings')
-    .select('id, gateway_name, gateway_display_name, gateway_description, qr_image_url, account_name, account_number, instructions, is_active, sort_order, created_at, updated_at')
+    .select('id, gateway_name, gateway_display_name, gateway_description, qr_image_url, account_name, account_number, instructions, is_active, is_automated, sort_order, created_at, updated_at')
     .eq('gateway_name', gateway)
     .eq('is_active', true)
     .order('sort_order', { ascending: true })

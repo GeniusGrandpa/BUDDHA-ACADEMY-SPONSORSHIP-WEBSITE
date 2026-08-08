@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useCmsStrings } from '../context/CmsStringsContext'
+import { useLanguage } from '../context/LanguageContext'
 import { Tr } from '../components/Translated'
 import { useTheme } from '../context/ThemeContext'
 import { getFooterContent } from '../services/cms-content'
@@ -19,18 +20,22 @@ const SOCIAL_ICONS: Record<string, React.ReactNode> = {
 export function Footer() {
   const { t } = useCmsStrings()
   const { branding } = useTheme()
+  const { language } = useLanguage()
   const localize = useLocalizePath()
   const [footerContent, setFooterContent] = useState<FooterContent | null>(null)
   const [siteSettings, setSiteSettings] = useState<{ contact_address?: string; contact_phone?: string; contact_email?: string }>({})
   useEffect(() => {
+    if (typeof window === 'undefined') return
+    let cancelled = false
     Promise.all([
-      getFooterContent(),
+      getFooterContent(language),
       getSiteSettings().catch(() => null),
     ]).then(([fc, ss]) => {
-      if (fc) setFooterContent(fc)
-      if (ss) setSiteSettings(ss as { contact_address?: string; contact_phone?: string; contact_email?: string })
+      if (fc && !cancelled) setFooterContent(fc)
+      if (ss && !cancelled) setSiteSettings(ss as { contact_address?: string; contact_phone?: string; contact_email?: string })
     }).catch(() => {})
-  }, [])
+    return () => { cancelled = true }
+  }, [language])
 
   const footerLogoSrc = branding.footer_logo_url || branding.logo_url || fallbackLogo
   const socialLinks = footerContent?.social_links || []

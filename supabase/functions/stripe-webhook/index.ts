@@ -71,6 +71,8 @@ Deno.serve(async (req) => {
         await rpcOrThrow('stripe_confirm_payment', {
           p_session_id: sessionId,
           p_transaction_id: pi.id,
+          p_amount: pi.amount / 100,
+          p_currency: pi.currency ?? 'npr',
         })
         break
       }

@@ -37,7 +37,7 @@ export function StripeCheckoutForm({ amount, onSuccess, onCancel: _onCancel }: S
     const { error: confirmError, paymentIntent } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `${window.location.origin}/donate?payment=success`,
+        return_url: `${window.location.origin}/donate`,
       },
       redirect: 'if_required',
     })

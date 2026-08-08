@@ -37,6 +37,10 @@ export const ContactPage = lazy(() => import('./pages/ContactPage').then(m => ({
 
 export const DonatePage = lazy(() => import('./pages/DonatePage').then(m => ({ default: m.DonatePage })))
 
+export const EsewaReturnPage = lazy(() => import('./pages/EsewaReturnPage').then(m => ({ default: m.EsewaReturnPage })))
+
+export const KhaltiReturnPage = lazy(() => import('./pages/KhaltiReturnPage').then(m => ({ default: m.KhaltiReturnPage })))
+
 export const TransparencyPage = lazy(() => import('./pages/TransparencyPage').then(m => ({ default: m.TransparencyPage })))
 
 export const FAQPage = lazy(() => import('./pages/FAQPage').then(m => ({ default: m.FAQPage })))

@@ -6,6 +6,7 @@ import { Tabs } from '../components/ui/Tabs'
 import { getNews } from '../services/news'
 import { getPageHeader } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
+import { useLanguage } from '../context/LanguageContext'
 import { Tr } from '../components/Translated'
 import { useLocalizePath } from '../hooks/useLocalizePath'
 import type { News } from '../types/database'
@@ -14,6 +15,7 @@ import { NewsCardSkeleton } from '../components/ui/LoadingSkeleton'
 
 export function NewsPage() {
   const { t } = useCmsStrings()
+  const { language } = useLanguage()
   const localize = useLocalizePath()
   const [news, setNews] = useState<News[]>([])
   const [loading, setLoading] = useState(true)
@@ -21,20 +23,24 @@ export function NewsPage() {
   const [pageHeader, setPageHeader] = useState<PageHeader | null>(null)
 
   useEffect(() => {
-    loadNews()
-  }, [])
+    if (typeof window === 'undefined') return
+    let cancelled = false
+    loadNews(language, cancelled)
+    return () => { cancelled = true }
+  }, [language])
 
-  const loadNews = async () => {
+  const loadNews = async (lang?: string, cancelled?: boolean) => {
     try {
       const [data, header] = await Promise.all([
         getNews(),
-        getPageHeader('news'),
+        getPageHeader('news', lang),
       ])
+      if (cancelled) return
       setNews(data)
       if (header) setPageHeader(header)
     } catch {
     } finally {
-      setLoading(false)
+      if (!cancelled) setLoading(false)
     }
   }
 

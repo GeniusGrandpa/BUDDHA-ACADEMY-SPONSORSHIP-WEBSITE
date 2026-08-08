@@ -4,12 +4,14 @@ import { getUpcomingEvents } from '../services/volunteerEvents'
 import { submitVolunteerApplication } from '../services/volunteerApplications'
 import { getErrorMessage } from '../lib/errors'
 import { useCmsStrings } from '../context/CmsStringsContext'
+import { useLanguage } from '../context/LanguageContext'
 import { Tr } from '../components/Translated'
 import type { VolunteerContent, PageHeader } from '../types/cms-content'
 import type { VolunteerEvent } from '../types/database'
 
 export function VolunteerPage() {
   const { t } = useCmsStrings()
+  const { language } = useLanguage()
   const [content, setContent] = useState<VolunteerContent | null>(null)
   const [header, setHeader] = useState<Pick<PageHeader, 'title' | 'subtitle'> | null>(null)
   const [events, setEvents] = useState<VolunteerEvent[]>([])
@@ -23,16 +25,21 @@ export function VolunteerPage() {
   const [submitError, setSubmitError] = useState('')
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+    let cancelled = false
     Promise.all([
-      getVolunteerContent(),
-      getPageHeader('volunteer'),
+      getVolunteerContent(language),
+      getPageHeader('volunteer', language),
       getUpcomingEvents(),
     ]).then(([vc, hdr, evts]) => {
+      if (cancelled) return
       if (vc) setContent(vc)
       if (hdr) setHeader(hdr)
       setEvents(evts)
     }).catch(() => {})
-  }, [])
+
+    return () => { cancelled = true }
+  }, [language])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

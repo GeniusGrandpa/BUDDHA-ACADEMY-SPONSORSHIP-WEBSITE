@@ -11,6 +11,8 @@ import { getStudents } from '../services/students'
 import { getHeroContent, getSectionContent, getSectionVisibility } from '../services/cms-content'
 import { getTestimonialsWithType } from '../services/content'
 import { useCmsStrings } from '../context/CmsStringsContext'
+import { useLanguage } from '../context/LanguageContext'
+import { resolveOverlayColor } from '../lib/color'
 import { Tr } from '../components/Translated'
 import type { Student, Testimonial } from '../types/database'
 import type { HeroContent, SectionContent } from '../types/cms-content'
@@ -104,7 +106,7 @@ function HeroSection({ hero, visible }: { hero: HeroContent; visible: boolean })
        )}
        <div 
          className="absolute inset-0 bg-gradient-to-br from-stone-950/80 via-stone-950/60 to-transparent"
-         style={{ backgroundColor: hero.overlay_color, opacity: hero.overlay_opacity ?? 0.5 }}
+         style={{ backgroundColor: resolveOverlayColor(hero.overlay_color), opacity: hero.overlay_opacity ?? 0.5 }}
          aria-hidden="true"
        />
        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
@@ -419,6 +421,7 @@ function TestimonialsSection({ testimonials, testimonialList, visible }: { testi
 
 export function HomePage() {
   const { t } = useCmsStrings()
+  const { language } = useLanguage()
   const [students, setStudents] = useState<Student[]>([])
   const [hero, setHero] = useState<HeroContent | null>(null)
   const [welcomeSection, setWelcomeSection] = useState<SectionContent | null>(null)
@@ -434,13 +437,17 @@ export function HomePage() {
   const [cmsLoaded, setCmsLoaded] = useState(false)
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+    let cancelled = false
+    setCmsLoaded(false)
+    setStudentsLoading(true)
     Promise.all([
-      getHeroContent().then(d => {
+      getHeroContent(language).then(d => {
         if (d) {
-          setHero(d)
+          if (!cancelled) setHero(d)
         } else {
-          getSectionContent('hero').then(heroSection => {
-            if (heroSection) {
+          getSectionContent('hero', language).then(heroSection => {
+            if (heroSection && !cancelled) {
               const c = heroSection.content as {
                 title?: string; highlight?: string; description?: string;
                 cta_primary_text?: string; cta_primary_link?: string;
@@ -466,21 +473,24 @@ export function HomePage() {
           }).catch(() => { })
         }
       }).catch(() => { }),
-      getSectionContent('welcome').then(d => { if (d) setWelcomeSection(d) }).catch(() => { }),
-      getSectionContent('about_preview').then(d => { if (d) setAboutSection(d) }).catch(() => { }),
-      getSectionContent('stats').then(d => { if (d) setStatsSection(d) }).catch(() => { }),
-      getSectionContent('featured_students').then(d => { if (d) setFeaturedStudentsSection(d) }).catch(() => { }),
-      getSectionContent('sponsorship_steps').then(d => { if (d) setSponsorshipSteps(d) }).catch(() => { }),
-      getSectionContent('testimonials').then(d => { if (d) setTestimonialsSection(d) }).catch(() => { }),
-      getTestimonialsWithType('testimonial').then(d => { if (d && d.length > 0) setTestimonialItems(d) }).catch(() => { }),
+      getSectionContent('welcome', language).then(d => { if (d && !cancelled) setWelcomeSection(d) }).catch(() => { }),
+      getSectionContent('about_preview', language).then(d => { if (d && !cancelled) setAboutSection(d) }).catch(() => { }),
+      getSectionContent('stats', language).then(d => { if (d && !cancelled) setStatsSection(d) }).catch(() => { }),
+      getSectionContent('featured_students', language).then(d => { if (d && !cancelled) setFeaturedStudentsSection(d) }).catch(() => { }),
+      getSectionContent('sponsorship_steps', language).then(d => { if (d && !cancelled) setSponsorshipSteps(d) }).catch(() => { }),
+      getSectionContent('testimonials', language).then(d => { if (d && !cancelled) setTestimonialsSection(d) }).catch(() => { }),
+      getTestimonialsWithType('testimonial').then(d => { if (d && d.length > 0 && !cancelled) setTestimonialItems(d) }).catch(() => { }),
       getSectionVisibility().then(sections => {
+        if (cancelled) return
         const map: Record<string, boolean> = {}
         sections.forEach((s: { section_key: string; is_visible: boolean }) => { map[s.section_key] = s.is_visible })
         setSectionsVisible(map)
       }).catch(() => { }),
-      getStudents(undefined, { limit: 3 }).then(d => { setStudents(d); setStudentsLoading(false) }).catch(() => { setStudentsLoading(false) }),
-    ]).finally(() => setCmsLoaded(true))
-  }, [])
+      getStudents(undefined, { limit: 3 }).then(d => { if (!cancelled) { setStudents(d); setStudentsLoading(false) } }).catch(() => { if (!cancelled) setStudentsLoading(false) }),
+    ]).finally(() => { if (!cancelled) setCmsLoaded(true) })
+
+    return () => { cancelled = true }
+  }, [language])
 
   const activeHero = hero ?? DEFAULT_HERO
   const statsToShow = (activeHero.statistics as { value: string; label: string }[]) || []

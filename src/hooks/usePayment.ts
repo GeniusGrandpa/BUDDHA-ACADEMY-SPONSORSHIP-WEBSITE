@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import type { PaymentGateway, CheckoutState } from '../types/payments'
-import { initiatePaymentCheckout, cancelPaymentSession, submitPaymentConfirmation } from '../services/payments'
+import { initiatePaymentCheckout, cancelPaymentSession, getPaymentSession } from '../services/payments'
 import { getErrorMessage } from '../lib/errors'
 import { logger } from '../lib/logger'
 
@@ -16,7 +16,7 @@ interface UsePaymentReturn {
     studentId?: string | null
     message?: string | null
   }) => Promise<void>
-  confirmPayment: (sessionId: string, screenshots?: string[], paymentReference?: string) => Promise<void>
+  confirmPayment: (sessionId: string) => Promise<void>
   resetCheckout: () => void
   abandonCheckout: () => Promise<void>
 }
@@ -77,8 +77,6 @@ export function usePayment(): UsePaymentReturn {
 
   const confirmPayment = useCallback(async (
     sessionId: string,
-    screenshots?: string[],
-    paymentReference?: string,
   ) => {
     setLoading(true)
     setError(null)
@@ -86,21 +84,39 @@ export function usePayment(): UsePaymentReturn {
     try {
       logger.info('payment.confirm.started', { sessionId })
 
-      await submitPaymentConfirmation(sessionId, screenshots || [], paymentReference)
-
-      logger.info('payment.confirm.submitted', { sessionId, screenshots: (screenshots || []).length })
-
       setCheckout(prev => ({
         ...prev,
         step: 'processing',
       }))
 
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      const MAX_ATTEMPTS = 15
+      const POLL_INTERVAL_MS = 2000
 
-      setCheckout(prev => ({
-        ...prev,
-        step: 'success',
-      }))
+      for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+        await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL_MS))
+
+        const session = await getPaymentSession(sessionId)
+        if (!session) continue
+
+        if (session.status === 'completed') {
+          logger.info('payment.confirm.completed', { sessionId })
+          setCheckout(prev => ({
+            ...prev,
+            step: 'success',
+            transactionId: session.transaction_id,
+          }))
+          return
+        }
+
+        if (session.status === 'failed' || session.status === 'cancelled') {
+          logger.warn('payment.confirm.rejected', { sessionId, status: session.status })
+          setError('Payment was not completed. Please try again.')
+          setCheckout(prev => ({ ...prev, step: 'failed' }))
+          return
+        }
+      }
+
+      logger.warn('payment.confirm.timeout', { sessionId })
     } catch (err: unknown) {
       logger.error('payment.confirm.failed', { sessionId, error: getErrorMessage(err, 'Failed to confirm payment') })
       setError(getErrorMessage(err, 'Failed to confirm payment'))

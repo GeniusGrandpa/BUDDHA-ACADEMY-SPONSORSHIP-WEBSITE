@@ -11,6 +11,7 @@ import { ImpactPanel } from '../components/donate/ImpactPanel'
 import { AuthPrompt } from '../components/donate/AuthPrompt'
 import { StudentStory } from '../components/donate/StudentStory'
 import { useCmsStrings } from '../context/CmsStringsContext'
+import { useLanguage } from '../context/LanguageContext'
 import { Tr } from '../components/Translated'
 import type { Currency } from '../utils/currency'
 import type { Student } from '../types/database'
@@ -19,6 +20,7 @@ import type { DonationContent, PageHeader } from '../types/cms-content'
 
 export function DonatePage() {
   const { t } = useCmsStrings()
+  const { language } = useLanguage()
   const [searchParams] = useSearchParams()
   const { user } = useAuth()
   const [students, setStudents] = useState<Student[]>([])
@@ -34,19 +36,23 @@ export function DonatePage() {
   const [message, setMessage] = useState('')
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+    let cancelled = false
     Promise.all([
-      getDonationContent(),
-      getPageHeader('donate'),
+      getDonationContent(language),
+      getPageHeader('donate', language),
       getStudents(),
     ]).then(([donationContent, header, studentsData]) => {
+      if (cancelled) return
       if (donationContent) {
         setContent(donationContent)
       } else {
         Promise.all([
-          getSectionContent('donate_hero'),
-          getSectionContent('donate_impact'),
-          getSectionContent('donate_process'),
+          getSectionContent('donate_hero', language),
+          getSectionContent('donate_impact', language),
+          getSectionContent('donate_process', language),
         ]).then(([hero, impact, process]) => {
+          if (cancelled) return
           if (hero || impact || process) {
             setContent({
               hero_title: hero?.title || '',
@@ -60,7 +66,9 @@ export function DonatePage() {
       if (header) setPageHeader(header)
       setStudents(studentsData.filter(s => s.sponsorship_status !== 'fully_sponsored'))
     }).catch(() => {})
-  }, [])
+
+    return () => { cancelled = true }
+  }, [language])
 
   useEffect(() => {
     const sid = searchParams.get('student')

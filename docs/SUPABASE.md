@@ -59,7 +59,6 @@ All tables have RLS policies enforced:
 | Bucket | Purpose | Read | Write |
 |--------|---------|------|-------|
 | `media` | CMS uploads | Public (authenticated for admin operations) | Admin only |
-| `payment-screenshots` | Payment proof screenshots | Admin/staff only | Authenticated users (own files) |
 | `payment-qr-codes` | Payment gateway QR codes | Admin only | Admin only (role >= 80) |
 
 ## Security Hardening (from migrations)
@@ -104,12 +103,14 @@ All schema changes in `supabase/migrations/` (80 files), applied in timestamp or
 | Function | Purpose |
 |----------|---------|
 | `admin_update_user_role` | Assign/change user roles with hierarchy enforcement |
-| `initiate_payment_checkout` | Create payment session |
-| `verify_payment` | Verify payment + create donation record |
-| `stripe_confirm_payment` | Webhook: confirm card payment + create donation record |
-| `stripe_fail_payment` | Webhook: mark payment failed/cancelled |
+| `initiate_payment_checkout` | Create payment session (Khalti/eSewa/Stripe only) |
+| `stripe_confirm_payment` | Stripe webhook: confirm card payment + create donation record |
+| `stripe_fail_payment` | Stripe webhook: mark payment failed/cancelled |
+| `esewa_confirm_payment` | eSewa callback: confirm payment + create donation record |
+| `esewa_fail_payment` | eSewa callback: mark payment failed/cancelled |
+| `khalti_confirm_payment` | Khalti lookup: confirm payment + create donation record |
+| `khalti_fail_payment` | Khalti lookup: mark payment failed/cancelled |
 | `cancel_payment_session` | Cancel an abandoned payment session |
-| `submit_payment_confirmation` | Submit manual payment reference/screenshots |
 | `get_user_permissions` | Fetch custom permissions for a user |
 | `reset_design_settings` | Reset design to defaults |
 | `handle_new_user` | Trigger function: creates profile on signup |

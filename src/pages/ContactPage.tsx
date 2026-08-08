@@ -9,10 +9,12 @@ import { createContactSubmission } from '../services/contact'
 import { getPageHeader } from '../services/cms-content'
 import { getSiteSettings } from '../services/settings'
 import { useCmsStrings } from '../context/CmsStringsContext'
+import { useLanguage } from '../context/LanguageContext'
 import type { PageHeader } from '../types/cms-content'
 
 export function ContactPage() {
   const { t } = useCmsStrings()
+  const { language } = useLanguage()
   const [header, setHeader] = useState<Pick<PageHeader, 'title' | 'subtitle'> | null>(null)
   const [settings, setSettings] = useState<{
     contact_email?: string
@@ -29,14 +31,19 @@ export function ContactPage() {
   const [error, setError] = useState('')
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+    let cancelled = false
     Promise.all([
-      getPageHeader('contact'),
+      getPageHeader('contact', language),
       getSiteSettings().catch(() => null),
     ]).then(([hdr, stgs]) => {
+      if (cancelled) return
       if (hdr) setHeader(hdr)
       if (stgs) setSettings(stgs as { contact_email?: string; contact_phone?: string; contact_address?: string })
     }).catch(() => {})
-  }, [])
+
+    return () => { cancelled = true }
+  }, [language])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

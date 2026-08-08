@@ -1,20 +1,19 @@
-import { useState, useEffect, type ChangeEvent } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, AlertCircle, Upload, Check } from 'lucide-react'
+import { X, AlertCircle } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useCmsStrings } from '../../context/CmsStringsContext'
 import { formatNPR } from '../../utils/currency'
 import { usePayment } from '../../hooks/usePayment'
 import { getActivePaymentSettings } from '../../services/paymentSettings'
-import { uploadPaymentScreenshot } from '../../services/payments'
 import { getErrorMessage } from '../../lib/errors'
-import toast from 'react-hot-toast'
 import { Button } from '../ui/Button'
 import { PaymentMethodCard } from './PaymentMethodCard'
-import { QRPaymentWidget } from './QRPaymentWidget'
 import { DonationImpactCard } from './DonationImpactCard'
 import { PaymentSuccess } from './PaymentSuccess'
 import { StripePaymentWrapper } from './stripe/StripePaymentWrapper'
+import { EsewaPayment } from './esewa/EsewaPayment'
+import { KhaltiPayment } from './khalti/KhaltiPayment'
 import type { PaymentGateway, PaymentSetting } from '../../types/payments'
 
 interface PaymentModalProps {
@@ -34,10 +33,6 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
   const [selectedGateway, setSelectedGateway] = useState<PaymentGateway | null>(null)
   const [settingsLoading, setSettingsLoading] = useState(true)
   const [settingsError, setSettingsError] = useState<string | null>(null)
-  const [screenshot, setScreenshot] = useState<File | null>(null)
-  const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null)
-  const [uploadProgress, setUploadProgress] = useState(false)
-  const [paymentReference, setPaymentReference] = useState('')
 
   useEffect(() => {
     if (isOpen) {
@@ -63,8 +58,6 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
     setSelectedGateway(gateway)
   }
 
-  const selectedSetting = paymentSettings.find(s => s.gateway_name === selectedGateway)
-
   const handleStartPayment = async () => {
     if (!user || !selectedGateway) return
 
@@ -78,54 +71,13 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
     })
   }
 
-  const handleConfirmPayment = async () => {
+  const handleStripeSuccess = async () => {
     if (!checkout.sessionId) return
-
-    let screenshots: string[] = []
-
-    if (screenshot) {
-      setUploadProgress(true)
-      try {
-        const url = await uploadPaymentScreenshot(checkout.sessionId, screenshot)
-        screenshots = [url]
-      } catch (err) {
-        toast.error(getErrorMessage(err, t('payment_screenshot_upload_error')))
-      }
-      setUploadProgress(false)
-    }
-
-    await confirmPayment(checkout.sessionId, screenshots, paymentReference || undefined)
-  }
-
-  const handleScreenshotChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    if (file.size > 5 * 1024 * 1024) {
-      return
-    }
-
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-      return
-    }
-
-    setScreenshot(file)
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      setScreenshotPreview(reader.result as string)
-    }
-    reader.readAsDataURL(file)
-  }
-
-  const handleStripeSuccess = async (paymentIntentId: string) => {
-    await confirmPayment(checkout.sessionId!, [], paymentIntentId)
+    await confirmPayment(checkout.sessionId)
   }
 
   const handleClose = async () => {
     await abandonCheckout()
-    setScreenshot(null)
-    setScreenshotPreview(null)
-    setPaymentReference('')
     setSettingsError(null)
     onClose()
   }
@@ -240,103 +192,25 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
                         onCancel={() => setSelectedGateway(null)}
                       />
                     </div>
+                  ) : selectedGateway === 'esewa' && checkout.sessionId ? (
+                    <EsewaPayment
+                      sessionId={checkout.sessionId}
+                      amount={amount}
+                      onCancel={() => setSelectedGateway(null)}
+                    />
+                  ) : selectedGateway === 'khalti' && checkout.sessionId ? (
+                    <KhaltiPayment
+                      sessionId={checkout.sessionId}
+                      amount={amount}
+                      onCancel={() => setSelectedGateway(null)}
+                    />
                   ) : (
-                    <>
-                      <div className="bg-gray-50 rounded-xl p-4">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">{t('payment_donation_amount')}</span>
-                          <span className="text-xl font-bold text-gray-900">{formatNPR(amount)}</span>
-                        </div>
-                        <div className="flex justify-between items-center mt-2">
-                          <span className="text-sm text-gray-600">{t('payment_transaction_id')}</span>
-                          <span className="text-sm font-mono font-medium text-gray-900">{checkout.transactionId}</span>
-                        </div>
-                      </div>
-
-                      {selectedSetting && checkout.transactionId && (
-                        <QRPaymentWidget
-                          setting={selectedSetting}
-                          transactionId={checkout.transactionId}
-                          amount={amount}
-                        />
-                      )}
-
-                      <DonationImpactCard amount={amount} />
-
-                      <div className="bg-warm-50 border border-amber-200 rounded-xl p-4 space-y-4">
-                        <h3 className="font-medium text-gray-900">{t('payment_confirm_title')}</h3>
-
-                        <div className="space-y-3">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              {t('payment_reference_label')}
-                            </label>
-                            <input
-                              type="text"
-                              value={paymentReference}
-                              onChange={(e) => setPaymentReference(e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                              placeholder={t('payment_reference_placeholder')}
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              {t('payment_screenshot_label')}
-                            </label>
-                            <div className="flex items-center gap-3">
-                              <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 text-sm text-gray-600">
-                                <Upload className="w-4 h-4" />
-                                {screenshot ? t('payment_change_file') : t('payment_upload_screenshot')}
-                                <input
-                                  type="file"
-                                  accept="image/jpeg,image/png,image/webp"
-                                  className="hidden"
-                                  onChange={handleScreenshotChange}
-                                />
-                              </label>
-                              {screenshot && (
-                                <span className="text-sm text-green-600 flex items-center gap-1">
-                                  <Check className="w-4 h-4" />
-                                  {screenshot.name}
-                                </span>
-                              )}
-                            </div>
-                            {screenshotPreview && (
-                              <img
-                                src={screenshotPreview}
-                                alt={t('payment_screenshot_preview_alt')}
-                                className="mt-2 w-32 h-32 object-cover rounded-lg border border-gray-200"
-                                loading="lazy" decoding="async"
-                              />
-                            )}
-                            <p className="text-xs text-gray-400 mt-1">
-                              {t('payment_max_size')}
-                            </p>
-                          </div>
-                        </div>
-
-                        <Button
-                          className="w-full"
-                          size="lg"
-                          onClick={handleConfirmPayment}
-                          disabled={loading || uploadProgress}
-                        >
-                          {loading || uploadProgress ? (
-                            <span className="flex items-center gap-2">
-                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                              {t('payment_processing')}
-                            </span>
-                          ) : (
-                            t('payment_completed_button')
-                          )}
-                        </Button>
-
-                        <p className="text-xs text-gray-400 text-center">
-                          {t('payment_confirm_disclaimer')}
-                        </p>
-                      </div>
-                    </>
+                    <div className="text-center py-8">
+                      <AlertCircle className="w-12 h-12 mx-auto text-red-400 mb-3" />
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('payment_failed_title')}</h3>
+                      <p className="text-sm text-gray-500 mb-4">{t('payment_gateway_unavailable')}</p>
+                      <Button onClick={() => setSelectedGateway(null)}>{t('payment_close')}</Button>
+                    </div>
                   )}
                 </div>
               ) : (
@@ -373,20 +247,6 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
                             onSelect={() => handleSelectGateway(setting.gateway_name as PaymentGateway)}
                           />
                         ))}
-                      </div>
-                    )}
-
-                    {selectedSetting && selectedSetting.qr_image_url && (
-                      <div className="mt-4 flex justify-center">
-                        <div className="bg-warm-50 p-4 rounded-xl border border-amber-200 shadow-sm">
-                          <img
-                            src={selectedSetting.qr_image_url}
-                            alt={`${selectedSetting.gateway_display_name} QR`}
-                            className="w-48 h-48 object-contain"
-                            loading="lazy" decoding="async"
-                          />
-                          <p className="text-center text-xs text-gray-500 mt-2">{t('payment_scan_to_pay')}</p>
-                        </div>
                       </div>
                     )}
                   </div>

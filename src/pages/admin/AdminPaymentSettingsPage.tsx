@@ -7,6 +7,8 @@ import { Button } from '../../components/ui/Button'
 import { FormSkeleton } from '../../components/ui/LoadingSkeleton'
 import type { PaymentSetting, PaymentGateway } from '../../types/payments'
 
+const AUTOMATED_GATEWAYS: PaymentGateway[] = ['khalti', 'esewa', 'stripe']
+
 export function AdminPaymentSettingsPage() {
   const [settings, setSettings] = useState<PaymentSetting[]>([])
   const [loading, setLoading] = useState(true)
@@ -21,6 +23,7 @@ export function AdminPaymentSettingsPage() {
     account_number: '',
     instructions: null as string | null,
     is_active: true,
+    is_automated: false,
     sort_order: 0,
   })
 
@@ -67,18 +70,19 @@ export function AdminPaymentSettingsPage() {
   const handleAddGateway = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newGateway.gateway_name) return
-    const isStripe = newGateway.gateway_name === 'stripe'
+    const isAutomated = AUTOMATED_GATEWAYS.includes(newGateway.gateway_name as PaymentGateway)
     setSaving('__new__')
     try {
       await createPaymentSetting({
         gateway_name: newGateway.gateway_name as PaymentGateway,
         gateway_display_name: newGateway.gateway_display_name,
         gateway_description: newGateway.gateway_description || null,
-        qr_image_url: newGateway.qr_image_url,
-        account_name: isStripe ? '' : newGateway.account_name,
-        account_number: isStripe ? '' : newGateway.account_number,
+        qr_image_url: isAutomated ? null : newGateway.qr_image_url,
+        account_name: isAutomated ? '' : newGateway.account_name,
+        account_number: isAutomated ? '' : newGateway.account_number,
         instructions: newGateway.instructions,
         is_active: true,
+        is_automated: isAutomated,
         sort_order: settings.length + 1,
       })
       toast.success('Gateway added successfully')
@@ -92,6 +96,7 @@ export function AdminPaymentSettingsPage() {
         account_number: '',
         instructions: null,
         is_active: true,
+        is_automated: false,
         sort_order: 0,
       })
       await loadSettings()
@@ -106,7 +111,7 @@ export function AdminPaymentSettingsPage() {
     return <FormSkeleton />
   }
 
-  const isStripe = newGateway.gateway_name === 'stripe'
+  const isAutomated = newGateway.gateway_name !== '' && AUTOMATED_GATEWAYS.includes(newGateway.gateway_name as PaymentGateway)
 
   return (
     <div className="space-y-6">
@@ -137,13 +142,27 @@ export function AdminPaymentSettingsPage() {
                   value={newGateway.gateway_name}
                   onChange={(e) => {
                     const name = e.target.value as PaymentGateway
+                    const automated = AUTOMATED_GATEWAYS.includes(name)
+                    let display = newGateway.gateway_display_name
+                    let description = newGateway.gateway_description
+                    if (name === 'stripe') {
+                      display = 'Credit / Debit Card'
+                      description = 'Pay securely with your credit or debit card'
+                    } else if (name === 'khalti') {
+                      display = 'Khalti'
+                      description = 'Pay securely with your Khalti digital wallet'
+                    } else if (name === 'esewa') {
+                      display = 'eSewa'
+                      description = 'Pay securely with your eSewa online wallet'
+                    }
                     setNewGateway({
                       ...newGateway,
                       gateway_name: name,
-                      gateway_display_name: name === 'stripe' ? 'Credit / Debit Card' : newGateway.gateway_display_name,
-                      gateway_description: name === 'stripe' ? 'Pay securely with your credit or debit card' : newGateway.gateway_description,
-                      account_name: name === 'stripe' ? '' : newGateway.account_name,
-                      account_number: name === 'stripe' ? '' : newGateway.account_number,
+                      gateway_display_name: display,
+                      gateway_description: description,
+                      account_name: automated ? '' : newGateway.account_name,
+                      account_number: automated ? '' : newGateway.account_number,
+                      is_automated: automated,
                     })
                   }}
                   className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500/50"
@@ -152,7 +171,6 @@ export function AdminPaymentSettingsPage() {
                   <option value="">Select gateway...</option>
                   <option value="khalti">khalti</option>
                   <option value="esewa">esewa</option>
-                  <option value="mobile_banking">mobile_banking</option>
                   <option value="stripe">stripe</option>
                 </select>
               </div>
@@ -167,7 +185,7 @@ export function AdminPaymentSettingsPage() {
                   placeholder="e.g. Khalti"
                 />
               </div>
-              {!isStripe ? (
+              {!isAutomated ? (
                 <>
                   <div>
                     <label className="block text-xs text-gray-500 mb-1">Account Name</label>
@@ -194,7 +212,7 @@ export function AdminPaymentSettingsPage() {
                 </>
               ) : (
                 <div className="md:col-span-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-xs text-amber-700">
-                  Account details and QR code are not required for Stripe card payments.
+                  Account details and QR code are not required for automated gateways such as Khalti and Stripe. Donors are redirected to the gateway to pay securely.
                 </div>
               )}
               <div className="md:col-span-2">
@@ -292,7 +310,7 @@ export function AdminPaymentSettingsPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {setting.gateway_name !== 'stripe' ? (
+                {!setting.is_automated ? (
                   <>
                     <div>
                       <label className="block text-xs text-gray-500 mb-1">Account Name</label>
@@ -325,10 +343,10 @@ export function AdminPaymentSettingsPage() {
                   </>
                 ) : (
                   <div className="md:col-span-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-xs text-amber-700">
-                    Account details are managed by Stripe for card payments.
+                    Account details and QR code are not required for automated gateways. Donors are redirected to the gateway to pay securely.
                   </div>
                 )}
-                {setting.gateway_name !== 'stripe' && (
+                {!setting.is_automated && (
                 <div className="md:col-span-2">
                   <label className="block text-xs text-gray-500 mb-1">QR Image</label>
                   <div className="flex gap-2 items-start">

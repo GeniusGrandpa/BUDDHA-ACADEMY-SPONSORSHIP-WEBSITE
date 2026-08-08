@@ -6,6 +6,7 @@ import { getGalleryItems } from '../services/gallery'
 import { getVideos } from '../services/content'
 import { getPageHeader, getSiteImage } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
+import { useLanguage } from '../context/LanguageContext'
 import { Tr } from '../components/Translated'
 import type { GalleryItem, Video } from '../types/database'
 import type { PageHeader } from '../types/cms-content'
@@ -40,6 +41,7 @@ function getVideoEmbedUrl(url: string): { type: 'youtube' | 'vimeo' | 'direct' |
 
 export function GalleryPage() {
   const { t } = useCmsStrings()
+  const { language } = useLanguage()
   const [items, setItems] = useState<GalleryItem[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('all')
@@ -50,17 +52,21 @@ export function GalleryPage() {
   const [fallbackImage, setFallbackImage] = useState('')
 
   useEffect(() => {
-    loadGallery()
-  }, [])
+    if (typeof window === 'undefined') return
+    let cancelled = false
+    loadGallery(language, cancelled)
+    return () => { cancelled = true }
+  }, [language])
 
-  const loadGallery = async () => {
+  const loadGallery = async (lang?: string, cancelled?: boolean) => {
     try {
       const [galleryData, videoData, header, fallbackImg] = await Promise.all([
         getGalleryItems({ publishedOnly: true }),
         getVideos(),
-        getPageHeader('gallery'),
+        getPageHeader('gallery', lang),
         getSiteImage('gallery_fallback'),
       ])
+      if (cancelled) return
       if (header) setPageHeader(header)
       if (fallbackImg?.image_url) setFallbackImage(fallbackImg.image_url)
       const mappedVideos: GalleryVideo[] = videoData.map((v: Video) => {
@@ -85,7 +91,7 @@ export function GalleryPage() {
       setItems([...galleryData, ...mappedVideos])
     } catch {
     } finally {
-      setLoading(false)
+      if (!cancelled) setLoading(false)
     }
   }
 

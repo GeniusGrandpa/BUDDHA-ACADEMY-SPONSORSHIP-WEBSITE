@@ -1,6 +1,5 @@
 import { getSupabaseClient } from '../lib/supabase'
 import { logAuditEvent } from '../lib/audit'
-import { markDonorAsVerified } from './profiles'
 import { logger } from '../lib/logger'
 import { AppError, ErrorCodes, getErrorMessage } from '../lib/errors'
 import type {
@@ -105,60 +104,6 @@ export async function cancelPaymentSession(sessionId: string): Promise<void> {
   })
 }
 
-export async function submitPaymentConfirmation(
-  sessionId: string,
-  screenshots: string[] = [],
-  paymentReference?: string | null,
-): Promise<void> {
-  const { error } = await supabase.rpc('submit_payment_confirmation', {
-    p_session_id: sessionId,
-    p_screenshots: screenshots,
-    p_payment_reference: paymentReference || null,
-  })
-
-  if (error) throw error
-
-  await logAuditEvent({
-    action: 'payment_session.submitted',
-    entityType: 'payment_sessions',
-    entityId: sessionId,
-    metadata: { screenshotsCount: screenshots.length },
-  })
-}
-
-export async function verifyPayment(
-  sessionId: string,
-  status: 'verified' | 'rejected' | 'failed',
-  notes?: string,
-): Promise<void> {
-  const { data: session, error: sessionError } = await supabase
-    .from('payment_sessions')
-    .select('donor_id')
-    .eq('id', sessionId)
-    .single()
-
-  if (sessionError) throw sessionError
-
-  const { error } = await supabase.rpc('verify_payment', {
-    p_session_id: sessionId,
-    p_status: status,
-    p_notes: notes || null,
-  })
-
-  if (error) throw error
-
-  await logAuditEvent({
-    action: `payment_session.${status}`,
-    entityType: 'payment_sessions',
-    entityId: sessionId,
-    metadata: { notes },
-  })
-
-  if (status === 'verified' && session?.donor_id) {
-    await markDonorAsVerified(session.donor_id)
-  }
-}
-
 export async function getDonorDonationsWithPayment(donorId: string): Promise<DonationWithPayment[]> {
   const { data, error } = await supabase
     .from('donations')
@@ -194,7 +139,7 @@ export async function getDonorPaymentSessions(donorId: string): Promise<PaymentS
 export async function getPaymentSession(sessionId: string): Promise<PaymentSession | null> {
   const { data, error } = await supabase
     .from('payment_sessions')
-    .select('id, donor_id, amount, frequency, gateway, status, created_at')
+    .select('id, donor_id, amount, frequency, gateway, status, transaction_id, created_at')
     .eq('id', sessionId)
     .single()
 
@@ -227,7 +172,7 @@ export async function getPaymentReceipt(donationId: string): Promise<PaymentRece
 export async function getAllPaymentSessions(status?: PaymentSessionStatus): Promise<PaymentSession[]> {
   let query = supabase
     .from('payment_sessions')
-    .select('*, donation:donations(*), donor:profiles!payment_sessions_donor_id_fkey(id, full_name, email)')
+    .select('*, donation:donations(*, receipt:payment_receipts(*)), donor:profiles!payment_sessions_donor_id_fkey(id, full_name, email)')
     .order('created_at', { ascending: false })
 
   if (status) {
@@ -238,64 +183,6 @@ export async function getAllPaymentSessions(status?: PaymentSessionStatus): Prom
 
   if (error) throw error
   return (data || []) as unknown as PaymentSession[]
-}
-
-export async function getPendingVerifications(): Promise<PaymentSession[]> {
-  const { data, error } = await supabase
-    .from('payment_sessions')
-    .select('*, donation:donations(*), donor:profiles!payment_sessions_donor_id_fkey(id, full_name, email)')
-    .eq('status', 'processing')
-    .order('created_at', { ascending: false })
-
-  if (error) {
-    logger.error('payment.verifications.load_failed', { code: error.code, message: error.message, details: error.details, hint: error.hint })
-    throw error
-  }
-  return (data || []) as unknown as PaymentSession[]
-}
-
-export async function uploadPaymentScreenshot(
-  sessionId: string,
-  file: File,
-): Promise<string> {
-  const { data: session } = await supabase
-    .from('payment_sessions')
-    .select('donor_id')
-    .eq('id', sessionId)
-    .maybeSingle()
-
-  const userId = session?.donor_id
-  if (!userId) throw new Error('Session not found')
-
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
-  if (!allowedTypes.includes(file.type)) {
-    throw new Error(`Invalid file type: ${file.type}. Allowed: JPEG, PNG, WebP`)
-  }
-  if (file.size > 5 * 1024 * 1024) {
-    throw new Error('File size exceeds 5MB limit')
-  }
-
-  const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg'
-  if (!['jpg', 'jpeg', 'png', 'webp'].includes(fileExt)) {
-    throw new Error(`Invalid file extension: .${fileExt}`)
-  }
-  const sanitizedName = `${sessionId}-${Date.now()}.${fileExt}`
-  const filePath = `${userId}/${sanitizedName}`
-
-  const { error: uploadError } = await supabase.storage
-    .from('payment-screenshots')
-    .upload(filePath, file, {
-      contentType: file.type,
-      upsert: false,
-    })
-
-  if (uploadError) throw uploadError
-
-  const { data: urlData } = supabase.storage
-    .from('payment-screenshots')
-    .getPublicUrl(filePath)
-
-  return urlData.publicUrl
 }
 
 export async function getPaymentStats() {

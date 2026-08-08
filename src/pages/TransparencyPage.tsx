@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Tr } from '../components/Translated'
+import { useLanguage } from '../context/LanguageContext'
 import { getPageBySlug } from '../services/content'
 import type { TransparencyContent } from '../types/cms'
 
@@ -49,21 +50,26 @@ const RECEIPT_POLICY = 'All donors receive official receipt confirmation via ema
 const DONOR_PRIVACY = 'We never share donor information with third parties. Your personal data is protected and used only for communication regarding your donations and impact updates.'
 
 export function TransparencyPage() {
+  const { language } = useLanguage()
   const [content, setContent] = useState<TransparencyContent | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    loadContent()
-  }, [])
+    if (typeof window === 'undefined') return
+    let cancelled = false
+    loadContent(cancelled)
+    return () => { cancelled = true }
+  }, [language])
 
-  const loadContent = async () => {
+  const loadContent = async (cancelled?: boolean) => {
     try {
       const page = await getPageBySlug('transparency')
+      if (cancelled) return
       if (page?.content) {
         setContent(page.content as unknown as TransparencyContent)
       }
     } catch {}
-    setLoading(false)
+    if (!cancelled) setLoading(false)
   }
 
   const data = content || DEFAULT_CONTENT

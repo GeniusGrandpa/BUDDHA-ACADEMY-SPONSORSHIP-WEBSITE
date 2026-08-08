@@ -36,7 +36,7 @@ These guard individual buttons, sections, and page-level features (e.g. `HomePag
 
 ### 3. Server Side RLS + RPC
 
-Row Level Security policies on every table plus guarded RPC functions enforce authorization independently of the client. Sensitive RPCs are `SECURITY DEFINER` and restricted to `service_role`/authorized roles (e.g. `stripe_confirm_payment`, `verify_payment`, `admin_update_user_role`), so the client cannot bypass checks even if it calls them directly.
+Row Level Security policies on every table plus guarded RPC functions enforce authorization independently of the client. Sensitive RPCs are `SECURITY DEFINER` and restricted to `service_role`/authorized roles (e.g. `stripe_confirm_payment`, `esewa_confirm_payment`, `admin_update_user_role`), so the client cannot bypass checks even if it calls them directly.
 
 ## Permission Codes
 

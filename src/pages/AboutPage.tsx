@@ -5,6 +5,7 @@ import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { getPageHeader, getSiteImagesBySection } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
+import { useLanguage } from '../context/LanguageContext'
 import { Tr } from '../components/Translated'
 import { useLocalizePath } from '../hooks/useLocalizePath'
 import type { PageHeader, SiteImage } from '../types/cms-content'
@@ -25,6 +26,7 @@ interface AboutContent {
 
 export function AboutPage() {
   const { t } = useCmsStrings()
+  const { language } = useLanguage()
   const localize = useLocalizePath()
   const [header, setHeader] = useState<Pick<PageHeader, 'title' | 'subtitle'> | null>(null)
   const [content, setContent] = useState<AboutContent | null>(null)
@@ -32,18 +34,23 @@ export function AboutPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+    let cancelled = false
     Promise.all([
-      getPageHeader('about'),
-      loadContent(),
+      getPageHeader('about', language),
+      loadContent(language),
       getSiteImagesBySection('about'),
     ]).then(([hdr, _, imgs]) => {
+      if (cancelled) return
       if (hdr) setHeader(hdr)
       if (imgs.length > 0) setImages(imgs)
       setLoading(false)
-    }).catch(() => setLoading(false))
-  }, [])
+    }).catch(() => { if (!cancelled) setLoading(false) })
 
-  const loadContent = async () => {
+    return () => { cancelled = true }
+  }, [language])
+
+  const loadContent = async (_language?: string) => {
     try {
       const { getPageBySlug } = await import('../services/content')
       const page = await getPageBySlug('about')

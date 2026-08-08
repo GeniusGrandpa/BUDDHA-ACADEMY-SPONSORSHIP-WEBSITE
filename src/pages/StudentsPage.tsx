@@ -7,6 +7,7 @@ import { Button } from '../components/ui/Button'
 import { getStudents } from '../services/students'
 import { getPageHeader } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
+import { useLanguage } from '../context/LanguageContext'
 import { Tr } from '../components/Translated'
 import { useLocalizePath } from '../hooks/useLocalizePath'
 import { sponsorshipVariant, sponsorshipLabel } from '../utils/sponsorship'
@@ -20,26 +21,31 @@ import { StudentCardSkeleton } from '../components/ui/LoadingSkeleton'
 
 export function StudentsPage() {
   const { t } = useCmsStrings()
+  const { language } = useLanguage()
   const localize = useLocalizePath()
   const [students, setStudents] = useState<Student[]>([])
   const [loading, setLoading] = useState(true)
   const [activeFilter, setActiveFilter] = useState('all')
   const [pageHeader, setPageHeader] = useState<PageHeader | null>(null)
   useEffect(() => {
-    loadStudents()
-  }, [])
+    if (typeof window === 'undefined') return
+    let cancelled = false
+    loadStudents(language, cancelled)
+    return () => { cancelled = true }
+  }, [language])
 
-  const loadStudents = async () => {
+  const loadStudents = async (lang?: string, cancelled?: boolean) => {
     try {
       const [data, header] = await Promise.all([
         getStudents(),
-        getPageHeader('students'),
+        getPageHeader('students', lang),
       ])
+      if (cancelled) return
       setStudents(data)
       if (header) setPageHeader(header)
     } catch {
     } finally {
-      setLoading(false)
+      if (!cancelled) setLoading(false)
     }
   }
 

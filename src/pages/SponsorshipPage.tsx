@@ -4,6 +4,7 @@ import { ArrowRight } from 'lucide-react'
 import { Button } from '../components/ui/Button'
 import { getSponsorshipContent, getSiteImage, getSectionContent } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
+import { useLanguage } from '../context/LanguageContext'
 import { Tr } from '../components/Translated'
 import { useLocalizePath } from '../hooks/useLocalizePath'
 import type { SponsorshipContent } from '../types/cms-content'
@@ -50,21 +51,26 @@ function SponsorshipTree({ steps }: { steps: { title: string; desc: string }[] }
 
 export function SponsorshipPage() {
   const { t } = useCmsStrings()
+  const { language } = useLanguage()
   const localize = useLocalizePath()
   const [content, setContent] = useState<SponsorshipContent | null>(null)
   const [heroImage, setHeroImage] = useState('')
 
   useEffect(() => {
-    getSponsorshipContent().then(d => {
+    if (typeof window === 'undefined') return
+    let cancelled = false
+    getSponsorshipContent(language).then(d => {
+      if (cancelled) return
       if (d) {
         setContent(d)
       } else {
         Promise.all([
-          getSectionContent('sponsor_hero'),
-          getSectionContent('sponsor_steps'),
-          getSectionContent('sponsor_benefits'),
-          getSectionContent('sponsor_cta'),
+          getSectionContent('sponsor_hero', language),
+          getSectionContent('sponsor_steps', language),
+          getSectionContent('sponsor_benefits', language),
+          getSectionContent('sponsor_cta', language),
         ]).then(([hero, steps, benefits, cta]) => {
+          if (cancelled) return
           if (hero || steps || benefits || cta) {
             setContent({
               hero_title: hero?.title || '',
@@ -82,8 +88,10 @@ export function SponsorshipPage() {
         }).catch(() => {})
       }
     }).catch(() => {})
-    getSiteImage('sponsorship_hero').then(img => { if (img) setHeroImage(img.image_url) }).catch(() => {})
-  }, [])
+    getSiteImage('sponsorship_hero').then(img => { if (img && !cancelled) setHeroImage(img.image_url) }).catch(() => {})
+
+    return () => { cancelled = true }
+  }, [language])
 
   const DEFAULT_STEPS = [
     { num: '1', title: 'Browse Profiles', desc: 'Review children waiting for sponsors and learn about their stories.' },

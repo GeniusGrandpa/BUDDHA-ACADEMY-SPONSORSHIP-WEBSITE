@@ -1,10 +1,16 @@
 import { getSupabaseClient } from '../lib/supabase'
 import { logAuditEvent } from '../lib/audit'
+import { getContentTranslations } from './content-localization'
 import type { NavigationItem, NavigationLocation } from '../types/cms'
 
 const supabase = getSupabaseClient()
 
-export async function getNavigationItems(location?: NavigationLocation): Promise<NavigationItem[]> {
+function localizeNavLabel(item: NavigationItem, overrides: Record<string, string>): NavigationItem {
+  const label = overrides[item.id] ?? overrides[item.route ?? item.url ?? '']
+  return label ? { ...item, label } : item
+}
+
+export async function getNavigationItems(location?: NavigationLocation, language?: string): Promise<NavigationItem[]> {
   let query = supabase
     .from('navigation_items')
     .select('id, label, url, route, location, parent_id, sort_order, is_visible, is_cta, cta_style, target')
@@ -12,7 +18,10 @@ export async function getNavigationItems(location?: NavigationLocation): Promise
   if (location) query = query.eq('location', location)
   const { data, error } = await query
   if (error) throw error
-  return (data || []) as NavigationItem[]
+  const items = (data || []) as NavigationItem[]
+  if (!language || language === 'en') return items
+  const overrides = await getContentTranslations('navigation_items', 'labels', language)
+  return items.map((item) => localizeNavLabel(item, overrides))
 }
 
 export async function getNavigationItemById(id: string): Promise<NavigationItem | null> {

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { getPageHeader } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
+import { useLanguage } from '../context/LanguageContext'
 import { Tr } from '../components/Translated'
 import { SuccessStoriesCarousel } from '../components/success-stories/SuccessStoriesCarousel'
 import type { StudentStory } from '../types/database'
@@ -10,18 +11,23 @@ import type { PageHeader } from '../types/cms-content'
 
 export function SuccessStoriesPage() {
   const { t } = useCmsStrings()
+  const { language } = useLanguage()
   const [stories, setStories] = useState<StudentStory[]>([])
   const [loading, setLoading] = useState(true)
   const [pageHeader, setPageHeader] = useState<PageHeader | null>(null)
 
   useEffect(() => {
-    loadStories().catch(() => setLoading(false))
-  }, [])
+    if (typeof window === 'undefined') return
+    let cancelled = false
+    loadStories(language, cancelled).catch(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
+  }, [language])
 
-  async function loadStories() {
+  async function loadStories(lang?: string, cancelled?: boolean) {
     const [header] = await Promise.all([
-      getPageHeader('success-stories'),
+      getPageHeader('success-stories', lang),
     ])
+    if (cancelled) return
     if (header) setPageHeader(header)
 
     const { data } = await supabase
@@ -30,6 +36,7 @@ export function SuccessStoriesPage() {
       .eq('is_published', true)
       .order('created_at', { ascending: false })
 
+    if (cancelled) return
     if (data) setStories(data)
     setLoading(false)
   }

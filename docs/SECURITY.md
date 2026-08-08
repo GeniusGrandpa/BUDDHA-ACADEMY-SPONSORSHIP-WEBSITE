@@ -41,10 +41,18 @@ All Supabase tables have RLS policies enabled:
 
 ## Payment Security
 
-- **No direct donation creation** frontend `createDonation()` throws; only the `verify_payment` RPC (server-side) can create donation records
-- **Idempotency** `payment_sessions.idempotency_key` with unique partial index prevents duplicate session creation
-- **Separation of concerns** `initiate_payment_checkout()` creates a `payment_session` independently; `verify_payment()` creates the `donations` row **only** on successful admin verification
-- **Audit logging** every payment action (session creation, verification, rejection) is logged to `audit_logs`
+- **No direct donation creation** frontend `createDonation()` throws; only the gateway-confirmation RPCs
+  (`stripe_confirm_payment`, `esewa_confirm_payment`, `khalti_confirm_payment`) can create donation records,
+  and only after a server-verified gateway confirmation
+- **No client-trusted status** payments are never confirmed from the browser, URL/query params, or
+  client-supplied status/amount/IDs. Confirmation requires a verified Stripe webhook signature, an eSewa
+  HMAC-SHA256 signature + transaction status lookup, or a Khalti lookup API `Completed` status
+- **Idempotency** `payment_sessions.idempotency_key` with unique partial index prevents duplicate session
+  creation; confirmation RPCs early-return when a session is already `completed`; Stripe webhook events are
+  deduplicated in `stripe_webhook_events` (PK `event_id`)
+- **Separation of concerns** `initiate_payment_checkout()` creates a `payment_session` independently; the
+  gateway RPCs create the `donations` row **only** on successful server-verified confirmation
+- **Audit logging** every payment action (session creation, verification, failure) is logged to `audit_logs`
 - Failed/cancelled/expired/abandoned sessions never create donation records
 
 ## Input Handling
@@ -144,12 +152,11 @@ From migrations `20260607000003`–`20260803000001`:
 
 ## Storage Security
 
-Three Supabase storage buckets with RLS:
+Two Supabase storage buckets with RLS:
 
 | Bucket | Read | Write |
 |--------|------|-------|
 | `media` | Public (authenticated for admin operations) | Admin only |
-| `payment-screenshots` | Admin/staff only | Authenticated users (own files) |
 | `payment-qr-codes` | Admin only | Admin only (role >= 80) |
 
 ## Environment Variables
@@ -162,6 +169,9 @@ Sensitive configuration is stored in environment variables (see `.env.example`):
 - `STRIPE_SECRET_KEY` Stripe secret key (Edge Function secret, server-side only)
 - `STRIPE_WEBHOOK_SECRET` Stripe webhook signing secret (Edge Function secret, server-side only)
 - `SUPABASE_SERVICE_ROLE_KEY` Supabase service role key (Edge Function secret, server-side only)
+- `KHALTI_ENVIRONMENT` Khalti environment (`test`/`production`) (Edge Function secret, server-side only)
+- `KHALTI_SECRET_KEY` Khalti secret key (Edge Function secret, server-side only)
+- `KHALTI_WEBSITE_URL` / `KHALTI_RETURN_URL` Khalti public URLs
 - `SUPABASE_JWKS_URL` Optional JWKS URL used by the SSR server
 
 No secrets, API keys, or tokens are hardcoded in the source code. The Supabase service role key and Stripe secret keys are never exposed to the frontend.

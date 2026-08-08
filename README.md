@@ -102,9 +102,9 @@ Browser -> Node SSR Server (server/index.mjs)
 
 - Supabase Auth manages authentication, sessions, email verification, password reset, and SMTP-delivered auth emails.
 - Supabase PostgreSQL stores users, profiles, students, donations, sponsorships, CMS content, design settings, payments, and audit logs.
-- Supabase Storage supports media uploads, payment screenshots, and payment QR codes.
-- Supabase Edge Functions (`create-payment-intent`, `stripe-webhook`) process Stripe card payments and handle webhook verification.
-- RPC functions handle sensitive workflows such as payment initiation, payment verification, permission retrieval, and role changes.
+- Supabase Storage supports media uploads and payment QR codes.
+- Supabase Edge Functions (`create-payment-intent`, `stripe-webhook`, `esewa-pay`, `esewa-callback`, `khalti-pay`, `khalti-callback`) process payments and verify gateway confirmations.
+- RPC functions handle sensitive workflows such as payment initiation, gateway payment confirmation, permission retrieval, and role changes.
 - Row Level Security protects table access at the database layer.
 
 ### Provider Hierarchy
@@ -241,13 +241,11 @@ The service layer keeps Supabase access organized by domain:
 
 ### Payment Verification
 
-- Manual payment session workflow for external payment methods (bank, eSewa, Khalti).
-- Transaction reference and screenshot submission.
-- Admin review, verification, rejection, and receipt-oriented workflows.
-- Verified payments create donation records through controlled RPC logic.
-- Automatic Stripe card verification: `create-payment-intent` Edge Function creates a PaymentIntent; the `stripe-webhook` Edge Function verifies `payment_intent.succeeded` events and completes the session without manual review.
+- Automatic gateway verification only: Stripe webhook, eSewa signed callback + status lookup, and Khalti lookup API are the only paths that mark a payment as paid.
+- Server-verified payments create donation records through controlled, service_role-only RPC logic (`stripe_confirm_payment`, `esewa_confirm_payment`, `khalti_confirm_payment`).
+- Donors are redirected to hosted gateways; the app auto-confirms via server-side lookup/callback Edge Functions.
 - Every payment action is audit-logged; card failures surface sanitized, user-friendly error messages.
-- **Stripe is geo-restricted and does not support Nepal** — Nepal IPs are blocked from Stripe's domains (Dashboard and the browser-based Payment Element). Nepal-based donors should use the manual gateways (bank, eSewa, Khalti); use a VPN in a supported region for Stripe testing. See [`docs/PAYMENTS.md`](docs/PAYMENTS.md).
+- **Stripe is geo-restricted and does not support Nepal** — Nepal IPs are blocked from Stripe's domains (Dashboard and the browser-based Payment Element). Nepal-based donors should use Khalti/eSewa (hosted redirect); use a VPN in a supported region for Stripe testing. See [`docs/PAYMENTS.md`](docs/PAYMENTS.md).
 
 ### CMS
 
@@ -297,10 +295,10 @@ The service layer keeps Supabase access organized by domain:
 ## Donation Workflow
 
 1. **Donation creation** A donor selects a donation amount, sponsorship context, or general donation pathway.
-2. **Payment submission** The donor pays through an external/manual payment method and submits a transaction reference and proof screenshot.
-3. **Verification process** Admin or finance staff review payment evidence.
-4. **Financial review** Finance staff validate records, confirm status, and identify rejected, pending, or verified payments.
-5. **Receipt generation** Verified payment records support receipt-oriented donor communication and reporting.
+2. **Payment** The donor pays through a hosted gateway (Stripe card, eSewa, or Khalti).
+3. **Server verification** A gateway webhook/callback (Stripe signature, eSewa signature + status lookup, Khalti lookup API) confirms the payment server-side.
+4. **Financial review** Finance staff view real transaction status; no manual payment is ever "marked paid".
+5. **Receipt generation** Confirmed payments generate receipts for donor communication and reporting.
 6. **Audit logging** Sensitive payment and verification actions are logged for accountability.
 
 
@@ -419,10 +417,10 @@ The platform includes a database-driven design management system.
 - **Protected Routes** through route-level guards.
 - **Row Level Security** on Supabase tables.
 - **Audit Logging** for sensitive administrative actions.
-- **Secure Payment Verification** through controlled RPC workflows, manual review, and verified Stripe webhooks.
+- **Secure Payment Verification** through server-verified gateway confirmations (Stripe webhook, eSewa/Khalti callback lookups) — no client-trusted status and no manual review path.
 - **Sanitized Error Handling** sensitive details (SQL, paths, keys, traces) are never shown to users; errors surface as friendly messages via a centralized error library (`src/lib/errors.ts`).
 - **Structured Logging** the SSR server writes JSON logs with per-request IDs (`X-Request-Id`) and crash handlers for uncaught exceptions and unhandled rejections.
-- **File Upload Validation** for payment screenshots and media assets.
+- **File Upload Validation** for media assets.
 - **HTTP Security Headers** configured on both the Vite dev server and the production SSR server.
 - **Database hardening** through restricted table/function access and safer function search paths.
 
@@ -437,7 +435,7 @@ Major data entities include:
 | `students` | Student records, profile details, and sponsorship status. |
 | `sponsorships` | Donor-to-student sponsorship relationships. |
 | `donations` | Confirmed or tracked donation records. |
-| `payments` / `payment_sessions` | Manual payment workflow state, references, screenshots, and verification status. |
+| `payments` / `payment_sessions` | Gateway-initiated payment sessions and their server-verified status. |
 | `content` / `pages` | CMS page records, structured content, and SEO metadata. |
 | `media` | Uploaded CMS and platform media assets. |
 | `design_settings` | Published and draft design tokens. |
@@ -499,6 +497,10 @@ Create a `.env` file in the project root (see `.env.example` for the full templa
 | `STRIPE_SECRET_KEY` | Yes (Stripe) | Stripe secret key used by the `create-payment-intent` Edge Function. Server-side only. |
 | `STRIPE_WEBHOOK_SECRET` | Yes (Stripe) | Stripe webhook signing secret (`whsec_...`) used by the `stripe-webhook` Edge Function. Server-side only. |
 | `SUPABASE_SERVICE_ROLE_KEY` | Yes (Stripe) | Supabase service role key used by the webhook Edge Function. Server-side only; never expose to the browser. |
+| `KHALTI_ENVIRONMENT` | Yes (Khalti) | Khalti environment: `test` (sandbox `dev.khalti.com`) or `production` (`khalti.com`). Server-side only. |
+| `KHALTI_SECRET_KEY` | Yes (Khalti) | Khalti `live_secret_key` used by the `khalti-pay` / `khalti-callback` Edge Functions. Server-side only. |
+| `KHALTI_WEBSITE_URL` | Yes (Khalti) | Public website origin sent to Khalti during initiation. |
+| `KHALTI_RETURN_URL` | Yes (Khalti) | Public origin the donor is redirected back to after paying. |
 | `SUPABASE_JWKS_URL` | Optional | Supabase JWKS URL used by the SSR server for signed requests. |
 
 Server runtime variables (`server/index.mjs`): `HOST` (default `0.0.0.0`), `PORT` (default `3000`), `LOG_LEVEL` (`debug`/`info`/`warn`/`error`/`silent`).

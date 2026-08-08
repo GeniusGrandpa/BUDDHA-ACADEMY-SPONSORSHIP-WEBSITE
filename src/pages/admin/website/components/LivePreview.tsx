@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import type { WebsiteSection, WebsitePage } from '../../../../types/website-builder'
 import { SECTION_TYPE_LABELS } from '../../../../types/website-builder'
+import { resolveOverlayColor } from '../../../../lib/color'
 
 const DEVICE_SIZES = {
   desktop: { width: '100%', maxWidth: '100%' },
@@ -39,7 +40,7 @@ function HeroPreview({ hero }: { hero: { title?: string; highlight?: string; des
         className="absolute inset-0"
         style={{ 
           background: 'linear-gradient(135deg, rgba(17,17,17,0.8), rgba(68,68,68,0.6), transparent)',
-          backgroundColor: hero.overlay_color,
+          backgroundColor: resolveOverlayColor(hero.overlay_color),
           opacity: hero.overlay_opacity ?? 0.5,
         }}
       />

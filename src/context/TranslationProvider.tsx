@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react
 import { useTranslation } from 'react-i18next'
 import { DEFAULT_LOCALE } from '../i18n'
 import { fetchPublicTranslations } from '../services/translations'
+import { clearContentTranslationsCache } from '../services/content-localization'
 import { TranslationContext } from './TranslationContext'
 
 export function TranslationProvider({ children }: { children: ReactNode }) {
@@ -35,6 +36,7 @@ export function TranslationProvider({ children }: { children: ReactNode }) {
 
   const refresh = useCallback(async () => {
     setLoading(true)
+    clearContentTranslationsCache()
     const strings = await fetchPublicTranslations()
     i18n.addResourceBundle(DEFAULT_LOCALE, 'translation', strings, true, true)
     setLoading(false)

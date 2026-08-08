@@ -1242,6 +1242,7 @@ export interface Database {
           account_number: string
           instructions: string | null
           is_active: boolean
+          is_automated: boolean
           sort_order: number
           created_at: string
           updated_at: string
@@ -1256,6 +1257,7 @@ export interface Database {
           account_number: string
           instructions?: string | null
           is_active?: boolean
+          is_automated?: boolean
           sort_order?: number
           created_at?: string
           updated_at?: string
@@ -1270,6 +1272,7 @@ export interface Database {
           account_number?: string
           instructions?: string | null
           is_active?: boolean
+          is_automated?: boolean
           sort_order?: number
           created_at?: string
           updated_at?: string
@@ -1287,9 +1290,7 @@ export interface Database {
           student_id: string | null
           message: string | null
           transaction_id: string | null
-          payment_reference: string | null
           idempotency_key: string | null
-          screenshots: string[] | null
           status: string
           verified_by: string | null
           verified_at: string | null
@@ -1308,9 +1309,7 @@ export interface Database {
           student_id?: string | null
           message?: string | null
           transaction_id?: string | null
-          payment_reference?: string | null
           idempotency_key?: string | null
-          screenshots?: string[] | null
           status?: string
           verified_by?: string | null
           verified_at?: string | null
@@ -1325,7 +1324,6 @@ export interface Database {
           gateway?: string
           amount?: number
           transaction_id?: string | null
-          screenshots?: string[] | null
           status?: string
           verified_by?: string | null
           verified_at?: string | null
@@ -2851,18 +2849,6 @@ export interface Database {
       }
       cancel_payment_session: {
         Args: { p_session_id: string }
-        Returns: boolean
-      }
-      submit_payment_confirmation: {
-        Args: {
-          p_session_id: string
-          p_screenshots: string[]
-          p_payment_reference?: string | null
-        }
-        Returns: boolean
-      }
-      verify_payment: {
-        Args: { p_session_id: string; p_status: string; p_notes: string | null }
         Returns: boolean
       }
       log_audit_event: {

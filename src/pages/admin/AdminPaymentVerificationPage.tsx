@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { formatNPR } from '../../utils/currency'
-import { getPendingVerifications, verifyPayment } from '../../services/payments'
+import { getAllPaymentSessions } from '../../services/payments'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
 import { TableSkeleton } from '../../components/ui/LoadingSkeleton'
-import { LoadingSpinner } from '../../components/ui/LoadingSpinner'
-import { AlertCircle, RefreshCw } from 'lucide-react'
-import toast from 'react-hot-toast'
+import { AlertCircle, RefreshCw, Receipt } from 'lucide-react'
 import type { PaymentSession, PaymentSessionStatus } from '../../types/payments'
 
 interface SessionWithDonor extends Omit<PaymentSession, 'status'> {
@@ -16,6 +14,11 @@ interface SessionWithDonor extends Omit<PaymentSession, 'status'> {
     donor_id: string
     amount: number
     frequency: string
+    status: string
+    transaction_id: string | null
+    receipt?: {
+      receipt_number: string | null
+    } | null
     donor?: {
       id: string
       full_name: string
@@ -27,30 +30,37 @@ interface SessionWithDonor extends Omit<PaymentSession, 'status'> {
     full_name: string
     email: string
   }
-  status: PaymentSessionStatus | 'rejected'
+  status: PaymentSessionStatus
+}
+
+const STATUS_STYLES: Record<string, string> = {
+  pending: 'bg-yellow-50 text-yellow-700 border-yellow-200',
+  processing: 'bg-blue-50 text-blue-600 border-blue-200',
+  completed: 'bg-emerald-50 text-emerald-600 border-emerald-200',
+  failed: 'bg-red-50 text-red-600 border-red-200',
+  cancelled: 'bg-gray-50 text-gray-500 border-gray-200',
 }
 
 export function AdminPaymentVerificationPage() {
   const [sessions, setSessions] = useState<SessionWithDonor[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState<PaymentSessionStatus | 'all'>('all')
   const [selectedSession, setSelectedSession] = useState<SessionWithDonor | null>(null)
-  const [verificationNotes, setVerificationNotes] = useState('')
-  const [verifying, setVerifying] = useState<Record<string, boolean>>({})
   const [loadError, setLoadError] = useState<string | null>(null)
 
   const loadSessions = async () => {
     setLoading(true)
     setLoadError(null)
     try {
-      const data = await getPendingVerifications()
+      const data = await getAllPaymentSessions()
       setSessions(data as unknown as SessionWithDonor[])
     } catch (err) {
       const detail = typeof err === 'object' && err !== null && 'message' in err
         ? String((err as { message?: unknown }).message || '')
         : ''
-      setLoadError(detail || 'Failed to load pending verifications. Please try again.')
-      console.error('[payment] load pending verifications failed:', err)
+      setLoadError(detail || 'Failed to load payment transactions. Please try again.')
+      console.error('[payment] load transactions failed:', err)
     } finally {
       setLoading(false)
     }
@@ -60,33 +70,8 @@ export function AdminPaymentVerificationPage() {
     loadSessions()
   }, [])
 
-  const handleVerify = async (sessionId: string, status: 'verified' | 'rejected') => {
-    if (verifying[sessionId]) return
-    setVerifying(prev => ({ ...prev, [sessionId]: true }))
-    const prevSelected = selectedSession
-
-    try {
-      setSessions(prev => prev.map(s =>
-        s.id === sessionId ? { ...s, status: status === 'verified' ? 'completed' : 'rejected' } : s
-      ))
-      await verifyPayment(sessionId, status, verificationNotes || undefined)
-      if (prevSelected?.id === sessionId) {
-        setSelectedSession(null)
-        setVerificationNotes('')
-      }
-      toast.success(status === 'verified' ? 'Payment verified successfully' : 'Payment rejected')
-      await loadSessions()
-    } catch {
-      setSessions(prev => prev.map(s =>
-        s.id === sessionId ? { ...s, status: 'processing' } : s
-      ))
-      toast.error(status === 'verified' ? 'Failed to verify payment' : 'Failed to reject payment')
-    } finally {
-      setVerifying(prev => ({ ...prev, [sessionId]: false }))
-    }
-  }
-
   const filtered = sessions.filter(s => {
+    if (statusFilter !== 'all' && s.status !== statusFilter) return false
     if (search) {
       const q = search.toLowerCase()
       const donor = s.donor || s.donation?.donor
@@ -94,23 +79,34 @@ export function AdminPaymentVerificationPage() {
         donor?.full_name?.toLowerCase().includes(q) ||
         donor?.email?.toLowerCase().includes(q) ||
         s.transaction_id?.toLowerCase().includes(q) ||
-        s.id?.toLowerCase().includes(q)
+        s.id?.toLowerCase().includes(q) ||
+        s.gateway.toLowerCase().includes(q)
       )
     }
     return true
   })
 
   const stats = {
-    processing: sessions.filter(s => s.status === 'processing').length,
     total: sessions.length,
+    completed: sessions.filter(s => s.status === 'completed').length,
+    processing: sessions.filter(s => s.status === 'processing').length,
+    pending: sessions.filter(s => s.status === 'pending').length,
+    failed: sessions.filter(s => s.status === 'failed' || s.status === 'cancelled').length,
   }
+
+  const statCards = [
+    { label: 'Total Transactions', value: stats.total, color: 'text-gray-600', bg: 'bg-gray-50' },
+    { label: 'Completed (Paid)', value: stats.completed, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { label: 'Awaiting Confirmation', value: stats.pending + stats.processing, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { label: 'Failed / Cancelled', value: stats.failed, color: 'text-red-600', bg: 'bg-red-50' },
+  ]
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Payment Verification</h1>
-          <p className="text-gray-500 mt-1">Review and verify donor payments</p>
+          <h1 className="text-2xl font-bold text-gray-900">Payment Transactions</h1>
+          <p className="text-gray-500 mt-1">Real-time status of gateway-confirmed payments</p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={loadSessions} disabled={loading}>
@@ -119,11 +115,8 @@ export function AdminPaymentVerificationPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {[
-          { label: 'Awaiting Verification', value: stats.processing, color: 'text-blue-600', bg: 'bg-blue-50' },
-          { label: 'In Review Queue', value: stats.total, color: 'text-gray-600', bg: 'bg-gray-50' },
-        ].map((stat) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {statCards.map((stat) => (
           <Card key={stat.label} variant="bordered" className={`${stat.bg} border-gray-100 p-5`}>
             <p className="text-sm text-gray-500">{stat.label}</p>
             <p className={`text-2xl font-bold mt-1 ${stat.color}`}>{stat.value}</p>
@@ -136,12 +129,25 @@ export function AdminPaymentVerificationPage() {
           <div className="flex-1">
             <input
               type="text"
-              placeholder="Search by donor name, email, or transaction ID..."
+              placeholder="Search by donor name, email, gateway, or transaction ID..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-amber-500/50"
             />
           </div>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as PaymentSessionStatus | 'all')}
+            title="Filter by status"
+            className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500/50"
+          >
+            <option value="all">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="processing">Processing</option>
+            <option value="completed">Completed</option>
+            <option value="failed">Failed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
         </div>
 
         {loading ? (
@@ -158,22 +164,21 @@ export function AdminPaymentVerificationPage() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-500 font-medium">All caught up!</p>
-            <p className="text-gray-400 text-sm mt-1">No pending payments to review.</p>
+            <p className="text-gray-500 font-medium">No transactions found</p>
+            <p className="text-gray-400 text-sm mt-1">Try adjusting the search or status filter.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {filtered.map((session) => {
               const donor = session.donor || session.donation?.donor
-              const isVerifying = verifying[session.id]
               return (
                 <motion.div
                   key={session.id}
                   initial={{ opacity: 0, y: 5 }}
                   animate={{ opacity: 1, y: 0 }}
                   layout
-                  className={`bg-gray-50 border border-gray-100 rounded-xl p-4 hover:bg-gray-100 transition-colors cursor-pointer ${isVerifying ? 'opacity-60 pointer-events-none' : ''}`}
-                  onClick={() => { if (!isVerifying) setSelectedSession(session) }}
+                  className="bg-gray-50 border border-gray-100 rounded-xl p-4 hover:bg-gray-100 transition-colors cursor-pointer"
+                  onClick={() => setSelectedSession(session)}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div className="flex-1 min-w-0">
@@ -187,30 +192,22 @@ export function AdminPaymentVerificationPage() {
                         </div>
                       </div>
                       <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-400 mt-2">
-                        <span className="font-mono">{session.transaction_id}</span>
+                        <span className="font-mono">{session.transaction_id || session.id.slice(0, 8)}</span>
                         <span>{formatNPR(Number(session.amount))}</span>
                         <span className="capitalize">{session.gateway.replace(/_/g, ' ')}</span>
                         <span>{new Date(session.created_at).toLocaleDateString()}</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${
-                        session.status === 'completed'
-                          ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
-                          : session.status === 'rejected'
-                          ? 'bg-red-50 text-red-600 border-red-200'
-                          : session.status === 'cancelled'
-                          ? 'bg-gray-50 text-gray-500 border-gray-200'
-                          : 'bg-blue-50 text-blue-600 border-blue-200'
-                      }`}>
-                        {session.status === 'processing' ? 'Payment Submitted' : session.status}
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${STATUS_STYLES[session.status] || 'bg-gray-50 text-gray-500 border-gray-200'}`}>
+                        {session.status}
                       </span>
-                      {session.screenshots && session.screenshots.length > 0 && (
-                        <span className="text-xs text-gray-500">
-                          {session.screenshots.length} screenshot(s)
+                      {session.donation?.receipt?.receipt_number && (
+                        <span className="flex items-center gap-1 text-xs text-gray-500">
+                          <Receipt className="w-3.5 h-3.5" />
+                          {session.donation.receipt.receipt_number}
                         </span>
                       )}
-                      {isVerifying && <LoadingSpinner size="sm" />}
                     </div>
                   </div>
                 </motion.div>
@@ -227,7 +224,7 @@ export function AdminPaymentVerificationPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm"
-            onClick={() => { if (selectedSession && !verifying[selectedSession.id]) setSelectedSession(null) }}
+            onClick={() => setSelectedSession(null)}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
@@ -238,11 +235,10 @@ export function AdminPaymentVerificationPage() {
             >
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-lg font-semibold text-gray-900">Payment Details</h2>
+                  <h2 className="text-lg font-semibold text-gray-900">Transaction Details</h2>
                   <button
-                    onClick={() => { if (!verifying[selectedSession.id]) setSelectedSession(null) }}
+                    onClick={() => setSelectedSession(null)}
                     className="text-sm text-gray-500 hover:text-gray-900"
-                    disabled={verifying[selectedSession.id]}
                   >
                     Close
                   </button>
@@ -254,7 +250,7 @@ export function AdminPaymentVerificationPage() {
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-500">Name</span>
-                        <span className="text-gray-700 font-medium">{selectedSession.donor?.full_name || selectedSession.donation?.donor?.full_name}</span>
+                        <span className="text-gray-700 font-medium">{selectedSession.donor?.full_name || selectedSession.donation?.donor?.full_name || 'Unknown'}</span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-500">Email</span>
@@ -271,89 +267,79 @@ export function AdminPaymentVerificationPage() {
                         <span className="text-gray-700 font-bold">{formatNPR(Number(selectedSession.amount))}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">Transaction ID</span>
-                        <span className="text-gray-700 font-mono">{selectedSession.transaction_id}</span>
+                        <span className="text-gray-500">Currency</span>
+                        <span className="text-gray-700">NPR</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Internal Transaction ID</span>
+                        <span className="text-gray-700 font-mono">{selectedSession.transaction_id || selectedSession.id.slice(0, 8)}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Provider Payment ID</span>
+                        <span className="text-gray-700 font-mono">{selectedSession.transaction_id || 'Pending'}</span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-500">Gateway</span>
                         <span className="text-gray-700 capitalize">{selectedSession.gateway.replace(/_/g, ' ')}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">Date</span>
-                        <span className="text-gray-700">{new Date(selectedSession.created_at).toLocaleString()}</span>
+                        <span className="text-gray-500">Frequency</span>
+                        <span className="text-gray-700 capitalize">{selectedSession.frequency}</span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-500">Status</span>
-                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                          selectedSession.status === 'pending'
-                            ? 'bg-yellow-50 text-yellow-700'
-                            : 'bg-blue-50 text-blue-700'
-                        }`}>
+                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${STATUS_STYLES[selectedSession.status] || 'bg-gray-50 text-gray-500 border-gray-200'}`}>
                           {selectedSession.status}
                         </span>
                       </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Initiated</span>
+                        <span className="text-gray-700">{new Date(selectedSession.created_at).toLocaleString()}</span>
+                      </div>
+                      {selectedSession.verified_at && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500">Confirmed</span>
+                          <span className="text-gray-700">{new Date(selectedSession.verified_at).toLocaleString()}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  {selectedSession.screenshots && selectedSession.screenshots.length > 0 && (
+                  {selectedSession.donation && (
                     <div className="bg-gray-50 rounded-xl p-4">
-                      <h3 className="text-sm font-medium text-gray-500 mb-3">Payment Screenshots</h3>
-                      <div className="grid grid-cols-2 gap-3">
-                        {selectedSession.screenshots.map((url, idx) => (
-                          <a
-                            key={idx}
-                            href={url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden group"
-                          >
-                            <img src={url} alt={`Screenshot ${idx + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
-                            <div className="absolute inset-0 bg-stone-900/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            </div>
-                          </a>
-                        ))}
+                      <h3 className="text-sm font-medium text-gray-500 mb-3">Associated Donation</h3>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500">Donation ID</span>
+                          <span className="text-gray-700 font-mono">{selectedSession.donation.id.slice(0, 8)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500">Status</span>
+                          <span className="text-gray-700 capitalize">{selectedSession.donation.status}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500">Amount</span>
+                          <span className="text-gray-700">{formatNPR(Number(selectedSession.donation.amount))}</span>
+                        </div>
+                        {selectedSession.donation.receipt?.receipt_number && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-500">Receipt</span>
+                            <span className="text-gray-700 font-mono">{selectedSession.donation.receipt.receipt_number}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
 
-                  <div className="bg-gray-50 rounded-xl p-4">
-                    <h3 className="text-sm font-medium text-gray-500 mb-3">Verification Notes</h3>
-                    <textarea
-                      value={verificationNotes}
-                      onChange={(e) => setVerificationNotes(e.target.value)}
-                      placeholder="Add verification notes (optional)..."
-                      rows={3}
-                      className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-amber-500/50"
-                      disabled={verifying[selectedSession.id]}
-                    />
-                  </div>
+                  {selectedSession.verification_notes && (
+                    <div className="bg-gray-50 rounded-xl p-4">
+                      <h3 className="text-sm font-medium text-gray-500 mb-2">Verification Notes</h3>
+                      <p className="text-sm text-gray-700">{selectedSession.verification_notes}</p>
+                    </div>
+                  )}
 
-                  <div className="flex gap-3">
-                    <Button
-                      className="flex-1"
-                      onClick={() => handleVerify(selectedSession.id, 'verified')}
-                      disabled={verifying[selectedSession.id]}
-                    >
-                      {verifying[selectedSession.id] ? (
-                        <span className="flex items-center gap-2">
-                          <LoadingSpinner size="sm" />
-                          Verifying...
-                        </span>
-                      ) : 'Approve Payment'}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="flex-1 border-red-500/50 text-red-400 hover:bg-red-500/10"
-                      onClick={() => handleVerify(selectedSession.id, 'rejected')}
-                      disabled={verifying[selectedSession.id]}
-                    >
-                      {verifying[selectedSession.id] ? (
-                        <span className="flex items-center gap-2">
-                          <LoadingSpinner size="sm" />
-                          Rejecting...
-                        </span>
-                      ) : 'Reject Payment'}
-                    </Button>
+                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs text-amber-800">
+                    Payment status is updated only by verified gateway confirmations (Stripe webhook, eSewa callback, Khalti lookup). Transactions cannot be manually marked as paid.
                   </div>
                 </div>
               </div>

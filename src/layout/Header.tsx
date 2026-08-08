@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import { useCmsStrings } from '../context/CmsStringsContext'
+import { useLanguage } from '../context/LanguageContext'
 import { Tr } from '../components/Translated'
 import { LanguageSwitcher } from '../components/LanguageSwitcher'
 import { useLocalizePath } from '../hooks/useLocalizePath'
@@ -17,6 +18,7 @@ export function Header() {
   const { user, profile, signOut } = useAuth()
   const { t } = useCmsStrings()
   const { branding } = useTheme()
+  const { language } = useLanguage()
   const location = useLocation()
   const navigate = useNavigate()
   const localize = useLocalizePath()
@@ -25,14 +27,17 @@ export function Header() {
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
 
   useEffect(() => {
-    getNavigationItems('header').then(items => setNavItems(items.filter(i => i.is_visible && i.label !== 'Programs'))).catch(() => {})
+    if (typeof window === 'undefined') return
+    let cancelled = false
+    getNavigationItems('header', language).then(items => { if (!cancelled) setNavItems(items.filter(i => i.is_visible && i.label !== 'Programs')) }).catch(() => {})
     getSiteSettings().then(s => {
-      if (s) {
+      if (s && !cancelled) {
         setSiteName(s.site_name || '')
         setLogoUrl(s.logo_url)
       }
     }).catch(() => {})
-  }, [])
+    return () => { cancelled = true }
+  }, [language])
 
   const headerLogoSrc = branding.header_logo_url || logoUrl || branding.logo_url || fallbackLogo
 

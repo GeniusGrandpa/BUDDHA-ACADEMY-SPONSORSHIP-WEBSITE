@@ -78,3 +78,18 @@ export function handleError(
   logError(context, err)
   return jsonError(safeMessage(err), errorCode, status)
 }
+
+export function getCallerUserId(req: Request): string | null {
+  const auth = req.headers.get('Authorization') ?? ''
+  const token = auth.replace(/^Bearer\s+/i, '').trim()
+  if (!token) return null
+  const parts = token.split('.')
+  if (parts.length !== 3) return null
+  try {
+    const payloadJson = atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'))
+    const payload = JSON.parse(payloadJson) as { sub?: string }
+    return typeof payload.sub === 'string' && payload.sub ? payload.sub : null
+  } catch {
+    return null
+  }
+}

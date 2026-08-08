@@ -9,7 +9,7 @@ import { AdminErrorPage } from './components/pages/AdminErrorPage'
 import { DEFAULT_LOCALE } from './i18n'
 import { ENABLE_VISUAL_BUILDER } from './config/feature-flags'
 import { Navigate } from 'react-router-dom'
-import { LazyPage, AdminIndexRedirect, HomePage, AboutPage, SponsorshipPage, StudentsPage, StudentDetailPage, GalleryPage, NewsPage, NewsDetailPage, ContactPage, DonatePage, TransparencyPage, FAQPage, VolunteerPage, PrivacyPage, TermsPage, LoginPage, ForgotPasswordPage, ResetPasswordPage, AuthCallbackPage, NotFoundPage, DashboardPage, CampaignsPage, SuccessStoriesPage, ActivityPage, DonationHistoryPage, AdminLayout, AdminStudentsPage, AdminDonationsPage, AdminNewsPage, AdminGalleryPage, AdminContactsPage, AdminDonorsPage, AdminPaymentVerificationPage, AdminPaymentSettingsPage, AdminEventsPage, AdminNotificationsPage, AdminReportsPage, AdminUsersPage, SuperAdminLayout, SuperAdminUsersPage, SuperAdminRolesPage, SuperAdminAuditLogsPage, SuperAdminNotificationsPage, FinanceDashboard, SponsorshipDashboard, VolunteerDashboard, TeacherDashboard, WebsiteDashboard, WebsiteBuilder, MediaLibrary, BrandingEditor, SEOEditor, AboutPageEditor, ContactPageEditor, CampaignsEditor, PrivacyPageEditor, TermsPageEditor, HomePageEditor, AdminContentGallery, AdminVideoManager, AdminContentTestimonials, AdminContentNews, AdminStudentStories, AdminTransparencyContent, AdminFaqManager, AdminPageEditor, AdminVersionHistory, AdminSiteSettings, AdminNavigationManager, AdminAnnouncements, AdminPartners, AdminDonationContent, AdminSponsorshipContent, AdminVolunteerContent, AdminFooterContent, AdminSiteImages, AdminSectionVisibility, AdminDesignDashboard, AdminBrandingPage, AdminColorsPage, AdminTypographyPage, AdminLayoutPage, AdminComponentsPage, AdminConfigPage, AdminThemePresetsPage, PreviewPage } from './route-pages'
+import { LazyPage, AdminIndexRedirect, HomePage, AboutPage, SponsorshipPage, StudentsPage, StudentDetailPage, GalleryPage, NewsPage, NewsDetailPage, ContactPage, DonatePage, EsewaReturnPage, TransparencyPage, FAQPage, VolunteerPage, PrivacyPage, TermsPage, LoginPage, ForgotPasswordPage, ResetPasswordPage, AuthCallbackPage, NotFoundPage, DashboardPage, CampaignsPage, SuccessStoriesPage, ActivityPage, DonationHistoryPage, AdminLayout, AdminStudentsPage, AdminDonationsPage, AdminNewsPage, AdminGalleryPage, AdminContactsPage, AdminDonorsPage, AdminPaymentVerificationPage, AdminPaymentSettingsPage, AdminEventsPage, AdminNotificationsPage, AdminReportsPage, AdminUsersPage, SuperAdminLayout, SuperAdminUsersPage, SuperAdminRolesPage, SuperAdminAuditLogsPage, SuperAdminNotificationsPage, FinanceDashboard, SponsorshipDashboard, VolunteerDashboard, TeacherDashboard, WebsiteDashboard, WebsiteBuilder, MediaLibrary, BrandingEditor, SEOEditor, AboutPageEditor, ContactPageEditor, CampaignsEditor, PrivacyPageEditor, TermsPageEditor, HomePageEditor, AdminContentGallery, AdminVideoManager, AdminContentTestimonials, AdminContentNews, AdminStudentStories, AdminTransparencyContent, AdminFaqManager, AdminPageEditor, AdminVersionHistory, AdminSiteSettings, AdminNavigationManager, AdminAnnouncements, AdminPartners, AdminDonationContent, AdminSponsorshipContent, AdminVolunteerContent, AdminFooterContent, AdminSiteImages, AdminSectionVisibility, AdminDesignDashboard, AdminBrandingPage, AdminColorsPage, AdminTypographyPage, AdminLayoutPage, AdminComponentsPage, AdminConfigPage, AdminThemePresetsPage, PreviewPage, KhaltiReturnPage } from './route-pages'
 
 export const routeDefinitions: RouteObject[] = [
   {
@@ -72,6 +72,16 @@ export const routeDefinitions: RouteObject[] = [
             <LazyPage Component={DonationHistoryPage} />
           </ProtectedRoute>
         ),
+        errorElement: <RouteErrorPage />,
+      },
+      {
+        path: '/donate/esewa/return',
+        element: <LazyPage Component={EsewaReturnPage} />,
+        errorElement: <RouteErrorPage />,
+      },
+      {
+        path: '/donate/khalti/return',
+        element: <LazyPage Component={KhaltiReturnPage} />,
         errorElement: <RouteErrorPage />,
       },
       {
