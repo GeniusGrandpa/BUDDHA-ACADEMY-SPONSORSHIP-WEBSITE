@@ -37,7 +37,7 @@ export function StudentsPage() {
   const loadStudents = async (lang?: string, cancelled?: boolean) => {
     try {
       const [data, header] = await Promise.all([
-        getStudents(),
+        getStudents(undefined, undefined, lang),
         getPageHeader('students', lang),
       ])
       if (cancelled) return

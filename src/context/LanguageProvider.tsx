@@ -1,5 +1,5 @@
 import React, { startTransition, useCallback, useEffect, useMemo, useState } from 'react'
-import { setLanguageCookie, toLocale } from '../lib/locale'
+import { LANGUAGE_STORAGE_KEY, setLanguageCookie, toLocale } from '../lib/locale'
 import { LanguageContext, languages, type LanguageCode } from './LanguageContext'
 import i18n from '../i18n'
 
@@ -15,7 +15,7 @@ export function LanguageProvider({ children, initialLanguage }: { children: Reac
   useEffect(() => {
     if (typeof window === 'undefined') return
     setLanguageCookie(language)
-    window.localStorage.setItem('language', language)
+    window.localStorage.setItem(LANGUAGE_STORAGE_KEY, language)
     document.documentElement.lang = language
     document.documentElement.dir = 'ltr'
   }, [language])
@@ -25,9 +25,13 @@ export function LanguageProvider({ children, initialLanguage }: { children: Reac
     startTransition(() => setLanguageState(newLanguage))
   }, [])
 
+  const toggleLanguage = useCallback(() => {
+    setLanguage(language === 'en' ? 'ne' : 'en')
+  }, [language, setLanguage])
+
   const value = useMemo(
-    () => ({ language, setLanguage }),
-    [language, setLanguage],
+    () => ({ language, setLanguage, toggleLanguage }),
+    [language, setLanguage, toggleLanguage],
   )
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>

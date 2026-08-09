@@ -6,6 +6,7 @@ import { Tr } from '../components/Translated'
 import { useLocalizePath } from '../hooks/useLocalizePath'
 import { getNewsById } from '../services/news'
 import { getPageHeader } from '../services/cms-content'
+import { useLanguage } from '../context/LanguageContext'
 import type { PageHeader } from '../types/cms-content'
 import type { Database } from '../types/database'
 import { DetailPageSkeleton } from '../components/ui/LoadingSkeleton'
@@ -22,6 +23,7 @@ type NewsArticle = Database['public']['Tables']['news']['Row'] & {
 
 export function NewsDetailPage() {
   const { id } = useParams<{ id: string }>()
+  const { language } = useLanguage()
   const localize = useLocalizePath()
   const [article, setArticle] = useState<NewsArticle | null>(null)
   const [header, setHeader] = useState<PageHeader | null>(null)
@@ -30,13 +32,13 @@ export function NewsDetailPage() {
   useEffect(() => {
     if (!id) return
     Promise.all([
-      getNewsById(id),
-      getPageHeader('news'),
+      getNewsById(id, language),
+      getPageHeader('news', language),
     ]).then(([newsData, hdr]) => {
       if (newsData) setArticle(newsData)
       if (hdr) setHeader(hdr)
     }).catch(() => {}).finally(() => setLoading(false))
-  }, [id])
+  }, [id, language])
 
   if (loading) return <DetailPageSkeleton />
   if (!article) return (
@@ -61,7 +63,7 @@ export function NewsDetailPage() {
             {heroTitle && <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">{heroTitle}</h1>}
             {heroSubtitle && <p className="text-xl text-gray-200">{heroSubtitle}</p>}
             {article.published_at && (
-              <p className="text-sm text-gray-300 mt-4">{new Date(article.published_at).toLocaleDateString()}</p>
+              <p className="text-sm text-gray-300 mt-4">{new Date(article.published_at).toLocaleDateString(language === 'ne' ? 'ne-NP' : 'en-US')}</p>
             )}
           </div>
         </section>
@@ -76,7 +78,7 @@ export function NewsDetailPage() {
           <>
             {heroTitle && <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">{heroTitle}</h1>}
             {article.published_at && (
-              <p className="text-sm text-gray-500 mb-6 sm:mb-8">{new Date(article.published_at).toLocaleDateString()}</p>
+              <p className="text-sm text-gray-500 mb-6 sm:mb-8">{new Date(article.published_at).toLocaleDateString(language === 'ne' ? 'ne-NP' : 'en-US')}</p>
             )}
           </>
         )}

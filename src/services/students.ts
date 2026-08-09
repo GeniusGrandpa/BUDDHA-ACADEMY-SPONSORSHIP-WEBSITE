@@ -1,11 +1,12 @@
 import { getSupabaseClient } from '../lib/supabase'
 import { requireRole } from '../lib/auth/secureService'
 import type { Database, Student } from '../types/database'
+import { getLocalizedContent } from './content-localization'
 const supabase = getSupabaseClient()
 
 type StudentInsert = Database['public']['Tables']['students']['Insert']
 
-export async function getStudents(status?: string, opts?: { limit?: number }): Promise<Student[]> {
+export async function getStudents(status?: string, opts?: { limit?: number }, language = 'en'): Promise<Student[]> {
   let query = supabase
     .from('students')
     .select('id, name, age, grade, class_section, photo_url, bio, family_background, hobbies, dream_career, education_goals, achievements, gallery_urls, date_of_birth, enrolled_date, sponsorship_status, sponsorship_amount, current_sponsorship, created_at, updated_at')
@@ -21,10 +22,10 @@ export async function getStudents(status?: string, opts?: { limit?: number }): P
 
   const { data, error } = await query
   if (error) throw error
-  return data || []
+  return Promise.all((data || []).map((student) => getLocalizedContent('students', student.id, language, async () => student) as Promise<Student>))
 }
 
-export async function getStudentById(id: string): Promise<Student | null> {
+export async function getStudentById(id: string, language = 'en'): Promise<Student | null> {
   const { data, error } = await supabase
     .from('students')
     .select('id, name, age, grade, class_section, photo_url, bio, family_background, hobbies, dream_career, education_goals, achievements, gallery_urls, date_of_birth, enrolled_date, sponsorship_status, sponsorship_amount, current_sponsorship, created_at, updated_at')
@@ -32,7 +33,7 @@ export async function getStudentById(id: string): Promise<Student | null> {
     .maybeSingle()
 
   if (error) throw error
-  return data
+  return getLocalizedContent('students', id, language, async () => data)
 }
 
 export async function createStudent(student: StudentInsert): Promise<Student> {

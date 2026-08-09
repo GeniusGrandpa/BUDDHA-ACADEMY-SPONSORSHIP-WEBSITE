@@ -5,25 +5,27 @@ import { Tr } from '../components/Translated'
 import { getFaqs } from '../services/content'
 import { getPageHeader } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
+import { useLanguage } from '../context/LanguageContext'
 import type { Faq } from '../types/database'
 import type { PageHeader } from '../types/cms-content'
 import { CardSkeleton } from '../components/ui/LoadingSkeleton'
 
 export function FAQPage() {
   const { t } = useCmsStrings()
+  const { language } = useLanguage()
   const [faqs, setFaqs] = useState<Faq[]>([])
   const [loading, setLoading] = useState(true)
   const [pageHeader, setPageHeader] = useState<PageHeader | null>(null)
 
   useEffect(() => {
-    loadFaqs()
-  }, [])
+    loadFaqs(language)
+  }, [language])
 
-  const loadFaqs = async () => {
+  const loadFaqs = async (lang: string) => {
     try {
       const [data, header] = await Promise.all([
-        getFaqs(true),
-        getPageHeader('faq'),
+        getFaqs(true, lang),
+        getPageHeader('faq', lang),
       ])
       setFaqs(data)
       if (header) setPageHeader(header)

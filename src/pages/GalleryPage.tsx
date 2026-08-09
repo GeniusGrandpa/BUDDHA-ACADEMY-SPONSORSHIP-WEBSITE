@@ -61,8 +61,8 @@ export function GalleryPage() {
   const loadGallery = async (lang?: string, cancelled?: boolean) => {
     try {
       const [galleryData, videoData, header, fallbackImg] = await Promise.all([
-        getGalleryItems({ publishedOnly: true }),
-        getVideos(),
+        getGalleryItems({ publishedOnly: true, language: lang }),
+        getVideos(undefined, lang),
         getPageHeader('gallery', lang),
         getSiteImage('gallery_fallback'),
       ])
@@ -226,7 +226,7 @@ export function GalleryPage() {
           </button>
               <img
                 src={selectedImage}
-                alt="Gallery image"
+                alt={t('gallery_image_alt')}
                 className="max-w-full max-h-[80vh] object-contain"
                 loading="lazy" decoding="async"
               />

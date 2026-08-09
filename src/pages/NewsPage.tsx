@@ -32,7 +32,7 @@ export function NewsPage() {
   const loadNews = async (lang?: string, cancelled?: boolean) => {
     try {
       const [data, header] = await Promise.all([
-        getNews(),
+        getNews(undefined, lang),
         getPageHeader('news', lang),
       ])
       if (cancelled) return
@@ -56,7 +56,7 @@ export function NewsPage() {
     : news.filter(n => n.category === activeTab)
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString(language === 'ne' ? 'ne-NP' : 'en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',

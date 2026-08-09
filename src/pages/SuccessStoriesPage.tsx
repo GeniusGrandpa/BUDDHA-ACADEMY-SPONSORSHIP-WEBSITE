@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { supabase } from '../lib/supabase'
+import { getStudentStories } from '../services/content'
 import { getPageHeader } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import { useLanguage } from '../context/LanguageContext'
@@ -30,11 +30,7 @@ export function SuccessStoriesPage() {
     if (cancelled) return
     if (header) setPageHeader(header)
 
-    const { data } = await supabase
-      .from('student_stories')
-      .select('*')
-      .eq('is_published', true)
-      .order('created_at', { ascending: false })
+    const data = await getStudentStories(true, lang)
 
     if (cancelled) return
     if (data) setStories(data)

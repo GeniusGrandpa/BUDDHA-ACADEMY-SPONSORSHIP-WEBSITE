@@ -4,6 +4,7 @@ import { Tr } from '../components/Translated'
 import { getPublishedLegalPageByType, type LegalPageWithSections } from '../services/legal-pages'
 import { getSectionContent } from '../services/cms-content'
 import { DetailPageSkeleton } from '../components/ui/LoadingSkeleton'
+import { useLanguage } from '../context/LanguageContext'
 
 const FALLBACK_SECTIONS = [
   {
@@ -61,20 +62,21 @@ const FALLBACK_SECTIONS = [
 ]
 
 export function PrivacyPage() {
+  const { language } = useLanguage()
   const [legalPage, setLegalPage] = useState<LegalPageWithSections | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    loadContent()
-  }, [])
+    loadContent(language)
+  }, [language])
 
-  const loadContent = async () => {
+  const loadContent = async (lang: string) => {
     try {
-      const page = await getPublishedLegalPageByType('privacy_policy')
+      const page = await getPublishedLegalPageByType('privacy_policy', lang)
       if (page) {
         setLegalPage(page)
       } else {
-        const section = await getSectionContent('privacy_content')
+        const section = await getSectionContent('privacy_content', lang)
         if (section?.content) {
           const c = section.content as { sections?: { heading: string; content: string }[]; title?: string }
           setLegalPage({
@@ -120,7 +122,7 @@ export function PrivacyPage() {
             </h1>
             {lastUpdated && (
               <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">
-                <Tr text="Last updated: " /> {new Date(lastUpdated).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                <Tr text="Last updated: " /> {new Date(lastUpdated).toLocaleDateString(language === 'ne' ? 'ne-NP' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
               </p>
             )}
           </div>

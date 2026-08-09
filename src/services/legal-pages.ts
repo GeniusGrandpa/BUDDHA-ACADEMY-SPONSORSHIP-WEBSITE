@@ -2,6 +2,7 @@ import { supabase } from '../lib/supabase'
 import { isPreviewMode } from '../lib/preview-mode'
 import { logAuditEvent } from '../lib/audit'
 import type { LegalPage, LegalPageSection, LegalPageVersion } from '../types/database'
+import { getLocalizedContent } from './content-localization'
 
 export type LegalPageType = 'privacy_policy' | 'terms_conditions' | 'cookie_policy' | 'donation_policy'
 export type LegalPageStatus = 'draft' | 'published' | 'hidden'
@@ -31,7 +32,7 @@ export async function getLegalPageByType(type: LegalPageType): Promise<LegalPage
   return { ...page, sections: sections || [] } as LegalPageWithSections
 }
 
-export async function getPublishedLegalPageByType(type: LegalPageType): Promise<LegalPageWithSections | null> {
+export async function getPublishedLegalPageByType(type: LegalPageType, language = 'en'): Promise<LegalPageWithSections | null> {
   if (isPreviewMode()) {
     return getLegalPageByType(type)
   }
@@ -55,7 +56,11 @@ export async function getPublishedLegalPageByType(type: LegalPageType): Promise<
     .eq('is_visible', true)
     .order('sort_order', { ascending: true })
 
-  return { ...page, sections: sections || [] } as LegalPageWithSections
+  const localizedPage = await getLocalizedContent('legal_pages', page.id, language, async () => page)
+  const localizedSections = await Promise.all((sections || []).map((section) =>
+    getLocalizedContent('legal_page_sections', section.id, language, async () => section) as Promise<LegalPageSection>,
+  ))
+  return { ...localizedPage, sections: localizedSections } as LegalPageWithSections
 }
 
 export async function upsertLegalPage(

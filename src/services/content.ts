@@ -1,4 +1,5 @@
 import { getSupabaseClient } from '../lib/supabase'
+import { getLocalizedContent } from './content-localization'
 import { isPreviewMode } from '../lib/preview-mode'
 import { logAuditEvent } from '../lib/audit'
 import type {
@@ -127,12 +128,12 @@ export async function updateHomepageSection(id: string, updates: Partial<Homepag
   return data
 }
 
-export async function getVideos(featuredOnly?: boolean): Promise<Video[]> {
+export async function getVideos(featuredOnly?: boolean, language = 'en'): Promise<Video[]> {
   let query = supabase.from('videos').select(VIDEO_COLS).order('created_at', { ascending: false })
   if (featuredOnly) query = query.eq('is_featured', true)
   const { data, error } = await query
   if (error) throw error
-  return data || []
+  return Promise.all((data || []).map((video) => getLocalizedContent('videos', video.id, language, async () => video) as Promise<Video>))
 }
 
 export async function getVideoById(id: string): Promise<Video | null> {
@@ -199,12 +200,12 @@ export async function deleteVideo(id: string): Promise<void> {
   if (error) throw error
 }
 
-export async function getFaqs(publishedOnly?: boolean): Promise<Faq[]> {
+export async function getFaqs(publishedOnly?: boolean, language = 'en'): Promise<Faq[]> {
   let query = supabase.from('faqs').select(FAQ_COLS).order('sort_order', { ascending: true })
   if (publishedOnly && !isPreviewMode()) query = query.eq('is_published', true)
   const { data, error } = await query
   if (error) throw error
-  return data || []
+  return Promise.all((data || []).map((faq) => getLocalizedContent('faqs', faq.id, language, async () => faq) as Promise<Faq>))
 }
 
 export async function getFaqById(id: string): Promise<Faq | null> {
@@ -239,12 +240,12 @@ export async function reorderFaqs(items: { id: string; sort_order: number }[]): 
   }
 }
 
-export async function getStudentStories(publishedOnly?: boolean): Promise<StudentStory[]> {
+export async function getStudentStories(publishedOnly?: boolean, language = 'en'): Promise<StudentStory[]> {
   let query = supabase.from('student_stories').select(STORY_COLS).order('created_at', { ascending: false })
   if (publishedOnly && !isPreviewMode()) query = query.eq('is_published', true)
   const { data, error } = await query
   if (error) throw error
-  return data || []
+  return Promise.all((data || []).map((story) => getLocalizedContent('student_stories', story.id, language, async () => story) as Promise<StudentStory>))
 }
 
 export async function getStudentStoryById(id: string): Promise<StudentStory | null> {
@@ -405,12 +406,12 @@ export async function updateNewsWithAuthor(id: string, updates: Partial<News>): 
   return data
 }
 
-export async function getTestimonialsWithType(type?: string): Promise<Testimonial[]> {
+export async function getTestimonialsWithType(type?: string, language = 'en'): Promise<Testimonial[]> {
   let query = supabase.from('testimonials').select(TESTIMONIAL_COLS).order('sort_order', { ascending: true })
   if (type && type !== 'all') query = query.eq('testimonial_type', type as Testimonial['testimonial_type'])
   const { data, error } = await query
   if (error) throw error
-  return data || []
+  return Promise.all((data || []).map((testimonial) => getLocalizedContent('testimonials', testimonial.id, language, async () => testimonial) as Promise<Testimonial>))
 }
 
 export async function createTestimonial(item: Omit<Testimonial, 'id' | 'created_at' | 'updated_at'>): Promise<Testimonial> {

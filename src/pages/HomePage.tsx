@@ -490,14 +490,14 @@ export function HomePage() {
       getSectionContent('featured_students', language).then(d => { if (d && !cancelled) setFeaturedStudentsSection(d) }).catch(() => { }),
       getSectionContent('sponsorship_steps', language).then(d => { if (d && !cancelled) setSponsorshipSteps(d) }).catch(() => { }),
       getSectionContent('testimonials', language).then(d => { if (d && !cancelled) setTestimonialsSection(d) }).catch(() => { }),
-      getTestimonialsWithType('testimonial').then(d => { if (d && d.length > 0 && !cancelled) setTestimonialItems(d) }).catch(() => { }),
+      getTestimonialsWithType('testimonial', language).then(d => { if (d && d.length > 0 && !cancelled) setTestimonialItems(d) }).catch(() => { }),
       getSectionVisibility().then(sections => {
         if (cancelled) return
         const map: Record<string, boolean> = {}
         sections.forEach((s: { section_key: string; is_visible: boolean }) => { map[s.section_key] = s.is_visible })
         setSectionsVisible(map)
       }).catch(() => { }),
-      getStudents(undefined, { limit: 3 }).then(d => { if (!cancelled) { setStudents(d); setStudentsLoading(false) } }).catch(() => { if (!cancelled) setStudentsLoading(false) }),
+      getStudents(undefined, { limit: 3 }, language).then(d => { if (!cancelled) { setStudents(d); setStudentsLoading(false) } }).catch(() => { if (!cancelled) setStudentsLoading(false) }),
     ]).finally(() => { if (!cancelled) setCmsLoaded(true) })
 
     return () => { cancelled = true }

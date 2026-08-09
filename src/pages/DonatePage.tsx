@@ -41,7 +41,7 @@ export function DonatePage() {
     Promise.all([
       getDonationContent(language),
       getPageHeader('donate', language),
-      getStudents(),
+      getStudents(undefined, undefined, language),
     ]).then(([donationContent, header, studentsData]) => {
       if (cancelled) return
       if (donationContent) {

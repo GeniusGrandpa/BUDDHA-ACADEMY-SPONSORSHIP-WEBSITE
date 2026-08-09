@@ -69,22 +69,6 @@
     font-family: var(--font-heading, var(--font-body));
   }
 
-  body > .skiptranslate,
-  .goog-te-banner-frame,
-  .goog-te-balloon-frame,
-  .goog-te-menu-frame,
-  .goog-tooltip,
-  .goog-tooltip:hover,
-  #goog-gt-tt,
-  #google_translate_element {
-    display: none !important;
-    visibility: hidden !important;
-  }
-
-  .goog-text-highlight {
-    background-color: transparent !important;
-    box-shadow: none !important;
-  }
 }
 
 @layer utilities {

@@ -3,18 +3,20 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCmsStrings } from '../../context/CmsStringsContext'
 import { Tr } from '../Translated'
-import { supabase } from '../../lib/supabase'
+import { getStudentStories } from '../../services/content'
+import { useLanguage } from '../../context/LanguageContext'
 import type { StudentStory } from '../../types/database'
 
 export function SuccessStoriesCarousel() {
   const { t } = useCmsStrings()
+  const { language } = useLanguage()
   const [stories, setStories] = useState<StudentStory[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    loadStories().catch(() => setLoading(false))
-  }, [])
+    loadStories(language).catch(() => setLoading(false))
+  }, [language])
 
   useEffect(() => {
     if (stories.length <= 1) return
@@ -24,13 +26,8 @@ export function SuccessStoriesCarousel() {
     return () => clearInterval(interval)
   }, [stories.length])
 
-  async function loadStories() {
-    const { data } = await supabase
-      .from('student_stories')
-      .select('*')
-      .eq('is_published', true)
-      .order('created_at', { ascending: false })
-      .limit(10)
+  async function loadStories(language: string) {
+    const data = await getStudentStories(true, language)
 
     if (data) setStories(data)
     setLoading(false)

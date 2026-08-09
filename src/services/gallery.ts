@@ -1,9 +1,10 @@
 import { getSupabaseClient } from '../lib/supabase'
 import { isPreviewMode } from '../lib/preview-mode'
 import type { GalleryItem } from '../types/database'
+import { getLocalizedContent } from './content-localization'
 const supabase = getSupabaseClient()
 
-export async function getGalleryItems(options?: { type?: string; publishedOnly?: boolean; featuredOnly?: boolean }): Promise<GalleryItem[]> {
+export async function getGalleryItems(options?: { type?: string; publishedOnly?: boolean; featuredOnly?: boolean; language?: string }): Promise<GalleryItem[]> {
   let query = supabase
     .from('gallery_items')
     .select('id, type, title, caption, url, thumbnail_url, author, category, is_featured, is_published, uploaded_by, created_at, updated_at')
@@ -24,7 +25,7 @@ export async function getGalleryItems(options?: { type?: string; publishedOnly?:
   const { data, error } = await query
 
   if (error) throw error
-  return data || []
+  return Promise.all((data || []).map((item) => getLocalizedContent('gallery_items', item.id, options?.language || 'en', async () => item) as Promise<GalleryItem>))
 }
 
 export async function createGalleryItem(item: Omit<GalleryItem, 'id' | 'created_at' | 'updated_at'>): Promise<GalleryItem> {

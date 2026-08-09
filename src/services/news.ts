@@ -2,9 +2,10 @@ import { getSupabaseClient } from '../lib/supabase'
 import { isPreviewMode } from '../lib/preview-mode'
 import { requireRole } from '../lib/auth/secureService'
 import type { News } from '../types/database'
+import { getLocalizedContent } from './content-localization'
 const supabase = getSupabaseClient()
 
-export async function getNews(category?: string): Promise<News[]> {
+export async function getNews(category?: string, language = 'en'): Promise<News[]> {
   let query = supabase
     .from('news')
     .select('id, slug, title, excerpt, content, image_url, category, tags, published, published_at, updated_by, created_at, updated_at')
@@ -20,10 +21,10 @@ export async function getNews(category?: string): Promise<News[]> {
 
   const { data, error } = await query
   if (error) throw error
-  return data || []
+  return Promise.all((data || []).map((article) => getLocalizedContent('news', article.id, language, async () => article) as Promise<News>))
 }
 
-export async function getNewsById(id: string): Promise<News | null> {
+export async function getNewsById(id: string, language = 'en'): Promise<News | null> {
   const { data, error } = await supabase
     .from('news')
     .select('id, slug, title, excerpt, content, image_url, category, tags, published, published_at, updated_by, created_at, updated_at')
@@ -31,7 +32,7 @@ export async function getNewsById(id: string): Promise<News | null> {
     .maybeSingle()
 
   if (error) throw error
-  return data
+  return getLocalizedContent('news', id, language, async () => data)
 }
 
 export async function createNews(article: Omit<News, 'id' | 'created_at' | 'updated_at'>): Promise<News> {

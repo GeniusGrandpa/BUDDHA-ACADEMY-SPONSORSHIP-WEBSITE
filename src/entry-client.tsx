@@ -9,7 +9,7 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 import { logger } from './lib/logger'
 import { getErrorMessage } from './lib/errors'
 import { setPreviewMode } from './lib/preview-mode'
-import { getBrowserLanguage, localeFromPath } from './lib/locale'
+import { getBrowserLanguage, isKnownLocale, localeFromPath } from './lib/locale'
 import i18n from './i18n'
 import { ENABLE_VISUAL_BUILDER } from './config/feature-flags'
 
@@ -46,7 +46,8 @@ const router = createBrowserRouter(routeDefinitions)
 
 const rootElement = document.getElementById('root')!
 
-const initialLanguage = localeFromPath(window.location.pathname) || getBrowserLanguage()
+const pathSegment = window.location.pathname.split('/')[1]
+const initialLanguage = isKnownLocale(pathSegment) ? localeFromPath(window.location.pathname) : getBrowserLanguage()
 
 if (i18n.language !== initialLanguage) {
   void i18n.changeLanguage(initialLanguage)

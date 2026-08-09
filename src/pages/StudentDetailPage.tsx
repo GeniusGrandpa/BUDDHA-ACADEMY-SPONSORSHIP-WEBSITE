@@ -7,6 +7,7 @@ import { Card } from '../components/ui/Card'
 import { getStudentById } from '../services/students'
 import { getSiteImage } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
+import { useLanguage } from '../context/LanguageContext'
 import { Tr } from '../components/Translated'
 import { useLocalizePath } from '../hooks/useLocalizePath'
 import { sponsorshipVariant, localizedSponsorshipLabel } from '../utils/sponsorship'
@@ -54,6 +55,7 @@ function DetailSkeleton() {
 
 export function StudentDetailPage() {
   const { t } = useCmsStrings()
+  const { language } = useLanguage()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const localize = useLocalizePath()
@@ -62,13 +64,13 @@ export function StudentDetailPage() {
   const [photoFallback, setPhotoFallback] = useState('')
 
   useEffect(() => {
-    if (id) loadStudent(id)
-  }, [id])
+    if (id) loadStudent(id, language)
+  }, [id, language])
 
-  const loadStudent = async (studentId: string) => {
+  const loadStudent = async (studentId: string, lang: string) => {
     try {
       const [data, fb] = await Promise.all([
-        getStudentById(studentId),
+        getStudentById(studentId, lang),
         getSiteImage('student_fallback'),
       ])
       setStudent(data)

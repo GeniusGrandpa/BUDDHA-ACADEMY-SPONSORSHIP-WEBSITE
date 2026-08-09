@@ -5,6 +5,7 @@ export type LanguageCode = string
 interface LanguageContextType {
   language: LanguageCode
   setLanguage: (language: LanguageCode) => void
+  toggleLanguage: () => void
 }
 
 interface LanguageOption {

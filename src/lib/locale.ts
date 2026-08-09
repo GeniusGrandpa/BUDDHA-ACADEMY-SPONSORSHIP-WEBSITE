@@ -1,6 +1,7 @@
 import { isSupportedLocale, SUPPORTED_LOCALES, type SupportedLocale } from '../i18n'
 
 export const LANGUAGE_COOKIE = 'language'
+export const LANGUAGE_STORAGE_KEY = 'buddha-academy-language'
 
 const NON_LOCALIZED_PREFIXES = [
   '/admin',
@@ -22,7 +23,9 @@ export function parseLanguageCookie(cookieHeader: string | null | undefined): st
 }
 
 export function getBrowserLanguage(): string {
-  if (typeof document === 'undefined') return 'en'
+  if (typeof window === 'undefined') return 'en'
+  const storedLanguage = window.localStorage.getItem(LANGUAGE_STORAGE_KEY)
+  if (isSupportedLocale(storedLanguage ?? '')) return storedLanguage as SupportedLocale
   return parseLanguageCookie(document.cookie)
 }
 
