@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { CheckCircle, Eye, EyeOff } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { Card } from '../components/ui/Card'
@@ -12,6 +13,7 @@ import { validatePassword, validateConfirmPassword } from '../lib/auth/validatio
 import { getAuthErrorMessage } from '../lib/auth/authErrors'
 
 export function ResetPasswordPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const localize = useLocalizePath()
   const [password, setPassword] = useState('')
@@ -164,7 +166,7 @@ export function ResetPasswordPage() {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => { setPassword(e.target.value); setFieldErrors((prev) => ({ ...prev, password: '' })) }}
-                placeholder="At least 8 characters"
+                placeholder={t('auth_password_min_placeholder')}
                 required
                 autoComplete="new-password"
                 error={fieldErrors.password}
@@ -174,7 +176,7 @@ export function ResetPasswordPage() {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-[38px] text-gray-400 hover:text-gray-600 transition-colors"
                 tabIndex={-1}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                aria-label={showPassword ? t('auth_hide_password') : t('auth_show_password')}
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -186,7 +188,7 @@ export function ResetPasswordPage() {
                 type={showConfirmPassword ? 'text' : 'password'}
                 value={confirmPassword}
                 onChange={(e) => { setConfirmPassword(e.target.value); setFieldErrors((prev) => ({ ...prev, confirmPassword: '' })) }}
-                placeholder="Re-enter your new password"
+                placeholder={t('auth_confirm_password_placeholder')}
                 required
                 autoComplete="new-password"
                 error={fieldErrors.confirmPassword}
@@ -196,7 +198,7 @@ export function ResetPasswordPage() {
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 className="absolute right-3 top-[38px] text-gray-400 hover:text-gray-600 transition-colors"
                 tabIndex={-1}
-                aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                aria-label={showConfirmPassword ? t('auth_hide_password') : t('auth_show_password')}
               >
                 {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>

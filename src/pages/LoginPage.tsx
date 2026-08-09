@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { Mail, CheckCircle, ArrowRight, AlertCircle, Eye, EyeOff, Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext'
@@ -16,19 +17,19 @@ import type { Role } from '../types/permissions'
 import logo from '../assets/logo.jpg'
 
 const countryOptions = [
-  { value: 'United States', label: 'United States' },
-  { value: 'United Kingdom', label: 'United Kingdom' },
-  { value: 'Canada', label: 'Canada' },
-  { value: 'Australia', label: 'Australia' },
-  { value: 'Nepal', label: 'Nepal' },
-  { value: 'India', label: 'India' },
-  { value: 'Germany', label: 'Germany' },
-  { value: 'France', label: 'France' },
-  { value: 'Netherlands', label: 'Netherlands' },
-  { value: 'Switzerland', label: 'Switzerland' },
-  { value: 'Japan', label: 'Japan' },
-  { value: 'Singapore', label: 'Singapore' },
-  { value: 'Other', label: 'Other' },
+  { value: 'United States', labelKey: 'auth_country_united_states' },
+  { value: 'United Kingdom', labelKey: 'auth_country_united_kingdom' },
+  { value: 'Canada', labelKey: 'auth_country_canada' },
+  { value: 'Australia', labelKey: 'auth_country_australia' },
+  { value: 'Nepal', labelKey: 'auth_country_nepal' },
+  { value: 'India', labelKey: 'auth_country_india' },
+  { value: 'Germany', labelKey: 'auth_country_germany' },
+  { value: 'France', labelKey: 'auth_country_france' },
+  { value: 'Netherlands', labelKey: 'auth_country_netherlands' },
+  { value: 'Switzerland', labelKey: 'auth_country_switzerland' },
+  { value: 'Japan', labelKey: 'auth_country_japan' },
+  { value: 'Singapore', labelKey: 'auth_country_singapore' },
+  { value: 'Other', labelKey: 'auth_country_other' },
 ]
 
 const fadeUp = (delay = 0) => ({
@@ -45,6 +46,7 @@ const stats = [
 type AuthMode = 'signin' | 'signup'
 
 export function LoginPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const localize = useLocalizePath()
   const [searchParams] = useSearchParams()
@@ -255,7 +257,7 @@ export function LoginPage() {
           <motion.div {...fadeUp(0)} className="flex items-center gap-3">
             <img
               src={logo}
-              alt="Buddha Academy"
+              alt={t('auth_brand_alt')}
               className="h-12 w-auto rounded-xl bg-white/10 backdrop-blur-sm border border-white/10"
               loading="eager" decoding="async"
             />
@@ -457,7 +459,7 @@ export function LoginPage() {
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-[38px] text-gray-400 hover:text-[#f59e0b] transition-colors"
                       tabIndex={-1}
-                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      aria-label={showPassword ? t('auth_hide_password') : t('auth_show_password')}
                     >
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
@@ -547,7 +549,7 @@ export function LoginPage() {
                         type="email"
                         value={resendEmail}
                         onChange={(e) => setResendEmail(e.target.value)}
-                        placeholder="Enter your email"
+                        placeholder={t('auth_resend_email_placeholder')}
                         className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-amber-500/50"
                       />
                       <div className="flex gap-2">
@@ -614,7 +616,7 @@ export function LoginPage() {
                     >
                       <option value="" disabled><Tr text="Select your country" /></option>
                       {countryOptions.map((opt) => (
-                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        <option key={opt.value} value={opt.value}>{t(opt.labelKey)}</option>
                       ))}
                     </select>
                     {fieldErrors.country && (
@@ -641,7 +643,7 @@ export function LoginPage() {
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-[38px] text-gray-400 hover:text-[#f59e0b] transition-colors"
                       tabIndex={-1}
-                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      aria-label={showPassword ? t('auth_hide_password') : t('auth_show_password')}
                     >
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
@@ -666,7 +668,7 @@ export function LoginPage() {
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       className="absolute right-3 top-[38px] text-gray-400 hover:text-[#f59e0b] transition-colors"
                       tabIndex={-1}
-                      aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                      aria-label={showConfirmPassword ? t('auth_hide_password') : t('auth_show_password')}
                     >
                       {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>

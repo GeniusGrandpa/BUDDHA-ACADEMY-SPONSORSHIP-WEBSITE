@@ -121,7 +121,7 @@ export function AboutPage() {
                   <img
                     key={img.id}
                     src={img.image_url}
-                    alt={img.alt_text || 'About image'}
+                    alt={img.alt_text || t('about_image_alt')}
                     className={`rounded-lg shadow-lg object-cover w-full ${idx % 2 === 1 ? 'h-48 sm:h-64 mt-4 sm:mt-8' : 'h-48 sm:h-64'}`}
                     loading="lazy" decoding="async"
                   />
