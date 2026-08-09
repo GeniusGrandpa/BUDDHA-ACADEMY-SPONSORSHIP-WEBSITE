@@ -5,7 +5,6 @@ import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import { useLanguage } from '../context/LanguageContext'
-import { Tr } from '../components/Translated'
 import { LanguageSwitcher } from '../components/LanguageSwitcher'
 import { useLocalizePath } from '../hooks/useLocalizePath'
 import { getNavigationItems } from '../services/navigation'
@@ -42,12 +41,26 @@ export function Header() {
   const headerLogoSrc = branding.header_logo_url || logoUrl || branding.logo_url || fallbackLogo
 
   const navigation = navItems.map(item => ({
-    name: item.label,
+    name: navigationLabel(item.label, item.route || item.url),
     href: localize(item.route || item.url || '/'),
     target: item.target,
     isCta: item.is_cta,
     ctaStyle: item.cta_style,
   }))
+
+  function navigationLabel(label: string, route?: string | null) {
+    const key = {
+      '/': 'navigation_home',
+      '/about': 'navigation_about',
+      '/students': 'navigation_students',
+      '/sponsor': 'navigation_sponsor',
+      '/gallery': 'navigation_gallery',
+      '/donate': 'navigation_donate',
+      '/news': 'navigation_news',
+      '/contact': 'navigation_contact',
+    }[route || '']
+    return key ? t(key) : label
+  }
 
   const isActive = (path: string) => location.pathname === path
 
@@ -74,7 +87,7 @@ export function Header() {
                 return (
                   <Link key={item.href} to={item.href} target={item.target}
                     className="px-5 py-2.5 rounded-full font-medium text-sm transition-colors hover:opacity-90 bg-[var(--color-button-primary-bg)] text-[var(--color-button-primary-text)]">
-                    <Tr text={item.name} />
+                    {item.name}
                   </Link>
                 )
               }
@@ -85,7 +98,7 @@ export function Header() {
                   target={item.target}
                   className={`text-sm font-medium transition-colors hover:opacity-80 ${isActive(item.href) ? 'text-[var(--color-navbar-active)]' : 'text-[var(--color-navbar-text)]'}`}
                 >
-                  <Tr text={item.name} />
+                  {item.name}
                 </Link>
               )
             })}
@@ -141,7 +154,7 @@ export function Header() {
                     isActive(item.href) ? 'bg-[var(--color-navbar-hover)] text-[var(--color-navbar-active)]' : 'bg-transparent text-[var(--color-navbar-text)]'
                   }`}
                 >
-                  <Tr text={item.name} />
+                  {item.name}
                 </Link>
               ))}
               <Link to={localize('/donate')} onClick={() => setIsMenuOpen(false)}
