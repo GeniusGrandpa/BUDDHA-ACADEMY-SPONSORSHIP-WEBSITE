@@ -3,7 +3,7 @@ import { isSupportedLocale, SUPPORTED_LOCALES, type SupportedLocale } from '../i
 export const LANGUAGE_COOKIE = 'language'
 export const LANGUAGE_STORAGE_KEY = 'buddha-academy-language'
 
-const NON_LOCALIZED_PREFIXES = [
+export const NON_LOCALIZED_PREFIXES = [
   '/admin',
   '/dashboard',
   '/donations',
