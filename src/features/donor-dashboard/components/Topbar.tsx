@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Search, Menu, ChevronDown, User, Settings, LogOut, ExternalLink } from 'lucide-react'
 import { useAuth } from '../../../context/AuthContext'
 import { NotificationBell } from '../../../components/notifications/NotificationBell'
+import { LanguageSwitcher } from '../../../components/LanguageSwitcher'
 import { Tr } from '../../../components/Translated'
 import type { Section } from './Sidebar'
 import logo from '../../../assets/logo.jpg'
@@ -67,6 +68,7 @@ export function Topbar({ userName, onMenuClick, userId, onSectionChange }: Topba
           </div>
 
           {userId && <NotificationBell userId={userId} />}
+          <LanguageSwitcher />
 
           <div ref={avatarRef} className="relative">
             <button

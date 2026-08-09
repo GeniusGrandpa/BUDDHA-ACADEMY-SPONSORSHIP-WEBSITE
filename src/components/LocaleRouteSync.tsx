@@ -2,6 +2,7 @@ import { startTransition, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useLanguage } from '../context/LanguageContext'
 import i18n, { isSupportedLocale } from '../i18n'
+import { getBrowserLanguage } from '../lib/locale'
 
 /**
  * Keeps the translation runtime aligned with locale-prefixed public URLs.
@@ -14,14 +15,14 @@ export function LocaleRouteSync() {
   const routeLocale = pathname.split('/')[1]
 
   useEffect(() => {
-    if (!isSupportedLocale(routeLocale)) return
+    const targetLocale = isSupportedLocale(routeLocale) ? routeLocale : getBrowserLanguage()
 
     startTransition(() => {
-      if (language !== routeLocale) {
-        setLanguage(routeLocale)
+      if (language !== targetLocale) {
+        setLanguage(targetLocale)
       }
-      if (i18n.resolvedLanguage !== routeLocale) {
-        void i18n.changeLanguage(routeLocale)
+      if (i18n.resolvedLanguage !== targetLocale) {
+        void i18n.changeLanguage(targetLocale)
       }
     })
   }, [language, pathname, routeLocale, setLanguage])

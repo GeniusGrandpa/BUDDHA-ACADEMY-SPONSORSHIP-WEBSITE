@@ -9,7 +9,7 @@ type StudentInsert = Database['public']['Tables']['students']['Insert']
 export async function getStudents(status?: string, opts?: { limit?: number }, language = 'en'): Promise<Student[]> {
   let query = supabase
     .from('students')
-    .select('id, name, age, grade, class_section, photo_url, bio, family_background, hobbies, dream_career, education_goals, achievements, gallery_urls, date_of_birth, enrolled_date, sponsorship_status, sponsorship_amount, current_sponsorship, created_at, updated_at')
+    .select('id, name, name_ne, age, grade, grade_ne, class_section, class_section_ne, photo_url, bio, bio_ne, family_background, family_background_ne, hobbies, hobbies_ne, dream_career, dream_career_ne, education_goals, education_goals_ne, achievements, achievements_ne, gallery_urls, date_of_birth, enrolled_date, sponsorship_status, sponsorship_amount, current_sponsorship, created_at, updated_at')
     .order('created_at', { ascending: false })
 
   if (status && status !== 'all') {
@@ -28,7 +28,7 @@ export async function getStudents(status?: string, opts?: { limit?: number }, la
 export async function getStudentById(id: string, language = 'en'): Promise<Student | null> {
   const { data, error } = await supabase
     .from('students')
-    .select('id, name, age, grade, class_section, photo_url, bio, family_background, hobbies, dream_career, education_goals, achievements, gallery_urls, date_of_birth, enrolled_date, sponsorship_status, sponsorship_amount, current_sponsorship, created_at, updated_at')
+    .select('id, name, name_ne, age, grade, grade_ne, class_section, class_section_ne, photo_url, bio, bio_ne, family_background, family_background_ne, hobbies, hobbies_ne, dream_career, dream_career_ne, education_goals, education_goals_ne, achievements, achievements_ne, gallery_urls, date_of_birth, enrolled_date, sponsorship_status, sponsorship_amount, current_sponsorship, created_at, updated_at')
     .eq('id', id)
     .maybeSingle()
 
@@ -42,7 +42,7 @@ export async function createStudent(student: StudentInsert): Promise<Student> {
   const { data, error } = await supabase
     .from('students')
     .insert(student)
-    .select('id, name, age, grade, class_section, photo_url, bio, family_background, hobbies, dream_career, education_goals, achievements, gallery_urls, date_of_birth, enrolled_date, sponsorship_status, sponsorship_amount, current_sponsorship, created_at, updated_at')
+    .select('id, name, name_ne, age, grade, grade_ne, class_section, class_section_ne, photo_url, bio, bio_ne, family_background, family_background_ne, hobbies, hobbies_ne, dream_career, dream_career_ne, education_goals, education_goals_ne, achievements, achievements_ne, gallery_urls, date_of_birth, enrolled_date, sponsorship_status, sponsorship_amount, current_sponsorship, created_at, updated_at')
     .single()
 
   if (error) throw error
@@ -56,7 +56,7 @@ export async function updateStudent(id: string, updates: Partial<Student>): Prom
     .from('students')
     .update(updates)
     .eq('id', id)
-    .select('id, name, age, grade, class_section, photo_url, bio, family_background, hobbies, dream_career, education_goals, achievements, gallery_urls, date_of_birth, enrolled_date, sponsorship_status, sponsorship_amount, current_sponsorship, created_at, updated_at')
+    .select('id, name, name_ne, age, grade, grade_ne, class_section, class_section_ne, photo_url, bio, bio_ne, family_background, family_background_ne, hobbies, hobbies_ne, dream_career, dream_career_ne, education_goals, education_goals_ne, achievements, achievements_ne, gallery_urls, date_of_birth, enrolled_date, sponsorship_status, sponsorship_amount, current_sponsorship, created_at, updated_at')
     .single()
 
   if (error) throw error

@@ -14,9 +14,12 @@ import { getErrorMessage } from '../../lib/errors'
 
 type StudentForm = {
   name: string
+  name_ne: string
   age: number
   grade: string
+  grade_ne: string
   bio: string
+  bio_ne: string
   photo_url: string
   sponsorship_status: 'available' | 'partially_sponsored' | 'fully_sponsored'
   sponsorship_amount: number
@@ -24,9 +27,12 @@ type StudentForm = {
 
 const emptyForm: StudentForm = {
   name: '',
+  name_ne: '',
   age: 0,
   grade: '',
+  grade_ne: '',
   bio: '',
+  bio_ne: '',
   photo_url: '',
   sponsorship_status: 'available',
   sponsorship_amount: 0,
@@ -66,9 +72,12 @@ export function AdminStudentsPage() {
     setEditing(student)
     setForm({
       name: student.name,
+      name_ne: (student as Record<string, unknown>).name_ne as string || '',
       age: student.age,
       grade: student.grade,
+      grade_ne: (student as Record<string, unknown>).grade_ne as string || '',
       bio: student.bio || '',
+      bio_ne: (student as Record<string, unknown>).bio_ne as string || '',
       photo_url: student.photo_url || '',
       sponsorship_status: student.sponsorship_status,
       sponsorship_amount: student.sponsorship_amount,
@@ -81,10 +90,10 @@ export function AdminStudentsPage() {
     setSaving(true)
     try {
       if (editing) {
-        await updateStudent(editing.id, form)
+        await updateStudent(editing.id, form as Partial<Student>)
         toast.success('Student updated')
       } else {
-        await createStudent(form)
+        await createStudent(form as unknown as Parameters<typeof createStudent>[0])
         toast.success('Student added')
       }
       setShowModal(false)
@@ -201,9 +210,14 @@ export function AdminStudentsPage() {
             <div className="p-4 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-1">Name *</label>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">Name (English) *</label>
                   <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
                     className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" placeholder="Student name" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">Name (Nepali)</label>
+                  <input value={form.name_ne} onChange={e => setForm({ ...form, name_ne: e.target.value })}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" placeholder="नाम" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1">Age</label>
@@ -213,9 +227,14 @@ export function AdminStudentsPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-1">Grade *</label>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">Grade (English) *</label>
                   <input value={form.grade} onChange={e => setForm({ ...form, grade: e.target.value })}
                     className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" placeholder="Grade" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">Grade (Nepali)</label>
+                  <input value={form.grade_ne} onChange={e => setForm({ ...form, grade_ne: e.target.value })}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" placeholder="कक्षा" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1">Status</label>
@@ -238,10 +257,16 @@ export function AdminStudentsPage() {
                   className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" placeholder="https://..." />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Bio</label>
+                <label className="block text-sm font-medium text-gray-600 mb-1">Bio (English)</label>
                 <textarea value={form.bio} onChange={e => setForm({ ...form, bio: e.target.value })}
                   rows={3}
                   className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50 resize-none" placeholder="Student biography" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">Bio (Nepali)</label>
+                <textarea value={form.bio_ne} onChange={e => setForm({ ...form, bio_ne: e.target.value })}
+                  rows={3}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50 resize-none" placeholder="विद्यार्थीको जीवनी" />
               </div>
             </div>
             <div className="flex justify-end gap-3 p-4 border-t border-gray-100">

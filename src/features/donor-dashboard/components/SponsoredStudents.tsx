@@ -6,6 +6,7 @@ import { StudentDetailModal } from './StudentDetailModal'
 import { useSiteCurrency } from '../hooks/useSiteCurrency'
 import { formatCurrency } from '../../../utils/currency'
 import { Tr } from '../../../components/Translated'
+import { getLocalizedField } from '../../../utils/localization'
 
 interface SponsoredStudentsProps {
   contributions: ContributionWithStudent[]
@@ -40,15 +41,15 @@ export function SponsoredStudents({ contributions }: SponsoredStudentsProps) {
                 <div className="relative">
                   <img
                     src={student.photo_url || ''}
-                    alt={student.name}
+                    alt={getLocalizedField<string>(student, 'name') || student.name}
                     className="w-14 h-14 rounded-xl object-cover"
                     loading="lazy" decoding="async"
                   />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-gray-900 truncate">{student.name}</h3>
+                  <h3 className="font-semibold text-gray-900 truncate">{getLocalizedField<string>(student, 'name') || student.name}</h3>
                   <div className="flex items-center gap-2">
-                    <p className="text-sm text-gray-500"><Tr text="Grade" /> {student.grade}</p>
+                    <p className="text-sm text-gray-500"><Tr text="Grade" /> {getLocalizedField<string>(student, 'grade') || student.grade}</p>
                     <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${
                       c.type === 'sponsorship'
                         ? 'bg-orange-100 text-orange-700'
