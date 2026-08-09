@@ -78,16 +78,23 @@ export interface Database {
         Row: {
           id: string
           name: string
+          name_ne: string | null
           age: number
           grade: string
           class_section: string | null
           photo_url: string | null
           bio: string
+          bio_ne: string | null
           family_background: string | null
+          family_background_ne: string | null
           hobbies: string[] | null
+          hobbies_ne: string[] | null
           dream_career: string | null
+          dream_career_ne: string | null
           education_goals: string | null
+          education_goals_ne: string | null
           achievements: string[] | null
+          achievements_ne: string[] | null
           gallery_urls: string[] | null
           date_of_birth: string | null
           enrolled_date: string | null
@@ -100,16 +107,23 @@ export interface Database {
         Insert: {
           id?: string
           name: string
+          name_ne?: string | null
           age: number
           grade: string
           class_section?: string | null
           photo_url?: string | null
           bio: string
+          bio_ne?: string | null
           family_background?: string | null
+          family_background_ne?: string | null
           hobbies?: string[] | null
+          hobbies_ne?: string[] | null
           dream_career?: string | null
+          dream_career_ne?: string | null
           education_goals?: string | null
+          education_goals_ne?: string | null
           achievements?: string[] | null
+          achievements_ne?: string[] | null
           gallery_urls?: string[] | null
           date_of_birth?: string | null
           enrolled_date?: string | null
@@ -122,16 +136,23 @@ export interface Database {
         Update: {
           id?: string
           name?: string
+          name_ne?: string | null
           age?: number
           grade?: string
           class_section?: string | null
           photo_url?: string | null
           bio?: string
+          bio_ne?: string | null
           family_background?: string | null
+          family_background_ne?: string | null
           hobbies?: string[] | null
+          hobbies_ne?: string[] | null
           dream_career?: string | null
+          dream_career_ne?: string | null
           education_goals?: string | null
+          education_goals_ne?: string | null
           achievements?: string[] | null
+          achievements_ne?: string[] | null
           gallery_urls?: string[] | null
           date_of_birth?: string | null
           enrolled_date?: string | null
@@ -266,10 +287,13 @@ export interface Database {
         Row: {
           id: string
           title: string
+          title_ne: string | null
           slug: string | null
           category: 'updates' | 'events' | 'impact'
           content: string
+          content_ne: string | null
           excerpt: string
+          excerpt_ne: string | null
           image_url: string | null
           tags: string[] | null
           published: boolean
@@ -281,10 +305,13 @@ export interface Database {
         Insert: {
           id?: string
           title: string
+          title_ne?: string | null
           slug?: string | null
           category?: 'updates' | 'events' | 'impact'
           content: string
+          content_ne?: string | null
           excerpt: string
+          excerpt_ne?: string | null
           image_url?: string | null
           tags?: string[] | null
           published?: boolean
@@ -296,10 +323,13 @@ export interface Database {
         Update: {
           id?: string
           title?: string
+          title_ne?: string | null
           slug?: string | null
           category?: 'updates' | 'events' | 'impact'
           content?: string
+          content_ne?: string | null
           excerpt?: string
+          excerpt_ne?: string | null
           image_url?: string | null
           tags?: string[] | null
           published?: boolean
@@ -322,10 +352,13 @@ export interface Database {
           id: string
           type: 'photo' | 'video' | 'testimonial'
           title: string
+          title_ne: string | null
           caption: string | null
+          caption_ne: string | null
           url: string
           thumbnail_url: string | null
           author: string | null
+          author_ne: string | null
           category: string
           is_featured: boolean
           is_published: boolean
@@ -337,10 +370,13 @@ export interface Database {
           id?: string
           type: 'photo' | 'video' | 'testimonial'
           title: string
+          title_ne?: string | null
           caption?: string | null
+          caption_ne?: string | null
           url: string
           thumbnail_url?: string | null
           author?: string | null
+          author_ne?: string | null
           category?: string
           is_featured?: boolean
           is_published?: boolean
@@ -352,10 +388,13 @@ export interface Database {
           id?: string
           type?: 'photo' | 'video' | 'testimonial'
           title?: string
+          title_ne?: string | null
           caption?: string | null
+          caption_ne?: string | null
           url?: string
           thumbnail_url?: string | null
           author?: string | null
+          author_ne?: string | null
           category?: string
           is_featured?: boolean
           is_published?: boolean
@@ -1798,7 +1837,9 @@ export interface Database {
         Row: {
           id: string
           question: string
+          question_ne: string | null
           answer: string
+          answer_ne: string | null
           category: string
           sort_order: number
           is_published: boolean
@@ -1808,7 +1849,9 @@ export interface Database {
         Insert: {
           id?: string
           question: string
+          question_ne?: string | null
           answer: string
+          answer_ne?: string | null
           category?: string
           sort_order?: number
           is_published?: boolean
@@ -1818,7 +1861,9 @@ export interface Database {
         Update: {
           id?: string
           question?: string
+          question_ne?: string | null
           answer?: string
+          answer_ne?: string | null
           category?: string
           sort_order?: number
           is_published?: boolean
@@ -1831,11 +1876,16 @@ export interface Database {
         Row: {
           id: string
           title: string
+          title_ne: string | null
           student_name: string
+          student_name_ne: string | null
           content: string
+          content_ne: string | null
           image_url: string | null
           quote: string | null
+          quote_ne: string | null
           achievements: string[] | null
+          achievements_ne: string[] | null
           is_published: boolean
           featured: boolean
           published_at: string | null
@@ -1845,11 +1895,16 @@ export interface Database {
         Insert: {
           id?: string
           title: string
+          title_ne?: string | null
           student_name: string
+          student_name_ne?: string | null
           content: string
+          content_ne?: string | null
           image_url?: string | null
           quote?: string | null
+          quote_ne?: string | null
           achievements?: string[] | null
+          achievements_ne?: string[] | null
           is_published?: boolean
           featured?: boolean
           published_at?: string | null
@@ -1859,11 +1914,16 @@ export interface Database {
         Update: {
           id?: string
           title?: string
+          title_ne?: string | null
           student_name?: string
+          student_name_ne?: string | null
           content?: string
+          content_ne?: string | null
           image_url?: string | null
           quote?: string | null
+          quote_ne?: string | null
           achievements?: string[] | null
+          achievements_ne?: string[] | null
           is_published?: boolean
           featured?: boolean
           published_at?: string | null

@@ -4,7 +4,7 @@ import { ChevronDown } from 'lucide-react'
 import { getLanguageFlagUrl, languages, useLanguage } from '../context/LanguageContext'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import type { LanguageCode } from '../context/LanguageContext'
-import { localizePath, stripLocale } from '../lib/locale'
+import { localizePath, stripLocale, NON_LOCALIZED_PREFIXES } from '../lib/locale'
 
 const sortedLanguages = [...languages].sort((a, b) =>
   a.label.localeCompare(b.label)
@@ -47,8 +47,17 @@ export function LanguageSwitcher({ mobile = false }: { mobile?: boolean }) {
 
   const select = (code: LanguageCode) => {
     setLanguage(code)
-    navigate(localizePath(stripLocale(location.pathname), code), { replace: true })
-    setOpen(false)
+    
+    const isNonLocalizedRoute = NON_LOCALIZED_PREFIXES.some(prefix => 
+      location.pathname === prefix || location.pathname.startsWith(`${prefix}/`)
+    )
+    
+    if (isNonLocalizedRoute) {
+      setOpen(false)
+    } else {
+      navigate(localizePath(stripLocale(location.pathname), code), { replace: true })
+      setOpen(false)
+    }
   }
 
   return (

@@ -5,7 +5,6 @@ import { Search, Menu, ChevronDown, User, Settings, LogOut, ExternalLink } from 
 import { useAuth } from '../../../context/AuthContext'
 import { NotificationBell } from '../../../components/notifications/NotificationBell'
 import { LanguageSwitcher } from '../../../components/LanguageSwitcher'
-import { Tr } from '../../../components/Translated'
 import type { Section } from './Sidebar'
 import logo from '../../../assets/logo.jpg'
 
@@ -49,9 +48,9 @@ export function Topbar({ userName, onMenuClick, userId, onSectionChange }: Topba
           </Link>
           <div className="hidden sm:block">
 <h1 className="text-sm font-medium text-gray-900 truncate">
-                <Tr text="Welcome back, " />{userName}
+                {t('dashboard_welcome_back', { defaultValue: 'Welcome back,' })} {userName}
               </h1>
-              <p className="text-xs text-gray-500"><Tr text="Here's your impact overview" /></p>
+              <p className="text-xs text-gray-500">{t('dashboard_impact_overview', { defaultValue: "Here's your impact overview" })}</p>
           </div>
         </div>
 
@@ -92,14 +91,14 @@ export function Topbar({ userName, onMenuClick, userId, onSectionChange }: Topba
                   className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors"
                 >
                   <User className="w-4 h-4 text-gray-400" />
-                  <Tr text="Profile" />
+                  {t('dashboard_profile_section', { defaultValue: 'Profile' })}
                 </button>
                 <button
                   onClick={() => { onSectionChange('settings'); setAvatarOpen(false) }}
                   className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors"
                 >
                   <Settings className="w-4 h-4 text-gray-400" />
-                  <Tr text="Settings" />
+                  {t('dashboard_settings_section', { defaultValue: 'Settings' })}
                 </button>
                 <div className="border-t border-gray-50 mt-1 pt-1">
                   <a
@@ -107,14 +106,14 @@ export function Topbar({ userName, onMenuClick, userId, onSectionChange }: Topba
                     className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-gray-600 hover:bg-orange-50 transition-colors"
                   >
                     <ExternalLink className="w-4 h-4" />
-                    <Tr text="Back to Website" />
+                    {t('dashboard_back_to_website', { defaultValue: 'Back to Website' })}
                   </a>
                   <button
                     onClick={signOut}
                     className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                   >
                     <LogOut className="w-4 h-4" />
-                    <Tr text="Sign Out" />
+                    {t('dashboard_sign_out', { defaultValue: 'Sign Out' })}
                   </button>
                 </div>
               </div>
@@ -128,8 +127,8 @@ export function Topbar({ userName, onMenuClick, userId, onSectionChange }: Topba
           <img src={logo} alt="Buddha Academy" className="h-7 w-7 rounded object-cover" loading="eager" decoding="async" />
         </Link>
         <div>
-          <h1 className="text-sm font-medium text-gray-900"><Tr text="Welcome back, " />{userName}</h1>
-          <p className="text-xs text-gray-500"><Tr text="Here's your impact overview" /></p>
+          <h1 className="text-sm font-medium text-gray-900">{t('dashboard_welcome_back', { defaultValue: 'Welcome back,' })} {userName}</h1>
+          <p className="text-xs text-gray-500">{t('dashboard_impact_overview', { defaultValue: "Here's your impact overview" })}</p>
         </div>
       </div>
     </header>

@@ -8,7 +8,7 @@ const supabase = getSupabaseClient()
 export async function getNews(category?: string, language = 'en'): Promise<News[]> {
   let query = supabase
     .from('news')
-    .select('id, slug, title, excerpt, content, image_url, category, tags, published, published_at, updated_by, created_at, updated_at')
+    .select('id, slug, title, title_ne, excerpt, excerpt_ne, content, content_ne, image_url, category, tags, published, published_at, updated_by, created_at, updated_at')
     .order('published_at', { ascending: false })
 
   if (!isPreviewMode()) {
@@ -27,7 +27,7 @@ export async function getNews(category?: string, language = 'en'): Promise<News[
 export async function getNewsById(id: string, language = 'en'): Promise<News | null> {
   const { data, error } = await supabase
     .from('news')
-    .select('id, slug, title, excerpt, content, image_url, category, tags, published, published_at, updated_by, created_at, updated_at')
+    .select('id, slug, title, title_ne, excerpt, excerpt_ne, content, content_ne, image_url, category, tags, published, published_at, updated_by, created_at, updated_at')
     .eq('id', id)
     .maybeSingle()
 
@@ -41,7 +41,7 @@ export async function createNews(article: Omit<News, 'id' | 'created_at' | 'upda
   const { data, error } = await supabase
     .from('news')
     .insert(article)
-    .select('id, slug, title, excerpt, content, image_url, category, tags, published, published_at, updated_by, created_at, updated_at')
+    .select('id, slug, title, title_ne, excerpt, excerpt_ne, content, content_ne, image_url, category, tags, published, published_at, updated_by, created_at, updated_at')
     .single()
 
   if (error) throw error
@@ -55,7 +55,7 @@ export async function updateNews(id: string, updates: Partial<News>): Promise<Ne
     .from('news')
     .update(updates)
     .eq('id', id)
-    .select('id, slug, title, excerpt, content, image_url, category, tags, published, published_at, updated_by, created_at, updated_at')
+    .select('id, slug, title, title_ne, excerpt, excerpt_ne, content, content_ne, image_url, category, tags, published, published_at, updated_by, created_at, updated_at')
     .single()
 
   if (error) throw error

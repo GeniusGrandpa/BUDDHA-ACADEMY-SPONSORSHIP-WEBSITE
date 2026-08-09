@@ -6,7 +6,6 @@ import { sidebarItem } from '../animations'
 import logo from '../../../assets/logo.jpg'
 import { useAuth } from '../../../context/AuthContext'
 import { ROLE_NAMES } from '../../../types/permissions'
-import { Tr } from '../../../components/Translated'
 import { useTranslation } from 'react-i18next'
 
 export type Section = 'overview' | 'students' | 'donations' | 'updates' | 'profile' | 'settings'
@@ -23,12 +22,12 @@ interface SidebarProps {
 }
 
 const navItems: { label: string; section: Section }[] = [
-  { label: 'Overview', section: 'overview' },
-  { label: 'Students', section: 'students' },
-  { label: 'Donations', section: 'donations' },
-  { label: 'Updates', section: 'updates' },
-  { label: 'Profile', section: 'profile' },
-  { label: 'Settings', section: 'settings' },
+  { label: 'dashboard_overview', section: 'overview' },
+  { label: 'dashboard_students', section: 'students' },
+  { label: 'dashboard_donations', section: 'donations' },
+  { label: 'dashboard_updates', section: 'updates' },
+  { label: 'dashboard_profile', section: 'profile' },
+  { label: 'dashboard_settings', section: 'settings' },
 ]
 
 const SIDEBAR_EXPANDED = 280
@@ -79,13 +78,13 @@ function SidebarContent({ collapsed, onToggleCollapse, onSignOut, userName, acti
                   : 'text-gray-500 hover:bg-orange-50 hover:text-orange-600'
                 }
               `}
-              title={collapsed ? t(item.label, { defaultValue: item.label }) : undefined}
+              title={collapsed ? t(item.label, { defaultValue: item.label.replace('dashboard_', '').replace('_', ' ') }) : undefined}
             >
-              {!collapsed && <span className="truncate"><Tr text={item.label} /></span>}
+              {!collapsed && <span className="truncate">{t(item.label, { defaultValue: item.label.replace('dashboard_', '').replace('_', ' ') })}</span>}
 
               {collapsed && (
                 <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-white text-gray-700 text-xs rounded-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all pointer-events-none z-50 shadow-lg border border-gray-200">
-                  <Tr text={item.label} />
+                  {t(item.label, { defaultValue: item.label.replace('dashboard_', '').replace('_', ' ') })}
                 </div>
               )}
             </motion.button>
@@ -112,13 +111,13 @@ function SidebarContent({ collapsed, onToggleCollapse, onSignOut, userName, acti
             ${collapsed ? 'justify-center px-0 py-3' : 'px-3 py-2.5'}
             text-gray-500 hover:bg-orange-50 hover:text-orange-600
           `}
-          title={collapsed ? t('Back to Website', { defaultValue: 'Back to Website' }) : undefined}
+          title={collapsed ? t('dashboard_back_to_website', { defaultValue: 'Back to Website' }) : undefined}
         >
           <ExternalLink className="w-5 h-5 shrink-0" />
-          {!collapsed && <span><Tr text="Back to Website" /></span>}
+          {!collapsed && <span>{t('dashboard_back_to_website', { defaultValue: 'Back to Website' })}</span>}
           {collapsed && (
             <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-white text-gray-700 text-xs rounded-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all pointer-events-none z-50 shadow-lg border border-gray-200">
-              <Tr text="Back to Website" />
+              {t('dashboard_back_to_website', { defaultValue: 'Back to Website' })}
             </div>
           )}
         </a>
@@ -129,13 +128,13 @@ function SidebarContent({ collapsed, onToggleCollapse, onSignOut, userName, acti
             ${collapsed ? 'justify-center px-0 py-3' : 'px-3 py-2.5'}
             text-gray-500 hover:bg-red-50 hover:text-red-500
           `}
-          title={collapsed ? t('Sign Out', { defaultValue: 'Sign Out' }) : undefined}
+          title={collapsed ? t('dashboard_sign_out', { defaultValue: 'Sign Out' }) : undefined}
         >
           <LogOut className="w-5 h-5 shrink-0" />
-          {!collapsed && <span><Tr text="Sign Out" /></span>}
+          {!collapsed && <span>{t('dashboard_sign_out', { defaultValue: 'Sign Out' })}</span>}
           {collapsed && (
             <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-white text-gray-700 text-xs rounded-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all pointer-events-none z-50 shadow-lg border border-gray-200">
-              <Tr text="Sign Out" />
+              {t('dashboard_sign_out', { defaultValue: 'Sign Out' })}
             </div>
           )}
         </button>

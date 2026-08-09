@@ -7,7 +7,7 @@ const supabase = getSupabaseClient()
 export async function getGalleryItems(options?: { type?: string; publishedOnly?: boolean; featuredOnly?: boolean; language?: string }): Promise<GalleryItem[]> {
   let query = supabase
     .from('gallery_items')
-    .select('id, type, title, caption, url, thumbnail_url, author, category, is_featured, is_published, uploaded_by, created_at, updated_at')
+    .select('id, type, title, title_ne, caption, caption_ne, url, thumbnail_url, author, author_ne, category, is_featured, is_published, uploaded_by, created_at, updated_at')
     .order('created_at', { ascending: false })
 
   if (options?.type && options.type !== 'all') {
@@ -32,7 +32,7 @@ export async function createGalleryItem(item: Omit<GalleryItem, 'id' | 'created_
   const { data, error } = await supabase
     .from('gallery_items')
     .insert(item)
-    .select('id, type, title, caption, url, thumbnail_url, author, category, is_featured, is_published, uploaded_by, created_at, updated_at')
+    .select('id, type, title, title_ne, caption, caption_ne, url, thumbnail_url, author, author_ne, category, is_featured, is_published, uploaded_by, created_at, updated_at')
     .single()
 
   if (error) throw error
@@ -44,7 +44,7 @@ export async function updateGalleryItem(id: string, updates: Partial<GalleryItem
     .from('gallery_items')
     .update(updates)
     .eq('id', id)
-    .select('id, type, title, caption, url, thumbnail_url, author, category, is_featured, is_published, uploaded_by, created_at, updated_at')
+    .select('id, type, title, title_ne, caption, caption_ne, url, thumbnail_url, author, author_ne, category, is_featured, is_published, uploaded_by, created_at, updated_at')
     .single()
 
   if (error) throw error
