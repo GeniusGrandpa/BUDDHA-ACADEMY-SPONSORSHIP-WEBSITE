@@ -2,6 +2,8 @@ import { motion } from 'framer-motion'
 import { Bell, CheckCheck } from 'lucide-react'
 import { fadeInUp, stagger } from '../animations'
 import { formatRelativeTime, cn } from '../utils/formatters'
+import { useTranslation } from 'react-i18next'
+import { Tr } from '../../../components/Translated'
 import type { Notification } from '../../../types/features'
 
 interface NotificationCenterProps {
@@ -19,6 +21,8 @@ export function NotificationCenter({
   onMarkAllAsRead,
   loading,
 }: NotificationCenterProps) {
+  const { t } = useTranslation()
+
   if (loading) {
     return (
       <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-8">
@@ -43,9 +47,9 @@ export function NotificationCenter({
         <div className="w-14 h-14 rounded-full bg-orange-50 flex items-center justify-center mx-auto mb-3">
           <Bell className="w-7 h-7 text-orange-400" />
         </div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-1">No Notifications Yet</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-1"><Tr text="No Notifications Yet" /></h3>
         <p className="text-sm text-gray-500 max-w-sm mx-auto">
-          You&apos;ll see notifications here when there are updates about your donations and sponsored students.
+          <Tr text="You'll see notifications here when there are updates about your donations and sponsored students." />
         </p>
       </motion.div>
     )
@@ -55,10 +59,10 @@ export function NotificationCenter({
     <motion.div variants={fadeInUp} initial="initial" animate="animate" className="mb-8">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <h2 className="text-xl font-bold text-gray-900">Notifications</h2>
+          <h2 className="text-xl font-bold text-gray-900"><Tr text="Notifications" /></h2>
           {unreadCount > 0 && (
             <span className="px-2 py-0.5 text-xs font-medium bg-orange-100 text-orange-700 rounded-full">
-              {unreadCount} new
+              {unreadCount} <Tr text="new" />
             </span>
           )}
         </div>
@@ -68,7 +72,7 @@ export function NotificationCenter({
             className="inline-flex items-center gap-1 text-xs font-medium text-orange-600 hover:text-orange-700 transition-colors"
           >
             <CheckCheck className="w-3.5 h-3.5" />
-            Mark all as read
+            <Tr text="Mark all as read" />
           </button>
         )}
       </div>
@@ -98,7 +102,7 @@ export function NotificationCenter({
                       <button
                         onClick={() => onMarkAsRead(notif.id)}
                         className="p-0.5 rounded text-gray-300 hover:text-orange-500 transition-colors"
-                        title="Mark as read"
+                        title={t('Mark as read', { defaultValue: 'Mark as read' })}
                       >
                         <CheckCheck className="w-3.5 h-3.5" />
                       </button>

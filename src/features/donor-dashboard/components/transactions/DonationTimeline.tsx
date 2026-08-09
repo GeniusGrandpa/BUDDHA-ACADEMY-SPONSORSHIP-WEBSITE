@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import type { TransactionWithDetails } from '../../../../types/features'
 
 interface DonationTimelineProps {
@@ -14,45 +15,46 @@ interface TimelineStep {
 }
 
 export function DonationTimeline({ transaction }: DonationTimelineProps) {
+  const { t } = useTranslation()
   const getSteps = (): TimelineStep[] => {
     const statusOrder = ['pending', 'processing', 'verified', 'completed']
     const currentIndex = statusOrder.indexOf(transaction.status)
 
     return [
       {
-        label: 'Donation Created',
+        label: t('Donation Created', { defaultValue: 'Donation Created' }),
         date: transaction.created_at,
         completed: true,
         active: false,
-        description: 'Your donation has been recorded',
+        description: t('Your donation has been recorded', { defaultValue: 'Your donation has been recorded' }),
       },
       {
-        label: 'Payment Submitted',
+        label: t('Payment Submitted', { defaultValue: 'Payment Submitted' }),
         date: transaction.payment_session?.created_at || null,
         completed: currentIndex >= 1,
         active: currentIndex === 1,
-        description: 'Payment confirmation submitted for review',
+        description: t('Payment confirmation submitted for review', { defaultValue: 'Payment confirmation submitted for review' }),
       },
       {
-        label: 'Payment Verified',
+        label: t('Payment Verified', { defaultValue: 'Payment Verified' }),
         date: transaction.verified_at || null,
         completed: currentIndex >= 2,
         active: currentIndex === 2,
-        description: 'Finance team has verified your payment',
+        description: t('Finance team has verified your payment', { defaultValue: 'Finance team has verified your payment' }),
       },
       {
-        label: 'Donation Allocated',
+        label: t('Donation Allocated', { defaultValue: 'Donation Allocated' }),
         date: transaction.verified_at || null,
         completed: currentIndex >= 3 && (transaction.allocations?.length ?? 0) > 0,
         active: currentIndex === 3 && (transaction.allocations?.length ?? 0) === 0,
-        description: 'Funds allocated to support categories',
+        description: t('Funds allocated to support categories', { defaultValue: 'Funds allocated to support categories' }),
       },
       {
-        label: 'Receipt Generated',
+        label: t('Receipt Generated', { defaultValue: 'Receipt Generated' }),
         date: transaction.receipt?.generated_at || null,
         completed: !!transaction.receipt,
         active: false,
-        description: 'Official receipt available for download',
+        description: t('Official receipt available for download', { defaultValue: 'Official receipt available for download' }),
       },
     ]
   }

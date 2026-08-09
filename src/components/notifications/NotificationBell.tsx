@@ -3,6 +3,8 @@ import { Bell, CheckCheck, Loader2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
+import { Tr } from '../Translated'
+import { useCmsStrings } from '../../context/CmsStringsContext'
 import { getNotifications, getUnreadCount, markAsRead, markAllAsRead } from '../../services/notifications'
 import type { Notification } from '../../types/database'
 
@@ -11,6 +13,7 @@ interface NotificationBellProps {
 }
 
 export function NotificationBell({ userId }: NotificationBellProps) {
+  const { t } = useCmsStrings()
   const [isOpen, setIsOpen] = useState(false)
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
@@ -60,7 +63,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
       )
       setUnreadCount(prev => Math.max(0, prev - 1))
     } catch {
-      toast.error('Failed to mark notification as read')
+      toast.error(t('Failed to mark notification as read'))
     }
   }
 
@@ -70,7 +73,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
       setNotifications(prev => prev.map(n => ({ ...n, read: true, read_at: new Date().toISOString() })))
       setUnreadCount(0)
     } catch {
-      toast.error('Failed to mark all as read')
+      toast.error(t('Failed to mark all as read'))
     }
   }
 
@@ -82,10 +85,10 @@ export function NotificationBell({ userId }: NotificationBellProps) {
     const diffHours = Math.floor(diffMs / 3600000)
     const diffDays = Math.floor(diffMs / 86400000)
 
-    if (diffMins < 1) return 'Just now'
-    if (diffMins < 60) return `${diffMins}m ago`
-    if (diffHours < 24) return `${diffHours}h ago`
-    if (diffDays < 7) return `${diffDays}d ago`
+    if (diffMins < 1) return t('Just now', { defaultValue: 'Just now' })
+    if (diffMins < 60) return t('notif_mins_ago', { count: diffMins })
+    if (diffHours < 24) return t('notif_hours_ago', { count: diffHours })
+    if (diffDays < 7) return t('notif_days_ago', { count: diffDays })
     return date.toLocaleDateString()
   }
 
@@ -123,14 +126,14 @@ export function NotificationBell({ userId }: NotificationBellProps) {
             className="absolute right-0 mt-2 w-80 sm:w-96 bg-warm-50 rounded-xl shadow-lg border border-amber-200 overflow-hidden z-50"
           >
             <div className="flex items-center justify-between p-4 border-b border-gray-100">
-              <h3 className="font-semibold text-gray-900">Notifications</h3>
+              <h3 className="font-semibold text-gray-900"><Tr text="Notifications" /></h3>
               {unreadCount > 0 && (
                 <button
                   onClick={handleMarkAllRead}
                   className="text-sm text-emerald-600 hover:text-emerald-700 flex items-center gap-1 transition-colors"
                 >
                   <CheckCheck className="w-4 h-4" />
-                  Mark all read
+                  <Tr text="Mark all read" />
                 </button>
               )}
             </div>
@@ -143,9 +146,9 @@ export function NotificationBell({ userId }: NotificationBellProps) {
               ) : notifications.length === 0 ? (
                 <div className="flex flex-col items-center py-8 text-center px-4">
                   <Bell className="w-8 h-8 text-gray-300 mb-2" />
-                  <p className="text-sm text-gray-500">No notifications yet</p>
+                  <p className="text-sm text-gray-500"><Tr text="No notifications yet" /></p>
                   <p className="text-xs text-gray-500 mt-1">
-                    Updates about your donations and sponsorships will appear here
+                    <Tr text="Updates about your donations and sponsorships will appear here" />
                   </p>
                 </div>
               ) : (
@@ -193,7 +196,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
                   }}
                   className="w-full text-center text-sm text-emerald-600 hover:text-emerald-700 font-medium transition-colors"
                 >
-                  View all notifications
+                  <Tr text="View all notifications" />
                 </button>
               </div>
             )}

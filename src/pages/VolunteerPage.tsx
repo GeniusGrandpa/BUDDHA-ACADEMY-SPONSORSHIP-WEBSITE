@@ -57,7 +57,7 @@ export function VolunteerPage() {
       })
       setSubmitted(true)
     } catch (err) {
-      setSubmitError(getErrorMessage(err, 'Submission failed'))
+      setSubmitError(getErrorMessage(err, t('Submission failed', { defaultValue: 'Submission failed' })))
     } finally {
       setSubmitting(false)
     }

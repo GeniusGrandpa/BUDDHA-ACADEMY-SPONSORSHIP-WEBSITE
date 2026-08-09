@@ -124,7 +124,7 @@ export function TermsPage() {
             </h1>
             {lastUpdated && (
               <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">
-                Last updated: {new Date(lastUpdated).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                <Tr text="Last updated: " /> {new Date(lastUpdated).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
               </p>
             )}
           </div>

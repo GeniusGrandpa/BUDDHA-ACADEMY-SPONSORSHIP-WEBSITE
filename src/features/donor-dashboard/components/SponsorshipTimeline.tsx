@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 
 import { fadeInUp, stagger } from '../animations'
 import { formatRelativeTime } from '../utils/formatters'
+import { Tr } from '../../../components/Translated'
 import type { SponsorshipTimelineEvent } from '../../../types/features'
 
 interface SponsorshipTimelineProps {
@@ -22,9 +23,9 @@ export function SponsorshipTimeline({ events }: SponsorshipTimelineProps) {
   if (events.length === 0) {
     return (
       <motion.div variants={fadeInUp} initial="initial" animate="animate" className="bg-white rounded-2xl border border-gray-100 p-6 mb-8 text-center">
-        <h3 className="text-lg font-semibold text-gray-900 mb-1">No Timeline Events Yet</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-1"><Tr text="No Timeline Events Yet" /></h3>
         <p className="text-sm text-gray-500 max-w-sm mx-auto">
-          Your sponsorship journey timeline will appear here as milestones are reached.
+          <Tr text="Your sponsorship journey timeline will appear here as milestones are reached." />
         </p>
       </motion.div>
     )
@@ -37,8 +38,8 @@ export function SponsorshipTimeline({ events }: SponsorshipTimelineProps) {
   return (
     <motion.div variants={fadeInUp} initial="initial" animate="animate" className="mb-8">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-gray-900">Sponsorship Timeline</h2>
-        <span className="text-sm text-gray-500">{sortedEvents.length} event{sortedEvents.length !== 1 ? 's' : ''}</span>
+        <h2 className="text-xl font-bold text-gray-900"><Tr text="Sponsorship Timeline" /></h2>
+        <span className="text-sm text-gray-500">{sortedEvents.length} {sortedEvents.length !== 1 ? <Tr text="events" /> : <Tr text="event" />}</span>
       </div>
 
       <motion.div

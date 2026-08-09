@@ -1,14 +1,15 @@
 import { motion } from 'framer-motion'
 import { useCmsStrings } from '../../context/CmsStringsContext'
-import { formatNPR } from '../../utils/currency'
+import { formatCurrency, type Currency } from '../../utils/currency'
 
 const impactAmounts = [200, 500, 1000, 5000]
 
 interface DonationImpactCardProps {
   amount: number
+  currency?: Currency
 }
 
-export function DonationImpactCard({ amount }: DonationImpactCardProps) {
+export function DonationImpactCard({ amount, currency = 'NPR' }: DonationImpactCardProps) {
   const { t } = useCmsStrings()
 
   const narrative = (perAmount: number, count: number) => {
@@ -43,7 +44,7 @@ export function DonationImpactCard({ amount }: DonationImpactCardProps) {
     >
       <h3 className="font-semibold text-gray-900 mb-1">{t('impact_your_impact')}</h3>
       <p className="text-sm text-gray-500 mb-4">
-        <span className="font-medium text-amber-700">{formatNPR(amount)}</span> {t('impact_helps_provide')}
+        <span className="font-medium text-amber-700">{formatCurrency(amount, currency)}</span> {t('impact_helps_provide')}
       </p>
 
       <div className="space-y-2.5">

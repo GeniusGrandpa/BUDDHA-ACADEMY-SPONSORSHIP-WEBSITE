@@ -733,7 +733,7 @@ See the [LICENSE](LICENSE) file for the full license terms.
 
 ## Author
 
-**Anil Tamang**  
+**Anil Tamang**
 Kathmandu, Nepal
 
 ## Additional Documentation

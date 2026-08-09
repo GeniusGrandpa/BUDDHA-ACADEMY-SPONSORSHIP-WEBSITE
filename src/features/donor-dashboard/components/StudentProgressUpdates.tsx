@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FileText, ChevronDown, User } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { fadeInUp, stagger } from '../animations'
+import { Tr } from '../../../components/Translated'
 import type { TeacherReport } from '../../../types/database'
 import type { SponsorshipWithStudent } from '../../../types/features'
 
@@ -17,6 +19,7 @@ interface ReportWithStudent extends TeacherReport {
 }
 
 export function StudentProgressUpdates({ reports, students }: StudentProgressUpdatesProps) {
+  const { t } = useTranslation()
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [showAll, setShowAll] = useState(false)
 
@@ -26,7 +29,7 @@ export function StudentProgressUpdates({ reports, students }: StudentProgressUpd
     const student = studentMap.get(r.student_id)
     return {
       ...r,
-      studentName: student?.name || 'Unknown Student',
+      studentName: student?.name || t('Unknown Student', { defaultValue: 'Unknown Student' }),
       studentPhoto: student?.photo_url || undefined,
       studentGrade: student?.grade || undefined,
     }
@@ -40,9 +43,9 @@ export function StudentProgressUpdates({ reports, students }: StudentProgressUpd
         <div className="w-14 h-14 rounded-full bg-orange-50 flex items-center justify-center mx-auto mb-3">
           <FileText className="w-7 h-7 text-orange-400" />
         </div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-1">No Progress Reports Yet</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-1"><Tr text="No Progress Reports Yet" /></h3>
         <p className="text-sm text-gray-500 max-w-sm mx-auto">
-          Teacher reports will appear here once they&apos;re published. Check back soon for updates on your sponsored students.
+          <Tr text="Teacher reports will appear here once they're published. Check back soon for updates on your sponsored students." />
         </p>
       </motion.div>
     )
@@ -51,8 +54,8 @@ export function StudentProgressUpdates({ reports, students }: StudentProgressUpd
   return (
     <motion.div variants={fadeInUp} initial="initial" animate="animate" className="mb-8">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-gray-900">Student Progress Updates</h2>
-        <span className="text-sm text-gray-500">{reports.length} report{reports.length !== 1 ? 's' : ''}</span>
+        <h2 className="text-xl font-bold text-gray-900"><Tr text="Student Progress Updates" /></h2>
+        <span className="text-sm text-gray-500">{reports.length} {reports.length !== 1 ? <Tr text="reports" /> : <Tr text="report" />}</span>
       </div>
 
       <motion.div variants={stagger} initial="initial" animate="animate" className="space-y-3">
@@ -112,9 +115,9 @@ export function StudentProgressUpdates({ reports, students }: StudentProgressUpd
                         </span>
                       )}
                       {report.grade_achieved && (
-                        <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
-                          Grade: {report.grade_achieved}
-                        </span>
+<span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
+                            <Tr text="Grade: " />{report.grade_achieved}
+                          </span>
                       )}
                     </div>
                   </div>
@@ -128,7 +131,7 @@ export function StudentProgressUpdates({ reports, students }: StudentProgressUpd
                       </span>
                     ))}
                     {report.achievements.length > 2 && (
-                          <span className="text-xs text-gray-500">+{report.achievements.length - 2} more</span>
+                          <span className="text-xs text-gray-500">+{report.achievements.length - 2} <Tr text="more" /></span>
                     )}
                   </div>
                 )}
@@ -149,13 +152,13 @@ export function StudentProgressUpdates({ reports, students }: StudentProgressUpd
                       )}
                       {report.teacher_notes && (
                         <div className="bg-orange-50/50 rounded-lg p-3 border border-orange-200/50">
-                          <p className="text-xs font-medium text-orange-700 mb-1">Teacher&apos;s Note</p>
+                          <p className="text-xs font-medium text-orange-700 mb-1"><Tr text="Teacher's Note" /></p>
                           <p className="text-sm text-orange-800/80 italic">&ldquo;{report.teacher_notes}&rdquo;</p>
                         </div>
                       )}
                       {report.areas_for_improvement && report.areas_for_improvement.length > 0 && (
                         <div>
-                          <p className="text-xs font-medium text-gray-500 mb-1">Areas for Improvement</p>
+                          <p className="text-xs font-medium text-gray-500 mb-1"><Tr text="Areas for Improvement" /></p>
                           <div className="flex flex-wrap gap-1.5">
                             {report.areas_for_improvement.map((area, i) => (
                               <span key={i} className="text-xs text-gray-500 bg-gray-50 px-2 py-0.5 rounded-md">
@@ -166,7 +169,7 @@ export function StudentProgressUpdates({ reports, students }: StudentProgressUpd
                         </div>
                       )}
                       <div className="text-xs text-gray-500 flex items-center gap-1">
-                        Reported: {new Date(report.report_date).toLocaleDateString('en-US', {
+                        <Tr text="Reported: " />{new Date(report.report_date).toLocaleDateString('en-US', {
                           year: 'numeric', month: 'long', day: 'numeric',
                         })}
                       </div>
@@ -184,7 +187,7 @@ export function StudentProgressUpdates({ reports, students }: StudentProgressUpd
           onClick={() => setShowAll(!showAll)}
           className="w-full mt-3 py-2.5 text-sm font-medium text-orange-600 bg-orange-50/50 rounded-xl hover:bg-orange-100/50 transition-colors border border-orange-100/50"
         >
-          {showAll ? 'Show Less' : `View All ${reportsWithStudents.length} Reports`}
+          {showAll ? <Tr text="Show Less" /> : <Tr text="View All" />} {reportsWithStudents.length} <Tr text="Reports" />
         </button>
       )}
     </motion.div>

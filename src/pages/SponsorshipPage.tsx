@@ -9,19 +9,10 @@ import { Tr } from '../components/Translated'
 import { useLocalizePath } from '../hooks/useLocalizePath'
 import type { SponsorshipContent } from '../types/cms-content'
 
-const TREE_STEPS = [
-  { title: 'Browse Profiles', desc: 'Review children waiting for sponsors' },
-  { title: 'Choose a Child', desc: 'Select a student to sponsor' },
-  { title: 'Make Your Pledge', desc: 'Complete donation form securely' },
-  { title: 'We Connect', desc: 'Link you with your sponsored child' },
-  { title: 'Receive Updates', desc: 'Get progress reports & photos' },
-  { title: 'Build Connection', desc: 'Exchange letters & messages' },
-  { title: 'Track Impact', desc: 'See your contribution at work' },
-  { title: 'Join Community', desc: 'Connect with other sponsors' },
-]
-
 function SponsorshipTree({ steps }: { steps: { title: string; desc: string }[] }) {
-  const items = steps.length > 0 ? steps : TREE_STEPS
+  const items = steps
+
+  if (items.length === 0) return null
 
   return (
     <div className="relative flex flex-col items-center">
@@ -93,41 +84,41 @@ export function SponsorshipPage() {
     return () => { cancelled = true }
   }, [language])
 
-  const DEFAULT_STEPS = [
-    { num: '1', title: 'Browse Profiles', desc: 'Review children waiting for sponsors and learn about their stories.' },
-    { num: '2', title: 'Choose a Child', desc: 'Select a student whose story resonates with you.' },
-    { num: '3', title: 'Make Your Pledge', desc: 'Complete the donation form securely online.' },
-    { num: '4', title: 'We Connect', desc: 'We link you with your sponsored child and share their profile.' },
-    { num: '5', title: 'Receive Updates', desc: 'Get progress reports, photos, and letters from your child.' },
-    { num: '6', title: 'Track Impact', desc: 'See how your contribution is making a difference.' },
+  const defaultSteps = [
+    { num: '1', title: t('sponsorship_step_1_title'), desc: t('sponsorship_step_1_desc') },
+    { num: '2', title: t('sponsorship_step_2_title'), desc: t('sponsorship_step_2_desc') },
+    { num: '3', title: t('sponsorship_step_3_title'), desc: t('sponsorship_step_3_desc') },
+    { num: '4', title: t('sponsorship_step_4_title'), desc: t('sponsorship_step_4_desc') },
+    { num: '5', title: t('sponsorship_step_5_title'), desc: t('sponsorship_step_5_desc') },
+    { num: '6', title: t('sponsorship_step_6_title'), desc: t('sponsorship_step_6_desc') },
   ]
 
-  const DEFAULT_BENEFITS = [
-    { text: 'Direct, life-changing impact on a child\'s education' },
-    { text: 'Regular updates with photos, letters, and progress reports' },
-    { text: 'Opportunity to build a meaningful connection across cultures' },
-    { text: 'Transparent reporting on how your funds are used' },
-    { text: 'Tax-deductible donations with annual receipts' },
+  const defaultBenefits = [
+    { text: t('sponsorship_benefit_1') },
+    { text: t('sponsorship_benefit_2') },
+    { text: t('sponsorship_benefit_3') },
+    { text: t('sponsorship_benefit_4') },
+    { text: t('sponsorship_benefit_5') },
   ]
 
-  const DEFAULT_HERO_TITLE = 'Sponsor a Child\'s Education'
-  const DEFAULT_HERO_SUBTITLE = 'For just NPR 5,000 per month, you can transform a child\'s life through the power of education at Buddha Academy in Kathmandu.'
-  const DEFAULT_SECTION_TITLE = 'How Sponsorship Works'
-  const DEFAULT_SECTION_DESC = 'Our sponsorship program connects you directly with a child, creating a personal bond while funding their education.'
-  const DEFAULT_CTA_TITLE = 'Ready to Change a Life?'
-  const DEFAULT_CTA_DESC = 'Choose a child to sponsor and begin your journey of impact today.'
-  const DEFAULT_CTA_BUTTON = 'Sponsor a Child'
+  const defaultHeroTitle = t('sponsorship_hero_title')
+  const defaultHeroSubtitle = t('sponsorship_hero_subtitle')
+  const defaultSectionTitle = t('sponsorship_section_title')
+  const defaultSectionDesc = t('sponsorship_section_desc')
+  const defaultCtaTitle = t('sponsorship_cta_title')
+  const defaultCtaDesc = t('sponsorship_cta_desc')
+  const defaultCtaButton = t('sponsorship_cta_button')
 
-  const steps = content?.steps && content.steps.length > 0 ? content.steps : DEFAULT_STEPS
-  const benefits = content?.benefits && content.benefits.length > 0 ? content.benefits : DEFAULT_BENEFITS
+  const steps = content?.steps && content.steps.length > 0 ? content.steps : defaultSteps
+  const benefits = content?.benefits && content.benefits.length > 0 ? content.benefits : defaultBenefits
 
   return (
     <div>
       <section className="relative py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-amber-50 to-orange-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[var(--color-text-primary)] mb-4 sm:mb-6"><Tr text={content?.hero_title || DEFAULT_HERO_TITLE} /></h1>
-            <p className="text-base sm:text-lg md:text-xl text-[var(--color-text-secondary)]"><Tr text={content?.hero_subtitle || DEFAULT_HERO_SUBTITLE} /></p>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[var(--color-text-primary)] mb-4 sm:mb-6"><Tr text={content?.hero_title || defaultHeroTitle} /></h1>
+            <p className="text-base sm:text-lg md:text-xl text-[var(--color-text-secondary)]"><Tr text={content?.hero_subtitle || defaultHeroSubtitle} /></p>
           </div>
         </div>
       </section>
@@ -135,8 +126,8 @@ export function SponsorshipPage() {
       <section className="py-12 sm:py-16 lg:py-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10 sm:mb-14">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text-primary)] mb-4"><Tr text={content?.section_title || DEFAULT_SECTION_TITLE} /></h2>
-            <p className="text-sm sm:text-base text-[var(--color-text-secondary)] max-w-2xl mx-auto"><Tr text={content?.section_description || DEFAULT_SECTION_DESC} /></p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text-primary)] mb-4"><Tr text={content?.section_title || defaultSectionTitle} /></h2>
+            <p className="text-sm sm:text-base text-[var(--color-text-secondary)] max-w-2xl mx-auto"><Tr text={content?.section_description || defaultSectionDesc} /></p>
           </div>
             <SponsorshipTree steps={steps} />
           </div>
@@ -169,7 +160,7 @@ export function SponsorshipPage() {
                 <div>
                   <img
                     src={heroImage}
-                    alt="Buddha Academy students"
+                    alt={t('sponsorship_hero_alt')}
                     className="rounded-2xl shadow-xl w-full object-cover h-64 sm:h-80 lg:h-[500px]"
                     loading="lazy" decoding="async"
                   />
@@ -182,10 +173,10 @@ export function SponsorshipPage() {
 
       <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-[var(--color-primary)] via-[var(--color-accent)] to-[var(--color-secondary)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 sm:mb-6"><Tr text={content?.cta_title || DEFAULT_CTA_TITLE} /></h2>
-          <p className="text-white/80 max-w-2xl mx-auto mb-6 sm:mb-8 text-sm sm:text-base"><Tr text={content?.cta_description || DEFAULT_CTA_DESC} /></p>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 sm:mb-6"><Tr text={content?.cta_title || defaultCtaTitle} /></h2>
+          <p className="text-white/80 max-w-2xl mx-auto mb-6 sm:mb-8 text-sm sm:text-base"><Tr text={content?.cta_description || defaultCtaDesc} /></p>
           <Link to={localize(content?.cta_button_link || '/students')}>
-            <Button size="lg" className="w-full sm:w-auto"><Tr text={content?.cta_button_text || DEFAULT_CTA_BUTTON} /> <ArrowRight className="w-4 h-4 ml-2" /></Button>
+            <Button size="lg" className="w-full sm:w-auto"><Tr text={content?.cta_button_text || defaultCtaButton} /> <ArrowRight className="w-4 h-4 ml-2" /></Button>
           </Link>
         </div>
       </section>

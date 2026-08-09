@@ -5,6 +5,7 @@ import { AlertCircle } from 'lucide-react'
 import { useCmsStrings } from '../../../context/CmsStringsContext'
 import { createPaymentIntent } from '../../../services/stripePayment'
 import { getErrorMessage } from '../../../lib/errors'
+import type { Currency } from '../../../utils/currency'
 import { StripeCheckoutForm } from './StripeCheckoutForm'
 
 let stripePromise: Promise<Stripe | null> | null = null
@@ -20,6 +21,7 @@ function getStripe(): Promise<Stripe | null> {
 interface StripePaymentWrapperProps {
   amount: number
   frequency: 'one-time' | 'monthly' | 'annual'
+  currency?: Currency
   sessionId?: string | null
   studentId?: string | null
   message?: string | null
@@ -27,7 +29,7 @@ interface StripePaymentWrapperProps {
   onCancel: () => void
 }
 
-export function StripePaymentWrapper({ amount, frequency, sessionId, onSuccess, onCancel }: StripePaymentWrapperProps) {
+export function StripePaymentWrapper({ amount, frequency, currency = 'NPR', sessionId, onSuccess, onCancel }: StripePaymentWrapperProps) {
   const { t } = useCmsStrings()
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -40,7 +42,7 @@ export function StripePaymentWrapper({ amount, frequency, sessionId, onSuccess, 
       try {
         const secret = await createPaymentIntent(
           amount * 100,
-          'npr',
+          currency.toLowerCase(),
           { frequency, ...(sessionId ? { session_id: sessionId } : {}) },
         )
         if (!cancelled) setClientSecret(secret)
@@ -55,7 +57,7 @@ export function StripePaymentWrapper({ amount, frequency, sessionId, onSuccess, 
 
     init()
     return () => { cancelled = true }
-  }, [amount, frequency, sessionId])
+  }, [amount, frequency, sessionId, currency])
 
   if (loading) {
     return (
@@ -86,6 +88,7 @@ export function StripePaymentWrapper({ amount, frequency, sessionId, onSuccess, 
     <Elements stripe={getStripe()} options={{ clientSecret }}>
       <StripeCheckoutForm
         amount={amount}
+        currency={currency}
         onSuccess={onSuccess}
         onCancel={onCancel}
       />

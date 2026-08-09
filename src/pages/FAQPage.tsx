@@ -4,11 +4,13 @@ import { Card } from '../components/ui/Card'
 import { Tr } from '../components/Translated'
 import { getFaqs } from '../services/content'
 import { getPageHeader } from '../services/cms-content'
+import { useCmsStrings } from '../context/CmsStringsContext'
 import type { Faq } from '../types/database'
 import type { PageHeader } from '../types/cms-content'
 import { CardSkeleton } from '../components/ui/LoadingSkeleton'
 
 export function FAQPage() {
+  const { t } = useCmsStrings()
   const [faqs, setFaqs] = useState<Faq[]>([])
   const [loading, setLoading] = useState(true)
   const [pageHeader, setPageHeader] = useState<PageHeader | null>(null)
@@ -38,7 +40,7 @@ export function FAQPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">
-              <Tr text={pageHeader?.title || 'Frequently Asked Questions'} />
+              <Tr text={pageHeader?.title || t('faq_title_fallback')} />
             </h1>
             {pageHeader?.subtitle && (
               <p className="text-base sm:text-lg md:text-xl text-gray-600">
@@ -62,22 +64,22 @@ export function FAQPage() {
                   <p className="text-gray-600 leading-relaxed"><Tr text={faq.answer} /></p>
                 </AccordionItem>
               ))
-            ) : (
+) : (
               <>
-                <AccordionItem title={<Tr text="What is the minimum sponsorship amount?" />} defaultOpen={true}>
-                  <p className="text-gray-600 leading-relaxed"><Tr text="The minimum sponsorship amount is $30 per month, which covers tuition, books, uniforms, daily meals, and basic healthcare for a child." /></p>
+                <AccordionItem title={t('faq_default_1_q')} defaultOpen={true}>
+                  <p className="text-gray-600 leading-relaxed">{t('faq_default_1_a')}</p>
                 </AccordionItem>
-                <AccordionItem title={<Tr text="How are my donations used?" />}>
-                  <p className="text-gray-600 leading-relaxed"><Tr text="100% of your donation goes directly to programs. 70% covers children's education and welfare, 20% supports teachers and staff, and 10% goes to facilities and operations." /></p>
+                <AccordionItem title={t('faq_default_2_q')}>
+                  <p className="text-gray-600 leading-relaxed">{t('faq_default_2_a')}</p>
                 </AccordionItem>
-                <AccordionItem title={<Tr text="Can I choose which child to sponsor?" />}>
-                  <p className="text-gray-600 leading-relaxed"><Tr text="Yes! You can browse profiles of children waiting for sponsors and choose a child whose story resonates with you. We'll connect you with your sponsored child." /></p>
+                <AccordionItem title={t('faq_default_3_q')}>
+                  <p className="text-gray-600 leading-relaxed">{t('faq_default_3_a')}</p>
                 </AccordionItem>
-                <AccordionItem title={<Tr text="How will I receive updates about my sponsored child?" />}>
-                  <p className="text-gray-600 leading-relaxed"><Tr text="You'll receive regular updates including progress reports, photos, and letters from your sponsored child. You can also exchange messages and build a meaningful connection." /></p>
+                <AccordionItem title={t('faq_default_4_q')}>
+                  <p className="text-gray-600 leading-relaxed">{t('faq_default_4_a')}</p>
                 </AccordionItem>
-                <AccordionItem title={<Tr text="Is my donation tax-deductible?" />}>
-                  <p className="text-gray-600 leading-relaxed"><Tr text="Yes. All donations are tax-deductible. You will receive an official receipt via email immediately after donation, and annual consolidated receipts are provided for tax purposes." /></p>
+                <AccordionItem title={t('faq_default_5_q')}>
+                  <p className="text-gray-600 leading-relaxed">{t('faq_default_5_a')}</p>
                 </AccordionItem>
               </>
             )}

@@ -259,7 +259,7 @@ export function GalleryPage() {
                     autoPlay
                     className="w-full h-full rounded-lg"
                   >
-                    Your browser does not support the video tag.
+                    <Tr text="Your browser does not support the video tag." />
                   </video>
                 )
               }
@@ -272,7 +272,7 @@ export function GalleryPage() {
                     autoPlay
                     className="absolute inset-0 w-full h-full rounded-lg"
                   >
-                    Your browser does not support the video tag.
+                    <Tr text="Your browser does not support the video tag." />
                   </video>
                 )
               }

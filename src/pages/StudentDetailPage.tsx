@@ -9,7 +9,7 @@ import { getSiteImage } from '../services/cms-content'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import { Tr } from '../components/Translated'
 import { useLocalizePath } from '../hooks/useLocalizePath'
-import { sponsorshipVariant, sponsorshipLabel } from '../utils/sponsorship'
+import { sponsorshipVariant, localizedSponsorshipLabel } from '../utils/sponsorship'
 import type { Student } from '../types/database'
 import { formatNPR } from '../utils/currency'
 
@@ -121,7 +121,7 @@ export function StudentDetailPage() {
               <div className="p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{student.name}</h1>
-                  <Badge variant={sponsorshipVariant(student.sponsorship_status)}>{sponsorshipLabel(student.sponsorship_status)}</Badge>
+                  <Badge variant={sponsorshipVariant(student.sponsorship_status)}>{localizedSponsorshipLabel(student.sponsorship_status, t)}</Badge>
                 </div>
 
                 <div className="space-y-2 text-sm sm:text-base text-gray-600">
@@ -132,7 +132,7 @@ export function StudentDetailPage() {
                 <div className="mt-6 pt-6 border-t border-gray-200">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm sm:text-base text-gray-600">{t('student_sponsorship_goal')}</span>
-                    <span className="font-semibold text-gray-900 text-sm sm:text-base">{formatNPR(student.sponsorship_amount)}/month</span>
+                    <span className="font-semibold text-gray-900 text-sm sm:text-base">{formatNPR(student.sponsorship_amount)}{t('month_suffix')}</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
                     <div

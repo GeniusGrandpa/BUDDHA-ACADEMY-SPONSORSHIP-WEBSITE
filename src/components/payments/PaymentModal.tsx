@@ -3,10 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X, AlertCircle } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useCmsStrings } from '../../context/CmsStringsContext'
-import { formatNPR } from '../../utils/currency'
 import { usePayment } from '../../hooks/usePayment'
 import { getActivePaymentSettings } from '../../services/paymentSettings'
 import { getErrorMessage } from '../../lib/errors'
+import { formatCurrency, type Currency } from '../../utils/currency'
 import { Button } from '../ui/Button'
 import { PaymentMethodCard } from './PaymentMethodCard'
 import { DonationImpactCard } from './DonationImpactCard'
@@ -21,11 +21,12 @@ interface PaymentModalProps {
   onClose: () => void
   amount: number
   frequency: 'one-time' | 'monthly' | 'annual'
+  currency?: Currency
   studentId?: string | null
   message?: string | null
 }
 
-export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, message }: PaymentModalProps) {
+export function PaymentModal({ isOpen, onClose, amount, frequency, currency = 'NPR', studentId, message }: PaymentModalProps) {
   const { user } = useAuth()
   const { t } = useCmsStrings()
   const { checkout, loading, error, startCheckout, confirmPayment, abandonCheckout } = usePayment()
@@ -149,6 +150,7 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
               {checkout.step === 'success' ? (
                 <PaymentSuccess
                   amount={amount}
+                  currency={currency}
                   transactionId={checkout.transactionId || ''}
                 />
               ) : checkout.step === 'payment' || checkout.step === 'processing' || checkout.step === 'failed' ? (
@@ -179,12 +181,13 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
                       <div className="bg-gray-50 rounded-xl p-4">
                         <div className="flex justify-between items-center">
                           <span className="text-sm text-gray-600">{t('payment_donation_amount')}</span>
-                          <span className="text-xl font-bold text-gray-900">{formatNPR(amount)}</span>
+                          <span className="text-xl font-bold text-gray-900">{formatCurrency(amount, currency)}</span>
                         </div>
                       </div>
                       <StripePaymentWrapper
                         amount={amount}
                         frequency={frequency}
+                        currency={currency}
                         sessionId={checkout.sessionId}
                         studentId={studentId}
                         message={message}
@@ -196,12 +199,14 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
                     <EsewaPayment
                       sessionId={checkout.sessionId}
                       amount={amount}
+                      currency={currency}
                       onCancel={() => setSelectedGateway(null)}
                     />
                   ) : selectedGateway === 'khalti' && checkout.sessionId ? (
                     <KhaltiPayment
                       sessionId={checkout.sessionId}
                       amount={amount}
+                      currency={currency}
                       onCancel={() => setSelectedGateway(null)}
                     />
                   ) : (
@@ -215,7 +220,7 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
                 </div>
               ) : (
                 <div className="space-y-6">
-                  <DonationImpactCard amount={amount} />
+                  <DonationImpactCard amount={amount} currency={currency} />
 
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-3">{t('payment_select_method')}</h3>
@@ -268,7 +273,7 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, studentId, me
                         {t('payment_processing')}
                       </span>
                     ) : (
-                      <>{t('donate_confirm_button', { amount: formatNPR(amount) })}</>
+                      <>{t('donate_confirm_button', { amount: formatCurrency(amount, currency) })}</>
                     )}
                   </Button>
 

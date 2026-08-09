@@ -5,6 +5,7 @@ import { CheckCircle, XCircle, Loader2, ArrowRight } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
+import { Tr } from '../components/Translated'
 import { getAuthErrorMessage } from '../lib/auth/authErrors'
 import { useLocalizePath } from '../hooks/useLocalizePath'
 import { getRedirectPath } from '../features/auth/utils/redirectByRole'
@@ -159,8 +160,8 @@ export function AuthCallbackPage() {
                     <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
                   </div>
                   <div>
-                    <h1 className="text-xl font-bold text-gray-800">Verifying</h1>
-                    <p className="text-gray-500 text-sm mt-2">{message}</p>
+                    <h1 className="text-xl font-bold text-gray-800"><Tr text="Verifying" /></h1>
+                    <p className="text-gray-500 text-sm mt-2"><Tr text={message} /></p>
                   </div>
                   <div className="flex justify-center gap-1.5">
                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: '0s' }} />
@@ -182,13 +183,13 @@ export function AuthCallbackPage() {
                     <CheckCircle className="w-8 h-8 text-emerald-600" />
                   </motion.div>
                   <div>
-                    <h1 className="text-xl font-bold text-gray-800">Success</h1>
-                    <p className="text-gray-500 text-sm mt-2">{message}</p>
+                    <h1 className="text-xl font-bold text-gray-800"><Tr text="Success" /></h1>
+                    <p className="text-gray-500 text-sm mt-2"><Tr text={message} /></p>
                   </div>
                   {!message.includes('Redirecting') && (
                     <Link to={localize('/login')}>
                       <Button className="w-full" size="lg">
-                        Continue to sign in
+                        <Tr text="Continue to sign in" />
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </Link>
@@ -207,14 +208,14 @@ export function AuthCallbackPage() {
                     <XCircle className="w-8 h-8 text-red-500" />
                   </motion.div>
                   <div>
-                    <h1 className="text-xl font-bold text-gray-800">Verification failed</h1>
-                    <p className="text-gray-500 text-sm mt-2">{message}</p>
-                    <p className="text-gray-400 text-xs mt-2">You can request a new verification email from the sign in page.</p>
+                    <h1 className="text-xl font-bold text-gray-800"><Tr text="Verification failed" /></h1>
+                    <p className="text-gray-500 text-sm mt-2"><Tr text={message} /></p>
+                    <p className="text-gray-400 text-xs mt-2"><Tr text="You can request a new verification email from the sign in page." /></p>
                   </div>
                   <div className="space-y-3">
                     <Link to={localize('/login')}>
                       <Button className="w-full" size="lg" variant="primary">
-                        Sign in
+                        <Tr text="Sign in" />
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </Link>

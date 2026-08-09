@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
+import { useSiteCurrency } from '../../hooks/useSiteCurrency'
 import { StatusBadge } from './StatusBadge'
 import { AllocationBadge } from './AllocationBadge'
 import { DonationTimeline } from './DonationTimeline'
@@ -8,7 +9,8 @@ import { generateReceiptPDF } from '../../utils/pdfGenerator'
 import type { TransactionWithDetails } from '../../../../types/features'
 import type { DonationAllocation } from '../../../../types/database'
 import type { PaymentReceipt } from '../../../../types/payments'
-import { formatNPR } from '../../../../utils/currency'
+import { formatCurrency } from '../../../../utils/currency'
+import { Tr } from '../../../../components/Translated'
 
 interface TransactionCardProps {
   transaction: TransactionWithDetails
@@ -19,9 +21,10 @@ interface TransactionCardProps {
 
 export function TransactionCard({ transaction, donorName, donorEmail, index = 0 }: TransactionCardProps) {
   const [expanded, setExpanded] = useState(false)
+  const currency = useSiteCurrency()
 
   const formatAmount = (amount: number) =>
-    formatNPR(amount)
+    formatCurrency(amount, currency)
 
   const formatDate = (date: string) =>
     new Date(date).toLocaleDateString('en-US', {
@@ -47,6 +50,7 @@ export function TransactionCard({ transaction, donorName, donorEmail, index = 0 
         name: donorName,
         email: donorEmail,
       },
+      currency,
     )
   }
 
@@ -92,14 +96,14 @@ export function TransactionCard({ transaction, donorName, donorEmail, index = 0 
                 onClick={handleDownloadReceipt}
                 className="px-3 py-1.5 text-sm font-medium text-orange-700 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors"
               >
-                Receipt
+                <Tr text="Receipt" />
               </button>
             )}
             <button
               onClick={() => setExpanded(!expanded)}
               className="px-3 py-1.5 text-sm font-medium text-gray-500 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
             >
-              {expanded ? 'Less' : 'Details'}
+              {expanded ? <Tr text="Less" /> : <Tr text="Details" />}
             </button>
           </div>
         </div>
@@ -119,7 +123,7 @@ export function TransactionCard({ transaction, donorName, donorEmail, index = 0 
                 {hasAllocations && (
                   <div>
                     <h4 className="text-sm font-semibold text-gray-900 mb-3">
-                      Allocation Breakdown
+                      <Tr text="Allocation Breakdown" />
                     </h4>
                     <div className="space-y-2">
                       {(transaction.allocations as DonationAllocation[]).map((alloc) => (
@@ -133,7 +137,7 @@ export function TransactionCard({ transaction, donorName, donorEmail, index = 0 
                       ))}
                       <div className="mt-3 pt-3 border-t border-gray-100">
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-500">Total Allocated</span>
+                          <span className="text-gray-500"><Tr text="Total Allocated" /></span>
                           <span className="font-semibold text-gray-900">
                             {formatAmount(transaction.amount)}
                           </span>
@@ -146,7 +150,7 @@ export function TransactionCard({ transaction, donorName, donorEmail, index = 0 
                 {hasTimeline && (
                   <div>
                     <h4 className="text-sm font-semibold text-gray-900 mb-3">
-                      Donation Timeline
+                      <Tr text="Donation Timeline" />
                     </h4>
                     <DonationTimeline transaction={transaction} />
                   </div>
@@ -156,10 +160,10 @@ export function TransactionCard({ transaction, donorName, donorEmail, index = 0 
                   <div className="sm:col-span-2">
                     <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm">
                       <div className="text-green-700 font-medium mb-1">
-                        Donation Verified
+                        <Tr text="Donation Verified" />
                       </div>
                       <p className="text-green-600">
-                        Verified on{' '}
+                        <Tr text="Verified on" />{' '}
                         {new Date(transaction.verified_at).toLocaleDateString('en-US', {
                           year: 'numeric',
                           month: 'long',
@@ -170,7 +174,7 @@ export function TransactionCard({ transaction, donorName, donorEmail, index = 0 
                         {transaction.payment_session?.verification_notes && (
                           <>
                             <br />
-                            Note: {transaction.payment_session.verification_notes}
+                            <Tr text="Note: " />{transaction.payment_session.verification_notes}
                           </>
                         )}
                       </p>

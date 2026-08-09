@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Search, Menu, ChevronDown, User, Settings, LogOut, ExternalLink } from 'lucide-react'
 import { useAuth } from '../../../context/AuthContext'
 import { NotificationBell } from '../../../components/notifications/NotificationBell'
+import { Tr } from '../../../components/Translated'
 import type { Section } from './Sidebar'
 import logo from '../../../assets/logo.jpg'
 
@@ -14,6 +16,7 @@ interface TopbarProps {
 }
 
 export function Topbar({ userName, onMenuClick, userId, onSectionChange }: TopbarProps) {
+  const { t } = useTranslation()
   const { signOut } = useAuth()
   const [searchFocused, setSearchFocused] = useState(false)
   const [avatarOpen, setAvatarOpen] = useState(false)
@@ -44,21 +47,21 @@ export function Topbar({ userName, onMenuClick, userId, onSectionChange }: Topba
             <img src={logo} alt="Buddha Academy" className="h-9 w-9 rounded-lg object-cover" loading="eager" decoding="async" />
           </Link>
           <div className="hidden sm:block">
-            <h1 className="text-sm font-medium text-gray-900 truncate">
-              Welcome back, {userName}
-            </h1>
-            <p className="text-xs text-gray-500">Here&apos;s your impact overview</p>
+<h1 className="text-sm font-medium text-gray-900 truncate">
+                <Tr text="Welcome back, " />{userName}
+              </h1>
+              <p className="text-xs text-gray-500"><Tr text="Here's your impact overview" /></p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
           <div className={`relative hidden md:block transition-all duration-200 ${searchFocused ? 'md:w-72' : 'md:w-56'}`}>
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
-            <input
-              type="text"
-              placeholder="Search..."
-              onFocus={() => setSearchFocused(true)}
-              onBlur={() => setSearchFocused(false)}
+<input
+                type="text"
+                placeholder={t('Search...', { defaultValue: 'Search...' })}
+                onFocus={() => setSearchFocused(true)}
+                onBlur={() => setSearchFocused(false)}
               className="w-full h-9 pl-9 pr-3 text-sm bg-orange-50/50 border border-orange-100 rounded-xl text-gray-600 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-200/50 focus:border-orange-300 transition-all"
             />
           </div>
@@ -87,14 +90,14 @@ export function Topbar({ userName, onMenuClick, userId, onSectionChange }: Topba
                   className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors"
                 >
                   <User className="w-4 h-4 text-gray-400" />
-                  Profile
+                  <Tr text="Profile" />
                 </button>
                 <button
                   onClick={() => { onSectionChange('settings'); setAvatarOpen(false) }}
                   className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors"
                 >
                   <Settings className="w-4 h-4 text-gray-400" />
-                  Settings
+                  <Tr text="Settings" />
                 </button>
                 <div className="border-t border-gray-50 mt-1 pt-1">
                   <a
@@ -102,14 +105,14 @@ export function Topbar({ userName, onMenuClick, userId, onSectionChange }: Topba
                     className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-gray-600 hover:bg-orange-50 transition-colors"
                   >
                     <ExternalLink className="w-4 h-4" />
-                    Back to Website
+                    <Tr text="Back to Website" />
                   </a>
                   <button
                     onClick={signOut}
                     className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                   >
                     <LogOut className="w-4 h-4" />
-                    Sign Out
+                    <Tr text="Sign Out" />
                   </button>
                 </div>
               </div>
@@ -123,8 +126,8 @@ export function Topbar({ userName, onMenuClick, userId, onSectionChange }: Topba
           <img src={logo} alt="Buddha Academy" className="h-7 w-7 rounded object-cover" loading="eager" decoding="async" />
         </Link>
         <div>
-          <h1 className="text-sm font-medium text-gray-900">Welcome back, {userName}</h1>
-          <p className="text-xs text-gray-500">Here&apos;s your impact overview</p>
+          <h1 className="text-sm font-medium text-gray-900"><Tr text="Welcome back, " />{userName}</h1>
+          <p className="text-xs text-gray-500"><Tr text="Here's your impact overview" /></p>
         </div>
       </div>
     </header>

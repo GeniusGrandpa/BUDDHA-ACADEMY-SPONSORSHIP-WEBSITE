@@ -294,7 +294,7 @@ export function LoginPage() {
                 {stats.map((stat) => (
                   <div key={stat.label}>
                     <p className="text-2xl sm:text-3xl font-bold text-white">{stat.value}</p>
-                    <p className="text-xs text-white/80 mt-1">{stat.label}</p>
+                    <p className="text-xs text-white/80 mt-1"><Tr text={stat.label} /></p>
                   </div>
                 ))}
               </motion.div>
@@ -404,7 +404,7 @@ export function LoginPage() {
                     className="flex items-start gap-2.5 bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-xl text-sm"
                   >
                     <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                    <span>{error}</span>
+                    <span><Tr text={error} /></span>
                   </motion.div>
                 )}
                 {success && (
@@ -416,7 +416,7 @@ export function LoginPage() {
                     className="flex items-start gap-2.5 bg-orange-50 border border-orange-100 text-[#d97706] px-4 py-3 rounded-xl text-sm"
                   >
                     <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                    <span>{success}</span>
+                    <span><Tr text={success} /></span>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -574,7 +574,7 @@ export function LoginPage() {
                 <form onSubmit={handleSignUp} className="space-y-6" noValidate>
                   <Input
                     id="signup-name"
-                    label="Full Name"
+                    label={<Tr text="Full Name" />}
                     type="text"
                     value={fullName}
                     onChange={(e) => {
@@ -618,7 +618,7 @@ export function LoginPage() {
                       ))}
                     </select>
                     {fieldErrors.country && (
-                      <p className="text-xs text-red-500 mt-1">{fieldErrors.country}</p>
+                      <p className="text-xs text-red-500 mt-1"><Tr text={fieldErrors.country} /></p>
                     )}
                   </div>
 

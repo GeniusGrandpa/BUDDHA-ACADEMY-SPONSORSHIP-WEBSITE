@@ -4,13 +4,15 @@ import { Link } from 'react-router-dom'
 import { useCmsStrings } from '../../context/CmsStringsContext'
 import { Button } from '../ui/Button'
 import { useLocalizePath } from '../../hooks/useLocalizePath'
+import { formatCurrency, type Currency } from '../../utils/currency'
 
 interface PaymentSuccessProps {
   amount: number
+  currency?: Currency
   transactionId: string
 }
 
-export function PaymentSuccess({ amount, transactionId }: PaymentSuccessProps) {
+export function PaymentSuccess({ amount, currency = 'NPR', transactionId }: PaymentSuccessProps) {
   const { t } = useCmsStrings()
   const localize = useLocalizePath()
   return (
@@ -39,7 +41,7 @@ export function PaymentSuccess({ amount, transactionId }: PaymentSuccessProps) {
       <div className="bg-green-50 border border-green-200 rounded-xl p-4 space-y-2">
         <div className="flex justify-between text-sm">
           <span className="text-gray-600">{t('payment_success_amount')}</span>
-          <span className="font-semibold text-gray-900">NPR {amount.toLocaleString()}</span>
+          <span className="font-semibold text-gray-900">{formatCurrency(amount, currency)}</span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-gray-600">{t('payment_success_reference')}</span>

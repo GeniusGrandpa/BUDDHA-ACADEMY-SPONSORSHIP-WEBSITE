@@ -2,7 +2,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
 import type { Student } from '../../../types/database'
 import type { ContributionWithStudent } from '../../../types/features'
-import { formatNPR } from '../../../utils/currency'
+import { useSiteCurrency } from '../hooks/useSiteCurrency'
+import { formatCurrency } from '../../../utils/currency'
+import { Tr } from '../../../components/Translated'
 
 interface StudentDetailModalProps {
   student: Student
@@ -11,6 +13,7 @@ interface StudentDetailModalProps {
 }
 
 export function StudentDetailModal({ student, contribution, onClose }: StudentDetailModalProps) {
+  const currency = useSiteCurrency()
   return (
     <AnimatePresence>
       <motion.div
@@ -54,23 +57,23 @@ export function StudentDetailModal({ student, contribution, onClose }: StudentDe
                   ? 'bg-orange-100 text-orange-700'
                   : 'bg-blue-100 text-blue-700'
               }`}>
-                {contribution.type === 'sponsorship' ? 'Monthly Sponsorship' : 'One-time Donation'}
+                {contribution.type === 'sponsorship' ? <Tr text="Monthly Sponsorship" /> : <Tr text="One-time Donation" />}
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 mb-4">
-              <span>Grade {student.grade}</span>
-              <span>Age {student.age}</span>
+              <span><Tr text="Grade" /> {student.grade}</span>
+              <span><Tr text="Age" /> {student.age}</span>
             </div>
 
             <p className="text-gray-600 text-sm mb-4 leading-relaxed">{student.bio}</p>
 
             <div className="grid grid-cols-2 gap-3 mb-4">
               <div className="bg-orange-50 rounded-xl p-3 text-center">
-                <div className="text-xs text-orange-600 font-medium">{contribution.type === 'sponsorship' ? 'Monthly' : 'Total'}</div>
-                <div className="text-lg font-bold text-orange-700">{formatNPR(contribution.amount)}</div>
+                <div className="text-xs text-orange-600 font-medium">{contribution.type === 'sponsorship' ? <Tr text="Monthly" /> : <Tr text="Total" />}</div>
+                <div className="text-lg font-bold text-orange-700">{formatCurrency(contribution.amount, currency)}</div>
               </div>
               <div className="bg-orange-50 rounded-xl p-3 text-center">
-                <div className="text-xs text-orange-600 font-medium">Since</div>
+                <div className="text-xs text-orange-600 font-medium"><Tr text="Since" /></div>
                 <div className="text-lg font-bold text-orange-700">
                   {new Date(contribution.start_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
                 </div>
@@ -79,8 +82,8 @@ export function StudentDetailModal({ student, contribution, onClose }: StudentDe
 
             {contribution.type === 'sponsorship' && (
               <div className="bg-orange-100 rounded-xl p-4">
-                <div className="text-sm font-semibold text-orange-800 mb-1">Recent Achievement</div>
-                <p className="text-sm text-orange-700">Won inter-school science quiz competition. Showing great dedication in mathematics and science.</p>
+                <div className="text-sm font-semibold text-orange-800 mb-1"><Tr text="Recent Achievement" /></div>
+                <p className="text-sm text-orange-700"><Tr text="Won inter-school science quiz competition. Showing great dedication in mathematics and science." /></p>
               </div>
             )}
           </div>

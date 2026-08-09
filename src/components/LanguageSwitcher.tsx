@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { ChevronDown } from 'lucide-react'
 import { getLanguageFlagAlt, getLanguageFlagUrl, languages, useLanguage } from '../context/LanguageContext'
+import { useCmsStrings } from '../context/CmsStringsContext'
 import type { LanguageCode } from '../context/LanguageContext'
 import { localizePath, stripLocale } from '../lib/locale'
 
@@ -11,6 +12,7 @@ const sortedLanguages = [...languages].sort((a, b) =>
 
 export function LanguageSwitcher({ mobile = false }: { mobile?: boolean }) {
   const { language, setLanguage } = useLanguage()
+  const { t } = useCmsStrings()
   const [open, setOpen] = useState(false)
   const [ready, setReady] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -55,7 +57,7 @@ export function LanguageSwitcher({ mobile = false }: { mobile?: boolean }) {
         onClick={() => setOpen(!open)}
         aria-expanded={open}
         aria-haspopup="listbox"
-        aria-label="Select language"
+        aria-label={t('language_select')}
         className={`flex items-center gap-2 transition-colors ${
           mobile
             ? 'w-full px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50'
@@ -85,7 +87,7 @@ export function LanguageSwitcher({ mobile = false }: { mobile?: boolean }) {
           >
             <ul
               role="listbox"
-              aria-label="Select language"
+              aria-label={t('language_select')}
               className="max-h-72 overflow-y-auto"
             >
               {sortedLanguages.map((lang) => {

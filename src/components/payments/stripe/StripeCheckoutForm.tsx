@@ -4,15 +4,16 @@ import { motion } from 'framer-motion'
 import { AlertCircle } from 'lucide-react'
 import { useCmsStrings } from '../../../context/CmsStringsContext'
 import { Button } from '../../ui/Button'
-import { formatNPR } from '../../../utils/currency'
+import { formatCurrency, type Currency } from '../../../utils/currency'
 
 interface StripeCheckoutFormProps {
   amount: number
+  currency?: Currency
   onSuccess: (paymentIntentId: string) => void
   onCancel: () => void
 }
 
-export function StripeCheckoutForm({ amount, onSuccess, onCancel: _onCancel }: StripeCheckoutFormProps) {
+export function StripeCheckoutForm({ amount, currency = 'NPR', onSuccess, onCancel: _onCancel }: StripeCheckoutFormProps) {
   const { t } = useCmsStrings()
   const stripe = useStripe()
   const elements = useElements()
@@ -97,7 +98,7 @@ export function StripeCheckoutForm({ amount, onSuccess, onCancel: _onCancel }: S
             {t('payment_processing')}
           </span>
         ) : (
-          t('pay_amount_button', { amount: formatNPR(amount) })
+          t('pay_amount_button', { amount: formatCurrency(amount, currency) })
         )}
       </Button>
     </form>

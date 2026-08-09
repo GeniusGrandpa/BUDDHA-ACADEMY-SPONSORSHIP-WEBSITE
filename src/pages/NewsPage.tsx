@@ -111,7 +111,7 @@ export function NewsPage() {
                   <div className="p-6">
                     <div className="flex items-center gap-3 mb-3">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${categoryColors[article.category]}`}>
-                        {article.category.charAt(0).toUpperCase() + article.category.slice(1)}
+                        <Tr text={article.category.charAt(0).toUpperCase() + article.category.slice(1)} />
                       </span>
                       <div className="text-xs text-gray-500">
                         {formatDate(article.published_at)}

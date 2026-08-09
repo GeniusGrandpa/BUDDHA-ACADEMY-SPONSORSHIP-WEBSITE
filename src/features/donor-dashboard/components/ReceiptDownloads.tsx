@@ -4,7 +4,9 @@ import { Download, FileText, FileDown, Calendar, Award } from 'lucide-react'
 import { fadeInUp, stagger } from '../animations'
 import { generateReceiptPDF, generateDonationHistoryPDF } from '../utils/pdfGenerator'
 import type { TransactionWithDetails } from '../../../types/features'
-import { formatNPR } from '../../../utils/currency'
+import { useSiteCurrency } from '../hooks/useSiteCurrency'
+import { formatCurrency } from '../../../utils/currency'
+import { Tr } from '../../../components/Translated'
 
 interface ReceiptDownloadsProps {
   transactions: TransactionWithDetails[]
@@ -14,6 +16,7 @@ interface ReceiptDownloadsProps {
 
 export function ReceiptDownloads({ transactions, donorName, donorEmail }: ReceiptDownloadsProps) {
   const [downloading, setDownloading] = useState<string | null>(null)
+  const currency = useSiteCurrency()
 
   const completedTx = transactions.filter(
     (t) => t.status === 'completed' || t.status === 'verified',
@@ -33,6 +36,7 @@ export function ReceiptDownloads({ transactions, donorName, donorEmail }: Receip
         donation_id: tx.id,
       },
       { name: donorName, email: donorEmail },
+      currency,
     )
     setDownloading(null)
   }
@@ -58,6 +62,7 @@ export function ReceiptDownloads({ transactions, donorName, donorEmail }: Receip
         updated_at: t.updated_at,
       })),
       { name: donorName },
+      currency,
     )
     setDownloading(null)
   }
@@ -73,8 +78,8 @@ export function ReceiptDownloads({ transactions, donorName, donorEmail }: Receip
           <FileText className="w-5 h-5 text-orange-600" />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Receipts & Downloads</h2>
-          <p className="text-sm text-gray-400 mt-0.5">Download receipts and reports for your records</p>
+          <h2 className="text-xl font-bold text-gray-900"><Tr text="Receipts & Downloads" /></h2>
+          <p className="text-sm text-gray-400 mt-0.5"><Tr text="Download receipts and reports for your records" /></p>
         </div>
       </div>
 
@@ -88,9 +93,9 @@ export function ReceiptDownloads({ transactions, donorName, donorEmail }: Receip
               <Calendar className="w-5 h-5 text-orange-600" />
             </div>
           </div>
-          <h3 className="text-sm font-semibold text-gray-900 mb-1">Yearly Summary</h3>
+          <h3 className="text-sm font-semibold text-gray-900 mb-1"><Tr text="Yearly Summary" /></h3>
           <p className="text-xs text-gray-400 mb-3">
-            Complete donation history for the year — {completedTx.length} donation{completedTx.length !== 1 ? 's' : ''}
+            <Tr text="Complete donation history for the year" /> — {completedTx.length} {completedTx.length !== 1 ? <Tr text="donations" /> : <Tr text="donation" />}
           </p>
           <button
             onClick={handleDownloadYearlySummary}
@@ -98,7 +103,7 @@ export function ReceiptDownloads({ transactions, donorName, donorEmail }: Receip
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-orange-700 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors disabled:opacity-50"
           >
             <Download className="w-3.5 h-3.5" />
-            {downloading === 'yearly' ? 'Downloading...' : 'Download PDF'}
+            {downloading === 'yearly' ? <Tr text="Downloading..." /> : <Tr text="Download PDF" />}
           </button>
         </motion.div>
 
@@ -111,16 +116,16 @@ export function ReceiptDownloads({ transactions, donorName, donorEmail }: Receip
               <Award className="w-5 h-5 text-orange-600" />
             </div>
           </div>
-          <h3 className="text-sm font-semibold text-gray-900 mb-1">Sponsorship Report</h3>
+          <h3 className="text-sm font-semibold text-gray-900 mb-1"><Tr text="Sponsorship Report" /></h3>
           <p className="text-xs text-gray-400 mb-3">
-            Overview of your sponsored students and their progress
+            <Tr text="Overview of your sponsored students and their progress" />
           </p>
           <button
             onClick={() => handleDownloadYearlySummary()}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-orange-700 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors"
           >
             <FileDown className="w-3.5 h-3.5" />
-            Download Report
+            <Tr text="Download Report" />
           </button>
         </motion.div>
 
@@ -135,9 +140,9 @@ export function ReceiptDownloads({ transactions, donorName, donorEmail }: Receip
                 <FileText className="w-5 h-5 text-orange-600" />
               </div>
             </div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-1">Latest Receipt</h3>
+            <h3 className="text-sm font-semibold text-gray-900 mb-1"><Tr text="Latest Receipt" /></h3>
             <p className="text-xs text-gray-400 mb-3">
-              {new Date(tx.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} &mdash; {formatNPR(tx.amount)}
+              {new Date(tx.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} &mdash; {formatCurrency(tx.amount, currency)}
             </p>
             <button
               onClick={() => handleDownloadReceipt(tx)}
@@ -145,7 +150,7 @@ export function ReceiptDownloads({ transactions, donorName, donorEmail }: Receip
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-orange-700 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors disabled:opacity-50"
             >
               <Download className="w-3.5 h-3.5" />
-              {downloading === tx.id ? 'Downloading...' : 'Download Receipt'}
+              {downloading === tx.id ? <Tr text="Downloading..." /> : <Tr text="Download Receipt" />}
             </button>
           </motion.div>
         ))}
@@ -160,9 +165,9 @@ export function ReceiptDownloads({ transactions, donorName, donorEmail }: Receip
                 <Download className="w-5 h-5 text-orange-600" />
               </div>
             </div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-1">All Receipts</h3>
+            <h3 className="text-sm font-semibold text-gray-900 mb-1"><Tr text="All Receipts" /></h3>
             <p className="text-xs text-gray-400 mb-3">
-              {completedTx.length} receipt{completedTx.length !== 1 ? 's' : ''} available for download
+              {completedTx.length} {completedTx.length !== 1 ? <Tr text="receipts" /> : <Tr text="receipt" />} <Tr text="available for download" />
             </p>
             <div className="space-y-1.5 max-h-28 overflow-y-auto">
               {latestReceipts.map((tx) => (
@@ -173,7 +178,7 @@ export function ReceiptDownloads({ transactions, donorName, donorEmail }: Receip
                   className="w-full flex items-center justify-between px-2.5 py-1.5 text-xs rounded-lg hover:bg-gray-50 transition-colors group"
                 >
                   <span className="text-gray-500 group-hover:text-gray-700 truncate">
-                    {new Date(tx.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} &mdash; {formatNPR(tx.amount)}
+                    {new Date(tx.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} &mdash; {formatCurrency(tx.amount, currency)}
                   </span>
                   <Download className="w-3 h-3 text-gray-300 group-hover:text-orange-500 shrink-0 ml-2" />
                 </button>

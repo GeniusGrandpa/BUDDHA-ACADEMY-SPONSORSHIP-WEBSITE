@@ -124,7 +124,7 @@ export function Header() {
             </Link>
           </div>
 
-          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="lg:hidden p-3 touch-target text-[var(--color-navbar-text)]" aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}>
+          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="lg:hidden p-3 touch-target text-[var(--color-navbar-text)]" aria-label={isMenuOpen ? t('header_close_menu') : t('header_open_menu')}>
             {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>

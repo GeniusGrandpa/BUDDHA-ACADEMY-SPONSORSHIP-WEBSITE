@@ -6,8 +6,11 @@ import { getDonorDonationsWithPayment } from '../services/payments'
 import { generateReceiptPDF, generateDonationHistoryPDF, exportToCSV } from '../features/donor-dashboard/utils/pdfGenerator'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
+import { Tr } from '../components/Translated'
+import { useCmsStrings } from '../context/CmsStringsContext'
 import { TableSkeleton } from '../components/ui/LoadingSkeleton'
-import { formatNPR } from '../utils/currency'
+import { formatCurrency } from '../utils/currency'
+import { useSiteCurrency } from '../features/donor-dashboard/hooks/useSiteCurrency'
 import type { Donation } from '../types/database'
 import type { DonationWithPayment } from '../types/payments'
 
@@ -31,7 +34,15 @@ const STATUS_LABELS: Record<string, string> = {
   cancelled: 'Cancelled',
 }
 
+const FREQUENCY_LABELS: Record<string, string> = {
+  'one-time': 'One-time',
+  monthly: 'Monthly',
+  annual: 'Annual',
+}
+
 export function DonationHistoryPage() {
+  const { t } = useCmsStrings()
+  const currency = useSiteCurrency()
   const { user, profile } = useAuth()
   const [donations, setDonations] = useState<DonationWithPayment[]>([])
   const [loading, setLoading] = useState(true)
@@ -72,6 +83,7 @@ export function DonationHistoryPage() {
         name: profile?.full_name || 'Donor',
         email: user?.email || '',
       },
+      currency,
     )
   }
 
@@ -80,13 +92,14 @@ export function DonationHistoryPage() {
     generateDonationHistoryPDF(
       donations as unknown as Donation[],
       { name: profile.full_name },
+      currency,
     )
   }
 
   const handleExportCSV = () => {
     const data = donations.map(d => ({
       Date: new Date(d.created_at).toLocaleDateString(),
-      Amount: `${formatNPR(d.amount)}`,
+      Amount: `${formatCurrency(d.amount, currency)}`,
       Frequency: d.frequency,
       Method: d.payment_method || 'N/A',
       Status: d.status,
@@ -115,16 +128,16 @@ export function DonationHistoryPage() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Donation History</h1>
-            <p className="text-sm text-gray-500 mt-1">Track all your contributions</p>
+            <h1 className="text-2xl font-bold text-gray-900"><Tr text="Donation History" /></h1>
+            <p className="text-sm text-gray-500 mt-1"><Tr text="Track all your contributions" /></p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={handleDownloadHistory}>
               <Download className="w-4 h-4 mr-2" />
-              PDF Report
+              <Tr text="PDF Report" />
             </Button>
             <Button variant="outline" size="sm" onClick={handleExportCSV}>
-              Export CSV
+              <Tr text="Export CSV" />
             </Button>
           </div>
         </div>
@@ -146,15 +159,15 @@ export function DonationHistoryPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                title="Filter by status"
+                title={t('Filter by status', { defaultValue: 'Filter by status' })}
                 className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
               >
-                <option value="all">All Status</option>
-                <option value="pending">Pending</option>
-                <option value="processing">Processing</option>
-                <option value="completed">Verified</option>
-                <option value="failed">Failed</option>
-                <option value="rejected">Rejected</option>
+                <option value="all"><Tr text="All Status" /></option>
+                <option value="pending"><Tr text="Pending" /></option>
+                <option value="processing"><Tr text="Processing" /></option>
+                <option value="completed"><Tr text="Verified" /></option>
+                <option value="failed"><Tr text="Failed" /></option>
+                <option value="rejected"><Tr text="Rejected" /></option>
               </select>
             </div>
           </div>
@@ -162,8 +175,8 @@ export function DonationHistoryPage() {
 
         {filtered.length === 0 ? (
           <Card variant="bordered" padding="lg" className="text-center">
-            <p className="text-gray-500">No donations found</p>
-            <p className="text-sm text-gray-400 mt-1">Your donation history will appear here after you make a donation.</p>
+            <p className="text-gray-500"><Tr text="No donations found" /></p>
+            <p className="text-sm text-gray-400 mt-1"><Tr text="Your donation history will appear here after you make a donation." /></p>
           </Card>
         ) : (
           <div className="space-y-3">
@@ -179,15 +192,15 @@ export function DonationHistoryPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-1">
                         <span className="text-lg font-bold text-gray-900">
-                          {formatNPR(donation.amount)}
+                          {formatCurrency(donation.amount, currency)}
                         </span>
                         <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${STATUS_STYLES[donation.status] || 'bg-gray-100 text-gray-700'}`}>
-                          {STATUS_LABELS[donation.status] || donation.status.charAt(0).toUpperCase() + donation.status.slice(1)}
+                          <Tr text={STATUS_LABELS[donation.status] || donation.status.charAt(0).toUpperCase() + donation.status.slice(1)} />
                         </span>
                       </div>
                       <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500">
                         <span>{new Date(donation.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
-                        <span className="capitalize">{donation.frequency}</span>
+                        <span className="capitalize"><Tr text={FREQUENCY_LABELS[donation.frequency] || donation.frequency} /></span>
                         {donation.payment_method && (
                           <span className="capitalize">{donation.payment_method.replace(/_/g, ' ')}</span>
                         )}
@@ -204,7 +217,7 @@ export function DonationHistoryPage() {
                           onClick={() => handleDownloadReceipt(donation)}
                         >
                           <Download className="w-3.5 h-3.5 mr-1.5" />
-                          Receipt
+                          <Tr text="Receipt" />
                         </Button>
                       )}
                     </div>
@@ -217,8 +230,8 @@ export function DonationHistoryPage() {
 
         {donations.length > 0 && (
           <div className="mt-6 bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
-            <p className="font-medium mb-1">Total Donations</p>
-            <p className="text-2xl font-bold">{formatNPR(donations.reduce((s, d) => s + d.amount, 0))}</p>
+            <p className="font-medium mb-1"><Tr text="Total Donations" /></p>
+            <p className="text-2xl font-bold">{formatCurrency(donations.reduce((s, d) => s + d.amount, 0), currency)}</p>
           </div>
         )}
       </div>

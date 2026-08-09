@@ -10,7 +10,7 @@ import { useCmsStrings } from '../context/CmsStringsContext'
 import { useLanguage } from '../context/LanguageContext'
 import { Tr } from '../components/Translated'
 import { useLocalizePath } from '../hooks/useLocalizePath'
-import { sponsorshipVariant, sponsorshipLabel } from '../utils/sponsorship'
+import { sponsorshipVariant, localizedSponsorshipLabel } from '../utils/sponsorship'
 import { optimizeImageUrl } from '../utils/image'
 import type { Student } from '../types/database'
 
@@ -105,7 +105,7 @@ export function StudentsPage() {
                   <div className="p-4 sm:p-6">
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="text-lg sm:text-xl font-semibold text-gray-900">{student.name}</h3>
-                      <Badge variant={sponsorshipVariant(student.sponsorship_status)}>{sponsorshipLabel(student.sponsorship_status)}</Badge>
+                      <Badge variant={sponsorshipVariant(student.sponsorship_status)}>{localizedSponsorshipLabel(student.sponsorship_status, t)}</Badge>
                     </div>
                     <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 mb-3">
                       <span>{t('students_age_label', { age: student.age })}</span>

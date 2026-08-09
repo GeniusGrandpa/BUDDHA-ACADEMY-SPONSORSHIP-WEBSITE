@@ -1,4 +1,5 @@
 import { InputHTMLAttributes, ReactNode, forwardRef } from 'react'
+import { Tr } from '../Translated'
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: ReactNode
@@ -28,7 +29,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           } focus:outline-none focus:ring-2 transition-colors ${className}`}
           {...props}
         />
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-red-600"><Tr text={error} /></p>}
       </div>
     )
   }

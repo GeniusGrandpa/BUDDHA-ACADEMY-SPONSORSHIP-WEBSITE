@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { AlertCircle } from 'lucide-react'
 import { useCmsStrings } from '../../../context/CmsStringsContext'
-import { formatNPR } from '../../../utils/currency'
+import { formatCurrency, type Currency } from '../../../utils/currency'
 import { initiateKhaltiPayment, type KhaltiPaymentInit } from '../../../services/khaltiPay'
 import { getErrorMessage } from '../../../lib/errors'
 import { Button } from '../../ui/Button'
@@ -9,11 +9,12 @@ import { Button } from '../../ui/Button'
 interface KhaltiPaymentProps {
   sessionId: string
   amount: number
+  currency?: Currency
   onError?: (message: string) => void
   onCancel: () => void
 }
 
-export function KhaltiPayment({ sessionId, amount, onError, onCancel }: KhaltiPaymentProps) {
+export function KhaltiPayment({ sessionId, amount, currency = 'NPR', onError, onCancel }: KhaltiPaymentProps) {
   const { t } = useCmsStrings()
   const [payment, setPayment] = useState<KhaltiPaymentInit | null>(null)
   const [loading, setLoading] = useState(true)
@@ -30,7 +31,6 @@ export function KhaltiPayment({ sessionId, amount, onError, onCancel }: KhaltiPa
         if (cancelled) return
         setPayment(result)
         setLoading(false)
-        // Auto-redirect once the Khalti payment page is ready.
         timer = window.setTimeout(() => {
           window.location.href = result.payment_url
         }, 600)
@@ -62,7 +62,7 @@ export function KhaltiPayment({ sessionId, amount, onError, onCancel }: KhaltiPa
       <div className="bg-gray-50 rounded-xl p-4">
         <div className="flex justify-between items-center">
           <span className="text-sm text-gray-600">{t('payment_donation_amount')}</span>
-          <span className="text-xl font-bold text-gray-900">{formatNPR(amount)}</span>
+          <span className="text-xl font-bold text-gray-900">{formatCurrency(amount, currency)}</span>
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 import { useRouteError, Link, isRouteErrorResponse } from 'react-router-dom'
 import { AlertTriangle, RefreshCw, Home, ArrowLeft } from 'lucide-react'
 import { Button } from '../ui/Button'
+import { Tr } from '../Translated'
 import { useLocalizePath } from '../../hooks/useLocalizePath'
 
 interface RouteErrorPageProps {
@@ -58,22 +59,22 @@ export function RouteErrorPage({ simple = false }: RouteErrorPageProps) {
           <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-red-100 flex items-center justify-center">
             <AlertTriangle className="w-8 h-8 text-red-600" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">{title}</h1>
-          <p className="text-gray-600 mb-6">{description}</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2"><Tr text={title} /></h1>
+          <p className="text-gray-600 mb-6"><Tr text={description} /></p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
               onClick={handleRetry}
               className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-full hover:bg-amber-600 transition-colors"
             >
               <RefreshCw className="w-4 h-4" />
-              Try Again
+              <Tr text="Try Again" />
             </button>
             <Link
               to={localize('/')}
               className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 transition-colors"
             >
               <Home className="w-4 h-4" />
-              Go Home
+              <Tr text="Go Home" />
             </Link>
           </div>
         </div>
@@ -87,28 +88,28 @@ export function RouteErrorPage({ simple = false }: RouteErrorPageProps) {
         <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-brand-100 flex items-center justify-center">
           <span className="text-4xl">{icon}</span>
         </div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">{title}</h1>
-        <p className="text-gray-600 mb-8">{description}</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-4"><Tr text={title} /></h1>
+        <p className="text-gray-600 mb-8"><Tr text={description} /></p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
           <Button onClick={handleRetry} variant="primary">
             <RefreshCw className="w-4 h-4 mr-2" />
-            Try Again
+            <Tr text="Try Again" />
           </Button>
           <Button onClick={goBack} variant="outline">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Go Back
+            <Tr text="Go Back" />
           </Button>
           <Link to={localize('/')}>
             <Button variant="secondary">
               <Home className="w-4 h-4 mr-2" />
-              Home
+              <Tr text="Home" />
             </Button>
           </Link>
         </div>
         {isDev && isRouteErrorResponse(error) && error.status !== 404 && (
           <details className="mt-8 text-left bg-gray-100 rounded-lg p-4">
             <summary className="cursor-pointer text-sm font-medium text-gray-700 mb-2">
-              Error Details (Development Only)
+              <Tr text="Error Details (Development Only)" />
             </summary>
             <pre className="text-xs text-gray-600 overflow-auto max-h-32">
               {JSON.stringify(

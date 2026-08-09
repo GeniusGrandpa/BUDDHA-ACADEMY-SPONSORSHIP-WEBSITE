@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 
 import { fadeInUp, stagger } from '../animations'
 import type { DonorImpact } from '../../../types/features'
-import { formatNPR } from '../../../utils/currency'
+import { useSiteCurrency } from '../hooks/useSiteCurrency'
+import { formatCurrency } from '../../../utils/currency'
+import { Tr } from '../../../components/Translated'
 
 interface ImpactTransparencyProps {
   impact: DonorImpact
@@ -62,43 +65,45 @@ function AnimatedCounter({ value, suffix = '', duration = 1.5 }: CounterProps) {
 }
 
 export function ImpactTransparency({ impact }: ImpactTransparencyProps) {
+  const { t } = useTranslation()
+  const currency = useSiteCurrency()
   const metrics = [
     {
-      label: 'Meals Funded',
+      label: t('Meals Funded', { defaultValue: 'Meals Funded' }),
       value: impact.meals_funded,
       max: Math.max(impact.meals_funded, 500),
       barColor: 'bg-orange-500',
-      description: 'Nutritious meals served to students',
+      description: t('Nutritious meals served to students', { defaultValue: 'Nutritious meals served to students' }),
     },
     {
-      label: 'Books Donated',
+      label: t('Books Donated', { defaultValue: 'Books Donated' }),
       value: impact.books_donated,
       max: Math.max(impact.books_donated, 200),
       barColor: 'bg-orange-500',
-      description: 'Educational books and materials',
+      description: t('Educational books and materials', { defaultValue: 'Educational books and materials' }),
     },
     {
-      label: 'Uniforms Provided',
+      label: t('Uniforms Provided', { defaultValue: 'Uniforms Provided' }),
       value: impact.uniforms_provided,
       max: Math.max(impact.uniforms_provided, 10),
       barColor: 'bg-orange-500',
-      description: 'School uniforms distributed',
+      description: t('School uniforms distributed', { defaultValue: 'School uniforms distributed' }),
     },
     {
-      label: 'Students Supported',
+      label: t('Students Supported', { defaultValue: 'Students Supported' }),
       value: impact.students_supported,
       max: Math.max(impact.students_supported, 10),
       barColor: 'bg-orange-500',
-      description: 'Children receiving education support',
+      description: t('Children receiving education support', { defaultValue: 'Children receiving education support' }),
     },
   ]
 
   return (
     <motion.div variants={fadeInUp} initial="initial" animate="animate" className="bg-gradient-to-br from-orange-50 to-orange-100/50 rounded-2xl border border-orange-200 p-5 sm:p-6 mb-8">
       <div className="text-center mb-6">
-        <h2 className="text-xl font-bold text-gray-900">Your Impact at a Glance</h2>
+        <h2 className="text-xl font-bold text-gray-900"><Tr text="Your Impact at a Glance" /></h2>
         <p className="text-sm text-orange-700 mt-1">
-          Together, we&apos;ve made this possible. Here&apos;s what your generosity has achieved.
+          <Tr text="Together, we've made this possible. Here's what your generosity has achieved." />
         </p>
       </div>
 
@@ -139,10 +144,10 @@ export function ImpactTransparency({ impact }: ImpactTransparencyProps) {
 
       <div className="mt-5 pt-4 border-t border-orange-200/50 text-center">
         <p className="text-sm text-orange-800 font-medium">
-          Total contribution: {formatNPR(impact.total_donated)}
+          <Tr text="Total contribution: " />{formatCurrency(impact.total_donated, currency)}
         </p>
         <p className="text-xs text-orange-600 mt-0.5">
-          Every rupee goes directly toward transforming young lives through education.
+          <Tr text="Every contribution goes directly toward transforming young lives through education." />
         </p>
       </div>
     </motion.div>

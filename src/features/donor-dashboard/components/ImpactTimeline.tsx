@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { fadeInUp, stagger } from '../animations'
+import { Tr } from '../../../components/Translated'
 import type { SponsorshipTimelineEvent } from '../../../types/features'
 
 interface ImpactTimelineProps {
@@ -10,9 +11,9 @@ export function ImpactTimeline({ events = [] }: ImpactTimelineProps) {
   if (events.length === 0) {
     return (
       <section className="mb-8">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Impact Feed</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-4"><Tr text="Impact Feed" /></h2>
         <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
-          <p className="text-sm text-gray-500">Timeline events will appear here as your sponsorship journey progresses.</p>
+          <p className="text-sm text-gray-500"><Tr text="Timeline events will appear here as your sponsorship journey progresses." /></p>
         </div>
       </section>
     )
@@ -20,7 +21,7 @@ export function ImpactTimeline({ events = [] }: ImpactTimelineProps) {
 
   return (
     <section className="mb-8">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">Impact Feed</h2>
+      <h2 className="text-xl font-bold text-gray-900 mb-4"><Tr text="Impact Feed" /></h2>
       <motion.div variants={stagger} initial="initial" animate="animate" className="bg-white rounded-2xl border border-gray-100 p-5">
         <div className="space-y-0">
           {events.map((event, i) => (

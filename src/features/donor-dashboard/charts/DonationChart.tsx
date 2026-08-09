@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import { fadeInUp } from '../animations'
+import { Tr } from '../../../components/Translated'
 import type { Donation } from '../../../types/database'
 
 interface DonationChartProps {
@@ -23,7 +24,7 @@ export function DonationChart({ donations }: DonationChartProps) {
 
   return (
     <motion.div variants={fadeInUp} initial="initial" animate="animate" className="bg-white rounded-2xl border border-gray-100 p-5 mb-8">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">Monthly Contributions</h2>
+      <h2 className="text-xl font-bold text-gray-900 mb-4"><Tr text="Monthly Contributions" /></h2>
       <div className="h-64 min-w-[300px]">
         <ResponsiveContainer width="100%" height="100%" minWidth={300} minHeight={200}>
           <BarChart data={data} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
@@ -37,7 +38,7 @@ export function DonationChart({ donations }: DonationChartProps) {
                 boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                 fontSize: '14px',
               }}
-              formatter={(value) => [value, 'Donated']}
+              formatter={(value) => [value, <Tr text="Donated" />]}
             />
             <Bar
               dataKey="amount"

@@ -1,7 +1,7 @@
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import type { Donation } from '../../../types/database'
-import { formatNPR } from '../../../utils/currency'
+import { formatCurrency, type Currency } from '../../../utils/currency'
 
 interface ReceiptInfo {
   receipt_number: string
@@ -58,6 +58,7 @@ function addFooter(doc: jsPDF): void {
 export function generateReceiptPDF(
   receipt: ReceiptInfo,
   donor: { name: string; email: string },
+  currency: Currency = 'NPR',
 ): void {
   const doc = new jsPDF()
   const pageWidth = doc.internal.pageSize.getWidth()
@@ -111,13 +112,13 @@ export function generateReceiptPDF(
 
   doc.setFontSize(16)
   doc.setTextColor(...ACCENT_COLOR)
-  doc.text(formatNPR(receipt.amount), pageWidth / 2 + 30, bodyStart + 12, { align: 'right' })
+  doc.text(formatCurrency(receipt.amount, currency), pageWidth / 2 + 30, bodyStart + 12, { align: 'right' })
 
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(9)
   doc.setTextColor(TEXT_MUTED)
   const words = numberToWords(receipt.amount)
-  doc.text(`In words: NPR ${words}`, 30, bodyStart + 22)
+  doc.text(`In words: ${currency} ${words}`, 30, bodyStart + 22)
 
   const detailsStart = bodyStart + 42
 
@@ -134,7 +135,7 @@ export function generateReceiptPDF(
       ['Receipt Title', receipt.title],
       ['Certificate Type', receipt.certificate_type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())],
       ['Transaction ID', receipt.donation_id || 'N/A'],
-      ['Donation Amount', formatNPR(receipt.amount)],
+      ['Donation Amount', formatCurrency(receipt.amount, currency)],
     ],
     headStyles: {
       fillColor: BRAND_COLOR,
@@ -157,6 +158,7 @@ export function generateReceiptPDF(
 export function generateCertificatePDF(
   certificate: ReceiptInfo,
   donor: { name: string; email: string },
+  currency: Currency = 'NPR',
 ): void {
   const doc = new jsPDF({ orientation: 'landscape' })
   const pageWidth = doc.internal.pageSize.getWidth()
@@ -202,7 +204,7 @@ export function generateCertificatePDF(
   doc.setFontSize(11)
   doc.setTextColor(TEXT_DARK)
   doc.text(`In recognition of your ${certificate.title.toLowerCase()}`, pageWidth / 2, 118, { align: 'center' })
-  doc.text(`with a generous contribution of ${formatNPR(certificate.amount)}`, pageWidth / 2, 130, { align: 'center' })
+  doc.text(`with a generous contribution of ${formatCurrency(certificate.amount, currency)}`, pageWidth / 2, 130, { align: 'center' })
   doc.text(`${new Date(certificate.issued_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`, pageWidth / 2, 142, { align: 'center' })
 
   if (certificate.description) {
@@ -235,6 +237,7 @@ export function generateCertificatePDF(
 export function generateDonationHistoryPDF(
   donations: Donation[],
   donor: { name: string },
+  currency: Currency = 'NPR',
 ): void {
   const doc = new jsPDF()
   const pageWidth = doc.internal.pageSize.getWidth()
@@ -253,14 +256,14 @@ export function generateDonationHistoryPDF(
 
   const totalDonated = donations.reduce((sum, d) => sum + d.amount, 0)
   doc.text(`Total Donations: ${donations.length}`, 20, 75)
-  doc.text(`Total Amount: ${formatNPR(totalDonated)}`, pageWidth - 20, 75, { align: 'right' })
+  doc.text(`Total Amount: ${formatCurrency(totalDonated, currency)}`, pageWidth - 20, 75, { align: 'right' })
   doc.text(`Generated: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`, pageWidth - 20, 82, { align: 'right' })
 
   const tableData = donations.map(d => [
     new Date(d.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
     d.frequency.charAt(0).toUpperCase() + d.frequency.slice(1),
     d.student_id || 'General',
-    formatNPR(d.amount),
+    formatCurrency(d.amount, currency),
     d.status.charAt(0).toUpperCase() + d.status.slice(1),
   ])
 
@@ -285,7 +288,7 @@ export function generateDonationHistoryPDF(
     },
     margin: { left: 20, right: 20 },
     foot: [
-      ['', '', 'Total', formatNPR(totalDonated), `${donations.length} donations`],
+      ['', '', 'Total', formatCurrency(totalDonated, currency), `${donations.length} donations`],
     ],
     footStyles: {
       fillColor: [254, 243, 199],
@@ -306,8 +309,8 @@ export function generateDonationHistoryPDF(
   const summaryStart = tableEnd + 4
   const summaryData = [
     ['Total Donations', donations.length.toString()],
-    ['Total Amount', formatNPR(totalDonated)],
-    ['Average Donation', donations.length > 0 ? formatNPR(Math.round(totalDonated / donations.length)) : formatNPR(0)],
+    ['Total Amount', formatCurrency(totalDonated, currency)],
+    ['Average Donation', donations.length > 0 ? formatCurrency(Math.round(totalDonated / donations.length), currency) : formatCurrency(0, currency)],
     ['Latest Donation', donations.length > 0 ? new Date(donations[0].created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'],
     ['Oldest Donation', donations.length > 0 ? new Date(donations[donations.length - 1].created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'],
   ]

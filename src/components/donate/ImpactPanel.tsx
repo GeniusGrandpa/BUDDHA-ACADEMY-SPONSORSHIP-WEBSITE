@@ -1,6 +1,8 @@
 import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import { useCmsStrings } from '../../context/CmsStringsContext'
 import { formatCurrency, type Currency } from '../../utils/currency'
+import { useLocalizePath } from '../../hooks/useLocalizePath'
 
 interface ImpactPanelProps {
   amount: number
@@ -10,6 +12,7 @@ interface ImpactPanelProps {
 
 export function ImpactPanel({ amount, currency, frequency }: ImpactPanelProps) {
   const { t } = useCmsStrings()
+  const localize = useLocalizePath()
   const monthlyEquivalent = frequency === 'annual' ? Math.round(amount / 12) : amount
 
   return (
@@ -28,7 +31,7 @@ export function ImpactPanel({ amount, currency, frequency }: ImpactPanelProps) {
               {formatCurrency(amount, currency)}
             </span>
             <span className="text-sm text-gray-600">
-              {frequency !== 'one-time' ? '/month' : ''}
+              {frequency !== 'one-time' ? t('month_suffix') : ''}
             </span>
           </div>
           {frequency !== 'one-time' && (
@@ -52,12 +55,12 @@ export function ImpactPanel({ amount, currency, frequency }: ImpactPanelProps) {
           <p className="text-xs text-gray-600 leading-relaxed">
             {t('impact_why_donate_desc')}
           </p>
-          <a
-            href="/transparency"
+          <Link
+            to={localize('/transparency')}
             className="inline-flex items-center gap-1 text-xs text-amber-600 hover:text-amber-700 font-medium mt-2"
           >
             {t('impact_see_funds')}
-          </a>
+          </Link>
         </div>
       </motion.div>
     </motion.div>

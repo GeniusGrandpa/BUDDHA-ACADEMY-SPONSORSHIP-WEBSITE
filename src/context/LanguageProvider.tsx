@@ -1,6 +1,6 @@
 import React, { startTransition, useCallback, useEffect, useMemo, useState } from 'react'
 import { setLanguageCookie, toLocale } from '../lib/locale'
-import { LanguageContext, languages, rtlLanguages, type LanguageCode } from './LanguageContext'
+import { LanguageContext, languages, type LanguageCode } from './LanguageContext'
 import i18n from '../i18n'
 
 export function LanguageProvider({ children, initialLanguage }: { children: React.ReactNode; initialLanguage?: LanguageCode }) {
@@ -17,7 +17,7 @@ export function LanguageProvider({ children, initialLanguage }: { children: Reac
     setLanguageCookie(language)
     window.localStorage.setItem('language', language)
     document.documentElement.lang = language
-    document.documentElement.dir = rtlLanguages.has(language) ? 'rtl' : 'ltr'
+    document.documentElement.dir = 'ltr'
   }, [language])
 
   const setLanguage = useCallback((newLanguage: LanguageCode) => {

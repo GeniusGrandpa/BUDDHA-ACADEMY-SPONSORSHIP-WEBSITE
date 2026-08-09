@@ -60,37 +60,36 @@ export function AboutPage() {
     } catch {}
   }
 
-  const DEFAULT_MISSION = 'Our mission is to provide quality education and holistic development opportunities to underprivileged children, empowering them to break the cycle of poverty and become self-reliant, contributing members of society.'
-  const DEFAULT_VISION = 'We envision a world where every child, regardless of their background, has access to quality education and the opportunity to realize their full potential.'
-  const DEFAULT_DESCRIPTION = 'Buddha Academy was founded with a simple yet powerful belief: education is the most effective tool to transform lives. Located in a community where many families struggle to afford basic education, we provide comprehensive support including tuition, books, uniforms, meals, and healthcare to ensure every child can learn and thrive.'
+  const defaults = {
+    mission: t('about_fallback_mission'),
+    vision: t('about_fallback_vision'),
+    description: t('about_fallback_description'),
+    timeline: [
+      { year: '2012', title: t('about_timeline_1_title'), desc: t('about_timeline_1_desc') },
+      { year: '2014', title: t('about_timeline_2_title'), desc: t('about_timeline_2_desc') },
+      { year: '2016', title: t('about_timeline_3_title'), desc: t('about_timeline_3_desc') },
+      { year: '2018', title: t('about_timeline_4_title'), desc: t('about_timeline_4_desc') },
+      { year: '2020', title: t('about_timeline_5_title'), desc: t('about_timeline_5_desc') },
+      { year: '2023', title: t('about_timeline_6_title'), desc: t('about_timeline_6_desc') },
+      { year: '2025', title: t('about_timeline_7_title'), desc: t('about_timeline_7_desc') },
+    ],
+    values: [
+      { title: t('about_value_compassion'), desc: t('about_value_compassion_desc') },
+      { title: t('about_value_excellence'), desc: t('about_value_excellence_desc') },
+      { title: t('about_value_integrity'), desc: t('about_value_integrity_desc') },
+      { title: t('about_value_empowerment'), desc: t('about_value_empowerment_desc') },
+    ],
+    stats: [
+      { value: '250+', label: t('about_stat_students') },
+      { value: '180+', label: t('about_stat_sponsors') },
+      { value: '12+', label: t('about_stat_years') },
+      { value: '95%', label: t('about_stat_efficiency') },
+    ],
+  }
 
-  const DEFAULT_TIMELINE = [
-    { year: '2012', title: 'Foundation', desc: 'Buddha Academy was established with a vision to provide quality education to underprivileged children in the community.' },
-    { year: '2014', title: 'First Batch Graduates', desc: 'Celebrated the graduation of our first cohort of students, marking a significant milestone in our journey.' },
-    { year: '2016', title: 'Expansion', desc: 'Expanded facilities to accommodate more students, adding new classrooms, a library, and computer lab.' },
-    { year: '2018', title: 'Sponsorship Program Launched', desc: 'Introduced the child sponsorship program, connecting donors directly with students to fund their education.' },
-    { year: '2020', title: 'Digital Learning Initiative', desc: 'Adapted to remote learning during global challenges, providing tablets and internet access to all students.' },
-    { year: '2023', title: '250+ Students Enrolled', desc: 'Reached over 250 enrolled students with 180+ active sponsors supporting their educational journey.' },
-    { year: '2025', title: 'Community Impact Award', desc: 'Recognized for outstanding contribution to community education and child welfare development.' },
-  ]
-
-  const DEFAULT_VALUES = [
-    { title: 'Compassion', desc: 'We treat every child with kindness, understanding, and respect, fostering a nurturing environment.' },
-    { title: 'Excellence', desc: 'We strive for the highest standards in education, character development, and community service.' },
-    { title: 'Integrity', desc: 'We operate with complete transparency, ensuring every donation is used effectively and ethically.' },
-    { title: 'Empowerment', desc: 'We believe in empowering children through education to break the cycle of poverty.' },
-  ]
-
-  const DEFAULT_STATS = [
-    { value: '250+', label: 'Students' },
-    { value: '180+', label: 'Sponsors' },
-    { value: '12+', label: 'Years' },
-    { value: '95%', label: 'Program Efficiency' },
-  ]
-
-  const stats = content?.stats && content.stats.length > 0 ? content.stats : DEFAULT_STATS
-  const values = content?.values && content.values.length > 0 ? content.values : DEFAULT_VALUES
-  const timeline = content?.timeline && content.timeline.length > 0 ? content.timeline : DEFAULT_TIMELINE
+  const stats = content?.stats && content.stats.length > 0 ? content.stats : defaults.stats
+  const values = content?.values && content.values.length > 0 ? content.values : defaults.values
+  const timeline = content?.timeline && content.timeline.length > 0 ? content.timeline : defaults.timeline
 
   if (loading) return <div className="min-h-screen" />
 
@@ -112,9 +111,9 @@ export function AboutPage() {
           <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
             <div>
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text-primary)] mb-4 sm:mb-6">{t('about_mission_heading')}</h2>
-              <p className="text-[var(--color-text-secondary)] mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base"><Tr text={content?.mission || DEFAULT_MISSION} /></p>
-              <p className="text-[var(--color-text-secondary)] mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base"><Tr text={content?.vision || DEFAULT_VISION} /></p>
-              <p className="text-[var(--color-text-secondary)] leading-relaxed text-sm sm:text-base"><Tr text={content?.description || DEFAULT_DESCRIPTION} /></p>
+              <p className="text-[var(--color-text-secondary)] mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base"><Tr text={content?.mission || defaults.mission} /></p>
+              <p className="text-[var(--color-text-secondary)] mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base"><Tr text={content?.vision || defaults.vision} /></p>
+              <p className="text-[var(--color-text-secondary)] leading-relaxed text-sm sm:text-base"><Tr text={content?.description || defaults.description} /></p>
             </div>
             {images.length > 0 && (
               <div className="grid grid-cols-2 gap-3 sm:gap-4">

@@ -240,6 +240,7 @@ export function DonatePage() {
         onClose={() => setShowPaymentModal(false)}
         amount={amount}
         frequency={frequency}
+        currency={currency}
         studentId={studentId || null}
         message={message || null}
       />

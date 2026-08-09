@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ArrowRight } from 'lucide-react'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
@@ -13,6 +13,7 @@ import { getTestimonialsWithType } from '../services/content'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import { useLanguage } from '../context/LanguageContext'
 import { Tr } from '../components/Translated'
+import { localizedSponsorshipLabel } from '../utils/sponsorship'
 import type { Student, Testimonial } from '../types/database'
 import type { HeroContent, SectionContent } from '../types/cms-content'
 
@@ -26,22 +27,17 @@ const STUDENT_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 
 const DEFAULT_HERO: HeroContent = {
   id: '',
-  title: 'Empowering Nepal\'s Future',
-  highlight: 'One Child at a Time',
-  description: 'Buddha Academy provides free education, meals, and healthcare to underprivileged children in Kathmandu, Nepal.',
+  title: '',
+  highlight: '',
+  description: '',
   background_image: '',
   overlay_color: '#000000',
   overlay_opacity: 0.5,
-  cta_primary_text: 'Sponsor a Child',
+  cta_primary_text: '',
   cta_primary_link: '/students',
-  cta_secondary_text: 'Donate Now',
+  cta_secondary_text: '',
   cta_secondary_link: '/donate',
-  statistics: [
-    { value: 'Since 1977', label: 'Trusted Service' },
-    { value: '49+', label: 'Years of Service' },
-    { value: '100%', label: 'Free Education' },
-    { value: '250+', label: 'Children Supported' },
-  ],
+  statistics: [],
   badges: [],
   layout: 'left',
   display_order: 1,
@@ -52,34 +48,50 @@ const DEFAULT_HERO: HeroContent = {
   updated_at: '',
 }
 
-const DEFAULT_ABOUT_CONTENT = {
-  title: 'About Buddha Academy',
-  description: 'Founded in 1977, Buddha Academy is a nonprofit boarding school in Kathmandu, Nepal, dedicated to providing free education to underprivileged children.',
-  milestones: [
-    { year: '1977', event: 'Founded with 12 students' },
-    { year: '1990s', event: 'Hostel expansion program' },
-    { year: '2010s', event: 'Computer lab established' },
-    { year: 'Today', event: 'Educating hundreds annually' },
-  ],
+function createHomeDefaults(t: (key: string) => string) {
+  const hero: HeroContent = {
+    ...DEFAULT_HERO,
+    title: t('home_hero_title'),
+    highlight: t('home_hero_highlight'),
+    description: t('home_hero_description'),
+    cta_primary_text: t('home_hero_cta_primary'),
+    cta_secondary_text: t('home_hero_cta_secondary'),
+    statistics: [
+      { value: t('home_stat_since'), label: t('home_stat_trusted_service') },
+      { value: '49+', label: t('home_stat_years_of_service') },
+      { value: '100%', label: t('home_stat_free_education') },
+      { value: '250+', label: t('home_stat_children_supported') },
+    ],
+  }
+  const aboutTitle = t('home_about_title')
+  const aboutDescription = t('home_about_description')
+  return {
+    hero,
+    about: {
+      title: aboutTitle,
+      description: aboutDescription,
+      milestones: [
+        { year: '1977', event: t('home_milestone_1977') },
+        { year: '1990s', event: t('home_milestone_1990s') },
+        { year: '2010s', event: t('home_milestone_2010s') },
+        { year: 'Today', event: t('home_milestone_today') },
+      ],
+    },
+    sponsorshipSteps: [
+      { title: t('sponsorship_step_1_title'), desc: t('sponsorship_step_1_desc') },
+      { title: t('sponsorship_step_2_title'), desc: t('sponsorship_step_2_desc') },
+      { title: t('sponsorship_step_3_title'), desc: t('sponsorship_step_3_desc') },
+      { title: t('sponsorship_step_4_title'), desc: t('sponsorship_step_4_desc') },
+      { title: t('sponsorship_step_5_title'), desc: t('sponsorship_step_5_desc') },
+      { title: t('sponsorship_step_6_title'), desc: t('sponsorship_step_6_desc') },
+      { title: t('sponsorship_step_7_title'), desc: t('sponsorship_step_7_desc') },
+      { title: t('sponsorship_step_8_title'), desc: t('sponsorship_step_8_desc') },
+    ],
+  }
 }
-
-const DEFAULT_SPONSORSHIP_STEPS = [
-  { title: 'Browse Profiles', desc: 'Review children waiting for sponsors' },
-  { title: 'Choose a Child', desc: 'Select a student to sponsor' },
-  { title: 'Make Your Pledge', desc: 'Complete donation form securely' },
-  { title: 'We Connect', desc: 'Link you with your sponsored child' },
-  { title: 'Receive Updates', desc: 'Get progress reports & photos' },
-  { title: 'Build Connection', desc: 'Exchange letters & messages' },
-  { title: 'Track Impact', desc: 'See your contribution at work' },
-  { title: 'Join Community', desc: 'Connect with other sponsors' },
-]
 
 function sponsorshipVariant(status: string) {
   return BADGE_MAP[status] ?? 'default'
-}
-
-function sponsorshipLabel(status: string) {
-  return status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
 }
 
 function HeroSection({ hero, visible }: { hero: HeroContent; visible: boolean }) {
@@ -207,11 +219,12 @@ function WelcomeSection({ welcome, visible }: { welcome: SectionContent; visible
 function AboutSection({ about, visible, t }: { about: SectionContent | null; visible: boolean; t: (k: string) => string }) {
   const localize = useLocalizePath()
   if (!visible) return null
+  const aboutDefaults = createHomeDefaults(t).about
   const milestones: { year: string; event: string }[] = about
     ? ((about.content as { milestones?: { year: string; event: string }[] })?.milestones || [])
-    : DEFAULT_ABOUT_CONTENT.milestones
-  const title = about?.title || (about?.content as { title?: string } | undefined)?.title || DEFAULT_ABOUT_CONTENT.title
-  const description = about?.description || (about?.content as { description?: string } | undefined)?.description || DEFAULT_ABOUT_CONTENT.description
+    : aboutDefaults.milestones
+  const title = about?.title || (about?.content as { title?: string } | undefined)?.title || aboutDefaults.title
+  const description = about?.description || (about?.content as { description?: string } | undefined)?.description || aboutDefaults.description
   return (
     <section className="py-12 sm:py-16 lg:py-24 bg-[var(--color-background)]">
       <div className="px-4 sm:px-6 lg:px-12">
@@ -284,7 +297,7 @@ function StudentsSection({ students, brokenPhotos, setBrokenPhotos, visible, loa
             </>
           ) : students.length === 0 ? (
             <div className="col-span-3 text-center py-12 text-[var(--color-text-muted)]">
-              No students available at the moment.
+              {t('home_no_students')}
             </div>
           ) : (
             students.map((student) => {
@@ -305,7 +318,7 @@ function StudentsSection({ students, brokenPhotos, setBrokenPhotos, visible, loa
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">{student.name}</h3>
-                      <Badge variant={sponsorshipVariant(student.sponsorship_status)}>{sponsorshipLabel(student.sponsorship_status)}</Badge>
+                      <Badge variant={sponsorshipVariant(student.sponsorship_status)}>{localizedSponsorshipLabel(student.sponsorship_status, t)}</Badge>
                     </div>
                     <div className="flex gap-4 text-sm text-[var(--color-text-secondary)] mb-3">
                       <span>{t('home_age_label', { age: student.age })}</span>
@@ -334,16 +347,8 @@ function StudentsSection({ students, brokenPhotos, setBrokenPhotos, visible, loa
 }
 
 function SponsorshipTree({ steps }: { steps: { title: string; desc: string }[] }) {
-  const items = steps.length >= 8 ? steps : [
-    { title: 'Browse Profiles', desc: 'Review children waiting for sponsors' },
-    { title: 'Choose a Child', desc: 'Select a student to sponsor' },
-    { title: 'Make Your Pledge', desc: 'Complete donation form securely' },
-    { title: 'We Connect', desc: 'Link you with your sponsored child' },
-    { title: 'Receive Updates', desc: 'Get progress reports & photos' },
-    { title: 'Build Connection', desc: 'Exchange letters & messages' },
-    { title: 'Track Impact', desc: 'See your contribution at work' },
-    { title: 'Join Community', desc: 'Connect with other sponsors' },
-  ]
+  const items = steps.length > 0 ? steps : []
+  if (items.length === 0) return null
 
   return (
     <div className="relative flex flex-col items-center">
@@ -371,12 +376,13 @@ function SponsorshipTree({ steps }: { steps: { title: string; desc: string }[] }
   )
 }
 
-function SponsorshipStepsSection({ sponsorshipSteps, visible }: { sponsorshipSteps: SectionContent | null; visible: boolean }) {
+function SponsorshipStepsSection({ sponsorshipSteps, visible, t }: { sponsorshipSteps: SectionContent | null; visible: boolean; t: (k: string) => string }) {
   if (!visible) return null
   const content = sponsorshipSteps?.content as { title?: string; description?: string; steps?: Array<{ title: string; desc: string }> } | undefined
-  const steps: { title: string; desc: string }[] = content?.steps?.length ? content.steps : DEFAULT_SPONSORSHIP_STEPS
-  const title = content?.title || 'How Sponsorship Works'
-  const description = content?.description || 'Your journey to changing a child\'s life starts here.'
+  const defaultSteps = createHomeDefaults(t).sponsorshipSteps
+  const steps: { title: string; desc: string }[] = content?.steps?.length ? content.steps : defaultSteps
+  const title = content?.title || t('home_how_sponsorship_works')
+  const description = content?.description || t('home_sponsorship_intro')
   return (
     <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-[var(--color-primary-light)]/10 via-[var(--color-surface)] to-[var(--color-secondary-light)]/10">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -390,7 +396,7 @@ function SponsorshipStepsSection({ sponsorshipSteps, visible }: { sponsorshipSte
   )
 }
 
-function TestimonialsSection({ testimonials, testimonialList, visible }: { testimonials: SectionContent; testimonialList: Testimonial[]; visible: boolean }) {
+function TestimonialsSection({ testimonials, testimonialList, visible, t }: { testimonials: SectionContent; testimonialList: Testimonial[]; visible: boolean; t: (k: string) => string }) {
   if (!visible) return null
   const content = testimonials.content as { title?: string }
   const items = testimonialList.length > 0 ? testimonialList.slice(0, 4) : []
@@ -413,7 +419,7 @@ function TestimonialsSection({ testimonials, testimonialList, visible }: { testi
               <p className="text-sm text-[var(--color-text-secondary)] italic">"<Tr text={t.content || t.quote || ''} />"</p>
             </div>
           )) : (
-            <div className="col-span-2 text-center py-8 text-[var(--color-text-muted)] text-sm">Testimonials will appear here once added.</div>
+            <div className="col-span-2 text-center py-8 text-[var(--color-text-muted)] text-sm">{t('home_testimonials_empty')}</div>
           )}
         </div>
       </div>
@@ -438,6 +444,9 @@ export function HomePage() {
   const [studentsLoading, setStudentsLoading] = useState(true)
   const [cmsLoaded, setCmsLoaded] = useState(false)
 
+  const homepageDefaults = useMemo(() => createHomeDefaults(t), [t])
+  const defaultHero = homepageDefaults.hero
+
   useEffect(() => {
     if (typeof window === 'undefined') return
     let cancelled = false
@@ -459,16 +468,16 @@ export function HomePage() {
                 background_image?: string;
               }
               setHero({
-                ...DEFAULT_HERO,
-                title: heroSection.title || c?.title || DEFAULT_HERO.title,
-                highlight: c?.highlight || DEFAULT_HERO.highlight,
-                description: heroSection.description || c?.description || DEFAULT_HERO.description,
+                ...defaultHero,
+                title: heroSection.title || c?.title || defaultHero.title,
+                highlight: c?.highlight || defaultHero.highlight,
+                description: heroSection.description || c?.description || defaultHero.description,
                 background_image: c?.background_image || '',
-                cta_primary_text: c?.cta_primary_text || DEFAULT_HERO.cta_primary_text,
-                cta_primary_link: c?.cta_primary_link || DEFAULT_HERO.cta_primary_link,
-                cta_secondary_text: c?.cta_secondary_text || DEFAULT_HERO.cta_secondary_text,
-                cta_secondary_link: c?.cta_secondary_link || DEFAULT_HERO.cta_secondary_link,
-                statistics: c?.statistics?.length ? c.statistics : DEFAULT_HERO.statistics,
+                cta_primary_text: c?.cta_primary_text || defaultHero.cta_primary_text,
+                cta_primary_link: c?.cta_primary_link || defaultHero.cta_primary_link,
+                cta_secondary_text: c?.cta_secondary_text || defaultHero.cta_secondary_text,
+                cta_secondary_link: c?.cta_secondary_link || defaultHero.cta_secondary_link,
+                statistics: c?.statistics?.length ? c.statistics : defaultHero.statistics,
                 badges: c?.badges || [],
               })
             }
@@ -494,7 +503,7 @@ export function HomePage() {
     return () => { cancelled = true }
   }, [language])
 
-  const activeHero = hero ?? DEFAULT_HERO
+  const activeHero = hero ?? defaultHero
   const statsToShow = (activeHero.statistics as { value: string; label: string }[]) || []
 
   if (!cmsLoaded) {
@@ -518,8 +527,8 @@ export function HomePage() {
         t={t}
         featuredContent={featuredStudentsSection}
       />
-      <SponsorshipStepsSection sponsorshipSteps={sponsorshipSteps} visible={sectionsVisible.sponsorship_steps !== false} />
-      {testimonialsSection && <TestimonialsSection testimonials={testimonialsSection} testimonialList={testimonialItems} visible={sectionsVisible.testimonials !== false} />}
+      <SponsorshipStepsSection sponsorshipSteps={sponsorshipSteps} visible={sectionsVisible.sponsorship_steps !== false} t={t} />
+      {testimonialsSection && <TestimonialsSection testimonials={testimonialsSection} testimonialList={testimonialItems} visible={sectionsVisible.testimonials !== false} t={t} />}
       {sectionsVisible.donation_cta !== false && <CtaBanner />}
     </div>
   )

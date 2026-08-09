@@ -33,7 +33,10 @@ import { Select } from '../../../components/ui/Select'
 import { Textarea } from '../../../components/ui/Textarea'
 import { ProfileSkeleton } from '../../../components/ui/LoadingSkeleton'
 import { useLanguage, languages } from '../../../context/LanguageContext'
-import { formatNPR } from '../../../utils/currency'
+import { formatCurrency } from '../../../utils/currency'
+import { useSiteCurrency } from '../hooks/useSiteCurrency'
+import { Tr } from '../../../components/Translated'
+import { useTranslation } from 'react-i18next'
 import { COUNTRY_CODES } from '../../../data/countryCodes'
 
 function getGreeting() {
@@ -44,8 +47,10 @@ function getGreeting() {
 }
 
 export function DashboardPage() {
+  const { t } = useTranslation()
   const { user, profile, refreshProfile } = useAuth()
   const userId = user?.id
+  const currency = useSiteCurrency()
   const [searchParams] = useSearchParams()
   const initialSection = (searchParams.get('tab') === 'notifications' ? 'updates' : 'overview') as Section
 
@@ -73,13 +78,13 @@ export function DashboardPage() {
       const prevDonation = prev.find(d => d.id === donation.id)
       if (prevDonation && prevDonation.status !== 'completed' && donation.status === 'completed') {
         toast.success(
-          `Donation of ${formatNPR(donation.amount)} verified! Thank you for your contribution.`,
+          `Donation of ${formatCurrency(donation.amount, currency)} verified! Thank you for your contribution.`,
           { duration: 5000 },
         )
       }
     }
     prevDonationsRef.current = donations
-  }, [donations])
+  }, [donations, currency])
 
   const totalDonated = donorStats?.totalDonated ?? donations.reduce((sum, d) => sum + d.amount, 0)
   const activeSponsorships = sponsorships.filter(s => s.status === 'active')
@@ -194,47 +199,49 @@ export function DashboardPage() {
         <div className="space-y-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight">{getGreeting()}, {profile?.full_name || 'Donor'}</h1>
+              <h1 className="text-2xl font-semibold tracking-tight">{t(getGreeting(), { defaultValue: getGreeting() })}, {profile?.full_name || t('Donor', { defaultValue: 'Donor' })}</h1>
               <p className="text-sm text-gray-500 mt-1">
-                Your support continues to make a meaningful impact at Buddha Academy.
+                <Tr text="Your support continues to make a meaningful impact at Buddha Academy." />
               </p>
             </div>
           </div>
 
-          <p className="text-xs text-gray-400">All amounts in Nepalese Rupees (NPR)</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <DashboardStatCard
-              label="Total Donated"
-              value={formatNPR(totalDonated)}
-              description="Lifetime contributions"
+              label={t('Total Donated', { defaultValue: 'Total Donated' })}
+              value={formatCurrency(totalDonated, currency)}
+              description={t('Lifetime contributions', { defaultValue: 'Lifetime contributions' })}
             />
             <DashboardStatCard
-              label="Active Sponsorships"
+              label={t('Active Sponsorships', { defaultValue: 'Active Sponsorships' })}
               value={String(activeSponsorships.length)}
-              description="Currently supporting"
+              description={t('Currently supporting', { defaultValue: 'Currently supporting' })}
             />
             <DashboardStatCard
-              label="Students Supported"
+              label={t('Students Supported', { defaultValue: 'Students Supported' })}
               value={String(totalSponsored)}
-              description={totalSponsored !== 1 ? 'Lives changed' : 'Life changed'}
+              description={totalSponsored !== 1 ? t('Lives changed', { defaultValue: 'Lives changed' }) : t('Life changed', { defaultValue: 'Life changed' })}
             />
             <DashboardStatCard
-              label="Last Donation"
+              label={t('Last Donation', { defaultValue: 'Last Donation' })}
               value={lastDonationDate
                 ? new Date(lastDonationDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                 : '-'}
-              description={lastDonationDate ? 'Most recent gift' : 'No donations yet'}
+              description={lastDonationDate ? t('Most recent gift', { defaultValue: 'Most recent gift' }) : t('No donations yet', { defaultValue: 'No donations yet' })}
             />
           </div>
 
           {contributedStudents.length > 0 ? (
             <SponsoredStudents contributions={contributedStudents} />
           ) : (
-            <DashboardCard title="Sponsorships" description="You haven't sponsored any students yet">
+            <DashboardCard
+              title={t('Sponsorships', { defaultValue: 'Sponsorships' })}
+              description={t("You haven't sponsored any students yet", { defaultValue: "You haven't sponsored any students yet" })}
+            >
               <div className="text-center py-8">
-                <p className="text-sm text-gray-500 mb-4">Start your journey by sponsoring a child's education.</p>
+                <p className="text-sm text-gray-500 mb-4"><Tr text="Start your journey by sponsoring a child's education." /></p>
                 <a href="/students" className="inline-flex items-center text-sm font-medium text-orange-600 hover:text-orange-700">
-                  Browse students
+                  <Tr text="Browse students" />
                 </a>
               </div>
             </DashboardCard>
@@ -245,10 +252,16 @@ export function DashboardPage() {
           )}
 
           <div className="grid lg:grid-cols-2 gap-6">
-            <DashboardCard title="Donation History" description="Your monthly contributions over time">
+            <DashboardCard
+              title={t('Donation History', { defaultValue: 'Donation History' })}
+              description={t('Your monthly contributions over time', { defaultValue: 'Your monthly contributions over time' })}
+            >
               <DonationChart donations={donations} />
             </DashboardCard>
-            <DashboardCard title="Impact Timeline" description="Key moments from your journey">
+            <DashboardCard
+              title={t('Impact Timeline', { defaultValue: 'Impact Timeline' })}
+              description={t('Key moments from your journey', { defaultValue: 'Key moments from your journey' })}
+            >
               <ImpactTimeline events={events} />
             </DashboardCard>
           </div>
@@ -258,8 +271,8 @@ export function DashboardPage() {
       {section === 'students' && (
         <div className="space-y-8">
           <div>
-            <h2 className="text-2xl font-semibold tracking-tight">Sponsored Students</h2>
-            <p className="text-sm text-gray-500 mt-1">Your sponsored children and their progress</p>
+            <h2 className="text-2xl font-semibold tracking-tight"><Tr text="Sponsored Students" /></h2>
+            <p className="text-sm text-gray-500 mt-1"><Tr text="Your sponsored children and their progress" /></p>
           </div>
           {contributedStudents.length > 0 ? (
             <>
@@ -269,7 +282,7 @@ export function DashboardPage() {
           ) : (
             <DashboardCard>
               <div className="text-center py-8">
-                <p className="text-sm text-gray-500">No sponsored students yet.</p>
+                <p className="text-sm text-gray-500"><Tr text="No sponsored students yet." /></p>
               </div>
             </DashboardCard>
           )}
@@ -279,8 +292,8 @@ export function DashboardPage() {
       {section === 'donations' && (
         <div className="space-y-8">
           <div>
-            <h2 className="text-2xl font-semibold tracking-tight">Your Transactions</h2>
-            <p className="text-sm text-gray-500 mt-1">Every donation, every allocation fully transparent</p>
+            <h2 className="text-2xl font-semibold tracking-tight"><Tr text="Your Transactions" /></h2>
+            <p className="text-sm text-gray-500 mt-1"><Tr text="Every donation, every allocation fully transparent" /></p>
           </div>
           <TransactionSection
             transactions={transactions}
@@ -299,8 +312,8 @@ export function DashboardPage() {
       {section === 'updates' && (
         <div className="space-y-8">
           <div>
-            <h2 className="text-2xl font-semibold tracking-tight">Updates & Activity</h2>
-            <p className="text-sm text-gray-500 mt-1">Latest news from your sponsored students</p>
+            <h2 className="text-2xl font-semibold tracking-tight"><Tr text="Updates & Activity" /></h2>
+            <p className="text-sm text-gray-500 mt-1"><Tr text="Latest news from your sponsored students" /></p>
           </div>
           <NotificationCenter
             notifications={notifications as unknown as NotifType[]}
@@ -317,8 +330,8 @@ export function DashboardPage() {
       {section === 'profile' && (
         <div className="space-y-8">
           <div>
-            <h2 className="text-2xl font-semibold tracking-tight">Profile</h2>
-            <p className="text-sm text-gray-500 mt-1">Manage your personal information</p>
+            <h2 className="text-2xl font-semibold tracking-tight"><Tr text="Profile" /></h2>
+            <p className="text-sm text-gray-500 mt-1"><Tr text="Manage your personal information" /></p>
           </div>
 
           {!profile ? (
@@ -337,13 +350,13 @@ export function DashboardPage() {
               </div>
               <form onSubmit={handleSaveProfile} className="p-6 space-y-5">
                 <Input
-                  label="Full Name"
+                  label={t('Full Name', { defaultValue: 'Full Name' })}
                   value={profileForm.full_name}
                   onChange={(e) => setProfileForm(p => ({ ...p, full_name: e.target.value }))}
                   required
                 />
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1"><Tr text="Phone" /></label>
                   <div className="flex gap-2">
                     <select
                       value={profileForm.phone_code}
@@ -364,25 +377,25 @@ export function DashboardPage() {
                   </div>
                 </div>
                 <Select
-                  label="Country"
+                  label={t('Country', { defaultValue: 'Country' })}
                   options={countryOptions}
                   value={profileForm.country}
                   onChange={(e) => setProfileForm(p => ({ ...p, country: e.target.value }))}
                 />
                 <Textarea
-                  label="Bio"
+                  label={t('Bio', { defaultValue: 'Bio' })}
                   value={profileForm.bio}
                   onChange={(e) => setProfileForm(p => ({ ...p, bio: e.target.value }))}
-                  placeholder="Tell us a little about yourself..."
+                  placeholder={t('Tell us a little about yourself...', { defaultValue: 'Tell us a little about yourself...' })}
                   rows={3}
                 />
                 <div className="flex items-center gap-3 pt-2">
                   <Button type="submit" disabled={profileSaving}>
-                    {profileSaving ? 'Saving...' : 'Save Changes'}
+                    {profileSaving ? t('Saving...', { defaultValue: 'Saving...' }) : t('Save Changes', { defaultValue: 'Save Changes' })}
                   </Button>
                   {profileSaved && (
                     <span className="text-sm text-emerald-600">
-                      Profile updated
+                      <Tr text="Profile updated" />
                     </span>
                   )}
                 </div>
@@ -395,49 +408,49 @@ export function DashboardPage() {
       {section === 'settings' && (
         <div className="space-y-8">
           <div>
-            <h2 className="text-2xl font-semibold tracking-tight">Settings</h2>
-            <p className="text-sm text-gray-500 mt-1">Customize your experience</p>
+            <h2 className="text-2xl font-semibold tracking-tight"><Tr text="Settings" /></h2>
+            <p className="text-sm text-gray-500 mt-1"><Tr text="Customize your experience" /></p>
           </div>
 
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
             <div className="p-6 border-b border-gray-100">
               <div>
-                <h3 className="text-base font-semibold text-gray-900">Language</h3>
+                <h3 className="text-base font-semibold text-gray-900"><Tr text="Language" /></h3>
               </div>
-              <p className="text-sm text-gray-500 mt-1">Choose your preferred language</p>
+              <p className="text-sm text-gray-500 mt-1"><Tr text="Choose your preferred language" /></p>
             </div>
             <form onSubmit={handleSaveSettings} className="p-6 space-y-5">
               <Select
-                label="Display Language"
+                label={t('Display Language', { defaultValue: 'Display Language' })}
                 options={languages.map(l => ({ value: l.code, label: `${l.shortLabel} ${l.nativeLabel}` }))}
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
               />
               <div className="border-t border-gray-100 pt-5">
                   <div className="mb-4">
-                  <h3 className="text-base font-semibold text-gray-900">Timezone</h3>
+                  <h3 className="text-base font-semibold text-gray-900"><Tr text="Timezone" /></h3>
                 </div>
                 <Select
-                  label="Your Timezone"
+                  label={t('Your Timezone', { defaultValue: 'Your Timezone' })}
                   options={timezoneOptions}
                   value={timezone}
                   onChange={(e) => setTimezone(e.target.value)}
                 />
               </div>
               <div className="border-t border-gray-100 pt-5">
-                <h3 className="text-base font-semibold text-gray-900 mb-1">Account</h3>
-                <p className="text-sm text-gray-500 mb-4">Your account details</p>
+                <h3 className="text-base font-semibold text-gray-900 mb-1"><Tr text="Account" /></h3>
+                <p className="text-sm text-gray-500 mb-4"><Tr text="Your account details" /></p>
                 <div className="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Email</span>
+                    <span className="text-gray-500"><Tr text="Email" /></span>
                     <span className="text-gray-900 font-medium">{user?.email || '-'}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Role</span>
+                    <span className="text-gray-500"><Tr text="Role" /></span>
                     <span className="text-gray-900 font-medium capitalize">{profile?.role?.replace('_', ' ') || '-'}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Member Since</span>
+                    <span className="text-gray-500"><Tr text="Member Since" /></span>
                     <span className="text-gray-900 font-medium">
                       {profile?.created_at ? new Date(profile.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long' }) : '-'}
                     </span>
@@ -446,11 +459,11 @@ export function DashboardPage() {
               </div>
               <div className="flex items-center gap-3 pt-2">
                 <Button type="submit" disabled={settingsSaving}>
-                  {settingsSaving ? 'Saving...' : 'Save Settings'}
+                  {settingsSaving ? t('Saving...', { defaultValue: 'Saving...' }) : t('Save Settings', { defaultValue: 'Save Settings' })}
                 </Button>
                   {settingsSaved && (
                   <span className="text-sm text-emerald-600">
-                    Settings saved
+                    <Tr text="Settings saved" />
                   </span>
                 )}
               </div>
