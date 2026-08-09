@@ -20,19 +20,14 @@ export const languages: LanguageOption[] = [
   { code: 'ne', label: 'Nepali', nativeLabel: 'नेपाली', shortLabel: '🇳🇵' },
 ]
 
-const languageFlagCountries: Record<LanguageCode, { code: string; name: string }> = {
-  en: { code: 'us', name: 'United States' },
-  ne: { code: 'np', name: 'Nepal' },
+const languageFlagCountries: Record<LanguageCode, string> = {
+  en: 'us',
+  ne: 'np',
 }
 
 export function getLanguageFlagUrl(language: LanguageCode) {
-  const country = languageFlagCountries[language] ?? languageFlagCountries.en
-  return `https://flagcdn.com/w40/${country.code}.png`
-}
-
-export function getLanguageFlagAlt(language: LanguageCode) {
-  const country = languageFlagCountries[language] ?? languageFlagCountries.en
-  return `${country.name} flag`
+  const countryCode = languageFlagCountries[language] ?? languageFlagCountries.en
+  return `https://flagcdn.com/w40/${countryCode}.png`
 }
 
 export const LanguageContext = createContext<LanguageContextType | undefined>(undefined)

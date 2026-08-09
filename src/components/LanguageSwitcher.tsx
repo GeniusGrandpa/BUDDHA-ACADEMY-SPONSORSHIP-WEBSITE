@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { ChevronDown } from 'lucide-react'
-import { getLanguageFlagAlt, getLanguageFlagUrl, languages, useLanguage } from '../context/LanguageContext'
+import { getLanguageFlagUrl, languages, useLanguage } from '../context/LanguageContext'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import type { LanguageCode } from '../context/LanguageContext'
 import { localizePath, stripLocale } from '../lib/locale'
@@ -64,7 +64,7 @@ export function LanguageSwitcher({ mobile = false }: { mobile?: boolean }) {
             : 'text-gray-600 hover:text-gray-900'
         }`}
       >
-        <span className="text-sm font-medium truncate">{current?.nativeLabel ?? 'English'}</span>
+        <span className="text-sm font-medium truncate">{current?.nativeLabel ?? t('language_name_en')}</span>
         <ChevronDown
           className={`w-3.5 h-3.5 flex-shrink-0 transition-transform duration-200 ${
             open ? 'rotate-180' : ''
@@ -106,7 +106,7 @@ export function LanguageSwitcher({ mobile = false }: { mobile?: boolean }) {
                   >
                     <img
                       src={getLanguageFlagUrl(lang.code)}
-                      alt={getLanguageFlagAlt(lang.code)}
+                      alt={t(`language_flag_alt_${lang.code}`)}
                       className="h-3.5 w-5 rounded-sm object-cover shadow-sm flex-shrink-0"
                       loading="lazy"
                     />

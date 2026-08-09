@@ -2,6 +2,7 @@ import type { RouteObject } from 'react-router-dom'
 import { Outlet, redirect } from 'react-router-dom'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { ScrollToTop } from './components/ScrollToTop'
+import { LocaleRouteSync } from './components/LocaleRouteSync'
 import { Layout } from './layout/Layout'
 import { LocaleGuard } from './components/LocaleGuard'
 import { RouteErrorPage } from './components/pages/RouteErrorPage'
@@ -15,6 +16,7 @@ export const routeDefinitions: RouteObject[] = [
   {
     element: (
       <>
+        <LocaleRouteSync />
         <ScrollToTop />
         <Outlet />
       </>
