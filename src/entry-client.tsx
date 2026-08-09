@@ -53,22 +53,10 @@ if (i18n.language !== initialLanguage) {
   void i18n.changeLanguage(initialLanguage)
 }
 
-const hasServerContent = rootElement.children.length > 0
-if (hasServerContent) {
-  ReactDOM.hydrateRoot(
-    rootElement,
-    <React.StrictMode>
-      <ErrorBoundary>
-        <App router={router} initialLanguage={initialLanguage} />
-      </ErrorBoundary>
-    </React.StrictMode>,
-  )
-} else {
-  ReactDOM.createRoot(rootElement).render(
-    <React.StrictMode>
-      <ErrorBoundary>
-        <App router={router} initialLanguage={initialLanguage} />
-      </ErrorBoundary>
-    </React.StrictMode>,
-  )
-}
+ReactDOM.createRoot(rootElement).render(
+  <React.StrictMode>
+    <ErrorBoundary>
+      <App router={router} initialLanguage={initialLanguage} />
+    </ErrorBoundary>
+  </React.StrictMode>,
+)
