@@ -12,7 +12,6 @@ import { getHeroContent, getSectionContent, getSectionVisibility } from '../serv
 import { getTestimonialsWithType } from '../services/content'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import { useLanguage } from '../context/LanguageContext'
-import { resolveOverlayColor } from '../lib/color'
 import { Tr } from '../components/Translated'
 import type { Student, Testimonial } from '../types/database'
 import type { HeroContent, SectionContent } from '../types/cms-content'
@@ -104,11 +103,14 @@ function HeroSection({ hero, visible }: { hero: HeroContent; visible: boolean })
            onError={e => { (e.target as HTMLImageElement).style.opacity = '0' }}
          />
        )}
-       <div 
-         className="absolute inset-0 bg-gradient-to-br from-stone-950/80 via-stone-950/60 to-transparent"
-         style={{ backgroundColor: resolveOverlayColor(hero.overlay_color), opacity: hero.overlay_opacity ?? 0.5 }}
-         aria-hidden="true"
-       />
+<div 
+          className="absolute inset-0"
+          style={{
+            backgroundImage: 'linear-gradient(to right, rgba(12, 11, 9, 0.55) 0%, rgba(12, 11, 9, 0.22) 50%, rgba(12, 11, 9, 0) 75%)',
+            opacity: Math.min(0.95, (hero.overlay_opacity ?? 0.5) * 0.75),
+          }}
+          aria-hidden="true"
+        />
        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
          <div className={`max-w-2xl ${hero.layout === 'center' ? 'mx-auto text-center' : ''}`}>
             {hero.title && (
