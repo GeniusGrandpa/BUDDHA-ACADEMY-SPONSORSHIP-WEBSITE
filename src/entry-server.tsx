@@ -5,8 +5,8 @@ import { PassThrough } from 'stream'
 import { routeDefinitions } from './routes'
 import { createQueryClient } from './lib/query-client'
 import { AppProviders } from './AppProviders'
-import { parseLanguageCookie, localeFromPath, toLocale } from './lib/locale'
-import i18n, { DEFAULT_LOCALE } from './i18n'
+import { localeFromPath } from './lib/locale'
+import i18n from './i18n'
 import './index.css'
 
 export interface SsrResult {
@@ -17,9 +17,9 @@ export interface SsrResult {
 const handler = createStaticHandler(routeDefinitions)
 
 export async function render(_url: string, template: string, cookieHeader?: string): Promise<SsrResult> {
+  void cookieHeader
   const pathLocale = localeFromPath(new URL(_url, 'http://localhost').pathname)
-  const cookieLocale = toLocale(parseLanguageCookie(cookieHeader))
-  const initialLanguage = pathLocale === DEFAULT_LOCALE && cookieLocale !== pathLocale ? cookieLocale : pathLocale
+  const initialLanguage = pathLocale
   if (i18n.isInitialized) {
     void i18n.changeLanguage(initialLanguage)
   }
