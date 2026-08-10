@@ -93,29 +93,39 @@ export function usePayment(): UsePaymentReturn {
         step: 'processing',
       }))
 
-      const session = await getPaymentSession(sessionId)
-      if (!session) {
-        throw new Error('Payment session not found')
+      const MAX_ATTEMPTS = 8
+      const POLL_DELAY_MS = 1500
+
+      for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
+        const session = await getPaymentSession(sessionId)
+        if (!session) {
+          throw new Error('Payment session not found')
+        }
+
+        if (session.status === 'completed') {
+          logger.info('payment.confirm.completed', { sessionId, attempt })
+          setCheckout(prev => ({
+            ...prev,
+            step: 'success',
+            transactionId: session.transaction_id,
+          }))
+          return
+        }
+
+        if (session.status === 'failed' || session.status === 'cancelled') {
+          logger.warn('payment.confirm.rejected', { sessionId, status: session.status, attempt })
+          setError('Payment was not completed. Please try again.')
+          setCheckout(prev => ({ ...prev, step: 'failed' }))
+          return
+        }
+
+        logger.info('payment.confirm.waiting', { sessionId, status: session.status, attempt })
+        if (attempt < MAX_ATTEMPTS) {
+          await new Promise(resolve => setTimeout(resolve, POLL_DELAY_MS))
+        }
       }
 
-      if (session.status === 'completed') {
-        logger.info('payment.confirm.completed', { sessionId })
-        setCheckout(prev => ({
-          ...prev,
-          step: 'success',
-          transactionId: session.transaction_id,
-        }))
-        return
-      }
-
-      if (session.status === 'failed' || session.status === 'cancelled') {
-        logger.warn('payment.confirm.rejected', { sessionId, status: session.status })
-        setError('Payment was not completed. Please try again.')
-        setCheckout(prev => ({ ...prev, step: 'failed' }))
-        return
-      }
-
-      logger.warn('payment.confirm.pending', { sessionId, status: session.status })
+      logger.warn('payment.confirm.pending', { sessionId })
       setError('Payment is still processing. Please check back later or contact support.')
       setCheckout(prev => ({ ...prev, step: 'failed' }))
     } catch (err: unknown) {
