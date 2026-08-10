@@ -4,6 +4,7 @@ import { useCmsStrings } from '../../../context/CmsStringsContext'
 import { formatCurrency, type Currency } from '../../../utils/currency'
 import { initiateKhaltiPayment, type KhaltiPaymentInit } from '../../../services/khaltiPay'
 import { getErrorMessage } from '../../../lib/errors'
+import { logger } from '../../../lib/logger'
 import { Button } from '../../ui/Button'
 
 interface KhaltiPaymentProps {
@@ -27,15 +28,19 @@ export function KhaltiPayment({ sessionId, amount, currency = 'NPR', onError, on
 
     async function init() {
       try {
+        logger.info('khalti.payment.init.started', { sessionId, amount, currency })
         const result = await initiateKhaltiPayment(sessionId)
         if (cancelled) return
+        logger.info('khalti.payment.init.succeeded', { sessionId, pidx: result.pidx, environment: result.environment })
         setPayment(result)
         setLoading(false)
         timer = window.setTimeout(() => {
+          logger.info('khalti.payment.redirect.started', { sessionId, paymentUrl: result.payment_url })
           window.location.href = result.payment_url
         }, 600)
       } catch (err) {
         if (!cancelled) {
+          logger.error('khalti.payment.init.failed', { sessionId, error: getErrorMessage(err, 'Unknown error') })
           const message = getErrorMessage(err, t('payment_khalti_init_failed'))
           setError(message)
           setLoading(false)
@@ -49,10 +54,11 @@ export function KhaltiPayment({ sessionId, amount, currency = 'NPR', onError, on
       cancelled = true
       if (timer) window.clearTimeout(timer)
     }
-  }, [sessionId, onError, t])
+  }, [sessionId, onError, amount, currency, t])
 
   const handleContinue = () => {
     if (!payment) return
+    logger.info('khalti.payment.manual_redirect.started', { sessionId, paymentUrl: payment.payment_url })
     setSubmitting(true)
     window.location.href = payment.payment_url
   }

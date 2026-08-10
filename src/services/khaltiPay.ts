@@ -28,22 +28,25 @@ export async function initiateKhaltiPayment(
   sessionId: string,
   returnUrl?: string,
 ): Promise<KhaltiPaymentInit> {
-  logger.info('khalti.initiate.started', { sessionId })
+  logger.info('khalti.initiate.started', { sessionId, hasReturnUrl: !!returnUrl })
 
   const { data, error } = await supabase.functions.invoke('khalti-pay', {
     body: { sessionId, returnUrl: returnUrl || getKhaltiReturnBaseUrl() },
   })
 
   if (error) {
+    logger.error('khalti.initiate.failed', { sessionId, error: error.message })
     throw await parseFunctionsError(error, 'We could not start your Khalti payment. Please try again or choose another payment method.')
   }
   if (!data?.payment_url || !data?.pidx) {
+    logger.error('khalti.initiate.invalid_response', { sessionId, hasPaymentUrl: !!data?.payment_url, hasPidx: !!data?.pidx })
     throw new AppError('We could not start your Khalti payment. Please try again.', {
       code: ErrorCodes.PAYMENT_FAILED,
       retryable: true,
     })
   }
 
+  logger.info('khalti.initiate.succeeded', { sessionId, pidx: data.pidx, environment: data.environment })
   return data as KhaltiPaymentInit
 }
 
@@ -52,16 +55,18 @@ export async function confirmKhaltiPayment(
   pidx?: string,
   status?: string,
 ): Promise<KhaltiConfirmResult> {
-  logger.info('khalti.confirm.started', { sessionId, hasPidx: !!pidx })
+  logger.info('khalti.confirm.started', { sessionId, hasPidx: !!pidx, status })
 
   const { data: result, error } = await supabase.functions.invoke('khalti-callback', {
     body: { sessionId, pidx: pidx || null, status: status || null },
   })
 
   if (error) {
+    logger.error('khalti.confirm.failed', { sessionId, error: error.message })
     throw await parseFunctionsError(error, 'We could not confirm your Khalti payment. Please try again.')
   }
 
+  logger.info('khalti.confirm.succeeded', { sessionId, status: result?.status })
   return (result ?? { status: 'processing' }) as KhaltiConfirmResult
 }
 

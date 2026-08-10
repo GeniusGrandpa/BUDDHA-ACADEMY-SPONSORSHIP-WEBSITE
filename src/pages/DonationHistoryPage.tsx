@@ -128,8 +128,8 @@ export function DonationHistoryPage() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900"><Tr text="Donation History" /></h1>
-            <p className="text-sm text-gray-500 mt-1"><Tr text="Track all your contributions" /></p>
+            <h1 className="text-2xl font-bold text-gray-900"><Tr text={t('donation_history_title')} /></h1>
+            <p className="text-sm text-gray-500 mt-1"><Tr text={t('donation_history_subtitle')} /></p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={handleDownloadHistory}>
@@ -159,7 +159,7 @@ export function DonationHistoryPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                title={t('Filter by status', { defaultValue: 'Filter by status' })}
+                title={t('donation_history_filter_status')}
                 className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
               >
                 <option value="all"><Tr text="All Status" /></option>
@@ -175,8 +175,8 @@ export function DonationHistoryPage() {
 
         {filtered.length === 0 ? (
           <Card variant="bordered" padding="lg" className="text-center">
-            <p className="text-gray-500"><Tr text="No donations found" /></p>
-            <p className="text-sm text-gray-400 mt-1"><Tr text="Your donation history will appear here after you make a donation." /></p>
+            <p className="text-gray-500"><Tr text={t('donation_history_no_donations')} /></p>
+            <p className="text-sm text-gray-400 mt-1"><Tr text={t('donation_history_will_appear')} /></p>
           </Card>
         ) : (
           <div className="space-y-3">

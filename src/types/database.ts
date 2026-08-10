@@ -1648,7 +1648,9 @@ export interface Database {
           id: string
           slug: string
           title: string
+          title_ne: string | null
           content: Json
+          content_ne: Json | null
           blocks: Json | null
           seo: Json | null
           published: boolean
@@ -1660,7 +1662,9 @@ export interface Database {
           id?: string
           slug: string
           title: string
+          title_ne?: string | null
           content?: Json
+          content_ne?: Json | null
           blocks?: Json | null
           seo?: Json | null
           published?: boolean
@@ -1672,7 +1676,9 @@ export interface Database {
           id?: string
           slug?: string
           title?: string
+          title_ne?: string | null
           content?: Json
+          content_ne?: Json | null
           blocks?: Json | null
           seo?: Json | null
           published?: boolean
@@ -1743,8 +1749,11 @@ export interface Database {
           id: string
           section_key: string
           title: string
+          title_ne: string | null
           subtitle: string | null
+          subtitle_ne: string | null
           content: Json
+          content_ne: Json | null
           is_active: boolean
           sort_order: number
           updated_by: string | null
@@ -1755,8 +1764,11 @@ export interface Database {
           id?: string
           section_key: string
           title: string
+          title_ne?: string | null
           subtitle?: string | null
+          subtitle_ne?: string | null
           content?: Json
+          content_ne?: Json | null
           is_active?: boolean
           sort_order?: number
           updated_by?: string | null
@@ -1767,8 +1779,11 @@ export interface Database {
           id?: string
           section_key?: string
           title?: string
+          title_ne?: string | null
           subtitle?: string | null
+          subtitle_ne?: string | null
           content?: Json
+          content_ne?: Json | null
           is_active?: boolean
           sort_order?: number
           updated_by?: string | null
@@ -1788,10 +1803,12 @@ export interface Database {
         Row: {
           id: string
           title: string
+          title_ne: string | null
           url: string
           video_type: 'youtube' | 'upload' | 'vimeo'
           thumbnail_url: string | null
           description: string | null
+          description_ne: string | null
           category: string
           is_featured: boolean
           uploaded_by: string | null
@@ -1801,10 +1818,12 @@ export interface Database {
         Insert: {
           id?: string
           title: string
+          title_ne?: string | null
           url: string
           video_type?: 'youtube' | 'upload' | 'vimeo'
           thumbnail_url?: string | null
           description?: string | null
+          description_ne?: string | null
           category?: string
           is_featured?: boolean
           uploaded_by?: string | null
@@ -1814,10 +1833,12 @@ export interface Database {
         Update: {
           id?: string
           title?: string
+          title_ne?: string | null
           url?: string
           video_type?: 'youtube' | 'upload' | 'vimeo'
           thumbnail_url?: string | null
           description?: string | null
+          description_ne?: string | null
           category?: string
           is_featured?: boolean
           uploaded_by?: string | null
@@ -1940,6 +1961,7 @@ export interface Database {
           file_size: number | null
           mime_type: string | null
           alt_text: string | null
+          alt_text_ne: string | null
           folder: string | null
           is_published: boolean
           uploaded_by: string | null
@@ -1952,6 +1974,7 @@ export interface Database {
           file_size?: number | null
           mime_type?: string | null
           alt_text?: string | null
+          alt_text_ne?: string | null
           folder?: string | null
           is_published?: boolean
           uploaded_by?: string | null
@@ -1964,6 +1987,7 @@ export interface Database {
           file_size?: number | null
           mime_type?: string | null
           alt_text?: string | null
+          alt_text_ne?: string | null
           folder?: string | null
           is_published?: boolean
           uploaded_by?: string | null
@@ -2495,6 +2519,8 @@ export interface Database {
           parent_id: string | null
           location: string
           label: string
+          label_ne: string | null
+          description_ne: string | null
           url: string | null
           route: string | null
           icon: string | null
@@ -2513,6 +2539,8 @@ export interface Database {
           parent_id?: string | null
           location: string
           label: string
+          label_ne?: string | null
+          description_ne?: string | null
           url?: string | null
           route?: string | null
           icon?: string | null
@@ -2531,6 +2559,8 @@ export interface Database {
           parent_id?: string | null
           location?: string
           label?: string
+          label_ne?: string | null
+          description_ne?: string | null
           url?: string | null
           route?: string | null
           icon?: string | null
@@ -2722,9 +2752,13 @@ export interface Database {
           id: string
           type: 'privacy_policy' | 'terms_conditions' | 'cookie_policy' | 'donation_policy'
           title: string
+          title_ne: string | null
           slug: string
+          content_ne: string | null
           meta_title: string
+          meta_title_ne: string | null
           meta_description: string
+          meta_description_ne: string | null
           status: 'draft' | 'published' | 'hidden'
           effective_date: string | null
           last_reviewed_at: string | null
@@ -2738,9 +2772,13 @@ export interface Database {
           id?: string
           type: 'privacy_policy' | 'terms_conditions' | 'cookie_policy' | 'donation_policy'
           title: string
+          title_ne?: string | null
           slug: string
+          content_ne?: string | null
           meta_title?: string
+          meta_title_ne?: string | null
           meta_description?: string
+          meta_description_ne?: string | null
           status?: 'draft' | 'published' | 'hidden'
           effective_date?: string | null
           last_reviewed_at?: string | null
@@ -2754,9 +2792,13 @@ export interface Database {
           id?: string
           type?: 'privacy_policy' | 'terms_conditions' | 'cookie_policy' | 'donation_policy'
           title?: string
+          title_ne?: string | null
           slug?: string
+          content_ne?: string | null
           meta_title?: string
+          meta_title_ne?: string | null
           meta_description?: string
+          meta_description_ne?: string | null
           status?: 'draft' | 'published' | 'hidden'
           effective_date?: string | null
           last_reviewed_at?: string | null
@@ -2786,7 +2828,9 @@ export interface Database {
           id: string
           legal_page_id: string
           heading: string
+          heading_ne: string | null
           content: string
+          content_ne: string | null
           sort_order: number
           is_visible: boolean
           created_at: string
@@ -2796,7 +2840,9 @@ export interface Database {
           id?: string
           legal_page_id: string
           heading: string
+          heading_ne?: string | null
           content?: string
+          content_ne?: string | null
           sort_order?: number
           is_visible?: boolean
           created_at?: string
@@ -2806,7 +2852,9 @@ export interface Database {
           id?: string
           legal_page_id?: string
           heading?: string
+          heading_ne?: string | null
           content?: string
+          content_ne?: string | null
           sort_order?: number
           is_visible?: boolean
           created_at?: string

@@ -5,6 +5,7 @@ import { AlertCircle } from 'lucide-react'
 import { useCmsStrings } from '../../../context/CmsStringsContext'
 import { Button } from '../../ui/Button'
 import { formatCurrency, type Currency } from '../../../utils/currency'
+import { logger } from '../../../lib/logger'
 
 interface StripeCheckoutFormProps {
   amount: number
@@ -25,15 +26,20 @@ export function StripeCheckoutForm({ amount, currency = 'NPR', onSuccess, onCanc
 
     if (!stripe || !elements) return
 
+    logger.info('stripe.payment_form.submit.started', { amount, currency })
+
     setIsProcessing(true)
     setMessage(null)
 
     const { error: submitError } = await elements.submit()
     if (submitError) {
+      logger.error('stripe.payment_form.submit.failed', { error: submitError.message })
       setMessage(submitError.message ?? t('payment_stripe_unexpected'))
       setIsProcessing(false)
       return
     }
+
+    logger.info('stripe.payment_form.confirm.started')
 
     const { error: confirmError, paymentIntent } = await stripe.confirmPayment({
       elements,
@@ -44,6 +50,7 @@ export function StripeCheckoutForm({ amount, currency = 'NPR', onSuccess, onCanc
     })
 
     if (confirmError) {
+      logger.error('stripe.payment_form.confirm.failed', { error: confirmError.message, type: confirmError.type })
       if (confirmError.type === 'card_error' || confirmError.type === 'validation_error') {
         setMessage(confirmError.message ?? t('payment_stripe_unexpected'))
       } else {
@@ -52,6 +59,8 @@ export function StripeCheckoutForm({ amount, currency = 'NPR', onSuccess, onCanc
       setIsProcessing(false)
       return
     }
+
+    logger.info('stripe.payment_form.confirm.succeeded', { paymentIntentId: paymentIntent?.id, status: paymentIntent?.status })
 
     if (paymentIntent?.status === 'succeeded') {
       onSuccess(paymentIntent.id)

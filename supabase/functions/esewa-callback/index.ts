@@ -57,10 +57,15 @@ Deno.serve(async (req) => {
   }
 
   try {
+    console.log('[esewa-callback] Request received')
+
     const config = getEsewaConfig()
     const { sessionId, data, failed } = await req.json().catch(() => ({}))
 
+    console.log('[esewa-callback] Request params', { hasSessionId: !!sessionId, hasData: !!data, failed })
+
     if (!sessionId || typeof sessionId !== 'string') {
+      console.log('[esewa-callback] Validation failed: missing session id')
       return jsonError('Payment session id is required.', 'VALIDATION_ERROR', 400)
     }
 
@@ -69,58 +74,83 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     )
 
+    console.log('[esewa-callback] Fetching payment session', { sessionId })
     const { data: session, error: sessionError } = await supabase
       .from('payment_sessions')
-      .select('id, amount, gateway, status, transaction_id, donor_id')
+      .select('id, amount, gateway, status, transaction_id, donor_id, currency')
       .eq('id', sessionId)
       .maybeSingle()
-    if (sessionError) throw sessionError
+    if (sessionError) {
+      console.log('[esewa-callback] Database error', { error: sessionError.message })
+      throw sessionError
+    }
     if (!session) {
+      console.log('[esewa-callback] Session not found', { sessionId })
       return jsonError('Payment session not found.', 'SESSION_NOT_FOUND', 404)
     }
     if (session.gateway !== 'esewa') {
+      console.log('[esewa-callback] Invalid gateway', { gateway: session.gateway })
       return jsonError('Payment session is not for eSewa.', 'INVALID_GATEWAY', 400)
     }
 
+    console.log('[esewa-callback] Session retrieved', { 
+      sessionId, 
+      amount: session.amount, 
+      currency: session.currency,
+      gateway: session.gateway,
+      status: session.status 
+    })
+
     const callerId = getCallerUserId(req)
     if (!callerId || !session.donor_id || callerId !== session.donor_id) {
+      console.log('[esewa-callback] Authorization failed', { callerId, donorId: session.donor_id })
       return jsonError('You are not authorized to update this payment session.', 'FORBIDDEN', 403)
     }
 
     if (failed === true || failed === 'true' || failed === '1') {
+      console.log('[esewa-callback] Payment failed/cancelled', { sessionId })
       const { error: failError } = await supabase.rpc('esewa_fail_payment', { p_session_id: sessionId, p_status: 'cancelled' })
       if (failError) throw failError
       return jsonOk({ status: 'cancelled' }, 200)
     }
 
     if (!data || typeof data !== 'string') {
+      console.log('[esewa-callback] Missing callback data')
       return jsonError('Missing eSewa response data.', 'INVALID_CALLBACK', 400)
     }
 
+    console.log('[esewa-callback] Decoding callback data')
     const decoded = decodeURIComponent(data)
     const payload = JSON.parse(atob(decoded)) as EsewaCallbackPayload
 
     if (!payload.signature) {
+      console.log('[esewa-callback] Missing signature')
       return jsonError('eSewa callback signature is missing.', 'INVALID_SIGNATURE', 400)
     }
 
+    console.log('[esewa-callback] Verifying signature')
     const verified = await verifySignature(payload, config.secretKey, {
       total_amount: session.amount,
       transaction_uuid: session.transaction_id || session.id,
       product_code: config.merchantCode,
     })
     if (!verified) {
+      console.log('[esewa-callback] Signature verification failed')
       logError('esewa-callback/verify', new Error('signature mismatch'))
       return jsonError('eSewa callback signature verification failed.', 'INVALID_SIGNATURE', 400)
     }
 
+    console.log('[esewa-callback] Signature verified successfully')
+
     const returnedAmount = Number(payload.total_amount)
     const sessionAmount = Number(session.amount)
     if (Math.abs(returnedAmount - sessionAmount) > 0.01) {
+      console.log('[esewa-callback] Amount mismatch', { returnedAmount, sessionAmount })
       logError('esewa-callback/amount', new Error(`amount mismatch: ${returnedAmount} vs ${sessionAmount}`))
       return jsonError('Payment amount does not match.', 'AMOUNT_MISMATCH', 400)
     }
 
+    console.log('[esewa-callback] Checking transaction status')
     const statusResult = await runTransactionStatus(
       config.statusUrl,
       config.merchantCode,
@@ -128,23 +158,32 @@ Deno.serve(async (req) => {
       (session.transaction_id || session.id) as string,
     )
 
+    console.log('[esewa-callback] Transaction status', { status: statusResult.status })
+
     if (statusResult.status !== 'COMPLETE') {
+      console.log('[esewa-callback] Transaction not complete', { status: statusResult.status })
       logError('esewa-callback/status', new Error(`unexpected status ${statusResult.status}`))
       return jsonOk({ status: 'processing' }, 200)
     }
 
     const transactionCode = (payload.transaction_code || session.transaction_id) as string
 
+    console.log('[esewa-callback] Confirming payment', { sessionId, transactionCode, currency: session.currency })
     const { error: confirmError } = await supabase.rpc('esewa_confirm_payment', {
       p_session_id: sessionId,
       p_transaction_id: transactionCode,
+      p_currency: session.currency || 'NPR',
     })
-    if (confirmError) throw confirmError
+    if (confirmError) {
+      console.log('[esewa-callback] Confirmation failed', { error: confirmError.message })
+      throw confirmError
+    }
 
-    console.log(JSON.stringify({ level: 'info', context: 'esewa-callback', message: `confirmed ${sessionId} ${transactionCode}` }))
+    console.log('[esewa-callback] Payment confirmed successfully', { sessionId, transactionCode })
 
     return jsonOk({ status: 'confirmed', transaction_id: transactionCode }, 200)
   } catch (err) {
+    console.log('[esewa-callback] Request failed', { error: err instanceof Error ? err.message : 'Unknown error' })
     return handleError('esewa-callback', err, 'ESEWA_CONFIRM_FAILED', 500)
   }
 })

@@ -10,6 +10,7 @@ import { getPageHeader } from '../services/cms-content'
 import { getSiteSettings } from '../services/settings'
 import { useCmsStrings } from '../context/CmsStringsContext'
 import { useLanguage } from '../context/LanguageContext'
+import { Tr } from '../components/Translated'
 import type { PageHeader } from '../types/cms-content'
 
 export function ContactPage() {
@@ -90,8 +91,8 @@ export function ContactPage() {
         <section className="relative py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-amber-50 to-orange-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto">
-              {header.title && <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">{header.title}</h1>}
-              {header.subtitle && <p className="text-base sm:text-lg md:text-xl text-gray-600">{header.subtitle}</p>}
+              {header.title && <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6"><Tr text={header.title} /></h1>}
+              {header.subtitle && <p className="text-base sm:text-lg md:text-xl text-gray-600"><Tr text={header.subtitle} /></p>}
             </div>
           </div>
         </section>
@@ -112,7 +113,7 @@ export function ContactPage() {
                       </div>
                       <div>
                         <h3 className="font-semibold text-gray-900 mb-1">{t('contact_address_label')}</h3>
-                        <p className="text-gray-600">{settings.contact_address}</p>
+                        <p className="text-gray-600"><Tr text={settings.contact_address} /></p>
                       </div>
                     </div>
                   )}
@@ -124,7 +125,7 @@ export function ContactPage() {
                       </div>
                       <div>
                         <h3 className="font-semibold text-gray-900 mb-1">{t('contact_phone_label')}</h3>
-                        <p className="text-gray-600">{settings.contact_phone}</p>
+                        <p className="text-gray-600"><Tr text={settings.contact_phone} /></p>
                       </div>
                     </div>
                   )}
@@ -136,7 +137,7 @@ export function ContactPage() {
                       </div>
                       <div>
                         <h3 className="font-semibold text-gray-900 mb-1">{t('contact_email_label')}</h3>
-                        <p className="text-gray-600">{settings.contact_email}</p>
+                        <p className="text-gray-600"><Tr text={settings.contact_email} /></p>
                       </div>
                     </div>
                   )}

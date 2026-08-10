@@ -1,6 +1,6 @@
 import i18n from '../i18n'
 
-export function getLocalizedField<T extends Record<string, unknown>>(
+export function getLocalizedField<T extends object>(
   item: T | null | undefined,
   fieldName: string
 ): string {
@@ -27,7 +27,7 @@ export function getLocalizedField<T extends Record<string, unknown>>(
   return ''
 }
 
-export function getLocalizedArrayField<T extends Record<string, unknown>>(
+export function getLocalizedArrayField<T extends object>(
   item: T | null | undefined,
   fieldName: string
 ): string[] {
@@ -53,7 +53,7 @@ export function getLocalizedArrayField<T extends Record<string, unknown>>(
   return []
 }
 
-export function getLocalizedJsonField<T extends Record<string, unknown>>(
+export function getLocalizedJsonField<T extends object>(
   item: T | null | undefined,
   fieldName: string
 ): Record<string, unknown> | null {
@@ -80,7 +80,7 @@ export function getLocalizedJsonField<T extends Record<string, unknown>>(
   return null
 }
 
-export function hasNepaliTranslation<T extends Record<string, unknown>>(
+export function hasNepaliTranslation<T extends object>(
   item: T | null | undefined,
   fieldName: string
 ): boolean {

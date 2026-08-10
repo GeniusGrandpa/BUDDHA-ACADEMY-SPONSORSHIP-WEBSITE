@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
-import { getGalleryItems, createGalleryItem, updateGalleryItem, deleteGalleryItem } from '../../../services/gallery'
+import { getGalleryItems, createGalleryItem, updateGalleryItem, deleteGalleryItem, validateGalleryMedia } from '../../../services/gallery'
 import type { GalleryItem } from '../../../types/database'
 import { GallerySkeleton } from '../../../components/ui/LoadingSkeleton'
 import { useConfirm } from '../../../context/ConfirmContext'
@@ -27,6 +27,9 @@ export function AdminContentGallery() {
       title: '', url: '', thumbnail_url: '', type: 'photo',
       caption: '', category: 'General', is_featured: false,
     })
+    const [mediaFile, setMediaFile] = useState<File | null>(null)
+    const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
+    const [uploading, setUploading] = useState(false)
 
   const loadItems = useCallback(async (featuredOnly?: boolean) => {
     setLoading(true)
@@ -45,6 +48,8 @@ export function AdminContentGallery() {
   const openCreate = () => {
     setEditing(null)
     setForm({ title: '', url: '', thumbnail_url: '', type: 'photo', caption: '', category: 'General', is_featured: false })
+    setMediaFile(null)
+    setThumbnailFile(null)
     setShowModal(true)
   }
 
@@ -55,26 +60,57 @@ export function AdminContentGallery() {
       type: item.type, caption: item.caption || '', category: item.category || 'General',
       is_featured: item.is_featured,
     })
+    setMediaFile(null)
+    setThumbnailFile(null)
     setShowModal(true)
   }
 
+  const handleMediaFile = (file: File | null) => {
+    setMediaFile(file)
+    if (!file) return
+    const result = validateGalleryMedia(file)
+    if (!result.ok) {
+      toast.error(result.reason === 'size' ? 'File exceeds the 50MB size limit for videos / 10MB for images' : 'Unsupported file type. Images: JPG/PNG/WebP/GIF. Videos: MP4/WebM/OGV/MOV')
+      setMediaFile(null)
+    }
+  }
+
+  const handleThumbnailFile = (file: File | null) => {
+    setThumbnailFile(file)
+    if (!file) return
+    const result = validateGalleryMedia(file)
+    if (!result.ok || result.type !== 'photo') {
+      toast.error('Thumbnail must be an image (JPG/PNG/WebP/GIF, max 10MB)')
+      setThumbnailFile(null)
+    }
+  }
+
   const handleSave = async () => {
-    if (!form.title.trim() || !form.url.trim()) {
-      toast.error('Title and URL are required')
+    if (!form.title.trim()) {
+      toast.error('Title is required')
       return
     }
+    if (!form.url.trim() && !mediaFile) {
+      toast.error('Provide a URL or upload a file')
+      return
+    }
+    setUploading(true)
     try {
       if (editing) {
         await updateGalleryItem(editing.id, form as unknown as Partial<GalleryItem>)
         toast.success('Gallery item updated')
       } else {
-        await createGalleryItem(form as unknown as Omit<GalleryItem, 'id' | 'created_at' | 'updated_at'>)
+        await createGalleryItem(form as unknown as Omit<GalleryItem, 'id' | 'created_at' | 'updated_at'>,
+          { file: mediaFile || undefined, thumbnailFile: thumbnailFile || undefined })
         toast.success('Gallery item added')
       }
       setShowModal(false)
       loadItems()
-    } catch {
-      toast.error('Failed to save')
+    } catch (error) {
+      const message = error instanceof Error && error.message ? error.message : 'Failed to save'
+      toast.error(message === 'GALLERY_FILE_TOO_LARGE' ? 'File too large' : message === 'GALLERY_FILE_TYPE_UNSUPPORTED' ? 'Unsupported file type' : 'Failed to save')
+    } finally {
+      setUploading(false)
     }
   }
 
@@ -236,15 +272,24 @@ export function AdminContentGallery() {
                     placeholder="Enter title" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-1">URL *</label>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">Media (first file wins) / URL</label>
+                  <input type="file" accept="image/*,video/*,video/mp4,video/webm,video/ogg,video/quicktime,.mp4,.webm,.ogv,.mov,.jpg,.jpeg,.png,.webp,.gif"
+                    onChange={e => handleMediaFile(e.target.files?.[0] || null)}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
+                  <p className="text-xs text-gray-400 mt-1">Or paste a URL below. Leaving URL blank will use the uploaded file.</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">URL</label>
                   <input value={form.url} onChange={e => setForm({ ...form, url: e.target.value })}
                     placeholder="https://example.com/image.jpg"
                     className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-1">Thumbnail URL</label>
-                  <input value={form.thumbnail_url} onChange={e => setForm({ ...form, thumbnail_url: e.target.value })}
-                    placeholder="https://..." className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
+                  <label className="block text-sm font-medium text-gray-600 mb-1">Thumbnail (image) / URL</label>
+                  <input type="file" accept="image/*"
+                    onChange={e => handleThumbnailFile(e.target.files?.[0] || null)}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
+                  <p className="text-xs text-gray-400 mt-1">Recommended for videos. Leave as is to keep an existing thumbnail.</p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -272,9 +317,9 @@ export function AdminContentGallery() {
               <div className="flex justify-end gap-3 p-4 border-t border-gray-100">
                 <button onClick={() => setShowModal(false)}
                   className="px-4 py-2 rounded-lg text-sm text-gray-500 hover:bg-gray-50">Cancel</button>
-                <button onClick={handleSave}
-                  className="px-4 py-2 rounded-lg text-sm bg-amber-500 hover:bg-amber-600 text-white">
-                  {editing ? 'Update' : 'Add Item'}
+                <button onClick={handleSave} disabled={uploading}
+                  className="px-4 py-2 rounded-lg text-sm bg-amber-500 hover:bg-amber-600 text-white disabled:opacity-50 disabled:cursor-not-allowed">
+                  {uploading ? 'Uploading...' : editing ? 'Update' : 'Add Item'}
                 </button>
               </div>
             </motion.div>

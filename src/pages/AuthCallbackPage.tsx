@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { Tr } from '../components/Translated'
+import { useCmsStrings } from '../context/CmsStringsContext'
 import { getAuthErrorMessage } from '../lib/auth/authErrors'
 import { useLocalizePath } from '../hooks/useLocalizePath'
 import { getRedirectPath } from '../features/auth/utils/redirectByRole'
@@ -20,23 +21,25 @@ const SANITIZED_MESSAGES: Record<string, string> = {
   'unauthorized': 'You are not authorized to perform this action.',
 }
 
+const FALLBACK_ERROR = 'Verification failed. The link may be invalid or expired.'
+
 const SENSITIVE_KEYWORDS = [
   'schema', 'postgres', 'rls', 'policy', 'relation', 'database error',
   'pg_', 'sql', 'syntax error', 'permission denied',
 ]
 
-function sanitizeError(input: string): string {
+function sanitizeError(input: string, t: (key: string) => string): string {
   const lower = input.toLowerCase()
 
   if (SENSITIVE_KEYWORDS.some(kw => lower.includes(kw))) {
-    return 'Verification failed. The link may be invalid or expired.'
+    return t('auth_verification_failed')
   }
 
   for (const [key, value] of Object.entries(SANITIZED_MESSAGES)) {
     if (lower.includes(key)) return value
   }
 
-  return input || 'Verification failed. The link may be invalid or expired.'
+  return input || t('auth_verification_failed')
 }
 
 async function getRedirectPathForCurrentUser(): Promise<string> {
@@ -54,6 +57,7 @@ async function getRedirectPathForCurrentUser(): Promise<string> {
 }
 
 export function AuthCallbackPage() {
+  const { t } = useCmsStrings()
   const navigate = useNavigate()
   const localize = useLocalizePath()
   const [searchParams] = useSearchParams()
@@ -71,7 +75,7 @@ export function AuthCallbackPage() {
       const errorDescription = searchParams.get('error_description') || searchParams.get('error')
       if (errorDescription) {
         setStatus('error')
-        setMessage(sanitizeError(errorDescription))
+        setMessage(sanitizeError(errorDescription, t))
         return
       }
 
@@ -96,7 +100,7 @@ export function AuthCallbackPage() {
         if (!cancelled) {
           if (error) {
             setStatus('error')
-            setMessage(sanitizeError(getAuthErrorMessage(error)))
+            setMessage(sanitizeError(getAuthErrorMessage(error), t))
           } else {
             setStatus('success')
             setMessage('Email verified. Redirecting...')
@@ -113,7 +117,7 @@ export function AuthCallbackPage() {
         if (!cancelled) {
           if (error) {
             setStatus('error')
-            setMessage(sanitizeError(getAuthErrorMessage(error)))
+            setMessage(sanitizeError(getAuthErrorMessage(error), t))
           } else {
             setStatus('success')
             setMessage('Verified. Redirecting...')
@@ -189,7 +193,7 @@ export function AuthCallbackPage() {
                   {!message.includes('Redirecting') && (
                     <Link to={localize('/login')}>
                       <Button className="w-full" size="lg">
-                        <Tr text="Continue to sign in" />
+                        <Tr text={t('auth_continue_sign_in')} />
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </Link>
@@ -208,9 +212,9 @@ export function AuthCallbackPage() {
                     <XCircle className="w-8 h-8 text-red-500" />
                   </motion.div>
                   <div>
-                    <h1 className="text-xl font-bold text-gray-800"><Tr text="Verification failed" /></h1>
+                    <h1 className="text-xl font-bold text-gray-800"><Tr text={t('auth_verification_failed')} /></h1>
                     <p className="text-gray-500 text-sm mt-2"><Tr text={message} /></p>
-                    <p className="text-gray-400 text-xs mt-2"><Tr text="You can request a new verification email from the sign in page." /></p>
+                    <p className="text-gray-400 text-xs mt-2"><Tr text={t('auth_request_new_verification')} /></p>
                   </div>
                   <div className="space-y-3">
                     <Link to={localize('/login')}>

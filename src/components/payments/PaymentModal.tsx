@@ -69,6 +69,7 @@ export function PaymentModal({ isOpen, onClose, amount, frequency, currency = 'N
       gateway: selectedGateway,
       studentId,
       message,
+      currency,
     })
   }
 

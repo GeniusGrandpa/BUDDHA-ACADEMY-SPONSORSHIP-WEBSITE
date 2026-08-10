@@ -28,7 +28,7 @@ export function Header() {
   useEffect(() => {
     if (typeof window === 'undefined') return
     let cancelled = false
-    getNavigationItems('header', language).then(items => { if (!cancelled) setNavItems(items.filter(i => i.is_visible && i.label !== 'Programs')) }).catch(() => {})
+    getNavigationItems('header', language).then(items => { if (!cancelled) setNavItems(items.filter(i => i.is_visible && i.route !== '/programs')) }).catch(() => {})
     getSiteSettings().then(s => {
       if (s && !cancelled) {
         setSiteName(s.site_name || '')

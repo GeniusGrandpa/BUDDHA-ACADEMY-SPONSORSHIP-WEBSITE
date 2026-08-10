@@ -41,8 +41,9 @@ export async function initiatePaymentCheckout(
   studentId?: string | null,
   message?: string | null,
   idempotencyKey?: string | null,
+  currency?: string,
 ): Promise<{ sessionId: string; transactionId: string | null }> {
-  logger.info('payment.checkout.start', { gateway, amount, frequency, hasStudentId: !!studentId })
+  logger.info('payment.checkout.start', { gateway, amount, frequency, hasStudentId: !!studentId, currency })
 
   const { data, error } = await supabase.rpc('initiate_payment_checkout', {
     p_amount: amount,
@@ -51,6 +52,7 @@ export async function initiatePaymentCheckout(
     p_idempotency_key: idempotencyKey || null,
     p_message: message || null,
     p_student_id: studentId || null,
+    p_currency: currency || 'NPR',
   })
 
   if (error) {

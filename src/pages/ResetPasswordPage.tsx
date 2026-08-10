@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { useTranslation } from 'react-i18next'
 import { CheckCircle, Eye, EyeOff } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { Card } from '../components/ui/Card'
@@ -9,11 +8,12 @@ import { Input } from '../components/ui/Input'
 import { Button } from '../components/ui/Button'
 import { Tr } from '../components/Translated'
 import { useLocalizePath } from '../hooks/useLocalizePath'
+import { useCmsStrings } from '../context/CmsStringsContext'
 import { validatePassword, validateConfirmPassword } from '../lib/auth/validation'
 import { getAuthErrorMessage } from '../lib/auth/authErrors'
 
 export function ResetPasswordPage() {
-  const { t } = useTranslation()
+  const { t } = useCmsStrings()
   const navigate = useNavigate()
   const localize = useLocalizePath()
   const [password, setPassword] = useState('')
@@ -184,7 +184,7 @@ export function ResetPasswordPage() {
 
             <div className="relative">
               <Input
-                label={<Tr text="Confirm new password" />}
+                label={<Tr text={t('reset_confirm_new_password')} />}
                 type={showConfirmPassword ? 'text' : 'password'}
                 value={confirmPassword}
                 onChange={(e) => { setConfirmPassword(e.target.value); setFieldErrors((prev) => ({ ...prev, confirmPassword: '' })) }}

@@ -22,12 +22,20 @@ export function LanguageProvider({ children, initialLanguage }: { children: Reac
 
   const setLanguage = useCallback((newLanguage: LanguageCode) => {
     if (!languages.some((item) => item.code === newLanguage)) return
+    if (i18n.isInitialized && i18n.language !== newLanguage) {
+      void i18n.changeLanguage(newLanguage)
+    }
     startTransition(() => setLanguageState(newLanguage))
-  }, [])
+  }, [language])
 
   const toggleLanguage = useCallback(() => {
-    setLanguage(language === 'en' ? 'ne' : 'en')
-  }, [language, setLanguage])
+    const newLanguage = language === 'en' ? 'ne' : 'en'
+    if (!languages.some((item) => item.code === newLanguage)) return
+    if (i18n.isInitialized && i18n.language !== newLanguage) {
+      void i18n.changeLanguage(newLanguage)
+    }
+    startTransition(() => setLanguageState(newLanguage))
+  }, [language])
 
   const value = useMemo(
     () => ({ language, setLanguage, toggleLanguage }),

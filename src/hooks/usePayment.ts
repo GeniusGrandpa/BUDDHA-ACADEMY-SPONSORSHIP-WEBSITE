@@ -15,6 +15,7 @@ interface UsePaymentReturn {
     gateway: PaymentGateway
     studentId?: string | null
     message?: string | null
+    currency?: string
   }) => Promise<void>
   confirmPayment: (sessionId: string) => Promise<void>
   resetCheckout: () => void
@@ -42,12 +43,13 @@ export function usePayment(): UsePaymentReturn {
     gateway: PaymentGateway
     studentId?: string | null
     message?: string | null
+    currency?: string
   }) => {
     setLoading(true)
     setError(null)
 
     try {
-      logger.info('payment.checkout.started', { gateway: params.gateway, amount: params.amount, frequency: params.frequency })
+      logger.info('payment.checkout.started', { gateway: params.gateway, amount: params.amount, frequency: params.frequency, currency: params.currency })
 
       const result = await initiatePaymentCheckout(
         params.amount,
@@ -55,6 +57,8 @@ export function usePayment(): UsePaymentReturn {
         params.gateway,
         params.studentId,
         params.message,
+        undefined,
+        params.currency,
       )
 
       logger.info('payment.checkout.success', { sessionId: result.sessionId })
@@ -89,34 +93,31 @@ export function usePayment(): UsePaymentReturn {
         step: 'processing',
       }))
 
-      const MAX_ATTEMPTS = 15
-      const POLL_INTERVAL_MS = 2000
-
-      for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
-        await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL_MS))
-
-        const session = await getPaymentSession(sessionId)
-        if (!session) continue
-
-        if (session.status === 'completed') {
-          logger.info('payment.confirm.completed', { sessionId })
-          setCheckout(prev => ({
-            ...prev,
-            step: 'success',
-            transactionId: session.transaction_id,
-          }))
-          return
-        }
-
-        if (session.status === 'failed' || session.status === 'cancelled') {
-          logger.warn('payment.confirm.rejected', { sessionId, status: session.status })
-          setError('Payment was not completed. Please try again.')
-          setCheckout(prev => ({ ...prev, step: 'failed' }))
-          return
-        }
+      const session = await getPaymentSession(sessionId)
+      if (!session) {
+        throw new Error('Payment session not found')
       }
 
-      logger.warn('payment.confirm.timeout', { sessionId })
+      if (session.status === 'completed') {
+        logger.info('payment.confirm.completed', { sessionId })
+        setCheckout(prev => ({
+          ...prev,
+          step: 'success',
+          transactionId: session.transaction_id,
+        }))
+        return
+      }
+
+      if (session.status === 'failed' || session.status === 'cancelled') {
+        logger.warn('payment.confirm.rejected', { sessionId, status: session.status })
+        setError('Payment was not completed. Please try again.')
+        setCheckout(prev => ({ ...prev, step: 'failed' }))
+        return
+      }
+
+      logger.warn('payment.confirm.pending', { sessionId, status: session.status })
+      setError('Payment is still processing. Please check back later or contact support.')
+      setCheckout(prev => ({ ...prev, step: 'failed' }))
     } catch (err: unknown) {
       logger.error('payment.confirm.failed', { sessionId, error: getErrorMessage(err, 'Failed to confirm payment') })
       setError(getErrorMessage(err, 'Failed to confirm payment'))

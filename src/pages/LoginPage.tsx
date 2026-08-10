@@ -102,7 +102,7 @@ export function LoginPage() {
     const errors: { email?: string; password?: string } = {}
     const emailResult = validateEmail(email)
     if (!emailResult.valid) errors.email = emailResult.error ?? undefined
-    if (!password) errors.password = 'Password is required'
+    if (!password) errors.password = t('login_password_required')
     setFieldErrors(errors)
     return Object.keys(errors).length === 0
   }
@@ -122,7 +122,7 @@ export function LoginPage() {
     const confirmResult = validateConfirmPassword(password, confirmPassword)
     if (!confirmResult.valid) errors.confirmPassword = confirmResult.error ?? undefined
 
-    if (!country) errors.country = 'Please select your country'
+    if (!country) errors.country = t('login_country_required')
 
     if (!acceptTerms) {
       setError('Please accept the Terms & Conditions to proceed.')
@@ -332,7 +332,7 @@ export function LoginPage() {
                   <Tr text="Check Your Email" />
                 </h1>
                 <p className="text-gray-600 text-sm">
-                  <Tr text="We sent a verification link to" /><br />
+                  <Tr text={t('login_we_sent_verification')} /><br />
                   <span className="font-medium text-[#0f172a]">{email}</span>
                 </p>
               </div>
@@ -341,11 +341,11 @@ export function LoginPage() {
                 <div className="flex items-start gap-3">
                   <CheckCircle className="w-5 h-5 text-[#f59e0b] shrink-0 mt-0.5" />
                   <div className="text-sm text-gray-600">
-                    <p className="font-medium text-[#0f172a] mb-1"><Tr text="What happens next?" /></p>
+                    <p className="font-medium text-[#0f172a] mb-1"><Tr text={t('login_what_happens_next')} /></p>
                     <ol className="space-y-1.5 list-decimal list-inside">
-                      <li><Tr text="Click the verification link in your email" /></li>
-                      <li><Tr text="Return here and sign in to your account" /></li>
-                      <li><Tr text="Start exploring sponsorship opportunities" /></li>
+                      <li><Tr text={t('login_click_verification_link')} /></li>
+                      <li><Tr text={t('login_return_sign_in')} /></li>
+                      <li><Tr text={t('login_start_exploring')} /></li>
                     </ol>
                   </div>
                 </div>
@@ -516,8 +516,8 @@ export function LoginPage() {
                       <div className="flex items-start gap-2.5">
                         <AlertCircle className="w-4 h-4 mt-0.5 text-amber-600 flex-shrink-0" />
                         <div className="text-sm text-amber-800">
-                          <p className="font-medium"><Tr text="Email not verified" /></p>
-                          <p className="text-amber-600 mt-0.5"><Tr text="Please verify your email before continuing." /></p>
+                          <p className="font-medium"><Tr text={t('login_email_not_verified')} /></p>
+                          <p className="text-amber-600 mt-0.5"><Tr text={t('login_verify_before_continue')} /></p>
                         </div>
                       </div>
                       <div className="flex gap-2">
@@ -528,7 +528,7 @@ export function LoginPage() {
                           className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium transition-colors disabled:opacity-50"
                         >
                           <Mail size={14} />
-                          {resending ? <Tr text="Sending..." /> : <Tr text="Resend verification email" />}
+                          {resending ? <Tr text={t('login_sending')} /> : <Tr text={t('login_resend_verification')} />}
                         </button>
                         <button
                           type="button"
@@ -543,8 +543,8 @@ export function LoginPage() {
 
                   {showResendForm && (
                     <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 space-y-3">
-                      <p className="text-sm font-medium text-gray-700"><Tr text="Resend verification email" /></p>
-                      <p className="text-xs text-gray-500"><Tr text="Enter your email address to receive a new verification link." /></p>
+                      <p className="text-sm font-medium text-gray-700"><Tr text={t('login_resend_verification')} /></p>
+                      <p className="text-xs text-gray-500"><Tr text={t('login_resend_verification_desc')} /></p>
                       <input
                         type="email"
                         value={resendEmail}
@@ -614,7 +614,7 @@ export function LoginPage() {
                       className="w-full px-4 py-2.5 rounded-xl text-sm bg-gray-50 border border-gray-200 hover:border-gray-300 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none transition-all duration-200 text-gray-900"
                       required
                     >
-                      <option value="" disabled><Tr text="Select your country" /></option>
+                      <option value="" disabled><Tr text={t('login_select_country')} /></option>
                       {countryOptions.map((opt) => (
                         <option key={opt.value} value={opt.value}>{t(opt.labelKey)}</option>
                       ))}
@@ -720,7 +720,7 @@ export function LoginPage() {
                       onClick={() => switchMode('signup')}
                       className="text-[#f59e0b] hover:text-[#d97706] font-medium inline-flex items-center gap-1 transition-colors"
                     >
-                      <Tr text="Join our community" />
+                      <Tr text={t('login_join_community')} />
                       <ArrowRight size={14} />
                     </button>
                   </>

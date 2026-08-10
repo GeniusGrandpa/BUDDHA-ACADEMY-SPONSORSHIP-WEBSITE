@@ -19,8 +19,8 @@ export function AdminContentNews() {
   const [editing, setEditing] = useState<News | null>(null)
 
   const [form, setForm] = useState<NewsForm>({
-    title: '', slug: '', category: 'updates',
-    content: '', excerpt: '', image_url: '',
+    title: '', title_ne: '', slug: '', category: 'updates',
+    content: '', content_ne: '', excerpt: '', excerpt_ne: '', image_url: '',
     tags: [], published: false, published_at: '',
   })
 
@@ -40,15 +40,15 @@ export function AdminContentNews() {
 
   const openCreate = () => {
     setEditing(null)
-    setForm({ title: '', slug: '', category: 'updates', content: '', excerpt: '', image_url: '', tags: [], published: false, published_at: '' })
+    setForm({ title: '', title_ne: '', slug: '', category: 'updates', content: '', content_ne: '', excerpt: '', excerpt_ne: '', image_url: '', tags: [], published: false, published_at: '' })
     setShowModal(true)
   }
 
   const openEdit = (article: News) => {
     setEditing(article)
     setForm({
-      title: article.title, slug: article.slug || '', category: article.category,
-      content: article.content, excerpt: article.excerpt, image_url: article.image_url || '',
+      title: article.title, title_ne: article.title_ne || '', slug: article.slug || '', category: article.category,
+      content: article.content, content_ne: article.content_ne || '', excerpt: article.excerpt, excerpt_ne: article.excerpt_ne || '', image_url: article.image_url || '',
       tags: article.tags || [], published: article.published, published_at: article.published_at,
     })
     setShowModal(true)

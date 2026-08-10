@@ -4,6 +4,7 @@ import { useCmsStrings } from '../../../context/CmsStringsContext'
 import { formatCurrency, type Currency } from '../../../utils/currency'
 import { initiateEsewaPayment, type EsewaPaymentInit } from '../../../services/esewaPay'
 import { getErrorMessage } from '../../../lib/errors'
+import { logger } from '../../../lib/logger'
 import { Button } from '../../ui/Button'
 
 interface EsewaPaymentProps {
@@ -27,10 +28,15 @@ export function EsewaPayment({ sessionId, amount, currency = 'NPR', onError, onC
 
     async function init() {
       try {
+        logger.info('esewa.payment.init.started', { sessionId, amount, currency })
         const result = await initiateEsewaPayment(sessionId)
-        if (!cancelled) setPayment(result)
+        if (!cancelled) {
+          logger.info('esewa.payment.init.succeeded', { sessionId, environment: result.environment })
+          setPayment(result)
+        }
       } catch (err) {
         if (!cancelled) {
+          logger.error('esewa.payment.init.failed', { sessionId, error: getErrorMessage(err, 'Unknown error') })
           const message = getErrorMessage(err, t('payment_esewa_init_failed'))
           setError(message)
           onError?.(message)
@@ -42,7 +48,7 @@ export function EsewaPayment({ sessionId, amount, currency = 'NPR', onError, onC
 
     init()
     return () => { cancelled = true }
-  }, [sessionId, onError])
+  }, [sessionId, onError, amount, currency, t])
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()

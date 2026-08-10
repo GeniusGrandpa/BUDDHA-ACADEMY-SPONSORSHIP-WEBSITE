@@ -1,5 +1,6 @@
 import { getSupabaseClient } from '../lib/supabase'
 import { AppError, ErrorCodes, getErrorMessage, type ErrorCode } from '../lib/errors'
+import { logger } from '../lib/logger'
 
 const supabase = getSupabaseClient()
 
@@ -8,20 +9,25 @@ export async function createPaymentIntent(
   currency = 'npr',
   metadata: Record<string, string> = {},
 ): Promise<string> {
+  logger.info('stripe.payment_intent.request.started', { amount, currency, hasMetadata: Object.keys(metadata).length > 0 })
+
   const { data, error } = await supabase.functions.invoke('create-payment-intent', {
     body: { amount, currency, metadata },
   })
 
   if (error) {
+    logger.error('stripe.payment_intent.request.failed', { error: error.message })
     throw await parseFunctionsError(error, 'We could not start your payment. Please try again or choose another payment method.')
   }
   if (!data?.clientSecret) {
+    logger.error('stripe.payment_intent.response.invalid', { hasData: !!data })
     throw new AppError('We could not start your payment. Please try again.', {
       code: ErrorCodes.PAYMENT_FAILED,
       retryable: true,
     })
   }
 
+  logger.info('stripe.payment_intent.request.succeeded', { hasClientSecret: !!data.clientSecret })
   return data.clientSecret as string
 }
 

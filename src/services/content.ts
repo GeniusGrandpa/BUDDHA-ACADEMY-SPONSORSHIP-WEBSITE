@@ -10,14 +10,14 @@ import type { ContentVersion } from '../types/database'
 import type { PageBlock, SeoMetadata } from '../types/cms'
 const supabase = getSupabaseClient()
 
-const PAGE_COLS = 'id, slug, title, content, published, blocks, seo, created_at, updated_at, updated_by'
-const HOMEPAGE_COLS = 'id, section_key, title, subtitle, content, is_active, sort_order, updated_by, created_at, updated_at'
-const VIDEO_COLS = 'id, title, url, video_type, thumbnail_url, description, category, is_featured, uploaded_by, created_at, updated_at'
-const FAQ_COLS = 'id, question, answer, category, sort_order, is_published, created_at, updated_at'
-const STORY_COLS = 'id, title, student_name, content, image_url, quote, achievements, is_published, featured, published_at, created_at, updated_at'
-const MEDIA_COLS = 'id, url, file_name, file_size, mime_type, alt_text, folder, is_published, uploaded_by, created_at'
-const GALLERY_COLS = 'id, type, title, caption, url, thumbnail_url, author, category, is_featured, is_published, uploaded_by, created_at, updated_at'
-const NEWS_COLS = 'id, slug, title, excerpt, content, image_url, category, tags, published, published_at, updated_by, created_at, updated_at'
+const PAGE_COLS = 'id, slug, title, title_ne, content, content_ne, published, blocks, seo, created_at, updated_at, updated_by'
+const HOMEPAGE_COLS = 'id, section_key, title, title_ne, subtitle, subtitle_ne, content, content_ne, is_active, sort_order, updated_by, created_at, updated_at'
+const VIDEO_COLS = 'id, title, title_ne, url, video_type, thumbnail_url, description, description_ne, category, is_featured, uploaded_by, created_at, updated_at'
+const FAQ_COLS = 'id, question, question_ne, answer, answer_ne, category, sort_order, is_published, created_at, updated_at'
+const STORY_COLS = 'id, title, title_ne, student_name, student_name_ne, content, content_ne, image_url, quote, quote_ne, achievements, achievements_ne, is_published, featured, published_at, created_at, updated_at'
+const MEDIA_COLS = 'id, url, file_name, file_size, mime_type, alt_text, alt_text_ne, folder, is_published, uploaded_by, created_at'
+const GALLERY_COLS = 'id, type, title, title_ne, caption, caption_ne, url, thumbnail_url, author, author_ne, category, is_featured, is_published, uploaded_by, created_at, updated_at'
+const NEWS_COLS = 'id, slug, title, title_ne, excerpt, excerpt_ne, content, content_ne, image_url, category, tags, published, published_at, updated_by, created_at, updated_at'
 const TESTIMONIAL_COLS = 'id, author_name, author_role, content, quote, avatar_url, is_published, is_featured, testimonial_type, sort_order, created_at, updated_at'
 const VERSION_COLS = 'id, entity_type, entity_id, entity_slug, version_number, title, content, published, created_by, created_at, restored_at, restore_notes'
 
@@ -136,10 +136,10 @@ export async function getVideos(featuredOnly?: boolean, language = 'en'): Promis
   return Promise.all((data || []).map((video) => getLocalizedContent('videos', video.id, language, async () => video) as Promise<Video>))
 }
 
-export async function getVideoById(id: string): Promise<Video | null> {
+export async function getVideoById(id: string, language = 'en'): Promise<Video | null> {
   const { data, error } = await supabase.from('videos').select(VIDEO_COLS).eq('id', id).maybeSingle()
   if (error) throw error
-  return data
+  return getLocalizedContent('videos', id, language, async () => data)
 }
 
 const VIDEO_MIME = ['video/mp4', 'video/webm', 'video/ogg']
@@ -208,10 +208,10 @@ export async function getFaqs(publishedOnly?: boolean, language = 'en'): Promise
   return Promise.all((data || []).map((faq) => getLocalizedContent('faqs', faq.id, language, async () => faq) as Promise<Faq>))
 }
 
-export async function getFaqById(id: string): Promise<Faq | null> {
+export async function getFaqById(id: string, language = 'en'): Promise<Faq | null> {
   const { data, error } = await supabase.from('faqs').select(FAQ_COLS).eq('id', id).maybeSingle()
   if (error) throw error
-  return data
+  return getLocalizedContent('faqs', id, language, async () => data)
 }
 
 export async function createFaq(faq: Omit<Faq, 'id' | 'created_at' | 'updated_at'>): Promise<Faq> {
@@ -248,10 +248,10 @@ export async function getStudentStories(publishedOnly?: boolean, language = 'en'
   return Promise.all((data || []).map((story) => getLocalizedContent('student_stories', story.id, language, async () => story) as Promise<StudentStory>))
 }
 
-export async function getStudentStoryById(id: string): Promise<StudentStory | null> {
+export async function getStudentStoryById(id: string, language = 'en'): Promise<StudentStory | null> {
   const { data, error } = await supabase.from('student_stories').select(STORY_COLS).eq('id', id).maybeSingle()
   if (error) throw error
-  return data
+  return getLocalizedContent('student_stories', id, language, async () => data)
 }
 
 export async function createStudentStory(story: Omit<StudentStory, 'id' | 'created_at' | 'updated_at'>): Promise<StudentStory> {

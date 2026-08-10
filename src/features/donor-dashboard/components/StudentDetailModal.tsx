@@ -43,7 +43,7 @@ export function StudentDetailModal({ student, contribution, onClose }: StudentDe
             <div className="absolute -bottom-12 left-6">
               <img
                 src={student.photo_url || 'https://images.pexels.com/photos/1171086/pexels-photo-1171086.jpeg?auto=compress&cs=tinysrgb&w=200'}
-                alt={getLocalizedField<string>(student, 'name') || student.name}
+                alt={getLocalizedField(student, 'name') || student.name}
                 className="w-24 h-24 rounded-xl object-cover border-4 border-white shadow-lg"
                 loading="lazy" decoding="async"
               />
@@ -52,7 +52,7 @@ export function StudentDetailModal({ student, contribution, onClose }: StudentDe
 
           <div className="pt-16 pb-6 px-6">
             <div className="flex items-center justify-between mb-1">
-              <h2 className="text-2xl font-bold text-gray-900">{getLocalizedField<string>(student, 'name') || student.name}</h2>
+              <h2 className="text-2xl font-bold text-gray-900">{getLocalizedField(student, 'name') || student.name}</h2>
               <span className={`text-xs font-medium px-2 py-1 rounded-full ${
                 contribution.type === 'sponsorship'
                   ? 'bg-orange-100 text-orange-700'
@@ -62,11 +62,11 @@ export function StudentDetailModal({ student, contribution, onClose }: StudentDe
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 mb-4">
-              <span><Tr text="Grade" /> {getLocalizedField<string>(student, 'grade') || student.grade}</span>
+              <span><Tr text="Grade" /> {getLocalizedField(student, 'grade') || student.grade}</span>
               <span><Tr text="Age" /> {student.age}</span>
             </div>
 
-            <p className="text-gray-600 text-sm mb-4 leading-relaxed">{getLocalizedField<string>(student, 'bio') || student.bio}</p>
+            <p className="text-gray-600 text-sm mb-4 leading-relaxed">{getLocalizedField(student, 'bio') || student.bio}</p>
 
             <div className="grid grid-cols-2 gap-3 mb-4">
               <div className="bg-orange-50 rounded-xl p-3 text-center">

@@ -16,7 +16,7 @@ export function AdminFaqManager() {
   const [editing, setEditing] = useState<Faq | null>(null)
   const [filterCat, setFilterCat] = useState('all')
 
-const [form, setForm] = useState({ question: '', answer: '', category: 'General', is_published: true, sort_order: 0 })
+const [form, setForm] = useState({ question: '', question_ne: '', answer: '', answer_ne: '', category: 'General', is_published: true, sort_order: 0 })
 
   const loadFaqs = useCallback(async () => {
     setLoading(true)
@@ -34,13 +34,13 @@ const [form, setForm] = useState({ question: '', answer: '', category: 'General'
 
   const openCreate = () => {
     setEditing(null)
-    setForm({ question: '', answer: '', category: 'General', is_published: true, sort_order: faqs.length })
+    setForm({ question: '', question_ne: '', answer: '', answer_ne: '', category: 'General', is_published: true, sort_order: faqs.length })
     setShowModal(true)
   }
 
   const openEdit = (faq: Faq) => {
     setEditing(faq)
-    setForm({ question: faq.question, answer: faq.answer, category: faq.category, is_published: faq.is_published, sort_order: faq.sort_order })
+    setForm({ question: faq.question, question_ne: faq.question_ne || '', answer: faq.answer, answer_ne: faq.answer_ne || '', category: faq.category, is_published: faq.is_published, sort_order: faq.sort_order })
     setShowModal(true)
   }
 

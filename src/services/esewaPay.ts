@@ -26,22 +26,25 @@ export async function initiateEsewaPayment(
   sessionId: string,
   returnUrl?: string,
 ): Promise<EsewaPaymentInit> {
-  logger.info('esewa.initiate.started', { sessionId })
+  logger.info('esewa.initiate.started', { sessionId, hasReturnUrl: !!returnUrl })
 
   const { data, error } = await supabase.functions.invoke('esewa-pay', {
     body: { sessionId, returnUrl: returnUrl || getEsewaReturnBaseUrl() },
   })
 
   if (error) {
+    logger.error('esewa.initiate.failed', { sessionId, error: error.message })
     throw await parseFunctionsError(error, 'We could not start your eSewa payment. Please try again or choose another payment method.')
   }
   if (!data?.pay_url || !data?.fields) {
+    logger.error('esewa.initiate.invalid_response', { sessionId, hasPayUrl: !!data?.pay_url, hasFields: !!data?.fields })
     throw new AppError('We could not start your eSewa payment. Please try again.', {
       code: ErrorCodes.PAYMENT_FAILED,
       retryable: true,
     })
   }
 
+  logger.info('esewa.initiate.succeeded', { sessionId, environment: data.environment })
   return data as EsewaPaymentInit
 }
 
@@ -50,16 +53,18 @@ export async function confirmEsewaPayment(
   data?: string,
   failed?: boolean,
 ): Promise<EsewaConfirmResult> {
-  logger.info('esewa.confirm.started', { sessionId, hasData: !!data })
+  logger.info('esewa.confirm.started', { sessionId, hasData: !!data, failed })
 
   const { data: result, error } = await supabase.functions.invoke('esewa-callback', {
     body: { sessionId, data: data || null, failed: failed || false },
   })
 
   if (error) {
+    logger.error('esewa.confirm.failed', { sessionId, error: error.message })
     throw await parseFunctionsError(error, 'We could not confirm your eSewa payment. Please try again.')
   }
 
+  logger.info('esewa.confirm.succeeded', { sessionId, status: result?.status })
   return (result ?? { status: 'processing' }) as EsewaConfirmResult
 }
 

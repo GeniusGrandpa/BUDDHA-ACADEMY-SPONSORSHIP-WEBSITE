@@ -131,10 +131,10 @@ export function DonatePage() {
             >
               <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-white/80 text-sm font-light tracking-wide mb-6">
                 <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-accent)]" />
-                <Tr text={pageHeader?.title || 'Donation Program'} />
+                <Tr text={pageHeader?.title || t('donate_page_title')} />
               </span>
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-white leading-tight tracking-tight mb-4 sm:mb-6">
-                <Tr text={content?.hero_title || 'Make a Donation'} />
+                <Tr text={content?.hero_title || t('donate_hero_title_fallback')} />
               </h1>
               <p className="text-base sm:text-lg lg:text-xl text-white/90 font-light leading-relaxed max-w-2xl mb-8 sm:mb-10">
                 {content?.hero_subtitle ? <Tr text={content.hero_subtitle} /> : null}

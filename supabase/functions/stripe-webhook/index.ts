@@ -37,8 +37,11 @@ Deno.serve(async (req) => {
     return jsonError('Method not allowed', 'METHOD_NOT_ALLOWED', 405)
   }
 
+  console.log('[stripe-webhook] Request received')
+
   const signature = req.headers.get('stripe-signature')
   if (!signature) {
+    console.log('[stripe-webhook] Missing signature')
     return jsonError('Missing stripe-signature header', 'INVALID_SIGNATURE', 400)
   }
 
@@ -46,49 +49,71 @@ Deno.serve(async (req) => {
 
   let event: Stripe.Event
   try {
+    console.log('[stripe-webhook] Verifying signature')
     event = await stripe.webhooks.constructEventAsync(rawBody, signature, webhookSecret)
+    console.log('[stripe-webhook] Signature verified', { eventType: event.type, eventId: event.id })
   } catch (err) {
+    console.log('[stripe-webhook] Signature verification failed', { error: err instanceof Error ? err.message : 'Unknown error' })
     logError('stripe-webhook/signature', err)
     return jsonError('Webhook signature verification failed.', 'INVALID_SIGNATURE', 400)
   }
 
   try {
+    console.log('[stripe-webhook] Checking for duplicate', { eventId: event.id })
     const isNew = await markProcessed(event.id, event.type, event.data.object)
     if (!isNew) {
+      console.log('[stripe-webhook] Duplicate event detected', { eventId: event.id })
       return jsonOk({ received: true, duplicate: true }, 200)
     }
+    console.log('[stripe-webhook] New event recorded', { eventId: event.id })
   } catch (err) {
+    console.log('[stripe-webhook] Failed to record event', { error: err instanceof Error ? err.message : 'Unknown error' })
     return handleError('stripe-webhook/record', err, 'DATABASE_ERROR', 500)
   }
 
   const pi = event.data.object as Stripe.PaymentIntent
   const sessionId = pi.metadata?.session_id
 
+  console.log('[stripe-webhook] Processing event', { eventType: event.type, hasSessionId: !!sessionId, paymentIntentId: pi.id })
+
   try {
     switch (event.type) {
       case 'payment_intent.succeeded': {
-        if (!sessionId) return jsonOk({ received: true, skipped: 'no session_id' }, 200)
+        if (!sessionId) {
+          console.log('[stripe-webhook] Skipping - no session_id', { paymentIntentId: pi.id })
+          return jsonOk({ received: true, skipped: 'no session_id' }, 200)
+        }
+        console.log('[stripe-webhook] Calling stripe_confirm_payment', { sessionId, paymentIntentId: pi.id, currency: pi.currency })
         await rpcOrThrow('stripe_confirm_payment', {
           p_session_id: sessionId,
           p_transaction_id: pi.id,
           p_currency: pi.currency ?? 'npr',
         })
+        console.log('[stripe-webhook] stripe_confirm_payment succeeded', { sessionId })
         break
       }
       case 'payment_intent.payment_failed':
       case 'payment_intent.canceled': {
-        if (!sessionId) return jsonOk({ received: true, skipped: 'no session_id' }, 200)
+        if (!sessionId) {
+          console.log('[stripe-webhook] Skipping - no session_id', { paymentIntentId: pi.id })
+          return jsonOk({ received: true, skipped: 'no session_id' }, 200)
+        }
+        console.log('[stripe-webhook] Calling stripe_fail_payment', { sessionId, status: event.type === 'payment_intent.payment_failed' ? 'failed' : 'cancelled' })
         await rpcOrThrow('stripe_fail_payment', {
           p_session_id: sessionId,
           p_status: event.type === 'payment_intent.payment_failed' ? 'failed' : 'cancelled',
         })
+        console.log('[stripe-webhook] stripe_fail_payment succeeded', { sessionId })
         break
       }
       default:
+        console.log('[stripe-webhook] Unhandled event type', { eventType: event.type })
         break
     }
+    console.log('[stripe-webhook] Event processed successfully', { eventType: event.type })
     return jsonOk({ received: true }, 200)
   } catch (err) {
+    console.log('[stripe-webhook] Failed to process event', { eventType: event.type, error: err instanceof Error ? err.message : 'Unknown error' })
     logError('stripe-webhook/process', err)
     return jsonError('Failed to process payment event.', 'PAYMENT_PROCESSING_FAILED', 500)
   }

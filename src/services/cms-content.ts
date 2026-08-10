@@ -23,7 +23,7 @@ export function db(table: string) {
 export async function getDonationContent(language?: string): Promise<DonationContent | null> {
   const fetchEnglish = async () => {
     let query = db('donation_content')
-      .select('id, hero_title, hero_subtitle, hero_background_image, currency_label, impact_cards, impact_stories, process_steps, sections, is_published, created_at')
+      .select('id, hero_title, hero_title_ne, hero_subtitle, hero_subtitle_ne, hero_background_image, currency_label, currency_label_ne, impact_cards, impact_cards_ne, impact_stories, impact_stories_ne, process_steps, process_steps_ne, sections, sections_ne, is_published, created_at')
       .order('created_at', { ascending: false })
       .limit(1)
     if (!isPreviewMode()) query = query.eq('is_published', true)
@@ -56,7 +56,7 @@ export async function upsertDonationContent(content: Partial<DonationContent>): 
 export async function getSponsorshipContent(language?: string): Promise<SponsorshipContent | null> {
   const fetchEnglish = async () => {
     let query = db('sponsorship_content')
-      .select('id, hero_title, hero_subtitle, hero_background_image, hero_image, section_title, section_description, steps, benefits, cta_title, cta_description, cta_button_text, cta_button_link, is_published, created_at')
+      .select('id, hero_title, hero_title_ne, hero_subtitle, hero_subtitle_ne, hero_background_image, hero_image, section_title, section_title_ne, section_description, section_description_ne, steps, steps_ne, benefits, benefits_ne, cta_title, cta_title_ne, cta_description, cta_description_ne, cta_button_text, cta_button_text_ne, cta_button_link, is_published, created_at')
       .order('created_at', { ascending: false })
       .limit(1)
     if (!isPreviewMode()) query = query.eq('is_published', true)
@@ -81,7 +81,7 @@ export async function upsertSponsorshipContent(content: Partial<SponsorshipConte
 export async function getVolunteerContent(language?: string): Promise<VolunteerContent | null> {
   const fetchEnglish = async () => {
     let query = db('volunteer_content')
-      .select('id, hero_title, hero_subtitle, hero_background_image, section_title, section_description, opportunities, skill_options, form_fields, success_message, is_published, created_at')
+      .select('id, hero_title, hero_title_ne, hero_subtitle, hero_subtitle_ne, hero_background_image, section_title, section_title_ne, section_description, section_description_ne, opportunities, opportunities_ne, skill_options, skill_options_ne, form_fields, form_fields_ne, success_message, success_message_ne, is_published, created_at')
       .order('created_at', { ascending: false })
       .limit(1)
     if (!isPreviewMode()) query = query.eq('is_published', true)
@@ -106,7 +106,7 @@ export async function upsertVolunteerContent(content: Partial<VolunteerContent>)
 export async function getTransparencyContent(language?: string): Promise<TransparencyContent | null> {
   const fetchEnglish = async () => {
     let query = db('transparency_content')
-      .select('id, hero_title, hero_subtitle, allocation_title, allocation_description, allocation_data, verification_title, verification_description, verification_steps, impact_report_title, impact_report_items, receipt_policy_title, receipt_policy_text, donor_privacy_title, donor_privacy_text, is_published, created_at')
+      .select('id, hero_title, hero_title_ne, hero_subtitle, hero_subtitle_ne, allocation_title, allocation_title_ne, allocation_description, allocation_description_ne, allocation_data, allocation_data_ne, verification_title, verification_title_ne, verification_description, verification_description_ne, verification_steps, verification_steps_ne, impact_report_title, impact_report_title_ne, impact_report_items, impact_report_items_ne, receipt_policy_title, receipt_policy_title_ne, receipt_policy_text, receipt_policy_text_ne, donor_privacy_title, donor_privacy_title_ne, donor_privacy_text, donor_privacy_text_ne, is_published, created_at')
       .order('created_at', { ascending: false })
       .limit(1)
     if (!isPreviewMode()) query = query.eq('is_published', true)
@@ -131,7 +131,7 @@ export async function upsertTransparencyContent(content: Partial<TransparencyCon
 export async function getHeroContent(language?: string): Promise<HeroContent | null> {
   const fetchEnglish = async () => {
     let query = db('hero_content')
-      .select('id, title, highlight, description, background_image, overlay_color, overlay_opacity, cta_primary_text, cta_primary_link, cta_secondary_text, cta_secondary_link, statistics, badges, layout, display_order, is_visible, animation_enabled')
+      .select('id, title, title_ne, highlight, highlight_ne, description, description_ne, background_image, overlay_color, overlay_opacity, cta_primary_text, cta_primary_text_ne, cta_primary_link, cta_secondary_text, cta_secondary_text_ne, cta_secondary_link, statistics, statistics_ne, badges, badges_ne, layout, display_order, is_visible, animation_enabled')
       .order('display_order', { ascending: true })
       .limit(1)
     if (!isPreviewMode()) query = query.eq('is_visible', true)
@@ -177,7 +177,7 @@ export async function updateSectionVisibility(key: string, isVisible: boolean): 
 
 export async function getSiteImage(imageKey: string): Promise<SiteImage | null> {
   const { data } = await db('site_images')
-    .select('id, image_key, image_url, alt_text, section')
+    .select('id, image_key, image_url, alt_text, alt_text_ne, section')
     .eq('image_key', imageKey)
     .maybeSingle()
   return data as SiteImage | null
@@ -185,7 +185,7 @@ export async function getSiteImage(imageKey: string): Promise<SiteImage | null> 
 
 export async function getSiteImagesBySection(section: string): Promise<SiteImage[]> {
   const { data } = await db('site_images')
-    .select('id, image_key, image_url, alt_text, section')
+    .select('id, image_key, image_url, alt_text, alt_text_ne, section')
     .eq('section', section)
   return (data || []) as SiteImage[]
 }
@@ -216,7 +216,7 @@ export async function deleteSiteImage(id: string): Promise<void> {
 export async function getFooterContent(language?: string): Promise<FooterContent | null> {
   const fetchEnglish = async () => {
     let query = db('footer_content')
-      .select('id, description, copyright_text, nonprofit_text, social_links, quick_links, contact_info, is_published, created_at')
+      .select('id, description, description_ne, copyright_text, copyright_text_ne, nonprofit_text, nonprofit_text_ne, social_links, quick_links, quick_links_ne, contact_info, contact_info_ne, is_published, created_at')
       .order('created_at', { ascending: false })
       .limit(1)
     if (!isPreviewMode()) query = query.eq('is_published', true)
@@ -238,13 +238,16 @@ export async function upsertFooterContent(content: Partial<FooterContent>): Prom
   }
 }
 
-export async function getSeoContent(pageSlug: string): Promise<SeoContent | null> {
-  let query = db('seo_content')
-    .select('id, page_slug, meta_title, meta_description, is_published')
-    .eq('page_slug', pageSlug)
-  if (!isPreviewMode()) query = query.eq('is_published', true)
-  const { data } = await query.maybeSingle()
-  return data as SeoContent | null
+export async function getSeoContent(pageSlug: string, language?: string): Promise<SeoContent | null> {
+  const fetchEnglish = async () => {
+    let query = db('seo_content')
+      .select('id, page_slug, meta_title, meta_title_ne, meta_description, meta_description_ne, is_published')
+      .eq('page_slug', pageSlug)
+    if (!isPreviewMode()) query = query.eq('is_published', true)
+    const { data } = await query.maybeSingle()
+    return data as SeoContent | null
+  }
+  return getLocalizedContent('seo_content', pageSlug, language || 'en', fetchEnglish)
 }
 
 export async function upsertSeoContent(content: Partial<SeoContent>): Promise<void> {
@@ -268,7 +271,7 @@ export async function upsertSeoContent(content: Partial<SeoContent>): Promise<vo
 export async function getPageHeader(pageSlug: string, language?: string): Promise<PageHeader | null> {
   const fetchEnglish = async () => {
     let query = db('page_headers')
-      .select('id, page_slug, title, subtitle, is_visible')
+      .select('id, page_slug, title, title_ne, subtitle, subtitle_ne, is_visible')
       .eq('page_slug', pageSlug)
     if (!isPreviewMode()) query = query.eq('is_visible', true)
     const { data } = await query.maybeSingle()
@@ -298,7 +301,7 @@ export async function upsertPageHeader(header: Partial<PageHeader>): Promise<voi
 export async function getSectionContent(sectionKey: string, language?: string): Promise<SectionContent | null> {
   const fetchEnglish = async () => {
     const { data } = await db('section_content')
-      .select('id, section_key, title, subtitle, description, content, images, is_visible, sort_order')
+      .select('id, section_key, title, title_ne, subtitle, subtitle_ne, description, description_ne, content, content_ne, images, is_visible, sort_order')
       .eq('section_key', sectionKey)
       .maybeSingle()
     return data as SectionContent | null

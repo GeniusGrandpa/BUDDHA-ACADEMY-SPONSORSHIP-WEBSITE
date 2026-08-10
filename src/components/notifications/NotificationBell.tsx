@@ -86,9 +86,9 @@ export function NotificationBell({ userId }: NotificationBellProps) {
     const diffDays = Math.floor(diffMs / 86400000)
 
     if (diffMins < 1) return t('Just now', { defaultValue: 'Just now' })
-    if (diffMins < 60) return t('notif_mins_ago', { count: diffMins })
-    if (diffHours < 24) return t('notif_hours_ago', { count: diffHours })
-    if (diffDays < 7) return t('notif_days_ago', { count: diffDays })
+    if (diffMins < 60) return t('notif_mins_ago', { count: diffMins, defaultValue: `${diffMins} min ago` })
+    if (diffHours < 24) return t('notif_hours_ago', { count: diffHours, defaultValue: `${diffHours} hour ago` })
+    if (diffDays < 7) return t('notif_days_ago', { count: diffDays, defaultValue: `${diffDays} day ago` })
     return date.toLocaleDateString()
   }
 
@@ -97,7 +97,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500"
-        aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
+        aria-label={t('notifications_label', { count: unreadCount })}
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
@@ -126,14 +126,14 @@ export function NotificationBell({ userId }: NotificationBellProps) {
             className="absolute right-0 mt-2 w-80 sm:w-96 bg-warm-50 rounded-xl shadow-lg border border-amber-200 overflow-hidden z-50"
           >
             <div className="flex items-center justify-between p-4 border-b border-gray-100">
-              <h3 className="font-semibold text-gray-900"><Tr text="Notifications" /></h3>
+              <h3 className="font-semibold text-gray-900">{t('notif_notifications')}</h3>
               {unreadCount > 0 && (
                 <button
                   onClick={handleMarkAllRead}
                   className="text-sm text-emerald-600 hover:text-emerald-700 flex items-center gap-1 transition-colors"
                 >
                   <CheckCheck className="w-4 h-4" />
-                  <Tr text="Mark all read" />
+                  {t('notif_mark_all_read')}
                 </button>
               )}
             </div>
@@ -146,9 +146,9 @@ export function NotificationBell({ userId }: NotificationBellProps) {
               ) : notifications.length === 0 ? (
                 <div className="flex flex-col items-center py-8 text-center px-4">
                   <Bell className="w-8 h-8 text-gray-300 mb-2" />
-                  <p className="text-sm text-gray-500"><Tr text="No notifications yet" /></p>
+                  <p className="text-sm text-gray-500">{t('notif_no_notifications')}</p>
                   <p className="text-xs text-gray-500 mt-1">
-                    <Tr text="Updates about your donations and sponsorships will appear here" />
+                    {t('notif_updates_here')}
                   </p>
                 </div>
               ) : (
@@ -196,7 +196,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
                   }}
                   className="w-full text-center text-sm text-emerald-600 hover:text-emerald-700 font-medium transition-colors"
                 >
-                  <Tr text="View all notifications" />
+                  {t('notif_view_all')}
                 </button>
               </div>
             )}

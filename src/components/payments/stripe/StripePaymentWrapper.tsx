@@ -5,6 +5,7 @@ import { AlertCircle } from 'lucide-react'
 import { useCmsStrings } from '../../../context/CmsStringsContext'
 import { createPaymentIntent } from '../../../services/stripePayment'
 import { getErrorMessage } from '../../../lib/errors'
+import { logger } from '../../../lib/logger'
 import type { Currency } from '../../../utils/currency'
 import { StripeCheckoutForm } from './StripeCheckoutForm'
 
@@ -40,14 +41,19 @@ export function StripePaymentWrapper({ amount, frequency, currency = 'NPR', sess
 
     async function init() {
       try {
+        logger.info('stripe.payment_wrapper.init.started', { amount, currency, frequency, hasSessionId: !!sessionId })
         const secret = await createPaymentIntent(
           amount * 100,
           currency.toLowerCase(),
           { frequency, ...(sessionId ? { session_id: sessionId } : {}) },
         )
-        if (!cancelled) setClientSecret(secret)
+        if (!cancelled) {
+          logger.info('stripe.payment_wrapper.init.succeeded', { hasClientSecret: !!secret })
+          setClientSecret(secret)
+        }
       } catch (err) {
         if (!cancelled) {
+          logger.error('stripe.payment_wrapper.init.failed', { error: getErrorMessage(err, 'Unknown error') })
           setError(getErrorMessage(err, t('payment_stripe_initialize_failed')))
         }
       } finally {
@@ -57,7 +63,7 @@ export function StripePaymentWrapper({ amount, frequency, currency = 'NPR', sess
 
     init()
     return () => { cancelled = true }
-  }, [amount, frequency, sessionId, currency])
+  }, [amount, frequency, sessionId, currency, t])
 
   if (loading) {
     return (

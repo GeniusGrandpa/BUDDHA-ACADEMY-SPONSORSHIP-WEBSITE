@@ -14,8 +14,8 @@ export function AdminStudentStories() {
   const [editing, setEditing] = useState<StudentStory | null>(null)
 
   const [form, setForm] = useState({
-    title: '', student_name: '', content: '', image_url: '',
-    quote: '', achievements: [] as string[], is_published: false, featured: false,
+    title: '', title_ne: '', student_name: '', student_name_ne: '', content: '', content_ne: '', image_url: '',
+    quote: '', quote_ne: '', achievements: [] as string[], achievements_ne: [] as string[], is_published: false, featured: false,
   })
   const [achievementInput, setAchievementInput] = useState('')
 
@@ -35,16 +35,16 @@ export function AdminStudentStories() {
 
   const openCreate = () => {
     setEditing(null)
-    setForm({ title: '', student_name: '', content: '', image_url: '', quote: '', achievements: [], is_published: false, featured: false })
+    setForm({ title: '', title_ne: '', student_name: '', student_name_ne: '', content: '', content_ne: '', image_url: '', quote: '', quote_ne: '', achievements: [], achievements_ne: [], is_published: false, featured: false })
     setShowModal(true)
   }
 
   const openEdit = (s: StudentStory) => {
     setEditing(s)
     setForm({
-      title: s.title, student_name: s.student_name, content: s.content,
-      image_url: s.image_url || '', quote: s.quote || '',
-      achievements: s.achievements || [], is_published: s.is_published, featured: s.featured,
+      title: s.title, title_ne: s.title_ne || '', student_name: s.student_name, student_name_ne: s.student_name_ne || '', content: s.content, content_ne: s.content_ne || '',
+      image_url: s.image_url || '', quote: s.quote || '', quote_ne: s.quote_ne || '',
+      achievements: s.achievements || [], achievements_ne: s.achievements_ne || [], is_published: s.is_published, featured: s.featured,
     })
     setShowModal(true)
   }

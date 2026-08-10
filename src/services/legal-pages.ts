@@ -4,6 +4,9 @@ import { logAuditEvent } from '../lib/audit'
 import type { LegalPage, LegalPageSection, LegalPageVersion } from '../types/database'
 import { getLocalizedContent } from './content-localization'
 
+const LEGAL_PAGE_COLS = 'id, type, title, title_ne, slug, meta_title, meta_title_ne, meta_description, meta_description_ne, status, effective_date, published_at, created_at'
+const LEGAL_SECTION_COLS = 'id, legal_page_id, heading, heading_ne, content, content_ne, sort_order, is_visible'
+
 export type LegalPageType = 'privacy_policy' | 'terms_conditions' | 'cookie_policy' | 'donation_policy'
 export type LegalPageStatus = 'draft' | 'published' | 'hidden'
 
@@ -14,7 +17,7 @@ export interface LegalPageWithSections extends LegalPage {
 export async function getLegalPageByType(type: LegalPageType): Promise<LegalPageWithSections | null> {
   const { data: page, error } = await supabase
     .from('legal_pages')
-    .select('id, type, title, slug, meta_title, meta_description, status, effective_date, published_at, created_at')
+    .select(LEGAL_PAGE_COLS)
     .eq('type', type)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -25,7 +28,7 @@ export async function getLegalPageByType(type: LegalPageType): Promise<LegalPage
 
   const { data: sections } = await supabase
     .from('legal_page_sections')
-    .select('id, legal_page_id, heading, content, sort_order, is_visible')
+    .select(LEGAL_SECTION_COLS)
     .eq('legal_page_id', page.id)
     .order('sort_order', { ascending: true })
 
@@ -39,7 +42,7 @@ export async function getPublishedLegalPageByType(type: LegalPageType, language 
 
   const { data: page, error } = await supabase
     .from('legal_pages')
-    .select('id, type, title, slug, meta_title, meta_description, status, effective_date, published_at, created_at')
+    .select(LEGAL_PAGE_COLS)
     .eq('type', type)
     .eq('status', 'published')
     .order('created_at', { ascending: false })
@@ -51,7 +54,7 @@ export async function getPublishedLegalPageByType(type: LegalPageType, language 
 
   const { data: sections } = await supabase
     .from('legal_page_sections')
-    .select('id, legal_page_id, heading, content, sort_order, is_visible')
+    .select(LEGAL_SECTION_COLS)
     .eq('legal_page_id', page.id)
     .eq('is_visible', true)
     .order('sort_order', { ascending: true })
@@ -93,7 +96,7 @@ export async function upsertLegalPage(
         ...(data.status === 'published' && existing.status !== 'published' ? { published_at: new Date().toISOString() } : {}),
       })
       .eq('id', existing.id)
-      .select('id, type, title, slug, meta_title, meta_description, status, effective_date, published_at, created_at')
+      .select(LEGAL_PAGE_COLS)
       .single()
 
     if (error) throw error
@@ -118,7 +121,7 @@ export async function upsertLegalPage(
       created_by: userId,
       updated_by: userId,
     })
-    .select('id, type, title, slug, meta_title, meta_description, status, effective_date, published_at, created_at')
+    .select(LEGAL_PAGE_COLS)
     .single()
 
   if (error) throw error
@@ -157,7 +160,7 @@ export async function updateLegalPageStatus(
 
 export async function upsertLegalPageSections(
   legalPageId: string,
-  sections: { heading: string; content: string; sort_order: number; is_visible?: boolean }[],
+  sections: { heading: string; heading_ne?: string; content: string; content_ne?: string; sort_order: number; is_visible?: boolean }[],
 ): Promise<void> {
   const { error: deleteError } = await supabase
     .from('legal_page_sections')
@@ -174,7 +177,9 @@ export async function upsertLegalPageSections(
       sections.map(s => ({
         legal_page_id: legalPageId,
         heading: s.heading,
+        heading_ne: s.heading_ne || '',
         content: s.content,
+        content_ne: s.content_ne || '',
         sort_order: s.sort_order,
         is_visible: s.is_visible ?? true,
       })),
