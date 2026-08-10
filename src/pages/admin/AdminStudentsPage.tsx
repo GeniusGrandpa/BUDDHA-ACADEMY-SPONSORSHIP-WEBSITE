@@ -17,7 +17,6 @@ type StudentForm = {
   name_ne: string
   age: number
   grade: string
-  grade_ne: string
   bio: string
   bio_ne: string
   photo_url: string
@@ -30,7 +29,6 @@ const emptyForm: StudentForm = {
   name_ne: '',
   age: 0,
   grade: '',
-  grade_ne: '',
   bio: '',
   bio_ne: '',
   photo_url: '',
@@ -75,7 +73,6 @@ export function AdminStudentsPage() {
       name_ne: (student as Record<string, unknown>).name_ne as string || '',
       age: student.age,
       grade: student.grade,
-      grade_ne: (student as Record<string, unknown>).grade_ne as string || '',
       bio: student.bio || '',
       bio_ne: (student as Record<string, unknown>).bio_ne as string || '',
       photo_url: student.photo_url || '',
@@ -230,11 +227,6 @@ export function AdminStudentsPage() {
                   <label className="block text-sm font-medium text-gray-600 mb-1">Grade (English) *</label>
                   <input value={form.grade} onChange={e => setForm({ ...form, grade: e.target.value })}
                     className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" placeholder="Grade" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-1">Grade (Nepali)</label>
-                  <input value={form.grade_ne} onChange={e => setForm({ ...form, grade_ne: e.target.value })}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" placeholder="कक्षा" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1">Status</label>

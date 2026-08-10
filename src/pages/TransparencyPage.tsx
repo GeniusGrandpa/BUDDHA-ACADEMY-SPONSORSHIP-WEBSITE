@@ -2,14 +2,19 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Tr } from '../components/Translated'
 import { useLanguage } from '../context/LanguageContext'
+import { useCmsStrings } from '../context/CmsStringsContext'
 import { getPageBySlug } from '../services/content'
 import type { TransparencyContent } from '../types/cms'
 
 const ALLOCATION_COLORS = ['#f26b1d', '#c49a4e', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899']
-const ALLOCATION_DESCRIPTIONS: Record<string, string> = {
-  "Children's Education & Welfare": 'Covers tuition, books, uniforms, daily meals, healthcare, and extracurricular activities.',
-  'Teachers & Staff': 'Salaries and training for qualified teachers, administrative staff, and support personnel.',
-  'Facilities & Operations': 'Building maintenance, utilities, transportation, and daily operational expenses.',
+
+function getAllocationDescription(name: string, t: (key: string) => string): string {
+  const descriptions: Record<string, string> = {
+    "Children's Education & Welfare": t('transparency_allocation_children_desc'),
+    'Teachers & Staff': t('transparency_allocation_teachers_desc'),
+    'Facilities & Operations': t('transparency_allocation_facilities_desc'),
+  }
+  return descriptions[name] || t('transparency_funds_allocated') + ' ' + name
 }
 
 const DEFAULT_CONTENT: TransparencyContent = {
@@ -31,26 +36,33 @@ const DEFAULT_CONTENT: TransparencyContent = {
 }
 
 const VERIFICATION_STEPS = [
-  'Each student is personally interviewed by our admissions team',
-  'Family background verification and financial need assessment',
-  'Academic records and previous school performance review',
-  'Regular follow-up visits and progress monitoring by coordinators',
-  'Annual re-evaluation of sponsorship eligibility and needs',
+  'transparency_verification_1',
+  'transparency_verification_2',
+  'transparency_verification_3',
+  'transparency_verification_4',
+  'transparency_verification_5',
 ]
 
 const IMPACT_REPORT_ITEMS = [
-  'Number of students enrolled and graduated',
-  'Academic performance statistics',
-  'Financial statements breakdown',
-  'Success stories and testimonials',
-  'Future plans and goals',
+  'transparency_impact_students',
+  'transparency_impact_academic',
+  'transparency_impact_financial',
+  'transparency_impact_stories',
+  'transparency_impact_plans',
 ]
 
-const RECEIPT_POLICY = 'All donors receive official receipt confirmation via email immediately after donation. Annual consolidated receipts are provided for tax purposes. Physical receipts available on request.'
-const DONOR_PRIVACY = 'We never share donor information with third parties. Your personal data is protected and used only for communication regarding your donations and impact updates.'
+const IMPACT_REPORT_HEADING = 'transparency_annual_report_heading'
+const IMPACT_REPORT_INTRO = 'transparency_annual_report_intro'
+const RECEIPT_HEADING = 'transparency_receipt_heading'
+const PRIVACY_HEADING = 'transparency_privacy_heading'
+const IMPACT_HEADING = 'transparency_impact_heading'
+
+const RECEIPT_POLICY = 'transparency_receipt_policy'
+const DONOR_PRIVACY = 'transparency_donor_privacy'
 
 export function TransparencyPage() {
   const { language } = useLanguage()
+  const { t } = useCmsStrings()
   const [content, setContent] = useState<TransparencyContent | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -91,9 +103,9 @@ export function TransparencyPage() {
       <section className="py-12 sm:py-16 lg:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4"><Tr text="How Your Donations Are Used" /></h2>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4"><Tr text={t('transparency_donations_used')} /></h2>
             <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">
-              <Tr text="Every dollar you donate goes directly to supporting our students and their education." />
+              <Tr text={t('transparency_donation_description')} />
             </p>
           </div>
 
@@ -116,7 +128,7 @@ export function TransparencyPage() {
               </svg>
               <div className="absolute inset-0 flex items-center justify-center flex-col">
                 <span className="text-3xl font-bold text-gray-900">100%</span>
-                <span className="text-sm text-gray-500"><Tr text="to Programs" /></span>
+                <span className="text-sm text-gray-500"><Tr text={t('transparency_to_programs')} /></span>
               </div>
             </div>
 
@@ -131,9 +143,7 @@ export function TransparencyPage() {
                     <span className="text-xl sm:text-2xl font-bold text-gray-900">{item.value}%</span>
                   </div>
                   <p className="text-gray-600 text-xs sm:text-sm mt-2">
-                    {ALLOCATION_DESCRIPTIONS[item.name]
-                      ? <Tr text={ALLOCATION_DESCRIPTIONS[item.name]} />
-                      : <Tr text={`Funds allocated to ${item.name}`} />}
+                    <Tr text={getAllocationDescription(item.name, t)} />
                   </p>
                 </div>
               ))}
@@ -145,9 +155,9 @@ export function TransparencyPage() {
       <section className="py-12 sm:py-16 lg:py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4"><Tr text="Student Verification Process" /></h2>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4"><Tr text={t('transparency_verification_heading')} /></h2>
             <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">
-              <Tr text="Every student at Buddha Academy goes through a rigorous verification process to ensure your sponsorship reaches those who need it most." />
+              <Tr text={t('transparency_verification_description')} />
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -161,7 +171,7 @@ export function TransparencyPage() {
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center mb-4 shadow-sm">
                   <span className="text-white font-bold text-sm">{idx + 1}</span>
                 </div>
-                <p className="text-gray-600 text-sm leading-relaxed"><Tr text={step} /></p>
+                <p className="text-gray-600 text-sm leading-relaxed"><Tr text={t(step)} /></p>
               </motion.div>
             ))}
           </div>
@@ -172,7 +182,7 @@ export function TransparencyPage() {
         <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-8 sm:mb-12">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4"><Tr text="Our Impact" /></h2>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4"><Tr text={t(IMPACT_HEADING)} /></h2>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-8 text-center">
               {data.impactStats.map((stat, idx) => (
@@ -193,14 +203,14 @@ export function TransparencyPage() {
       <section className="py-12 sm:py-16 lg:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 sm:mb-6"><Tr text="Annual Impact Report" /></h2>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 sm:mb-6"><Tr text={t(IMPACT_REPORT_HEADING)} /></h2>
             <div className="bg-gray-50 rounded-xl p-6 sm:p-8 border border-amber-100">
-              <p className="text-gray-600 text-sm sm:text-base mb-4 font-medium"><Tr text="We publish detailed annual reports showing:" /></p>
+              <p className="text-gray-600 text-sm sm:text-base mb-4 font-medium"><Tr text={t(IMPACT_REPORT_INTRO)} /></p>
               <ul className="space-y-3">
                 {IMPACT_REPORT_ITEMS.map((item, idx) => (
                   <li key={idx} className="flex items-center gap-3">
                     <span className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0" />
-                    <span className="text-gray-600 text-sm sm:text-base"><Tr text={item} /></span>
+                    <span className="text-gray-600 text-sm sm:text-base"><Tr text={t(item)} /></span>
                   </li>
                 ))}
               </ul>
@@ -218,9 +228,9 @@ export function TransparencyPage() {
             className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-6 sm:p-8 border border-amber-200">
             <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
               <svg className="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-              <Tr text="Receipt Policy" />
+              <Tr text={t(RECEIPT_HEADING)} />
             </h3>
-            <p className="text-gray-600 text-xs sm:text-sm leading-relaxed"><Tr text={RECEIPT_POLICY} /></p>
+            <p className="text-gray-600 text-xs sm:text-sm leading-relaxed"><Tr text={t(RECEIPT_POLICY)} /></p>
           </motion.div>
           <motion.div
             initial={{ opacity: 0, x: 20 }}
@@ -229,9 +239,9 @@ export function TransparencyPage() {
             className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-6 sm:p-8 border border-amber-200">
             <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
               <svg className="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-              <Tr text="Donor Privacy" />
+              <Tr text={t(PRIVACY_HEADING)} />
             </h3>
-            <p className="text-gray-600 text-xs sm:text-sm leading-relaxed"><Tr text={DONOR_PRIVACY} /></p>
+            <p className="text-gray-600 text-xs sm:text-sm leading-relaxed"><Tr text={t(DONOR_PRIVACY)} /></p>
           </motion.div>
         </div>
       </div>
