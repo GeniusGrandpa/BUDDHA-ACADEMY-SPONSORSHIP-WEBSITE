@@ -9,7 +9,8 @@ ALTER TABLE public.stripe_webhook_events ENABLE ROW LEVEL SECURITY;
 
 CREATE OR REPLACE FUNCTION public.stripe_confirm_payment(
   p_session_id UUID,
-  p_transaction_id TEXT
+  p_transaction_id TEXT,
+  p_currency TEXT DEFAULT 'npr'
 )
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -78,7 +79,7 @@ BEGIN
     'amount', v_amount,
     'gateway', v_gateway,
     'transaction_id', p_transaction_id,
-    'currency', 'NPR'
+    'currency', upper(p_currency)
   ));
 
   INSERT INTO donation_allocations (donation_id, category, allocation_percentage, amount)
