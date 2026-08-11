@@ -69,13 +69,12 @@ function ConfirmModal({ open, title, message, confirmLabel, onConfirm, onCancel,
 }
 
 function ChangeRoleModal({ open, user, onClose, onConfirm, loading }: {
-  open: boolean; user: ExtendedProfile | null; onClose: () => void; onConfirm: (userId: string, newRole: string, reason: string) => void; loading: boolean
+  open: boolean; user: ExtendedProfile | null; onClose: () => void; onConfirm: (userId: string, newRole: string) => void; loading: boolean
 }) {
   const [newRole, setNewRole] = useState<string>('')
-  const [reason, setReason] = useState('')
 
   useEffect(() => {
-    if (user) { setNewRole(user.role); setReason('') }
+    if (user) { setNewRole(user.role) }
   }, [user])
 
   if (!open || !user) return null
@@ -120,20 +119,10 @@ function ChangeRoleModal({ open, user, onClose, onConfirm, loading }: {
               ))}
             </select>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Reason (optional)</label>
-            <textarea
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              placeholder="Why is this role being changed?"
-              rows={2}
-              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-amber-500/50"
-            />
-          </div>
           <div className="flex gap-3 pt-2">
             <button onClick={onClose} disabled={loading} className="flex-1 px-4 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">Cancel</button>
             <button
-              onClick={() => onConfirm(user.id, newRole, reason)}
+              onClick={() => onConfirm(user.id, newRole)}
               disabled={loading || newRole === user.role}
               className="flex-1 px-4 py-2 text-sm font-medium text-white bg-amber-500 rounded-lg hover:bg-amber-600 transition-colors disabled:opacity-50"
             >
@@ -219,7 +208,7 @@ export function SuperAdminUsersPage() {
   const [stats, setStats] = useState<UserStats | null>(null)
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set())
   const [confirmAction, setConfirmAction] = useState<{
-    type: 'role' | 'super_admin' | 'suspend' | 'restore' | 'bulk_suspend' | 'bulk_restore'
+    type: 'super_admin' | 'suspend' | 'restore' | 'bulk_suspend' | 'bulk_restore'
     userId?: string; userName?: string; newRole?: string; currentRole?: string
   } | null>(null)
   const [roleModal, setRoleModal] = useState<{ user: ExtendedProfile } | null>(null)
@@ -262,12 +251,12 @@ export function SuperAdminUsersPage() {
       if (error) throw error
       toast.success('Role updated successfully')
       await loadData()
+      setRoleModal(null)
     } catch (err) {
       toast.error(getErrorMessage(err, 'Failed to update role'))
     } finally {
       setUpdating(null)
       setConfirmAction(null)
-      setRoleModal(null)
     }
   }
 
@@ -321,7 +310,6 @@ export function SuperAdminUsersPage() {
     if (!confirmAction) return ''
     switch (confirmAction.type) {
       case 'super_admin': return `Assign Super Admin to "${confirmAction.userName}"? This role has full system control. This action is permanently audited.`
-      case 'role': return `Change "${confirmAction.userName}" role from ${confirmAction.currentRole} to ${confirmAction.newRole}?`
       case 'suspend': return `Suspend "${confirmAction.userName}"? They will lose all platform access.`
       case 'restore': return `Restore "${confirmAction.userName}" account access?`
       case 'bulk_suspend': return `Suspend ${selectedUsers.size} selected users? They will lose all platform access.`
@@ -356,13 +344,13 @@ export function SuperAdminUsersPage() {
     <div className="space-y-6">
       <ConfirmModal
         open={confirmAction !== null}
-        title={confirmAction?.type === 'super_admin' ? 'Promote to Super Admin?' : confirmAction?.type === 'suspend' ? 'Suspend User?' : confirmAction?.type === 'restore' ? 'Restore User?' : confirmAction?.type === 'bulk_suspend' ? 'Bulk Suspend?' : confirmAction?.type === 'bulk_restore' ? 'Bulk Restore?' : 'Confirm Role Change'}
+        title={confirmAction?.type === 'super_admin' ? 'Promote to Super Admin?' : confirmAction?.type === 'suspend' ? 'Suspend User?' : confirmAction?.type === 'restore' ? 'Restore User?' : confirmAction?.type === 'bulk_suspend' ? 'Bulk Suspend?' : confirmAction?.type === 'bulk_restore' ? 'Bulk Restore?' : 'Confirm'}
         message={getConfirmMessage()}
-        confirmLabel={confirmAction?.type === 'super_admin' ? 'Promote to Super Admin' : confirmAction?.type === 'role' ? 'Change Role' : confirmAction?.type === 'suspend' ? 'Suspend User' : confirmAction?.type === 'restore' ? 'Restore User' : confirmAction?.type === 'bulk_suspend' ? 'Suspend All' : confirmAction?.type === 'bulk_restore' ? 'Restore All' : 'Confirm'}
+        confirmLabel={confirmAction?.type === 'super_admin' ? 'Promote to Super Admin' : confirmAction?.type === 'suspend' ? 'Suspend User' : confirmAction?.type === 'restore' ? 'Restore User' : confirmAction?.type === 'bulk_suspend' ? 'Suspend All' : confirmAction?.type === 'bulk_restore' ? 'Restore All' : 'Confirm'}
         onConfirm={() => {
           if (!confirmAction) return
           switch (confirmAction.type) {
-            case 'super_admin': case 'role': executeRoleUpdate(confirmAction.userId!, confirmAction.newRole!); break
+            case 'super_admin': executeRoleUpdate(confirmAction.userId!, confirmAction.newRole!); break
             case 'suspend': updateStatus(confirmAction.userId!, 'suspended'); break
             case 'restore': updateStatus(confirmAction.userId!, 'active'); break
             case 'bulk_suspend': handleBulkAction('suspend'); break
@@ -378,11 +366,11 @@ export function SuperAdminUsersPage() {
         user={roleModal?.user || null}
         onClose={() => setRoleModal(null)}
         onConfirm={(userId, newRole) => {
-          const user = users.find(u => u.id === userId)
           if (newRole === 'super_admin') {
+            const user = users.find(u => u.id === userId)
             setConfirmAction({ type: 'super_admin', userId, userName: user?.full_name || '', newRole })
           } else {
-            setConfirmAction({ type: 'role', userId, userName: user?.full_name || '', newRole, currentRole: user?.role })
+            executeRoleUpdate(userId, newRole)
           }
         }}
         loading={updating !== null}

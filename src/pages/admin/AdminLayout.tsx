@@ -120,6 +120,26 @@ export function AdminLayout() {
               <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 rounded-lg hover:opacity-80 text-[var(--color-text-muted)]" aria-label="Open sidebar">
                 <Menu className="w-5 h-5" />
               </button>
+              {role === 'teacher' && (
+                <Link to="/teacher/dashboard" className="hidden sm:flex items-center px-3 py-1.5 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] rounded-lg transition-colors">
+                  Teacher Dashboard
+                </Link>
+              )}
+              {role === 'finance_manager' && (
+                <Link to="/admin/finance" className="hidden sm:flex items-center px-3 py-1.5 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] rounded-lg transition-colors">
+                  Finance Dashboard
+                </Link>
+              )}
+              {role === 'donor' && (
+                <Link to="/dashboard" className="hidden sm:flex items-center px-3 py-1.5 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] rounded-lg transition-colors">
+                  Donor Dashboard
+                </Link>
+              )}
+              {role === 'volunteer' && (
+                <Link to="/dashboard" className="hidden sm:flex items-center px-3 py-1.5 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] rounded-lg transition-colors">
+                  Volunteer Dashboard
+                </Link>
+              )}
             </div>
 
             <div className="flex items-center gap-3">
@@ -155,9 +175,26 @@ export function AdminLayout() {
                         <Link to={localize('/')} className="flex items-center px-3 py-2 text-sm rounded-lg transition-colors text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)]">
                           View Website
                         </Link>
-                        <Link to="/dashboard" className="flex items-center px-3 py-2 text-sm rounded-lg transition-colors text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)]">
-                          User Dashboard
-                        </Link>
+                        {role === 'teacher' && (
+                          <Link to="/teacher/dashboard" className="flex items-center px-3 py-2 text-sm rounded-lg transition-colors text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)]">
+                            Teacher Dashboard
+                          </Link>
+                        )}
+                        {role === 'finance_manager' && (
+                          <Link to="/admin/finance" className="flex items-center px-3 py-2 text-sm rounded-lg transition-colors text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)]">
+                            Finance Dashboard
+                          </Link>
+                        )}
+                        {role === 'donor' && (
+                          <Link to="/dashboard" className="flex items-center px-3 py-2 text-sm rounded-lg transition-colors text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)]">
+                            Donor Dashboard
+                          </Link>
+                        )}
+                        {role === 'volunteer' && (
+                          <Link to="/dashboard" className="flex items-center px-3 py-2 text-sm rounded-lg transition-colors text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)]">
+                            Volunteer Dashboard
+                          </Link>
+                        )}
                       </div>
                       <div className="p-1 border-t border-[var(--color-border-light)]">
                         <button onClick={signOut}
