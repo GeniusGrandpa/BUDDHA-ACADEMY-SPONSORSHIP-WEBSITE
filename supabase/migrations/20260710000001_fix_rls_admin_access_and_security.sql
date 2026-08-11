@@ -115,7 +115,7 @@ RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
 AS $$
 BEGIN
-  INSERT INTO public.content_versions (entity_type, entity_id, content, version_number, created_by)
+  INSERT INTO public.content_versions (entity_type, entity_id, content, version_number, title, created_by)
   VALUES (
     TG_TABLE_NAME,
     COALESCE(NEW.id, OLD.id),
@@ -125,6 +125,11 @@ BEGIN
       ELSE row_to_json(NEW)::jsonb
     END,
     COALESCE(NEW.updated_at, OLD.updated_at, now())::text,
+    CASE 
+      WHEN TG_TABLE_NAME = 'pages' THEN COALESCE(NEW.title, OLD.title, '')
+      WHEN TG_TABLE_NAME = 'news' THEN COALESCE(NEW.title, OLD.title, '')
+      ELSE ''
+    END,
     auth.uid()
   );
   RETURN COALESCE(NEW, OLD);
@@ -135,7 +140,7 @@ RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
 AS $$
 BEGIN
-  INSERT INTO public.audit_log (table_name, record_id, action, old_data, new_data, changed_by, ip_address)
+  INSERT INTO public.audit_logs (table_name, record_id, action, old_data, new_data, changed_by, ip_address)
   VALUES (
     TG_TABLE_NAME,
     COALESCE(NEW.id, OLD.id),
@@ -164,7 +169,7 @@ BEGIN
   SELECT COALESCE(MAX(version_number), 0) + 1 INTO v_version_number
   FROM public.content_versions
   WHERE entity_type = TG_TABLE_NAME AND entity_id = COALESCE(NEW.id, OLD.id);
-  INSERT INTO public.content_versions (entity_type, entity_id, content, version_number, created_by)
+  INSERT INTO public.content_versions (entity_type, entity_id, content, version_number, title, created_by)
   VALUES (
     TG_TABLE_NAME,
     COALESCE(NEW.id, OLD.id),
@@ -174,6 +179,11 @@ BEGIN
       ELSE row_to_json(NEW)::jsonb
     END,
     v_version_number,
+    CASE 
+      WHEN TG_TABLE_NAME = 'pages' THEN COALESCE(NEW.title, OLD.title, '')
+      WHEN TG_TABLE_NAME = 'news' THEN COALESCE(NEW.title, OLD.title, '')
+      ELSE ''
+    END,
     auth.uid()
   );
   RETURN COALESCE(NEW, OLD);
@@ -187,7 +197,7 @@ DECLARE
   page_slug TEXT;
 BEGIN
   SELECT slug INTO page_slug FROM public.pages WHERE id = COALESCE(NEW.page_id, OLD.page_id);
-  INSERT INTO public.audit_log (table_name, record_id, action, old_data, new_data, changed_by)
+  INSERT INTO public.audit_logs (table_name, record_id, action, old_data, new_data, changed_by)
   VALUES (
     'page_blocks',
     COALESCE(NEW.id, OLD.id),

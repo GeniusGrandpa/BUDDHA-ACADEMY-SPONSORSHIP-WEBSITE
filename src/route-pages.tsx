@@ -97,6 +97,8 @@ export const AdminReportsPage = lazy(() => import('./pages/admin/AdminReportsPag
 
 export const AdminUsersPage = lazy(() => import('./pages/admin/AdminUsersPage').then(m => ({ default: m.AdminUsersPage })))
 
+export const AdminTeacherAssignments = lazy(() => import('./pages/admin/AdminTeacherAssignments').then(m => ({ default: m.AdminTeacherAssignments })))
+
 export const SuperAdminLayout = lazy(() => import('./pages/super-admin/SuperAdminLayout').then(m => ({ default: m.SuperAdminLayout })))
 
 export const SuperAdminUsersPage = lazy(() => import('./pages/super-admin/SuperAdminUsersPage').then(m => ({ default: m.SuperAdminUsersPage })))
@@ -115,7 +117,7 @@ export const SponsorshipDashboard = lazy(() => import('./pages/admin/dashboards/
 
 export const VolunteerDashboard = lazy(() => import('./pages/admin/dashboards/VolunteerDashboard').then(m => ({ default: m.VolunteerDashboard })))
 
-export const TeacherDashboard = lazy(() => import('./pages/teacher/TeacherDashboard').then(m => ({ default: m.TeacherDashboard })))
+export const TeacherDashboard = lazy(() => import('./pages/teacher/TeacherDashboard'))
 
 export const WebsiteDashboard = lazy(() => import('./pages/admin/website/WebsiteDashboard').then(m => ({ default: m.WebsiteDashboard })))
 export const WebsiteBuilder = lazy(() => import('./pages/admin/website/WebsiteBuilder').then(m => ({ default: m.WebsiteBuilder })))

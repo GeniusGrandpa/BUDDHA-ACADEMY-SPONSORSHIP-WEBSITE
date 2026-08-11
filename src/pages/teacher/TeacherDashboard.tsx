@@ -83,7 +83,19 @@ function ProgressCard({ student }: { student: AssignedStudent }) {
       className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-all"
     >
       <div className="flex items-center gap-4 mb-4">
-        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center text-orange-600 font-semibold text-lg">
+        {student.photo_url ? (
+          <img 
+            src={student.photo_url} 
+            alt={student.name}
+            className="w-12 h-12 rounded-full object-cover border-2 border-orange-200"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).style.display = 'none'
+              const fallback = e.currentTarget.nextElementSibling as HTMLElement
+              if (fallback) fallback.classList.remove('hidden')
+            }}
+          />
+        ) : null}
+        <div className={`w-12 h-12 rounded-full bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center text-orange-600 font-semibold text-lg ${student.photo_url ? 'hidden' : ''}`}>
           {student.name.charAt(0)}
         </div>
         <div className="flex-1 min-w-0">
@@ -108,9 +120,26 @@ function ProgressCard({ student }: { student: AssignedStudent }) {
       </div>
       <div className="flex items-center justify-between pt-3 border-t border-gray-50">
         <span className="text-sm text-gray-500">Attendance: {student.attendance}%</span>
-        <button className="text-sm text-orange-600 hover:text-orange-700 font-medium">
-          View Profile
-        </button>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => {
+              setSelectedStudent(student)
+              setShowAttendanceModal(true)
+            }}
+            className="text-sm text-orange-600 hover:text-orange-700 font-medium"
+          >
+            Attendance
+          </button>
+          <button 
+            onClick={() => {
+              setSelectedStudent(student)
+              setShowGradeModal(true)
+            }}
+            className="text-sm text-orange-600 hover:text-orange-700 font-medium"
+          >
+            Add Grade
+          </button>
+        </div>
       </div>
     </motion.div>
   )
@@ -123,123 +152,310 @@ function parseGrade(grade: string | null): number | null {
   return letterGrades[grade] ?? null
 }
 
-export function TeacherDashboard() {
+export default function TeacherDashboard() {
   const { profile } = useAuth()
   const [students, setStudents] = useState<AssignedStudent[]>([])
   const [progressEntries, setProgressEntries] = useState<ProgressEntry[]>([])
   const [attendance, setAttendance] = useState<AttendanceSummary>({ present: 0, absent: 0, late: 0, excused: 0, total: 0 })
   const [loading, setLoading] = useState(true)
+  
+  const [showGradeModal, setShowGradeModal] = useState(false)
+  const [showAttendanceModal, setShowAttendanceModal] = useState(false)
+  const [selectedStudent, setSelectedStudent] = useState<AssignedStudent | null>(null)
+  
+  const [newGrade, setNewGrade] = useState({ subject: '', grade: '', notes: '', achievement: '' })
+  const [newAttendance, setNewAttendance] = useState({ date: new Date().toISOString().split('T')[0], status: 'present' as 'present' | 'absent' | 'late' | 'excused', notes: '' })
 
-  useEffect(() => {
+  const loadData = async () => {
     if (!profile?.id) return
+    try {
+      if (!profile) { setLoading(false); return }
+      const pid = profile.id
 
-    async function loadData() {
-      try {
-        if (!profile) { setLoading(false); return }
-        const pid = profile.id
+      const { data: rawAssignments, error: assignError } = await supabase
+        .from('teacher_assignments')
+        .select('student_id, subject')
+        .eq('teacher_id', pid)
+      
+      if (assignError) {
+        console.error('Error fetching assignments:', assignError)
+      }
+      
+      const assignments = (rawAssignments || []) as Pick<TeacherAssignment, 'student_id' | 'subject'>[]
 
-        const { data: rawAssignments, error: assignError } = await supabase
-          .from('teacher_assignments')
-          .select('student_id, subject')
-          .eq('teacher_id', pid)
-        
-        if (assignError) {
-          console.error('Error fetching assignments:', assignError)
-        }
-        
-        const assignments = (rawAssignments || []) as Pick<TeacherAssignment, 'student_id' | 'subject'>[]
+      if (assignments.length === 0) {
+        console.log('No assignments found for teacher:', pid)
+        setLoading(false)
+        return
+      }
 
-        if (assignments.length === 0) {
-          console.log('No assignments found for teacher:', pid)
-          setLoading(false)
-          return
-        }
+      const studentIds = [...new Set(assignments.map(a => a.student_id))]
+      const subjectMap = new Map<string, string[]>()
+      assignments.forEach(a => {
+        const subs = subjectMap.get(a.student_id) || []
+        if (a.subject) subs.push(a.subject)
+        subjectMap.set(a.student_id, subs)
+      })
 
-        const studentIds = [...new Set(assignments.map(a => a.student_id))]
-        const subjectMap = new Map<string, string[]>()
-        assignments.forEach(a => {
-          const subs = subjectMap.get(a.student_id) || []
-          if (a.subject) subs.push(a.subject)
-          subjectMap.set(a.student_id, subs)
-        })
+      const { data: rawStudentData, error: studentError } = await supabase
+        .from('students')
+        .select('id, name, grade, photo_url, sponsorship_status')
+        .in('id', studentIds)
+      
+      if (studentError) {
+        console.error('Error fetching students:', studentError)
+        setLoading(false)
+        return
+      }
+      
+      const studentData = (rawStudentData || []) as Pick<Student, 'id' | 'name' | 'grade' | 'photo_url' | 'sponsorship_status'>[]
 
-        const { data: rawStudentData, error: studentError } = await supabase
-          .from('students')
-          .select('id, name, grade, photo_url, sponsorship_status')
-          .in('id', studentIds)
-        
-        if (studentError) {
-          console.error('Error fetching students:', studentError)
-          setLoading(false)
-          return
-        }
-        
-        const studentData = (rawStudentData || []) as Pick<Student, 'id' | 'name' | 'grade' | 'photo_url' | 'sponsorship_status'>[]
+      if (studentData.length === 0) { setLoading(false); return }
 
-        if (studentData.length === 0) { setLoading(false); return }
+      const { data: rawProgressData, error: progressError } = await supabase
+        .from('student_progress')
+        .select('*')
+        .eq('teacher_id', pid)
+        .order('recorded_at', { ascending: false })
+      
+      if (progressError) {
+        console.error('Error fetching progress:', progressError)
+      }
+      
+      const progressData = (rawProgressData || []) as StudentProgress[]
 
-        const { data: rawProgressData, error: progressError } = await supabase
-          .from('student_progress')
-          .select('*')
-          .eq('teacher_id', pid)
-          .order('recorded_at', { ascending: false })
-        
-        if (progressError) {
-          console.error('Error fetching progress:', progressError)
-        }
-        
-        const progressData = (rawProgressData || []) as StudentProgress[]
+      const { data: rawAttendanceData, error: attendanceError } = await supabase
+        .from('attendance_records')
+        .select('student_id, status')
+        .eq('teacher_id', pid)
+      
+      if (attendanceError) {
+        console.error('Error fetching attendance:', attendanceError)
+      }
+      
+      const attendanceData = (rawAttendanceData || []) as Pick<AttendanceRecord, 'student_id' | 'status'>[]
 
-        const { data: rawAttendanceData, error: attendanceError } = await supabase
-          .from('attendance_records')
-          .select('status')
-          .eq('teacher_id', pid)
-        
-        if (attendanceError) {
-          console.error('Error fetching attendance:', attendanceError)
-        }
-        
-        const attendanceData = (rawAttendanceData || []) as Pick<AttendanceRecord, 'status'>[]
+      const attSummary: AttendanceSummary = { present: 0, absent: 0, late: 0, excused: 0, total: 0 }
+      attendanceData.forEach(a => {
+        if (a.status === 'present') attSummary.present++
+        else if (a.status === 'absent') attSummary.absent++
+        else if (a.status === 'late') attSummary.late++
+        else if (a.status === 'excused') attSummary.excused++
+        attSummary.total++
+      })
 
-        const attSummary: AttendanceSummary = { present: 0, absent: 0, late: 0, excused: 0, total: 0 }
-        attendanceData.forEach(a => {
-          if (a.status === 'present') attSummary.present++
-          else if (a.status === 'absent') attSummary.absent++
-          else if (a.status === 'late') attSummary.late++
-          else if (a.status === 'excused') attSummary.excused++
-          attSummary.total++
-        })
+      const progressByStudent = new Map<string, { subject: string; grade: string }[]>()
+      progressData.forEach(p => {
+        const list = progressByStudent.get(p.student_id) || []
+        if (p.subject && p.grade) list.push({ subject: p.subject, grade: p.grade })
+        progressByStudent.set(p.student_id, list)
+      })
 
-        const progressByStudent = new Map<string, { subject: string; grade: string }[]>()
-        progressData.forEach(p => {
-          const list = progressByStudent.get(p.student_id) || []
-          if (p.subject && p.grade) list.push({ subject: p.subject, grade: p.grade })
-          progressByStudent.set(p.student_id, list)
-        })
+      const attendanceByStudent = new Map<string, { present: number; total: number }>()
+      attendanceData.forEach(a => {
+        const studentAtt = attendanceByStudent.get(a.student_id) || { present: 0, total: 0 }
+        studentAtt.total++
+        if (a.status === 'present') studentAtt.present++
+        attendanceByStudent.set(a.student_id, studentAtt)
+      })
 
-        const totalDays = attSummary.total || 1
-        const merged: AssignedStudent[] = studentData.map(s => ({
+      const merged: AssignedStudent[] = studentData.map(s => {
+        const studentAtt = attendanceByStudent.get(s.id) || { present: 0, total: 0 }
+        return {
           id: s.id,
           name: s.name,
           grade: s.grade,
           photo_url: s.photo_url,
           sponsorship_status: s.sponsorship_status,
           progress: progressByStudent.get(s.id) || [],
-          attendance: totalDays > 0
-            ? Math.round(((attSummary.present) / totalDays) * 100)
+          attendance: studentAtt.total > 0
+            ? Math.round((studentAtt.present / studentAtt.total) * 100)
             : 100,
-        }))
+        }
+      })
 
-        setStudents(merged)
-        setProgressEntries(progressData || [])
-        setAttendance(attSummary)
-      } finally {
-        setLoading(false)
-      }
+      setStudents(merged)
+      setProgressEntries(progressData || [])
+      setAttendance(attSummary)
+    } finally {
+      setLoading(false)
     }
+  }
 
-loadData()
-   }, [profile?.id, profile])
+  const handleAddGrade = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedStudent || !profile?.id) return
+
+    try {
+      const { error } = await supabase
+        .from('student_progress')
+        .insert({
+          student_id: selectedStudent.id,
+          teacher_id: profile.id,
+          subject: newGrade.subject,
+          grade: newGrade.grade.includes('%') ? newGrade.grade : `${newGrade.grade}%`,
+          notes: newGrade.notes || null,
+          achievement: newGrade.achievement || null,
+        })
+
+      if (error) throw error
+
+      loadData()
+      setShowGradeModal(false)
+      setNewGrade({ subject: '', grade: '', notes: '', achievement: '' })
+      setSelectedStudent(null)
+    } catch (error) {
+      console.error('Error adding grade:', error)
+      alert('Failed to add grade. Please try again.')
+    }
+  }
+
+  const handleAddAttendance = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedStudent || !profile?.id) return
+
+    try {
+      const { error } = await supabase
+        .from('attendance_records')
+        .insert({
+          student_id: selectedStudent.id,
+          teacher_id: profile.id,
+          date: newAttendance.date,
+          status: newAttendance.status,
+          notes: newAttendance.notes || null,
+        })
+
+      if (error) throw error
+
+      loadData()
+      setShowAttendanceModal(false)
+      setNewAttendance({ date: new Date().toISOString().split('T')[0], status: 'present', notes: '' })
+      setSelectedStudent(null)
+    } catch (error) {
+      console.error('Error adding attendance:', error)
+      alert('Failed to record attendance. Please try again.')
+    }
+  }
+
+  const loadData = async () => {
+    if (!profile?.id) return
+    try {
+      if (!profile) { setLoading(false); return }
+      const pid = profile.id
+
+      const { data: rawAssignments, error: assignError } = await supabase
+        .from('teacher_assignments')
+        .select('student_id, subject')
+        .eq('teacher_id', pid)
+      
+      if (assignError) {
+        console.error('Error fetching assignments:', assignError)
+      }
+      
+      const assignments = (rawAssignments || []) as Pick<TeacherAssignment, 'student_id' | 'subject'>[]
+
+      if (assignments.length === 0) {
+        console.log('No assignments found for teacher:', pid)
+        setLoading(false)
+        return
+      }
+
+      const studentIds = [...new Set(assignments.map(a => a.student_id))]
+      const subjectMap = new Map<string, string[]>()
+      assignments.forEach(a => {
+        const subs = subjectMap.get(a.student_id) || []
+        if (a.subject) subs.push(a.subject)
+        subjectMap.set(a.student_id, subs)
+      })
+
+      const { data: rawStudentData, error: studentError } = await supabase
+        .from('students')
+        .select('id, name, grade, photo_url, sponsorship_status')
+        .in('id', studentIds)
+      
+      if (studentError) {
+        console.error('Error fetching students:', studentError)
+        setLoading(false)
+        return
+      }
+      
+      const studentData = (rawStudentData || []) as Pick<Student, 'id' | 'name' | 'grade' | 'photo_url' | 'sponsorship_status'>[]
+
+      if (studentData.length === 0) { setLoading(false); return }
+
+      const { data: rawProgressData, error: progressError } = await supabase
+        .from('student_progress')
+        .select('*')
+        .eq('teacher_id', pid)
+        .order('recorded_at', { ascending: false })
+      
+      if (progressError) {
+        console.error('Error fetching progress:', progressError)
+      }
+      
+      const progressData = (rawProgressData || []) as StudentProgress[]
+
+      const { data: rawAttendanceData, error: attendanceError } = await supabase
+        .from('attendance_records')
+        .select('student_id, status')
+        .eq('teacher_id', pid)
+      
+      if (attendanceError) {
+        console.error('Error fetching attendance:', attendanceError)
+      }
+      
+      const attendanceData = (rawAttendanceData || []) as Pick<AttendanceRecord, 'student_id' | 'status'>[]
+
+      const attSummary: AttendanceSummary = { present: 0, absent: 0, late: 0, excused: 0, total: 0 }
+      attendanceData.forEach(a => {
+        if (a.status === 'present') attSummary.present++
+        else if (a.status === 'absent') attSummary.absent++
+        else if (a.status === 'late') attSummary.late++
+        else if (a.status === 'excused') attSummary.excused++
+        attSummary.total++
+      })
+
+      const progressByStudent = new Map<string, { subject: string; grade: string }[]>()
+      progressData.forEach(p => {
+        const list = progressByStudent.get(p.student_id) || []
+        if (p.subject && p.grade) list.push({ subject: p.subject, grade: p.grade })
+        progressByStudent.set(p.student_id, list)
+      })
+
+      const attendanceByStudent = new Map<string, { present: number; total: number }>()
+      attendanceData.forEach(a => {
+        const studentAtt = attendanceByStudent.get(a.student_id) || { present: 0, total: 0 }
+        studentAtt.total++
+        if (a.status === 'present') studentAtt.present++
+        attendanceByStudent.set(a.student_id, studentAtt)
+      })
+
+      const merged: AssignedStudent[] = studentData.map(s => {
+        const studentAtt = attendanceByStudent.get(s.id) || { present: 0, total: 0 }
+        return {
+          id: s.id,
+          name: s.name,
+          grade: s.grade,
+          photo_url: s.photo_url,
+          sponsorship_status: s.sponsorship_status,
+          progress: progressByStudent.get(s.id) || [],
+          attendance: studentAtt.total > 0
+            ? Math.round((studentAtt.present / studentAtt.total) * 100)
+            : 100,
+        }
+      })
+
+      setStudents(merged)
+      setProgressEntries(progressData || [])
+      setAttendance(attSummary)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadData()
+   }, [profile?.id])
 
   if (loading) {
     return <DashboardSkeleton />
@@ -259,11 +475,17 @@ loadData()
               <p className="text-gray-500 mt-1">Here's your classroom overview</p>
             </div>
             <div className="flex items-center gap-3">
-              <button className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-orange-50 transition-colors shadow-sm">
-                Upload Photos
+              <button 
+                onClick={() => setShowAttendanceModal(true)}
+                className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-orange-50 transition-colors shadow-sm"
+              >
+                Record Attendance
               </button>
-              <button className="px-4 py-2 bg-orange-500 border border-transparent rounded-xl text-sm font-medium text-white hover:bg-orange-600 transition-colors shadow-sm">
-                Add Progress
+              <button 
+                onClick={() => setShowGradeModal(true)}
+                className="px-4 py-2 bg-orange-500 border border-transparent rounded-xl text-sm font-medium text-white hover:bg-orange-600 transition-colors shadow-sm"
+              >
+                Add Grades
               </button>
             </div>
           </div>
@@ -417,6 +639,174 @@ loadData()
           </motion.div>
         )}
       </div>
+
+      {showGradeModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Add Student Grade</h3>
+            <form onSubmit={handleAddGrade} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Select Student</label>
+                <select
+                  required
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  value={selectedStudent?.id || ''}
+                  onChange={(e) => {
+                    const student = students.find(s => s.id === e.target.value)
+                    setSelectedStudent(student || null)
+                  }}
+                >
+                  <option value="">Choose a student...</option>
+                  {students.map(s => (
+                    <option key={s.id} value={s.id}>{s.name} (Grade {s.grade})</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g., Math, English, Science"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  value={newGrade.subject}
+                  onChange={(e) => setNewGrade({ ...newGrade, subject: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Grade (%)</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g., 85%, 92%"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  value={newGrade.grade}
+                  onChange={(e) => setNewGrade({ ...newGrade, grade: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                <textarea
+                  placeholder="Optional notes about performance..."
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  rows={2}
+                  value={newGrade.notes}
+                  onChange={(e) => setNewGrade({ ...newGrade, notes: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Achievement (Optional)</label>
+                <input
+                  type="text"
+                  placeholder="e.g., Won science fair, Perfect attendance"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  value={newGrade.achievement}
+                  onChange={(e) => setNewGrade({ ...newGrade, achievement: e.target.value })}
+                />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowGradeModal(false)
+                    setSelectedStudent(null)
+                    setNewGrade({ subject: '', grade: '', notes: '', achievement: '' })
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
+                >
+                  Add Grade
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showAttendanceModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Record Attendance</h3>
+            <form onSubmit={handleAddAttendance} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Select Student</label>
+                <select
+                  required
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  value={selectedStudent?.id || ''}
+                  onChange={(e) => {
+                    const student = students.find(s => s.id === e.target.value)
+                    setSelectedStudent(student || null)
+                  }}
+                >
+                  <option value="">Choose a student...</option>
+                  {students.map(s => (
+                    <option key={s.id} value={s.id}>{s.name} (Grade {s.grade})</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                <input
+                  type="date"
+                  required
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  value={newAttendance.date}
+                  onChange={(e) => setNewAttendance({ ...newAttendance, date: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <select
+                  required
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  value={newAttendance.status}
+                  onChange={(e) => setNewAttendance({ ...newAttendance, status: e.target.value as any })}
+                >
+                  <option value="present">Present</option>
+                  <option value="absent">Absent</option>
+                  <option value="late">Late</option>
+                  <option value="excused">Excused</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Notes (Optional)</label>
+                <textarea
+                  placeholder="Optional notes..."
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  rows={2}
+                  value={newAttendance.notes}
+                  onChange={(e) => setNewAttendance({ ...newAttendance, notes: e.target.value })}
+                />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAttendanceModal(false)
+                    setSelectedStudent(null)
+                    setNewAttendance({ date: new Date().toISOString().split('T')[0], status: 'present', notes: '' })
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
+                >
+                  Record Attendance
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

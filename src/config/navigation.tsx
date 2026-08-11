@@ -247,6 +247,11 @@ export const navigationConfig: NavSection[] = [
         href: '/admin/users',
         roles: ['super_admin', 'admin'],
       },
+      {
+        label: 'Teacher Assignments',
+        href: '/admin/teacher-assignments',
+        roles: ['super_admin', 'admin'],
+      },
     ],
   },
   {
