@@ -36,11 +36,11 @@ export function HomePageEditor() {
     badges: [], layout: '', display_order: 0, is_visible: true,
     animation_enabled: true, updated_by: null, created_at: '', updated_at: '',
   })
-  const [welcome, setWelcome] = useState({ title: '', content: '' })
+  const [welcome, setWelcome] = useState<{ title: string; title_ne?: string; content: string; content_ne?: string }>({ title: '', content: '' })
   const [statsTitle, setStatsTitle] = useState('')
   const [featuredTitle, setFeaturedTitle] = useState('')
   const [testimonialTitle, setTestimonialTitle] = useState('')
-  const [donationCta, setDonationCta] = useState({ title: '', description: '', button_text: '', button_link: '' })
+  const [donationCta, setDonationCta] = useState<{ title: string; title_ne?: string; description: string; description_ne?: string; button_text: string; button_text_ne?: string; button_link: string }>({ title: '', description: '', button_text: '', button_link: '' })
   const [sectionsVisible, setSectionsVisible] = useState<Record<string, boolean>>({})
 
   const load = useCallback(async () => {
@@ -57,15 +57,15 @@ export function HomePageEditor() {
       ])
       if (heroData) setHero(heroData)
       if (welcomeData?.content) {
-        const c = welcomeData.content as { title?: string; content?: string }
-        setWelcome({ title: c.title || '', content: c.content || '' })
+        const c = welcomeData.content as { title?: string; title_ne?: string; content?: string; content_ne?: string }
+        setWelcome({ title: c.title || '', title_ne: c.title_ne || '', content: c.content || '', content_ne: c.content_ne || '' })
       }
       if (statsData?.content) setStatsTitle((statsData.content as { title?: string })?.title || '')
       if (featuredData?.content) setFeaturedTitle((featuredData.content as { title?: string })?.title || '')
       if (testimonialData?.content) setTestimonialTitle((testimonialData.content as { title?: string })?.title || '')
       if (ctaData?.content) {
-        const c = ctaData.content as { title?: string; description?: string; button_text?: string; button_link?: string }
-        setDonationCta({ title: c.title || '', description: c.description || '', button_text: c.button_text || '', button_link: c.button_link || '' })
+        const c = ctaData.content as { title?: string; title_ne?: string; description?: string; description_ne?: string; button_text?: string; button_text_ne?: string; button_link?: string }
+        setDonationCta({ title: c.title || '', title_ne: c.title_ne || '', description: c.description || '', description_ne: c.description_ne || '', button_text: c.button_text || '', button_text_ne: c.button_text_ne || '', button_link: c.button_link || '' })
       }
       const visMap: Record<string, boolean> = {}
       visibilityData.forEach(s => { visMap[s.section_key] = s.is_visible })
@@ -118,11 +118,11 @@ export function HomePageEditor() {
     try {
       await Promise.all([
         upsertHeroContent({ ...hero } as never),
-        upsertSectionContent({ section_key: 'welcome', title: 'Welcome', content: welcome } as never),
+        upsertSectionContent({ section_key: 'welcome', title: 'Welcome', content: { title: welcome.title, content: welcome.content }, content_ne: { title: welcome.title_ne, content: welcome.content_ne } } as never),
         upsertSectionContent({ section_key: 'stats', title: 'Statistics', content: { title: statsTitle } } as never),
         upsertSectionContent({ section_key: 'featured_students', title: 'Featured Students', content: { title: featuredTitle } } as never),
         upsertSectionContent({ section_key: 'testimonials', title: 'Testimonials', content: { title: testimonialTitle } } as never),
-        upsertSectionContent({ section_key: 'donation_cta', title: 'Donation CTA', content: donationCta } as never),
+        upsertSectionContent({ section_key: 'donation_cta', title: 'Donation CTA', content: { title: donationCta.title, description: donationCta.description, button_text: donationCta.button_text, button_link: donationCta.button_link }, content_ne: { title: donationCta.title_ne, description: donationCta.description_ne, button_text: donationCta.button_text_ne } } as never),
       ])
       toast.success('Home page published successfully')
       setPublished(true)
@@ -152,18 +152,25 @@ export function HomePageEditor() {
   }
 
   const statPlaceholder = hero.statistics || []
+  const statNe = hero.statistics_ne || []
   const handleStatChange = (idx: number, field: string, value: string) => {
     const stats = [...statPlaceholder]
     stats[idx] = { ...stats[idx], [field]: value }
     setHero({ ...hero, statistics: stats })
     markAsUnpublished()
   }
+  const handleStatNeChange = (idx: number, field: string, value: string) => {
+    const stats = [...statNe]
+    stats[idx] = { ...stats[idx], [field]: value }
+    setHero({ ...hero, statistics_ne: stats })
+    markAsUnpublished()
+  }
   const addStat = () => {
-    setHero({ ...hero, statistics: [...statPlaceholder, { value: '', label: '' }] })
+    setHero({ ...hero, statistics: [...statPlaceholder, { value: '', label: '' }], statistics_ne: [...statNe, { value: '', label: '' }] })
     markAsUnpublished()
   }
   const removeStat = (idx: number) => {
-    setHero({ ...hero, statistics: statPlaceholder.filter((_, i) => i !== idx) })
+    setHero({ ...hero, statistics: statPlaceholder.filter((_, i) => i !== idx), statistics_ne: statNe.filter((_, i) => i !== idx) })
     markAsUnpublished()
   }
 
@@ -196,15 +203,13 @@ export function HomePageEditor() {
       <SectionCard title="Hero Banner" description="The main banner visitors see at the top of your homepage"
         sectionKey="hero" isVisible={sectionsVisible.hero !== false} onToggleVisibility={() => toggleSectionVisibility('hero')}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Field label="Main Title" value={hero.title} onChange={v => { setHero({ ...hero, title: v }); markAsUnpublished(); }} required />
-          <Field label="Highlight Text" value={hero.highlight || ''} onChange={v => { setHero({ ...hero, highlight: v }); markAsUnpublished(); }} />
-          <div className="md:col-span-2">
-            <Field label="Description" value={hero.description || ''} onChange={v => { setHero({ ...hero, description: v }); markAsUnpublished(); }} textarea />
-          </div>
+          <NeField label="Main Title" value={hero.title} neValue={hero.title_ne || ''} onChange={v => { setHero({ ...hero, title: v }); markAsUnpublished(); }} neOnChange={v => { setHero({ ...hero, title_ne: v }); markAsUnpublished(); }} />
+          <NeField label="Highlight Text" value={hero.highlight || ''} neValue={hero.highlight_ne || ''} onChange={v => { setHero({ ...hero, highlight: v }); markAsUnpublished(); }} neOnChange={v => { setHero({ ...hero, highlight_ne: v }); markAsUnpublished(); }} />
+          <NeField label="Description" value={hero.description || ''} neValue={hero.description_ne || ''} onChange={v => { setHero({ ...hero, description: v }); markAsUnpublished(); }} neOnChange={v => { setHero({ ...hero, description_ne: v }); markAsUnpublished(); }} textarea />
           <Field label="Background Image URL" value={hero.background_image || ''} onChange={v => { setHero({ ...hero, background_image: v }); markAsUnpublished(); }} />
-          <Field label="Primary CTA Text" value={hero.cta_primary_text || ''} onChange={v => { setHero({ ...hero, cta_primary_text: v }); markAsUnpublished(); }} />
+          <NeField label="Primary CTA Text" value={hero.cta_primary_text || ''} neValue={hero.cta_primary_text_ne || ''} onChange={v => { setHero({ ...hero, cta_primary_text: v }); markAsUnpublished(); }} neOnChange={v => { setHero({ ...hero, cta_primary_text_ne: v }); markAsUnpublished(); }} />
           <Field label="Primary CTA Link" value={hero.cta_primary_link || ''} onChange={v => { setHero({ ...hero, cta_primary_link: v }); markAsUnpublished(); }} />
-          <Field label="Secondary CTA Text" value={hero.cta_secondary_text || ''} onChange={v => { setHero({ ...hero, cta_secondary_text: v }); markAsUnpublished(); }} />
+          <NeField label="Secondary CTA Text" value={hero.cta_secondary_text || ''} neValue={hero.cta_secondary_text_ne || ''} onChange={v => { setHero({ ...hero, cta_secondary_text: v }); markAsUnpublished(); }} neOnChange={v => { setHero({ ...hero, cta_secondary_text_ne: v }); markAsUnpublished(); }} />
           <Field label="Secondary CTA Link" value={hero.cta_secondary_link || ''} onChange={v => { setHero({ ...hero, cta_secondary_link: v }); markAsUnpublished(); }} />
         </div>
       </SectionCard>
@@ -214,15 +219,23 @@ export function HomePageEditor() {
         <Field label="Section Title" value={statsTitle} onChange={v => { setStatsTitle(v); markAsUnpublished(); }} />
         <div className="space-y-3 mt-4">
           {statPlaceholder.map((stat, idx) => (
-            <div key={idx} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-              <span className="text-sm font-medium text-gray-500 w-8">{idx + 1}.</span>
-              <input type="text" value={stat.value} onChange={e => handleStatChange(idx, 'value', e.target.value)} placeholder="Value (e.g. 49+)"
-                className="flex-1 bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
-              <input type="text" value={stat.label} onChange={e => handleStatChange(idx, 'label', e.target.value)} placeholder="Label (e.g. Years)"
-                className="flex-1 bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
-              <button onClick={() => removeStat(idx)} className="p-1.5 rounded hover:bg-red-50 text-gray-400 hover:text-red-500" aria-label="Remove stat">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-              </button>
+            <div key={idx} className="p-3 bg-gray-50 rounded-lg border border-gray-100 space-y-2">
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-gray-500 w-8">{idx + 1}.</span>
+                <input type="text" value={stat.value} onChange={e => handleStatChange(idx, 'value', e.target.value)} placeholder="Value (e.g. 49+)"
+                  className="flex-1 bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
+                <input type="text" value={stat.label} onChange={e => handleStatChange(idx, 'label', e.target.value)} placeholder="Label (e.g. Years)"
+                  className="flex-1 bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
+                <button onClick={() => removeStat(idx)} className="p-1.5 rounded hover:bg-red-50 text-gray-400 hover:text-red-500" aria-label="Remove stat">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+              <div className="flex items-center gap-3 pl-11">
+                <input type="text" value={statNe[idx]?.value || ''} onChange={e => handleStatNeChange(idx, 'value', e.target.value)} placeholder="Nepali Value"
+                  className="flex-1 bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
+                <input type="text" value={statNe[idx]?.label || ''} onChange={e => handleStatNeChange(idx, 'label', e.target.value)} placeholder="Nepali Label"
+                  className="flex-1 bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
+              </div>
             </div>
           ))}
           <button onClick={addStat} className="text-sm text-amber-600 hover:text-amber-700 font-medium flex items-center gap-1">
@@ -234,8 +247,8 @@ export function HomePageEditor() {
 
       <SectionCard title="Welcome Section" description="The about/intro section on your homepage"
         sectionKey="welcome" isVisible={sectionsVisible.welcome !== false} onToggleVisibility={() => toggleSectionVisibility('welcome')}>
-        <Field label="Title" value={welcome.title} onChange={v => { setWelcome({ ...welcome, title: v }); markAsUnpublished(); }} />
-        <Field label="Content" value={welcome.content} onChange={v => { setWelcome({ ...welcome, content: v }); markAsUnpublished(); }} textarea />
+        <NeField label="Title" value={welcome.title} neValue={welcome.title_ne || ''} onChange={v => { setWelcome({ ...welcome, title: v }); markAsUnpublished(); }} neOnChange={v => { setWelcome({ ...welcome, title_ne: v }); markAsUnpublished(); }} />
+        <NeField label="Content" value={welcome.content} neValue={welcome.content_ne || ''} onChange={v => { setWelcome({ ...welcome, content: v }); markAsUnpublished(); }} neOnChange={v => { setWelcome({ ...welcome, content_ne: v }); markAsUnpublished(); }} textarea />
       </SectionCard>
 
       <SectionCard title="Featured Students Section" description="Title for the featured students section"
@@ -252,12 +265,12 @@ export function HomePageEditor() {
         sectionKey="donation_cta" isVisible={sectionsVisible.donation_cta !== false} onToggleVisibility={() => toggleSectionVisibility('donation_cta')}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="md:col-span-2">
-            <Field label="Title" value={donationCta.title} onChange={v => { setDonationCta({ ...donationCta, title: v }); markAsUnpublished(); }} />
+            <NeField label="Title" value={donationCta.title} neValue={donationCta.title_ne || ''} onChange={v => { setDonationCta({ ...donationCta, title: v }); markAsUnpublished(); }} neOnChange={v => { setDonationCta({ ...donationCta, title_ne: v }); markAsUnpublished(); }} />
           </div>
           <div className="md:col-span-2">
-            <Field label="Description" value={donationCta.description} onChange={v => { setDonationCta({ ...donationCta, description: v }); markAsUnpublished(); }} textarea />
+            <NeField label="Description" value={donationCta.description} neValue={donationCta.description_ne || ''} onChange={v => { setDonationCta({ ...donationCta, description: v }); markAsUnpublished(); }} neOnChange={v => { setDonationCta({ ...donationCta, description_ne: v }); markAsUnpublished(); }} textarea />
           </div>
-          <Field label="Button Text" value={donationCta.button_text} onChange={v => { setDonationCta({ ...donationCta, button_text: v }); markAsUnpublished(); }} />
+          <NeField label="Button Text" value={donationCta.button_text} neValue={donationCta.button_text_ne || ''} onChange={v => { setDonationCta({ ...donationCta, button_text: v }); markAsUnpublished(); }} neOnChange={v => { setDonationCta({ ...donationCta, button_text_ne: v }); markAsUnpublished(); }} />
           <Field label="Button Link" value={donationCta.button_link} onChange={v => { setDonationCta({ ...donationCta, button_link: v }); markAsUnpublished(); }} />
         </div>
       </SectionCard>
@@ -279,6 +292,33 @@ function Field({ label, value, onChange, textarea, required }: { label: string; 
         <input type="text" value={value} onChange={e => onChange(e.target.value)}
           className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 placeholder-gray-400 focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20" />
       )}
+    </div>
+  )
+}
+
+function NeField({ label, value, neValue, onChange, neOnChange, textarea }: { label: string; value: string; neValue: string; onChange: (v: string) => void; neOnChange: (v: string) => void; textarea?: boolean }) {
+  return (
+    <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-600 mb-1">{label} (English)</label>
+        {textarea ? (
+          <textarea value={value} onChange={e => onChange(e.target.value)} rows={3}
+            className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 placeholder-gray-400 focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 resize-vertical" />
+        ) : (
+          <input type="text" value={value} onChange={e => onChange(e.target.value)}
+            className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 placeholder-gray-400 focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20" />
+        )}
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-600 mb-1">{label} (Nepali)</label>
+        {textarea ? (
+          <textarea value={neValue} onChange={e => neOnChange(e.target.value)} rows={3}
+            className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 placeholder-gray-400 focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 resize-vertical" />
+        ) : (
+          <input type="text" value={neValue} onChange={e => neOnChange(e.target.value)}
+            className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 placeholder-gray-400 focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20" />
+        )}
+      </div>
     </div>
   )
 }

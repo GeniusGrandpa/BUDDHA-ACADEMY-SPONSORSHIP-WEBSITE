@@ -52,7 +52,7 @@ function ConfirmModal({ open, title, message, confirmLabel, onConfirm, onCancel,
   if (!open) return null
   const buttonColors = { danger: 'bg-red-500 hover:bg-red-600', warning: 'bg-amber-500 hover:bg-amber-600', info: 'bg-emerald-500 hover:bg-emerald-600' }
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[50] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-stone-900/50" onClick={onCancel} />
       <div className="relative bg-white border border-gray-200 rounded-2xl p-6 max-w-md w-full shadow-2xl">
         <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
@@ -91,7 +91,7 @@ function ChangeRoleModal({ open, user, onClose, onConfirm, loading }: {
   ]
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-stone-900/50" onClick={onClose} />
       <div className="relative bg-white border border-gray-200 rounded-2xl p-6 max-w-lg w-full shadow-2xl">
         <div className="flex items-center justify-between mb-6">
@@ -167,7 +167,7 @@ function RoleHistoryModal({ open, userId, userName, onClose }: {
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[55] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-stone-900/50" onClick={onClose} />
       <div className="relative bg-white border border-gray-200 rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto shadow-2xl">
         <div className="flex items-center justify-between mb-6">

@@ -3,11 +3,6 @@ import { sanitizeCmsText } from '../lib/sanitize-cms'
 
 export type ContentTranslationMap = Record<string, string>
 
-/**
- * Direct field-based localization without content_translations table
- * This function maps English field names to their Nepali (_ne) counterparts
- * and applies the appropriate language version based on the requested language
- */
 export function applyLanguageLocalization<T>(data: T | null, language: string): T | null {
   if (!data) {
     return data
@@ -22,7 +17,6 @@ export function applyLanguageLocalization<T>(data: T | null, language: string): 
   const result = { ...data } as T
   const dataObj = data as Record<string, unknown>
 
-  // Field mappings for common translatable fields
   const fieldMappings: Record<string, string> = {
     title: 'title_ne',
     subtitle: 'subtitle_ne',
@@ -58,7 +52,6 @@ export function applyLanguageLocalization<T>(data: T | null, language: string): 
     site_tagline: 'site_tagline_ne',
   }
 
-  // Apply simple field mappings
   for (const [englishField, nepaliField] of Object.entries(fieldMappings)) {
     if (!(englishField in dataObj)) continue
     const englishValue = dataObj[englishField]
@@ -74,7 +67,6 @@ export function applyLanguageLocalization<T>(data: T | null, language: string): 
     }
   }
 
-  // Handle array fields (hobbies, achievements, etc.)
   const arrayFieldMappings: Record<string, string> = {
     hobbies: 'hobbies_ne',
     achievements: 'achievements_ne',
@@ -99,7 +91,6 @@ export function applyLanguageLocalization<T>(data: T | null, language: string): 
     }
   }
 
-  // Handle JSONB array fields (steps, benefits, impact_cards, etc.)
   const jsonbFieldMappings: Record<string, string> = {
     steps: 'steps_ne',
     benefits: 'benefits_ne',
@@ -154,10 +145,6 @@ export function applyLanguageLocalization<T>(data: T | null, language: string): 
   return result
 }
 
-/**
- * Legacy function for backward compatibility
- * Now uses direct field-based localization
- */
 export async function getLocalizedContent<T>(
   _entityType: string,
   _entityId: string,
@@ -168,29 +155,17 @@ export async function getLocalizedContent<T>(
   return applyLanguageLocalization(base, language)
 }
 
-/**
- * Legacy cache clear function for backward compatibility
- */
 export function clearContentTranslationsCache(): void {
-  // No-op since we no longer use caching with direct field access
 }
 
-/**
- * Legacy function for backward compatibility
- * Now uses direct field-based localization
- */
 export function applyContentTranslations<T>(data: T, _overrides: ContentTranslationMap): T {
   return applyLanguageLocalization(data, 'ne') as T
 }
 
-/**
- * Legacy function for backward compatibility
- */
 export async function getContentTranslations(
   _entityType: string,
   _entityId: string,
   _language: string,
 ): Promise<ContentTranslationMap> {
-  // Return empty map since we no longer use content_translations table
   return {}
 }

@@ -102,8 +102,8 @@ export function usePayment(): UsePaymentReturn {
           throw new Error('Payment session not found')
         }
 
-        if (session.status === 'completed') {
-          logger.info('payment.confirm.completed', { sessionId, attempt })
+        if (session.status === 'completed' || session.status === 'payment_received') {
+          logger.info('payment.confirm.completed', { sessionId, attempt, status: session.status })
           setCheckout(prev => ({
             ...prev,
             step: 'success',

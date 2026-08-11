@@ -41,7 +41,7 @@ export function TransactionSection({
       totalAmount: totalAll,
       completedAmount: totalCompleted,
       completedCount: completed.length,
-      pendingCount: transactions.filter((t) => t.status === 'pending' || t.status === 'processing').length,
+      pendingCount: transactions.filter((t) => t.status === 'pending' || t.status === 'processing' || t.status === 'payment_received').length,
     }
   }, [transactions])
 
@@ -123,6 +123,7 @@ export function TransactionSection({
                 <option value="all"><Tr text="All Status" /></option>
                 <option value="pending"><Tr text="Pending" /></option>
                 <option value="processing"><Tr text="Processing" /></option>
+                <option value="payment_received"><Tr text="Awaiting Verification" /></option>
                 <option value="verified"><Tr text="Verified" /></option>
                 <option value="completed"><Tr text="Completed" /></option>
                 <option value="failed"><Tr text="Failed" /></option>

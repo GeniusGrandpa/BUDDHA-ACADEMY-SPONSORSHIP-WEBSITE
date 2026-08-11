@@ -49,7 +49,6 @@ export function SuperAdminDashboard() {
     async function loadActivities() {
       const data = await getRecentActivities(8)
       if (data.length === 0) {
-        // getRecentActivities returns [] both for a clean state and on error.
         const probe = await supabase.from('activities').select('id').limit(1)
         if (probe.error) {
           setActivitiesError(true)

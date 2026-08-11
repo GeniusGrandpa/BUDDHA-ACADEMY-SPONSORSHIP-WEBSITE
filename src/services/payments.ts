@@ -106,6 +106,54 @@ export async function cancelPaymentSession(sessionId: string): Promise<void> {
   })
 }
 
+export async function verifyPayment(sessionId: string, notes?: string): Promise<void> {
+  const { error } = await supabase.rpc('verify_payment' as never, {
+    p_session_id: sessionId,
+    p_notes: notes || null,
+  } as never)
+
+  if (error) throw error
+
+  await logAuditEvent({
+    action: 'payment_session.verified',
+    entityType: 'payment_sessions',
+    entityId: sessionId,
+    metadata: { notes },
+  })
+}
+
+export async function approvePayment(sessionId: string, notes?: string): Promise<void> {
+  const { error } = await supabase.rpc('approve_payment' as never, {
+    p_session_id: sessionId,
+    p_notes: notes || null,
+  } as never)
+
+  if (error) throw error
+
+  await logAuditEvent({
+    action: 'payment_session.approved',
+    entityType: 'payment_sessions',
+    entityId: sessionId,
+    metadata: { notes },
+  })
+}
+
+export async function rejectPayment(sessionId: string, notes?: string): Promise<void> {
+  const { error } = await supabase.rpc('reject_payment' as never, {
+    p_session_id: sessionId,
+    p_notes: notes || null,
+  } as never)
+
+  if (error) throw error
+
+  await logAuditEvent({
+    action: 'payment_session.rejected',
+    entityType: 'payment_sessions',
+    entityId: sessionId,
+    metadata: { notes },
+  })
+}
+
 export async function getDonorDonationsWithPayment(donorId: string): Promise<DonationWithPayment[]> {
   const { data, error } = await supabase
     .from('donations')
@@ -115,7 +163,7 @@ export async function getDonorDonationsWithPayment(donorId: string): Promise<Don
       receipt:payment_receipts(*)
     `)
     .eq('donor_id', donorId)
-    .eq('payment_session.status', 'completed')
+    .in('payment_session.status', ['completed', 'payment_received'])
     .order('created_at', { ascending: false })
 
   if (error) throw error
@@ -199,6 +247,7 @@ export async function getPaymentStats() {
     totalAmount: sessions.reduce((s, p) => s + Number(p.amount), 0),
     pending: sessions.filter(s => s.status === 'pending').length,
     processing: sessions.filter(s => s.status === 'processing').length,
+    paymentReceived: sessions.filter(s => s.status === 'payment_received').length,
     completed: sessions.filter(s => s.status === 'completed').length,
     cancelled: sessions.filter(s => s.status === 'cancelled').length,
     rejected: sessions.filter(s => s.status === 'rejected').length,
@@ -207,7 +256,7 @@ export async function getPaymentStats() {
       .filter(s => s.status === 'completed')
       .reduce((s, p) => s + Number(p.amount), 0),
     awaitingVerification: sessions
-      .filter(s => s.status === 'processing')
+      .filter(s => s.status === 'payment_received')
       .reduce((s, p) => s + Number(p.amount), 0),
     processingCount: sessions.filter(s => s.status === 'processing').length,
   }

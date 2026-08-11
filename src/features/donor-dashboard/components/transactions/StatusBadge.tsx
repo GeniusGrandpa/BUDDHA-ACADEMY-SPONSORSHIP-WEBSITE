@@ -3,6 +3,7 @@ import { Tr } from '../../../../components/Translated'
 const STATUS_LABELS: Record<string, string> = {
   pending: 'Pending',
   processing: 'Processing',
+  payment_received: 'Awaiting Verification',
   completed: 'Verified',
   verified: 'Verified',
   failed: 'Failed',
@@ -14,6 +15,7 @@ export function StatusBadge({ status, size = 'sm' }: { status: string; size?: 's
   const colors: Record<string, string> = {
     pending: 'bg-yellow-100 text-yellow-700',
     processing: 'bg-blue-100 text-blue-700',
+    payment_received: 'bg-orange-100 text-orange-700',
     completed: 'bg-emerald-100 text-emerald-700',
     verified: 'bg-emerald-100 text-emerald-700',
     failed: 'bg-red-100 text-red-700',

@@ -71,11 +71,11 @@ async function logLoginHistory(
   failureReason?: string
 ): Promise<void> {
   try {
-    await supabase.from('login_history').insert({
-      user_id: userId,
-      status,
-      failure_reason: failureReason || null,
-    })
+    await supabase.rpc('record_login_attempt', {
+      p_user_id: userId,
+      p_status: status,
+      p_failure_reason: failureReason || null
+    } as never)
   } catch {
   }
 }

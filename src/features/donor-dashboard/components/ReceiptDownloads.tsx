@@ -52,6 +52,7 @@ export function ReceiptDownloads({ transactions, donorName, donorEmail }: Receip
         amount: t.amount,
         frequency: t.frequency,
         status: t.status,
+        verification_status: t.verification_status ?? null,
         message: t.message,
         transaction_id: t.transaction_id,
         payment_method: t.payment_method,

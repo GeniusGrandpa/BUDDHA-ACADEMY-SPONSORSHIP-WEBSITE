@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { formatNPR } from '../../utils/currency'
-import { getAllPaymentSessions } from '../../services/payments'
+import { getAllPaymentSessions, verifyPayment, approvePayment, rejectPayment } from '../../services/payments'
+import { useAuth } from '../../context/AuthContext'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
 import { TableSkeleton } from '../../components/ui/LoadingSkeleton'
-import { AlertCircle, RefreshCw, Receipt } from 'lucide-react'
-import type { PaymentSession, PaymentSessionStatus } from '../../types/payments'
+import { AlertCircle, RefreshCw, Receipt, CheckCircle, XCircle, ShieldCheck } from 'lucide-react'
+import type { PaymentSession, PaymentSessionStatus, VerificationStatus } from '../../types/payments'
+import toast from 'react-hot-toast'
 
 interface SessionWithDonor extends Omit<PaymentSession, 'status'> {
   donation?: {
@@ -15,6 +17,7 @@ interface SessionWithDonor extends Omit<PaymentSession, 'status'> {
     amount: number
     frequency: string
     status: string
+    verification_status: string | null
     transaction_id: string | null
     receipt?: {
       receipt_number: string | null
@@ -31,25 +34,54 @@ interface SessionWithDonor extends Omit<PaymentSession, 'status'> {
     email: string
   }
   status: PaymentSessionStatus
+  verification_status: VerificationStatus | null
 }
 
 const STATUS_STYLES: Record<string, string> = {
   pending: 'bg-yellow-50 text-yellow-700 border-yellow-200',
   processing: 'bg-blue-50 text-blue-600 border-blue-200',
+  payment_received: 'bg-orange-50 text-orange-700 border-orange-200',
   completed: 'bg-emerald-50 text-emerald-600 border-emerald-200',
   failed: 'bg-red-50 text-red-600 border-red-200',
   cancelled: 'bg-gray-50 text-gray-500 border-gray-200',
 }
 
+const STATUS_LABELS: Record<string, string> = {
+  pending: 'Pending',
+  processing: 'Processing',
+  payment_received: 'Awaiting Verification',
+  completed: 'Completed',
+  failed: 'Failed',
+  cancelled: 'Cancelled',
+}
+
+const VERIFICATION_STYLES: Record<string, string> = {
+  pending_verification: 'bg-amber-50 text-amber-700 border-amber-200',
+  verified: 'bg-emerald-50 text-emerald-600 border-emerald-200',
+  rejected: 'bg-red-50 text-red-600 border-red-200',
+}
+
+const VERIFICATION_LABELS: Record<string, string> = {
+  pending_verification: 'Pending Verification',
+  verified: 'Verified',
+  rejected: 'Rejected',
+}
+
 export function AdminPaymentVerificationPage() {
+  const { profile } = useAuth()
   const [sessions, setSessions] = useState<SessionWithDonor[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<PaymentSessionStatus | 'all'>('all')
   const [selectedSession, setSelectedSession] = useState<SessionWithDonor | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
+  const [actionLoading, setActionLoading] = useState(false)
+  const [actionNotes, setActionNotes] = useState('')
 
-  const loadSessions = async () => {
+  const isFinanceManager = profile?.role === 'finance_manager'
+  const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin'
+
+  const loadSessions = useCallback(async () => {
     setLoading(true)
     setLoadError(null)
     try {
@@ -64,11 +96,11 @@ export function AdminPaymentVerificationPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     loadSessions()
-  }, [])
+  }, [loadSessions])
 
   const filtered = sessions.filter(s => {
     if (statusFilter !== 'all' && s.status !== statusFilter) return false
@@ -89,6 +121,7 @@ export function AdminPaymentVerificationPage() {
   const stats = {
     total: sessions.length,
     completed: sessions.filter(s => s.status === 'completed').length,
+    awaitingVerification: sessions.filter(s => s.status === 'payment_received').length,
     processing: sessions.filter(s => s.status === 'processing').length,
     pending: sessions.filter(s => s.status === 'pending').length,
     failed: sessions.filter(s => s.status === 'failed' || s.status === 'cancelled').length,
@@ -96,17 +129,42 @@ export function AdminPaymentVerificationPage() {
 
   const statCards = [
     { label: 'Total Transactions', value: stats.total, color: 'text-gray-600', bg: 'bg-gray-50' },
+    { label: 'Awaiting Verification', value: stats.awaitingVerification, color: 'text-orange-600', bg: 'bg-orange-50' },
     { label: 'Completed (Paid)', value: stats.completed, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { label: 'Awaiting Confirmation', value: stats.pending + stats.processing, color: 'text-blue-600', bg: 'bg-blue-50' },
     { label: 'Failed / Cancelled', value: stats.failed, color: 'text-red-600', bg: 'bg-red-50' },
   ]
+
+  const handleAction = async (action: 'verify' | 'approve' | 'reject') => {
+    if (!selectedSession) return
+    setActionLoading(true)
+    try {
+      if (action === 'verify') {
+        await verifyPayment(selectedSession.id, actionNotes || undefined)
+        toast.success('Payment verified successfully')
+      } else if (action === 'approve') {
+        await approvePayment(selectedSession.id, actionNotes || undefined)
+        toast.success('Payment approved successfully')
+      } else {
+        await rejectPayment(selectedSession.id, actionNotes || undefined)
+        toast.success('Payment rejected')
+      }
+      setActionNotes('')
+      setSelectedSession(null)
+      await loadSessions()
+    } catch (err) {
+      toast.error(`Failed to ${action} payment`)
+      console.error(`[payment] ${action} failed:`, err)
+    } finally {
+      setActionLoading(false)
+    }
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Payment Transactions</h1>
-          <p className="text-gray-500 mt-1">Real-time status of gateway-confirmed payments</p>
+          <h1 className="text-2xl font-bold text-gray-900">Payment Verification</h1>
+          <p className="text-gray-500 mt-1">Review and verify pending payments</p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={loadSessions} disabled={loading}>
@@ -142,6 +200,7 @@ export function AdminPaymentVerificationPage() {
             className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500/50"
           >
             <option value="all">All Statuses</option>
+            <option value="payment_received">Awaiting Verification</option>
             <option value="pending">Pending</option>
             <option value="processing">Processing</option>
             <option value="completed">Completed</option>
@@ -178,7 +237,10 @@ export function AdminPaymentVerificationPage() {
                   animate={{ opacity: 1, y: 0 }}
                   layout
                   className="bg-gray-50 border border-gray-100 rounded-xl p-4 hover:bg-gray-100 transition-colors cursor-pointer"
-                  onClick={() => setSelectedSession(session)}
+                  onClick={() => {
+                    setSelectedSession(session)
+                    setActionNotes('')
+                  }}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div className="flex-1 min-w-0">
@@ -199,8 +261,13 @@ export function AdminPaymentVerificationPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
+                      {session.verification_status && (
+                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${VERIFICATION_STYLES[session.verification_status] || 'bg-gray-50 text-gray-500 border-gray-200'}`}>
+                          {VERIFICATION_LABELS[session.verification_status] || session.verification_status}
+                        </span>
+                      )}
                       <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${STATUS_STYLES[session.status] || 'bg-gray-50 text-gray-500 border-gray-200'}`}>
-                        {session.status}
+                        {STATUS_LABELS[session.status] || session.status}
                       </span>
                       {session.donation?.receipt?.receipt_number && (
                         <span className="flex items-center gap-1 text-xs text-gray-500">
@@ -289,17 +356,31 @@ export function AdminPaymentVerificationPage() {
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-500">Status</span>
                         <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${STATUS_STYLES[selectedSession.status] || 'bg-gray-50 text-gray-500 border-gray-200'}`}>
-                          {selectedSession.status}
+                          {STATUS_LABELS[selectedSession.status] || selectedSession.status}
                         </span>
                       </div>
+                      {selectedSession.verification_status && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500">Verification</span>
+                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${VERIFICATION_STYLES[selectedSession.verification_status] || 'bg-gray-50 text-gray-500 border-gray-200'}`}>
+                            {VERIFICATION_LABELS[selectedSession.verification_status] || selectedSession.verification_status}
+                          </span>
+                        </div>
+                      )}
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-500">Initiated</span>
                         <span className="text-gray-700">{new Date(selectedSession.created_at).toLocaleString()}</span>
                       </div>
                       {selectedSession.verified_at && (
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-500">Confirmed</span>
+                          <span className="text-gray-500">Verified</span>
                           <span className="text-gray-700">{new Date(selectedSession.verified_at).toLocaleString()}</span>
+                        </div>
+                      )}
+                      {selectedSession.approved_at && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500">Approved</span>
+                          <span className="text-gray-700">{new Date(selectedSession.approved_at).toLocaleString()}</span>
                         </div>
                       )}
                     </div>
@@ -338,9 +419,82 @@ export function AdminPaymentVerificationPage() {
                     </div>
                   )}
 
-                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs text-amber-800">
-                    Payment status is updated only by verified gateway confirmations (Stripe webhook, eSewa callback, Khalti lookup). Transactions cannot be manually marked as paid.
-                  </div>
+                  {selectedSession.approval_notes && (
+                    <div className="bg-gray-50 rounded-xl p-4">
+                      <h3 className="text-sm font-medium text-gray-500 mb-2">Approval Notes</h3>
+                      <p className="text-sm text-gray-700">{selectedSession.approval_notes}</p>
+                    </div>
+                  )}
+
+                  {selectedSession.status === 'payment_received' && (
+                    <div className="bg-gray-50 rounded-xl p-4">
+                      <label className="text-sm font-medium text-gray-500 mb-2 block">Notes (optional)</label>
+                      <textarea
+                        value={actionNotes}
+                        onChange={(e) => setActionNotes(e.target.value)}
+                        placeholder="Add notes for this action..."
+                        rows={3}
+                        className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-amber-500/50"
+                      />
+                    </div>
+                  )}
+
+                  {selectedSession.status === 'payment_received' && (
+                    <div className="flex flex-wrap gap-2 pt-2">
+                      {isFinanceManager && (
+                        <>
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => handleAction('verify')}
+                            disabled={actionLoading}
+                          >
+                            <ShieldCheck className="w-4 h-4 mr-1" />
+                            {actionLoading ? 'Processing...' : 'Verify Payment'}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleAction('reject')}
+                            disabled={actionLoading}
+                            className="text-red-600 border-red-200 hover:bg-red-50"
+                          >
+                            <XCircle className="w-4 h-4 mr-1" />
+                            {actionLoading ? 'Processing...' : 'Reject'}
+                          </Button>
+                        </>
+                      )}
+                      {isAdmin && (
+                        <>
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => handleAction('approve')}
+                            disabled={actionLoading}
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            {actionLoading ? 'Processing...' : 'Approve Payment'}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleAction('reject')}
+                            disabled={actionLoading}
+                            className="text-red-600 border-red-200 hover:bg-red-50"
+                          >
+                            <XCircle className="w-4 h-4 mr-1" />
+                            {actionLoading ? 'Processing...' : 'Reject'}
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {selectedSession.status !== 'payment_received' && (
+                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs text-amber-800">
+                      Payment status is updated only by verified gateway confirmations (Stripe webhook, eSewa callback, Khalti lookup). Transactions cannot be manually marked as paid.
+                    </div>
+                  )}
                 </div>
               </div>
             </motion.div>

@@ -256,6 +256,7 @@ export const DEFAULT_ALLOCATIONS: { category: AllocationCategory; percentage: nu
 export const DONATION_STATUS_FLOW: { status: DonationStatus; label: string; description: string }[] = [
   { status: 'pending', label: 'Pending', description: 'Awaiting payment confirmation' },
   { status: 'processing', label: 'Processing', description: 'Payment being verified' },
+  { status: 'payment_received', label: 'Awaiting Verification', description: 'Payment received, pending verification' },
   { status: 'verified', label: 'Verified', description: 'Payment confirmed by finance team' },
   { status: 'completed', label: 'Completed', description: 'Donation fully processed and allocated' },
   { status: 'failed', label: 'Failed', description: 'Payment could not be processed' },

@@ -10,7 +10,7 @@ export async function createDonation(_donation: Omit<Donation, 'id' | 'created_a
 export async function getDonationsByDonor(donorId: string): Promise<Donation[]> {
   const { data, error } = await supabase
     .from('donations')
-    .select('id, donor_id, amount, frequency, status, student_id, message, transaction_id, payment_method, payment_session_id, verified_by, verified_at, created_at, updated_at, verified_by_profile:profiles!donations_verified_by_fkey(full_name)')
+    .select('id, donor_id, amount, frequency, status, verification_status, student_id, message, transaction_id, payment_method, payment_session_id, verified_by, verified_at, created_at, updated_at, verified_by_profile:profiles!donations_verified_by_fkey(full_name)')
     .eq('donor_id', donorId)
     .order('created_at', { ascending: false })
 
@@ -25,7 +25,7 @@ export async function getDonationsByDonor(donorId: string): Promise<Donation[]> 
 export async function getAllDonations(): Promise<Donation[]> {
   const { data, error } = await supabase
     .from('donations')
-    .select('id, donor_id, amount, frequency, status, student_id, message, transaction_id, payment_method, payment_session_id, verified_by, verified_at, created_at, updated_at')
+    .select('id, donor_id, amount, frequency, status, verification_status, student_id, message, transaction_id, payment_method, payment_session_id, verified_by, verified_at, created_at, updated_at')
     .order('created_at', { ascending: false })
 
   if (error) throw error
@@ -52,7 +52,7 @@ export async function updateDonationStatus(id: string, status: Donation['status'
     .from('donations')
     .update(updates)
     .eq('id', id)
-    .select('id, donor_id, amount, frequency, status, student_id, message, transaction_id, payment_method, payment_session_id, verified_by, verified_at, created_at, updated_at')
+    .select('id, donor_id, amount, frequency, status, verification_status, student_id, message, transaction_id, payment_method, payment_session_id, verified_by, verified_at, created_at, updated_at')
     .single()
 
   if (error) throw error

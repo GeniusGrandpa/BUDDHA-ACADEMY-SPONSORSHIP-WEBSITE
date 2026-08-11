@@ -23,6 +23,7 @@ export const routeDefinitions: RouteObject[] = [
     ),
     children: [
       { path: '/', loader: () => redirect(`/${DEFAULT_LOCALE}`) },
+      { path: '/auth/callback', element: <LazyPage Component={AuthCallbackPage} />, errorElement: <RouteErrorPage /> },
       {
         path: '/:locale',
         element: (

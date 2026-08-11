@@ -138,13 +138,19 @@ export function TeacherDashboard() {
         if (!profile) { setLoading(false); return }
         const pid = profile.id
 
-        const { data: rawAssignments } = await supabase
+        const { data: rawAssignments, error: assignError } = await supabase
           .from('teacher_assignments')
           .select('student_id, subject')
           .eq('teacher_id', pid)
+        
+        if (assignError) {
+          console.error('Error fetching assignments:', assignError)
+        }
+        
         const assignments = (rawAssignments || []) as Pick<TeacherAssignment, 'student_id' | 'subject'>[]
 
         if (assignments.length === 0) {
+          console.log('No assignments found for teacher:', pid)
           setLoading(false)
           return
         }
@@ -157,25 +163,42 @@ export function TeacherDashboard() {
           subjectMap.set(a.student_id, subs)
         })
 
-        const { data: rawStudentData } = await supabase
+        const { data: rawStudentData, error: studentError } = await supabase
           .from('students')
           .select('id, name, grade, photo_url, sponsorship_status')
           .in('id', studentIds)
+        
+        if (studentError) {
+          console.error('Error fetching students:', studentError)
+          setLoading(false)
+          return
+        }
+        
         const studentData = (rawStudentData || []) as Pick<Student, 'id' | 'name' | 'grade' | 'photo_url' | 'sponsorship_status'>[]
 
         if (studentData.length === 0) { setLoading(false); return }
 
-        const { data: rawProgressData } = await supabase
+        const { data: rawProgressData, error: progressError } = await supabase
           .from('student_progress')
           .select('*')
           .eq('teacher_id', pid)
           .order('recorded_at', { ascending: false })
+        
+        if (progressError) {
+          console.error('Error fetching progress:', progressError)
+        }
+        
         const progressData = (rawProgressData || []) as StudentProgress[]
 
-        const { data: rawAttendanceData } = await supabase
+        const { data: rawAttendanceData, error: attendanceError } = await supabase
           .from('attendance_records')
           .select('status')
           .eq('teacher_id', pid)
+        
+        if (attendanceError) {
+          console.error('Error fetching attendance:', attendanceError)
+        }
+        
         const attendanceData = (rawAttendanceData || []) as Pick<AttendanceRecord, 'status'>[]
 
         const attSummary: AttendanceSummary = { present: 0, absent: 0, late: 0, excused: 0, total: 0 }

@@ -36,7 +36,7 @@ export function useDonorTransactions(donorId: string | undefined): UseDonorTrans
           receipt:payment_receipts(*)
         `)
         .eq('donor_id', donorId)
-        .eq('payment_session.status', 'completed')
+        .in('payment_session.status', ['completed', 'payment_received'])
         .order('created_at', { ascending: false })
 
       if (donationsError) throw donationsError
@@ -51,6 +51,7 @@ export function useDonorTransactions(donorId: string | undefined): UseDonorTrans
           amount: Number(session.amount),
           frequency: session.frequency,
           status: 'processing' as const,
+          verification_status: null,
           message: session.message,
           transaction_id: session.transaction_id,
           payment_method: session.gateway,

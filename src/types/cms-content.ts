@@ -136,17 +136,24 @@ export interface AllocationItem {
 export interface HeroContent {
   id: string
   title: string
+  title_ne?: string
   highlight: string
+  highlight_ne?: string
   description: string
+  description_ne?: string
   background_image: string
   overlay_color: string
   overlay_opacity: number
   cta_primary_text: string
+  cta_primary_text_ne?: string
   cta_primary_link: string
   cta_secondary_text: string
+  cta_secondary_text_ne?: string
   cta_secondary_link: string
   statistics: StatItem[]
+  statistics_ne?: StatItem[]
   badges: BadgeItem[]
+  badges_ne?: BadgeItem[]
   layout: string
   display_order: number
   is_visible: boolean
@@ -254,9 +261,12 @@ export interface SectionContent {
   id: string
   section_key: string
   title: string
+  title_ne?: string
   subtitle: string
+  subtitle_ne?: string
   description: string
   content: Record<string, unknown>
+  content_ne?: Record<string, unknown>
   images: SectionImage[]
   is_visible: boolean
   sort_order: number

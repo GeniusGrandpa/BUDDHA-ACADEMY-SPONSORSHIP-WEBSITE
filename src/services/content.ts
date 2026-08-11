@@ -37,6 +37,7 @@ export async function upsertPage(page: {
   slug: string
   title: string
   content: Record<string, unknown>
+  content_ne?: Record<string, unknown>
   published?: boolean
   blocks?: PageBlock[]
   seo?: SeoMetadata
@@ -50,6 +51,7 @@ export async function upsertPage(page: {
       .update({
         title: page.title,
         content: page.content as Json,
+        ...(page.content_ne ? { content_ne: page.content_ne as Json } : {}),
         published: page.published ?? existing?.published ?? false,
         updated_by: userId,
         ...(page.blocks ? { blocks: page.blocks as unknown as Json } : {}),
@@ -69,6 +71,7 @@ export async function upsertPage(page: {
       slug: page.slug,
       title: page.title,
       content: page.content as Json,
+      ...(page.content_ne ? { content_ne: page.content_ne as Json } : {}),
       published: page.published ?? false,
       updated_by: userId,
       ...(page.blocks ? { blocks: page.blocks as unknown as Json } : {}),

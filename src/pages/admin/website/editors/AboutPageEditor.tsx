@@ -11,11 +11,17 @@ interface StatItem { value: string; label: string }
 
 interface AboutContent {
   mission?: string
+  mission_ne?: string
   vision?: string
+  vision_ne?: string
   description?: string
+  description_ne?: string
   stats?: StatItem[]
+  stats_ne?: StatItem[]
   values?: ValueItem[]
+  values_ne?: ValueItem[]
   timeline?: TimelineItem[]
+  timeline_ne?: TimelineItem[]
   location?: string
   locationDesc?: string
 }
@@ -25,11 +31,17 @@ export function AboutPageEditor() {
   const [saving, setSaving] = useState(false)
   const [header, setHeader] = useState({ title: '', subtitle: '' })
   const [mission, setMission] = useState('')
+  const [missionNe, setMissionNe] = useState('')
   const [vision, setVision] = useState('')
+  const [visionNe, setVisionNe] = useState('')
   const [description, setDescription] = useState('')
+  const [descriptionNe, setDescriptionNe] = useState('')
   const [stats, setStats] = useState<StatItem[]>([])
+  const [statsNe, setStatsNe] = useState<StatItem[]>([])
   const [values, setValues] = useState<ValueItem[]>([])
+  const [valuesNe, setValuesNe] = useState<ValueItem[]>([])
   const [timeline, setTimeline] = useState<TimelineItem[]>([])
+  const [timelineNe, setTimelineNe] = useState<TimelineItem[]>([])
   const [images, setImages] = useState<{ id?: string; url: string; alt: string }[]>([])
 
   useEffect(() => { load() }, [])
@@ -51,6 +63,15 @@ export function AboutPageEditor() {
         if (c.values) setValues(c.values)
         if (c.timeline) setTimeline(c.timeline)
       }
+      if (page?.content_ne && typeof page.content_ne === 'object' && Object.keys(page.content_ne).length > 0) {
+        const cn = page.content_ne as AboutContent
+        if (cn.mission) setMissionNe(cn.mission)
+        if (cn.vision) setVisionNe(cn.vision)
+        if (cn.description) setDescriptionNe(cn.description)
+        if (cn.stats) setStatsNe(cn.stats)
+        if (cn.values) setValuesNe(cn.values)
+        if (cn.timeline) setTimelineNe(cn.timeline)
+      }
       if (imgs.length > 0) setImages(imgs.map(i => ({ id: i.id, url: i.image_url, alt: i.alt_text || '' })))
     } catch { toast.error('Failed to load about page data') }
     finally { setLoading(false) }
@@ -61,7 +82,13 @@ export function AboutPageEditor() {
     try {
       await Promise.all([
         upsertPageHeader({ page_slug: 'about', title: header.title, subtitle: header.subtitle, is_visible: true } as never),
-        upsertPage({ slug: 'about', title: 'About Us', content: { mission, vision, description, stats, values, timeline } as unknown as Record<string, unknown>, published: true }),
+        upsertPage({
+          slug: 'about',
+          title: 'About Us',
+          content: { mission, vision, description, stats, values, timeline } as unknown as Record<string, unknown>,
+          content_ne: { mission: missionNe, vision: visionNe, description: descriptionNe, stats: statsNe, values: valuesNe, timeline: timelineNe } as unknown as Record<string, unknown>,
+          published: true,
+        }),
       ])
       toast.success('About page saved')
     } catch { toast.error('Failed to save about page') }
@@ -99,6 +126,24 @@ export function AboutPageEditor() {
   }
   const saveImage = async (img: { id?: string; url: string; alt: string }) => {
     await upsertSiteImage({ id: img.id, image_key: `about_${Date.now()}`, image_url: img.url, alt_text: img.alt, section: 'about' } as never)
+  }
+
+  const addStatNe = () => setStatsNe(prev => [...prev, { value: '', label: '' }])
+  const removeStatNe = (i: number) => setStatsNe(prev => prev.filter((_, idx) => idx !== i))
+  const updateStatNe = (i: number, field: keyof StatItem, val: string) => {
+    setStatsNe(prev => prev.map((s, idx) => idx === i ? { ...s, [field]: val } : s))
+  }
+
+  const addValueNe = () => setValuesNe(prev => [...prev, { title: '', desc: '' }])
+  const removeValueNe = (i: number) => setValuesNe(prev => prev.filter((_, idx) => idx !== i))
+  const updateValueNe = (i: number, field: keyof ValueItem, val: string) => {
+    setValuesNe(prev => prev.map((v, idx) => idx === i ? { ...v, [field]: val } : v))
+  }
+
+  const addTimelineItemNe = () => setTimelineNe(prev => [...prev, { year: '', title: '', desc: '' }])
+  const removeTimelineItemNe = (i: number) => setTimelineNe(prev => prev.filter((_, idx) => idx !== i))
+  const updateTimelineItemNe = (i: number, field: keyof TimelineItem, val: string) => {
+    setTimelineNe(prev => prev.map((t, idx) => idx === i ? { ...t, [field]: val } : t))
   }
 
   const handleSaveImages = async () => {
@@ -146,35 +191,68 @@ export function AboutPageEditor() {
 
       <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-5">
         <h2 className="text-lg font-semibold text-gray-900">Mission & Vision</h2>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Mission</label>
-          <textarea value={mission} onChange={e => setMission(e.target.value)} rows={3}
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-amber-500/50" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Mission (English)</label>
+            <textarea value={mission} onChange={e => setMission(e.target.value)} rows={3}
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-amber-500/50" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Mission (Nepali)</label>
+            <textarea value={missionNe} onChange={e => setMissionNe(e.target.value)} rows={3}
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-amber-500/50" />
+          </div>
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Vision</label>
-          <textarea value={vision} onChange={e => setVision(e.target.value)} rows={3}
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-amber-500/50" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Vision (English)</label>
+            <textarea value={vision} onChange={e => setVision(e.target.value)} rows={3}
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-amber-500/50" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Vision (Nepali)</label>
+            <textarea value={visionNe} onChange={e => setVisionNe(e.target.value)} rows={3}
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-amber-500/50" />
+          </div>
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-          <textarea value={description} onChange={e => setDescription(e.target.value)} rows={3}
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-amber-500/50" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description (English)</label>
+            <textarea value={description} onChange={e => setDescription(e.target.value)} rows={3}
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-amber-500/50" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description (Nepali)</label>
+            <textarea value={descriptionNe} onChange={e => setDescriptionNe(e.target.value)} rows={3}
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-amber-500/50" />
+          </div>
         </div>
       </div>
 
       <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-900">Statistics</h2>
-          <button onClick={addStat} className="text-sm text-amber-600 hover:text-amber-700 font-medium">+ Add Stat</button>
+          <div className="flex gap-2">
+            <button onClick={addStat} className="text-sm text-amber-600 hover:text-amber-700 font-medium">+ Add Stat</button>
+            <button onClick={addStatNe} className="text-sm text-blue-600 hover:text-blue-700 font-medium">+ Add Nepali</button>
+          </div>
         </div>
         {stats.map((stat, i) => (
-          <div key={i} className="flex gap-3 items-start">
-            <input value={stat.value} onChange={e => updateStat(i, 'value', e.target.value)} placeholder="Value (e.g. 49+)"
-              className="flex-1 px-4 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-amber-500/50" />
-            <input value={stat.label} onChange={e => updateStat(i, 'label', e.target.value)} placeholder="Label (e.g. Years of Service)"
-              className="flex-1 px-4 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-amber-500/50" />
-            <button onClick={() => removeStat(i)} className="text-red-400 hover:text-red-500 p-2">&times;</button>
+          <div key={i} className="p-3 bg-gray-50 rounded-lg space-y-2">
+            <div className="flex gap-3 items-start">
+              <input value={stat.value} onChange={e => updateStat(i, 'value', e.target.value)} placeholder="Value (e.g. 49+)"
+                className="flex-1 px-4 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-amber-500/50" />
+              <input value={stat.label} onChange={e => updateStat(i, 'label', e.target.value)} placeholder="Label (e.g. Years of Service)"
+                className="flex-1 px-4 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-amber-500/50" />
+              <button onClick={() => removeStat(i)} className="text-red-400 hover:text-red-500 p-2">&times;</button>
+            </div>
+            <div className="flex gap-3 items-start pl-2">
+              <input value={statsNe[i]?.value || ''} onChange={e => updateStatNe(i, 'value', e.target.value)} placeholder="Nepali Value"
+                className="flex-1 px-4 py-2 rounded-lg border border-blue-200 text-sm focus:outline-none focus:border-blue-500/50" />
+              <input value={statsNe[i]?.label || ''} onChange={e => updateStatNe(i, 'label', e.target.value)} placeholder="Nepali Label"
+                className="flex-1 px-4 py-2 rounded-lg border border-blue-200 text-sm focus:outline-none focus:border-blue-500/50" />
+              <button onClick={() => removeStatNe(i)} className="text-red-400 hover:text-red-500 p-2">&times;</button>
+            </div>
           </div>
         ))}
       </div>
@@ -182,15 +260,27 @@ export function AboutPageEditor() {
       <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-900">Core Values</h2>
-          <button onClick={addValue} className="text-sm text-amber-600 hover:text-amber-700 font-medium">+ Add Value</button>
+          <div className="flex gap-2">
+            <button onClick={addValue} className="text-sm text-amber-600 hover:text-amber-700 font-medium">+ Add Value</button>
+            <button onClick={addValueNe} className="text-sm text-blue-600 hover:text-blue-700 font-medium">+ Add Nepali</button>
+          </div>
         </div>
         {values.map((val, i) => (
-          <div key={i} className="flex gap-3 items-start">
-            <input value={val.title} onChange={e => updateValue(i, 'title', e.target.value)} placeholder="Title"
-              className="flex-1 px-4 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-amber-500/50" />
-            <input value={val.desc} onChange={e => updateValue(i, 'desc', e.target.value)} placeholder="Description"
-              className="flex-1 px-4 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-amber-500/50" />
-            <button onClick={() => removeValue(i)} className="text-red-400 hover:text-red-500 p-2">&times;</button>
+          <div key={i} className="p-3 bg-gray-50 rounded-lg space-y-2">
+            <div className="flex gap-3 items-start">
+              <input value={val.title} onChange={e => updateValue(i, 'title', e.target.value)} placeholder="Title"
+                className="flex-1 px-4 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-amber-500/50" />
+              <input value={val.desc} onChange={e => updateValue(i, 'desc', e.target.value)} placeholder="Description"
+                className="flex-1 px-4 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-amber-500/50" />
+              <button onClick={() => removeValue(i)} className="text-red-400 hover:text-red-500 p-2">&times;</button>
+            </div>
+            <div className="flex gap-3 items-start pl-2">
+              <input value={valuesNe[i]?.title || ''} onChange={e => updateValueNe(i, 'title', e.target.value)} placeholder="Nepali Title"
+                className="flex-1 px-4 py-2 rounded-lg border border-blue-200 text-sm focus:outline-none focus:border-blue-500/50" />
+              <input value={valuesNe[i]?.desc || ''} onChange={e => updateValueNe(i, 'desc', e.target.value)} placeholder="Nepali Description"
+                className="flex-1 px-4 py-2 rounded-lg border border-blue-200 text-sm focus:outline-none focus:border-blue-500/50" />
+              <button onClick={() => removeValueNe(i)} className="text-red-400 hover:text-red-500 p-2">&times;</button>
+            </div>
           </div>
         ))}
       </div>
@@ -198,17 +288,31 @@ export function AboutPageEditor() {
       <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-900">Timeline</h2>
-          <button onClick={addTimelineItem} className="text-sm text-amber-600 hover:text-amber-700 font-medium">+ Add Event</button>
+          <div className="flex gap-2">
+            <button onClick={addTimelineItem} className="text-sm text-amber-600 hover:text-amber-700 font-medium">+ Add Event</button>
+            <button onClick={addTimelineItemNe} className="text-sm text-blue-600 hover:text-blue-700 font-medium">+ Add Nepali</button>
+          </div>
         </div>
         {timeline.map((item, i) => (
-          <div key={i} className="flex gap-3 items-start">
-            <input value={item.year} onChange={e => updateTimelineItem(i, 'year', e.target.value)} placeholder="Year"
-              className="w-24 px-4 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-amber-500/50" />
-            <input value={item.title} onChange={e => updateTimelineItem(i, 'title', e.target.value)} placeholder="Title"
-              className="flex-1 px-4 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-amber-500/50" />
-            <input value={item.desc} onChange={e => updateTimelineItem(i, 'desc', e.target.value)} placeholder="Description"
-              className="flex-[2] px-4 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-amber-500/50" />
-            <button onClick={() => removeTimelineItem(i)} className="text-red-400 hover:text-red-500 p-2">&times;</button>
+          <div key={i} className="p-3 bg-gray-50 rounded-lg space-y-2">
+            <div className="flex gap-3 items-start">
+              <input value={item.year} onChange={e => updateTimelineItem(i, 'year', e.target.value)} placeholder="Year"
+                className="w-24 px-4 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-amber-500/50" />
+              <input value={item.title} onChange={e => updateTimelineItem(i, 'title', e.target.value)} placeholder="Title"
+                className="flex-1 px-4 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-amber-500/50" />
+              <input value={item.desc} onChange={e => updateTimelineItem(i, 'desc', e.target.value)} placeholder="Description"
+                className="flex-[2] px-4 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-amber-500/50" />
+              <button onClick={() => removeTimelineItem(i)} className="text-red-400 hover:text-red-500 p-2">&times;</button>
+            </div>
+            <div className="flex gap-3 items-start pl-2">
+              <input value={timelineNe[i]?.year || ''} onChange={e => updateTimelineItemNe(i, 'year', e.target.value)} placeholder="Year"
+                className="w-24 px-4 py-2 rounded-lg border border-blue-200 text-sm focus:outline-none focus:border-blue-500/50" />
+              <input value={timelineNe[i]?.title || ''} onChange={e => updateTimelineItemNe(i, 'title', e.target.value)} placeholder="Nepali Title"
+                className="flex-1 px-4 py-2 rounded-lg border border-blue-200 text-sm focus:outline-none focus:border-blue-500/50" />
+              <input value={timelineNe[i]?.desc || ''} onChange={e => updateTimelineItemNe(i, 'desc', e.target.value)} placeholder="Nepali Description"
+                className="flex-[2] px-4 py-2 rounded-lg border border-blue-200 text-sm focus:outline-none focus:border-blue-500/50" />
+              <button onClick={() => removeTimelineItemNe(i)} className="text-red-400 hover:text-red-500 p-2">&times;</button>
+            </div>
           </div>
         ))}
       </div>

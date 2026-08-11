@@ -1,6 +1,7 @@
 export type PaymentGateway = 'khalti' | 'esewa' | 'stripe'
-export type DonationStatus = 'pending' | 'processing' | 'verified' | 'completed' | 'failed' | 'rejected' | 'cancelled'
-export type PaymentSessionStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled'
+export type DonationStatus = 'pending' | 'processing' | 'payment_received' | 'verified' | 'completed' | 'failed' | 'rejected' | 'cancelled'
+export type PaymentSessionStatus = 'pending' | 'processing' | 'payment_received' | 'completed' | 'failed' | 'cancelled'
+export type VerificationStatus = 'pending_verification' | 'verified' | 'rejected'
 export type VerificationAction = 'submitted' | 'processing' | 'verified' | 'rejected' | 'failed' | 'expired' | 'cancelled'
 
 export interface PaymentSetting {
@@ -31,9 +32,13 @@ export interface PaymentSession {
   transaction_id: string | null
   idempotency_key: string | null
   status: PaymentSessionStatus
+  verification_status: VerificationStatus | null
   verified_by: string | null
   verified_at: string | null
   verification_notes: string | null
+  approved_by: string | null
+  approved_at: string | null
+  approval_notes: string | null
   expires_at: string | null
   created_at: string
   updated_at: string
@@ -87,6 +92,7 @@ export interface DonationWithPayment {
   amount: number
   frequency: 'one-time' | 'monthly' | 'annual'
   status: DonationStatus
+  verification_status?: VerificationStatus | null
   message: string | null
   transaction_id: string | null
   payment_method: string | null

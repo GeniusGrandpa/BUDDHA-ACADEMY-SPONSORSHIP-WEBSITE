@@ -8,7 +8,8 @@ export type Json =
 
 export type Role = 'super_admin' | 'admin' | 'finance_manager' | 'teacher' | 'donor' | 'volunteer' | 'public_user'
 export type ProfileStatus = 'active' | 'inactive' | 'suspended' | 'banned'
-export type DonationStatus = 'pending' | 'processing' | 'verified' | 'completed' | 'failed' | 'rejected' | 'cancelled' | 'received' | 'pledged'
+export type DonationStatus = 'pending' | 'processing' | 'payment_received' | 'verified' | 'completed' | 'failed' | 'rejected' | 'cancelled' | 'received' | 'pledged'
+export type VerificationStatus = 'pending_verification' | 'verified' | 'rejected'
 export type AllocationCategory = 'Educational Materials' | 'Student Meals' | 'School Supplies' | 'Uniform Support' | 'Events & Activities' | 'Operations'
 
 export interface Database {
@@ -172,6 +173,7 @@ export interface Database {
           amount: number
           frequency: 'one-time' | 'monthly' | 'annual'
           status: DonationStatus
+          verification_status: string | null
           message: string | null
           transaction_id: string | null
           payment_method: string | null
@@ -188,6 +190,7 @@ export interface Database {
           amount: number
           frequency?: 'one-time' | 'monthly' | 'annual'
           status?: DonationStatus
+          verification_status?: string | null
           message?: string | null
           transaction_id?: string | null
           payment_method?: string | null
@@ -204,6 +207,7 @@ export interface Database {
           amount?: number
           frequency?: 'one-time' | 'monthly' | 'annual'
           status?: DonationStatus
+          verification_status?: string | null
           message?: string | null
           transaction_id?: string | null
           payment_method?: string | null
@@ -1331,9 +1335,13 @@ export interface Database {
           transaction_id: string | null
           idempotency_key: string | null
           status: string
+          verification_status: string | null
           verified_by: string | null
           verified_at: string | null
           verification_notes: string | null
+          approved_by: string | null
+          approved_at: string | null
+          approval_notes: string | null
           expires_at: string | null
           created_at: string
           updated_at: string
@@ -1350,9 +1358,13 @@ export interface Database {
           transaction_id?: string | null
           idempotency_key?: string | null
           status?: string
+          verification_status?: string | null
           verified_by?: string | null
           verified_at?: string | null
           verification_notes?: string | null
+          approved_by?: string | null
+          approved_at?: string | null
+          approval_notes?: string | null
           expires_at?: string | null
           created_at?: string
           updated_at?: string
@@ -1364,9 +1376,13 @@ export interface Database {
           amount?: number
           transaction_id?: string | null
           status?: string
+          verification_status?: string | null
           verified_by?: string | null
           verified_at?: string | null
           verification_notes?: string | null
+          approved_by?: string | null
+          approved_at?: string | null
+          approval_notes?: string | null
           expires_at?: string | null
           created_at?: string
           updated_at?: string

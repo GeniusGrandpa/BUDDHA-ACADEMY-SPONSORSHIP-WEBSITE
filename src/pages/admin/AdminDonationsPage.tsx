@@ -110,12 +110,13 @@ export function AdminDonationsPage() {
                           donation.status === 'completed' ? 'bg-green-100 text-green-700' :
                           donation.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
                           donation.status === 'processing' ? 'bg-blue-100 text-blue-700' :
+                          donation.status === 'payment_received' ? 'bg-orange-100 text-orange-700' :
                           donation.status === 'rejected' ? 'bg-red-100 text-red-700' :
                           'bg-gray-100 text-gray-600'
                         }`}>
                           {donation.status}
                         </span>
-                        {donation.status === 'pending' && (
+                        {(donation.status === 'pending' || donation.status === 'payment_received') && (
                           <div className="flex gap-1 mt-1">
                             <button
                               onClick={() => handleStatusChange(donation.id, 'completed')}
