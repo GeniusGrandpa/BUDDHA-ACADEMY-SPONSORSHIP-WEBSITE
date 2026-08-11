@@ -116,10 +116,24 @@ export function Header() {
                     {t('header_admin')}
                   </Link>
                 )}
-                <Link to={localize('/dashboard')}
-                  className="text-sm font-medium transition-colors hover:opacity-80 text-[var(--color-navbar-text)]">
-                  {t('header_dashboard')}
-                </Link>
+                {profile?.role === 'teacher' && (
+                  <Link to="/teacher/dashboard"
+                    className="text-sm font-medium transition-colors hover:opacity-80 text-[var(--color-navbar-text)]">
+                    Teacher Dashboard
+                  </Link>
+                )}
+                {profile?.role === 'finance_manager' && (
+                  <Link to="/admin/finance"
+                    className="text-sm font-medium transition-colors hover:opacity-80 text-[var(--color-navbar-text)]">
+                    Finance Dashboard
+                  </Link>
+                )}
+                {(profile?.role === 'donor' || profile?.role === 'volunteer') && (
+                  <Link to={localize('/dashboard')}
+                    className="text-sm font-medium transition-colors hover:opacity-80 text-[var(--color-navbar-text)]">
+                    {t('header_dashboard')}
+                  </Link>
+                )}
                 <button onClick={handleSignOut}
                   className="text-sm font-medium transition-colors hover:opacity-80 text-[var(--color-navbar-text)]">
                   {t('header_sign_out')}
@@ -174,10 +188,24 @@ export function Header() {
                       {t('header_admin')}
                     </Link>
                   )}
-                  <Link to={localize('/dashboard')} onClick={() => setIsMenuOpen(false)}
-                    className="block px-4 py-3 rounded-lg text-sm font-medium text-[var(--color-navbar-text)]">
-                    {t('header_dashboard')}
-                  </Link>
+                  {profile?.role === 'teacher' && (
+                    <Link to="/teacher/dashboard" onClick={() => setIsMenuOpen(false)}
+                      className="block px-4 py-3 rounded-lg text-sm font-medium text-[var(--color-navbar-text)]">
+                      Teacher Dashboard
+                    </Link>
+                  )}
+                  {profile?.role === 'finance_manager' && (
+                    <Link to="/admin/finance" onClick={() => setIsMenuOpen(false)}
+                      className="block px-4 py-3 rounded-lg text-sm font-medium text-[var(--color-navbar-text)]">
+                      Finance Dashboard
+                    </Link>
+                  )}
+                  {(profile?.role === 'donor' || profile?.role === 'volunteer') && (
+                    <Link to={localize('/dashboard')} onClick={() => setIsMenuOpen(false)}
+                      className="block px-4 py-3 rounded-lg text-sm font-medium text-[var(--color-navbar-text)]">
+                      {t('header_dashboard')}
+                    </Link>
+                  )}
                   <button onClick={() => { handleSignOut(); setIsMenuOpen(false) }}
                     className="block w-full text-left px-4 py-3 rounded-lg text-sm font-medium text-[var(--color-navbar-text)]">
                     {t('header_sign_out')}
