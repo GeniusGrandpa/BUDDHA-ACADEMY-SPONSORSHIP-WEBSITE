@@ -60,8 +60,22 @@ export function AboutPageEditor() {
         if (c.vision) setVision(c.vision)
         if (c.description) setDescription(c.description)
         if (c.stats) setStats(c.stats)
+        else setStats([
+          { value: '४९ +', label: 'Years of Service' },
+          { value: '२०० +', label: 'Children Supported' },
+          { value: '१०० %', label: 'Free Education' },
+          { value: '१२ +', label: 'Trust' },
+        ])
         if (c.values) setValues(c.values)
         if (c.timeline) setTimeline(c.timeline)
+        else setTimeline([
+          { year: '१९७७', title: 'Founded', desc: 'Opened with 12 students.' },
+          { year: '१९८५', title: 'First Graduation', desc: 'First batch of students completed their secondary education.' },
+          { year: '१९९५', title: 'Permanent Campus', desc: 'Moved to a dedicated campus with proper classrooms.' },
+          { year: '२००५', title: 'Reaching Milestones', desc: 'Enrollment crossed 500 students with expanded programs.' },
+          { year: '२०१५', title: 'Global Outreach', desc: 'International sponsorships began connecting students worldwide.' },
+          { year: '२०२६', title: 'Today', desc: 'Serving over 2,000 children with free, quality education.' },
+        ])
       }
       if (page?.content_ne && typeof page.content_ne === 'object' && Object.keys(page.content_ne).length > 0) {
         const cn = page.content_ne as AboutContent

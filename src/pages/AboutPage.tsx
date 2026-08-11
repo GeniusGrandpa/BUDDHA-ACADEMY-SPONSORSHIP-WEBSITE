@@ -69,13 +69,12 @@ export function AboutPage() {
     vision: t('about_fallback_vision'),
     description: t('about_fallback_description'),
     timeline: [
-      { year: '2012', title: t('about_timeline_1_title'), desc: t('about_timeline_1_desc') },
-      { year: '2014', title: t('about_timeline_2_title'), desc: t('about_timeline_2_desc') },
-      { year: '2016', title: t('about_timeline_3_title'), desc: t('about_timeline_3_desc') },
-      { year: '2018', title: t('about_timeline_4_title'), desc: t('about_timeline_4_desc') },
-      { year: '2020', title: t('about_timeline_5_title'), desc: t('about_timeline_5_desc') },
-      { year: '2023', title: t('about_timeline_6_title'), desc: t('about_timeline_6_desc') },
-      { year: '2025', title: t('about_timeline_7_title'), desc: t('about_timeline_7_desc') },
+      { year: '१९७७', title: t('about_timeline_1_title'), desc: t('about_timeline_1_desc') },
+      { year: '१९८५', title: t('about_timeline_2_title'), desc: t('about_timeline_2_desc') },
+      { year: '१९९५', title: t('about_timeline_3_title'), desc: t('about_timeline_3_desc') },
+      { year: '२००५', title: t('about_timeline_4_title'), desc: t('about_timeline_4_desc') },
+      { year: '२०१५', title: t('about_timeline_5_title'), desc: t('about_timeline_5_desc') },
+      { year: '२०२६', title: t('about_timeline_6_title'), desc: t('about_timeline_6_desc') },
     ],
     values: [
       { title: t('about_value_compassion'), desc: t('about_value_compassion_desc') },
@@ -84,10 +83,10 @@ export function AboutPage() {
       { title: t('about_value_empowerment'), desc: t('about_value_empowerment_desc') },
     ],
     stats: [
-      { value: '250+', label: t('about_stat_students') },
-      { value: '180+', label: t('about_stat_sponsors') },
-      { value: '12+', label: t('about_stat_years') },
-      { value: '95%', label: t('about_stat_efficiency') },
+      { value: '४९ +', label: 'Years of Service' },
+      { value: '२०० +', label: 'Children Supported' },
+      { value: '१०० %', label: 'Free Education' },
+      { value: '१२ +', label: 'Trust' },
     ],
   }
 

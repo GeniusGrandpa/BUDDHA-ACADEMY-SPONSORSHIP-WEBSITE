@@ -115,7 +115,7 @@ RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
 AS $$
 BEGIN
-  INSERT INTO public.content_versions (entity_type, entity_id, content, version_number, changed_by)
+  INSERT INTO public.content_versions (entity_type, entity_id, content, version_number, created_by)
   VALUES (
     TG_TABLE_NAME,
     COALESCE(NEW.id, OLD.id),
@@ -164,7 +164,7 @@ BEGIN
   SELECT COALESCE(MAX(version_number), 0) + 1 INTO v_version_number
   FROM public.content_versions
   WHERE entity_type = TG_TABLE_NAME AND entity_id = COALESCE(NEW.id, OLD.id);
-  INSERT INTO public.content_versions (entity_type, entity_id, content, version_number, changed_by)
+  INSERT INTO public.content_versions (entity_type, entity_id, content, version_number, created_by)
   VALUES (
     TG_TABLE_NAME,
     COALESCE(NEW.id, OLD.id),
