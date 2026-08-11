@@ -2,6 +2,7 @@ import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { RefreshCw, Home, AlertTriangle } from 'lucide-react'
 import { logger } from '../lib/logger'
 import { Tr } from './Translated'
+import { getBrowserLanguage, localizePath } from '../lib/locale'
 
 interface Props {
   children: ReactNode
@@ -51,7 +52,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 <Tr text="Reload Page" />
               </button>
               <a
-                href="/"
+                href={localizePath('/', getBrowserLanguage())}
                 className="inline-flex items-center justify-center px-5 py-2.5 border border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 transition-colors duration-200"
               >
                 <Home className="w-4 h-4 mr-2" />

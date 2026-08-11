@@ -54,8 +54,12 @@ export function AboutPage() {
     try {
       const { getPageBySlug } = await import('../services/content')
       const page = await getPageBySlug('about')
-      if (page?.content) {
-        setContent(page.content as AboutContent)
+      const lang = _language || 'en'
+      const localized = lang === 'ne' && page?.content_ne && typeof page.content_ne === 'object' && Object.keys(page.content_ne).length > 0
+        ? page.content_ne
+        : page?.content
+      if (localized) {
+        setContent(localized as AboutContent)
       }
     } catch {}
   }

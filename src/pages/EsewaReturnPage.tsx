@@ -5,6 +5,7 @@ import { useCmsStrings } from '../context/CmsStringsContext'
 import { confirmEsewaPayment } from '../services/esewaPay'
 import { getErrorMessage } from '../lib/errors'
 import { Button } from '../components/ui/Button'
+import { useLocalizePath } from '../hooks/useLocalizePath'
 
 type ResultState =
   | { kind: 'loading' }
@@ -14,6 +15,7 @@ type ResultState =
 
 export function EsewaReturnPage() {
   const { t } = useCmsStrings()
+  const localize = useLocalizePath()
   const [searchParams] = useSearchParams()
   const session = searchParams.get('session')
   const data = searchParams.get('data')
@@ -90,13 +92,13 @@ export function EsewaReturnPage() {
             <h2 className="text-lg font-semibold text-gray-900 mb-2">{t('payment_esewa_cancelled_title')}</h2>
             <p className="text-sm text-gray-500 mb-1">{t('payment_esewa_cancelled_msg')}</p>
             <div className="mt-6 space-y-2">
-              <Link to="/donate">
+              <Link to={localize('/donate')}>
                 <Button className="w-full" size="lg">{t('payment_esewa_try_again')}</Button>
               </Link>
               <Link to="/donations" className="block text-sm text-gray-500 hover:text-gray-700 py-1">
                 {t('payment_esewa_go_dashboard')}
               </Link>
-              <Link to="/" className="block text-sm text-gray-500 hover:text-gray-700 py-1">
+              <Link to={localize('/')} className="block text-sm text-gray-500 hover:text-gray-700 py-1">
                 {t('notfound_home_button')}
               </Link>
             </div>
@@ -111,13 +113,13 @@ export function EsewaReturnPage() {
             <h2 className="text-lg font-semibold text-gray-900 mb-2">{t('payment_esewa_failed_title')}</h2>
             <p className="text-sm text-gray-500 mb-1">{result.message}</p>
             <div className="mt-6 space-y-2">
-              <Link to="/donate">
+              <Link to={localize('/donate')}>
                 <Button className="w-full" size="lg">{t('payment_esewa_try_again')}</Button>
               </Link>
               <Link to="/donations" className="block text-sm text-gray-500 hover:text-gray-700 py-1">
                 {t('payment_esewa_go_dashboard')}
               </Link>
-              <Link to="/" className="block text-sm text-gray-500 hover:text-gray-700 py-1">
+              <Link to={localize('/')} className="block text-sm text-gray-500 hover:text-gray-700 py-1">
                 {t('notfound_home_button')}
               </Link>
             </div>

@@ -7,6 +7,7 @@ import logo from '../../../assets/logo.jpg'
 import { useAuth } from '../../../context/AuthContext'
 import { ROLE_NAMES } from '../../../types/permissions'
 import { useTranslation } from 'react-i18next'
+import { useLocalizePath } from '../../../hooks/useLocalizePath'
 
 export type Section = 'overview' | 'students' | 'donations' | 'updates' | 'profile' | 'settings'
 
@@ -44,6 +45,7 @@ function SidebarContent({ collapsed, onToggleCollapse, onSignOut, userName, acti
 }) {
   const { profile } = useAuth()
   const { t } = useTranslation()
+  const localize = useLocalizePath()
   const displayRole = profile?.role ? (ROLE_NAMES[profile.role as keyof typeof ROLE_NAMES] || profile.role) : 'Donor'
   return (
     <div className="flex flex-col h-full bg-warm-50 border-r border-amber-200">
@@ -105,7 +107,7 @@ function SidebarContent({ collapsed, onToggleCollapse, onSignOut, userName, acti
           )}
         </div>
         <a
-          href="/"
+          href={localize('/')}
           className={`
             w-full flex items-center gap-3 rounded-xl text-sm font-medium transition-colors mb-0.5
             ${collapsed ? 'justify-center px-0 py-3' : 'px-3 py-2.5'}

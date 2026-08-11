@@ -21,8 +21,6 @@ const SANITIZED_MESSAGES: Record<string, string> = {
   'unauthorized': 'You are not authorized to perform this action.',
 }
 
-const FALLBACK_ERROR = 'Verification failed. The link may be invalid or expired.'
-
 const SENSITIVE_KEYWORDS = [
   'schema', 'postgres', 'rls', 'policy', 'relation', 'database error',
   'pg_', 'sql', 'syntax error', 'permission denied',
@@ -193,7 +191,7 @@ export function AuthCallbackPage() {
                   {!message.includes('Redirecting') && (
                     <Link to={localize('/login')}>
                       <Button className="w-full" size="lg">
-                        <Tr text={t('auth_continue_sign_in')} />
+                        <Tr text="auth_continue_sign_in" />
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </Link>
@@ -212,9 +210,9 @@ export function AuthCallbackPage() {
                     <XCircle className="w-8 h-8 text-red-500" />
                   </motion.div>
                   <div>
-                    <h1 className="text-xl font-bold text-gray-800"><Tr text={t('auth_verification_failed')} /></h1>
+                    <h1 className="text-xl font-bold text-gray-800"><Tr text="auth_verification_failed" /></h1>
                     <p className="text-gray-500 text-sm mt-2"><Tr text={message} /></p>
-                    <p className="text-gray-400 text-xs mt-2"><Tr text={t('auth_request_new_verification')} /></p>
+                    <p className="text-gray-400 text-xs mt-2"><Tr text="auth_request_new_verification" /></p>
                   </div>
                   <div className="space-y-3">
                     <Link to={localize('/login')}>
@@ -230,7 +228,7 @@ export function AuthCallbackPage() {
           </Card>
 
           <p className="text-center text-xs text-gray-400 mt-6">
-            Buddha Academy Sponsorship Platform
+            <Tr text="Buddha Academy Sponsorship Platform" />
           </p>
         </motion.div>
       </AnimatePresence>

@@ -9,6 +9,7 @@ import { LanguageSwitcher } from '../components/LanguageSwitcher'
 import { useLocalizePath } from '../hooks/useLocalizePath'
 import { getNavigationItems } from '../services/navigation'
 import { getSiteSettings } from '../services/settings'
+import { sanitizeCmsText } from '../lib/sanitize-cms'
 import type { NavigationItem } from '../types/cms'
 import fallbackLogo from '../assets/logo.jpg'
 
@@ -59,7 +60,7 @@ export function Header() {
       '/news': 'navigation_news',
       '/contact': 'navigation_contact',
     }[route || '']
-    return key ? t(key) : label
+    return key ? t(key) : sanitizeCmsText(label)
   }
 
   const isActive = (path: string) => location.pathname === path
@@ -74,10 +75,10 @@ export function Header() {
       <div className="w-full px-4 sm:px-8 lg:px-16 xl:px-24">
         <div className="flex justify-between items-center h-20">
           <Link to={localize('/')} className="flex items-center space-x-3">
-            <img src={headerLogoSrc} alt={siteName || branding.organization_name || ''} className="h-12 w-auto drop-shadow-sm" loading="eager" decoding="async" width="48" height="48" {...{'fetchpriority': 'high'}} />
+            <img src={headerLogoSrc} alt={sanitizeCmsText(siteName || branding.organization_name || '')} className="h-12 w-auto drop-shadow-sm" loading="eager" decoding="async" width="48" height="48" {...{'fetchpriority': 'high'}} />
             <div className="hidden sm:block">
-              <div className="font-semibold text-lg text-[var(--color-navbar-text)]">{siteName || branding.organization_name || ''}</div>
-              {branding.tagline && <div className="text-xs text-[var(--color-text-muted)]">{branding.tagline}</div>}
+              <div className="font-semibold text-lg text-[var(--color-navbar-text)]">{sanitizeCmsText(siteName || branding.organization_name || '')}</div>
+              {branding.tagline && <div className="text-xs text-[var(--color-text-muted)]">{sanitizeCmsText(branding.tagline)}</div>}
             </div>
           </Link>
 

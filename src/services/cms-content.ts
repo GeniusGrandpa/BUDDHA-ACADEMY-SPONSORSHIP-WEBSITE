@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase'
 import { isPreviewMode } from '../lib/preview-mode'
 import { getLocalizedContent } from './content-localization'
+import { sanitizeCmsText } from '../lib/sanitize-cms'
 import type {
   DonationContent,
   SponsorshipContent,
@@ -333,7 +334,8 @@ export async function getAllCmsStrings(): Promise<CmsStringMap> {
   const rows = (data || []) as { key: string; value: string }[]
   const map: CmsStringMap = {}
   for (const row of rows) {
-    map[row.key] = row.value
+    const value = sanitizeCmsText(row.value)
+    if (value) map[row.key] = value
   }
   return map
 }
@@ -345,7 +347,7 @@ export async function getCmsString(key: string): Promise<string | null> {
   if (!isPreviewMode()) query = query.eq('is_published', true)
   const { data } = await query.maybeSingle()
   if (!data) return null
-  return (data as { value: string }).value
+  return sanitizeCmsText((data as { value: string }).value)
 }
 
 export async function upsertCmsString(stringData: { key: string; value: string; page_slug?: string; category?: string }): Promise<void> {

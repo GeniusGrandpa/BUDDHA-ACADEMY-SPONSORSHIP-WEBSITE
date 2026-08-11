@@ -1,6 +1,7 @@
 import { getSupabaseClient } from '../lib/supabase'
 import { logAuditEvent } from '../lib/audit'
 import { applyLanguageLocalization } from './content-localization'
+import { sanitizeCmsText } from '../lib/sanitize-cms'
 import type { NavigationItem, NavigationLocation } from '../types/cms'
 
 const supabase = getSupabaseClient()
@@ -14,8 +15,13 @@ export async function getNavigationItems(location?: NavigationLocation, language
   const { data, error } = await query
   if (error) throw error
   const items = (data || []) as unknown as NavigationItem[]
-  if (!language || language === 'en') return items
-  return items.map((item) => applyLanguageLocalization(item, language) as NavigationItem)
+  if (!language || language === 'en') {
+    return items.map((item) => ({ ...item, label: sanitizeCmsText(item.label) }))
+  }
+  return items.map((item) => {
+    const localized = applyLanguageLocalization(item, language) as NavigationItem
+    return { ...localized, label: sanitizeCmsText(localized.label) }
+  })
 }
 
 export async function getNavigationItemById(id: string): Promise<NavigationItem | null> {

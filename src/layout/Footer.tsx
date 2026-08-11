@@ -8,6 +8,7 @@ import { useTheme } from '../context/ThemeContext'
 import { getFooterContent } from '../services/cms-content'
 import { getSiteSettings } from '../services/settings'
 import { useLocalizePath } from '../hooks/useLocalizePath'
+import { sanitizeCmsText } from '../lib/sanitize-cms'
 import type { FooterContent } from '../types/cms-content'
 import fallbackLogo from '../assets/logo.jpg'
 
@@ -44,7 +45,7 @@ export function Footer() {
   const address = contactInfo?.address || siteSettings.contact_address
   const phone = contactInfo?.phone || siteSettings.contact_phone
   const email = contactInfo?.email || siteSettings.contact_email
-  const copyrightText = footerContent?.copyright_text || `© ${new Date().getFullYear()} ${branding.footer_branding || ''}`.replace(/^\s*©\s*/, '').trim()
+  const copyrightText = sanitizeCmsText(footerContent?.copyright_text || `© ${new Date().getFullYear()} ${branding.footer_branding || ''}`.replace(/^\s*©\s*/, '').trim())
   const rights = t('footer.rights')
   const hasRights = copyrightText.toLowerCase().includes('all rights reserved')
   const finalCopyright = `${copyrightText.startsWith('©') ? '' : '© '}${copyrightText}${hasRights ? '' : ` ${rights}`}`
@@ -57,12 +58,12 @@ export function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           <div>
             <div className="flex items-center space-x-3 mb-4">
-              <img src={footerLogoSrc} alt={branding.organization_name || ''} className="h-14 w-auto" loading="lazy" decoding="async" width="56" height="56" />
+              <img src={footerLogoSrc} alt={sanitizeCmsText(branding.organization_name || '')} className="h-14 w-auto" loading="lazy" decoding="async" width="56" height="56" />
               <div>
                 {branding.organization_name && (
-                  <div className="font-semibold text-[var(--color-footer-heading)]">{branding.organization_name}</div>
+                  <div className="font-semibold text-[var(--color-footer-heading)]">{sanitizeCmsText(branding.organization_name)}</div>
                 )}
-                {branding.tagline && <div className="text-xs text-[var(--color-text-muted)]">{branding.tagline}</div>}
+                {branding.tagline && <div className="text-xs text-[var(--color-text-muted)]">{sanitizeCmsText(branding.tagline)}</div>}
               </div>
             </div>
             {footerContent?.description && (

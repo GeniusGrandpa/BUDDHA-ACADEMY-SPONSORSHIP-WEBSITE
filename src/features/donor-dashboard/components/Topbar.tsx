@@ -5,6 +5,7 @@ import { Search, Menu, ChevronDown, User, Settings, LogOut, ExternalLink } from 
 import { useAuth } from '../../../context/AuthContext'
 import { NotificationBell } from '../../../components/notifications/NotificationBell'
 import { LanguageSwitcher } from '../../../components/LanguageSwitcher'
+import { useLocalizePath } from '../../../hooks/useLocalizePath'
 import type { Section } from './Sidebar'
 import logo from '../../../assets/logo.jpg'
 
@@ -18,6 +19,7 @@ interface TopbarProps {
 export function Topbar({ userName, onMenuClick, userId, onSectionChange }: TopbarProps) {
   const { t } = useTranslation()
   const { signOut } = useAuth()
+  const localize = useLocalizePath()
   const [searchFocused, setSearchFocused] = useState(false)
   const [avatarOpen, setAvatarOpen] = useState(false)
   const avatarRef = useRef<HTMLDivElement>(null)
@@ -43,7 +45,7 @@ export function Topbar({ userName, onMenuClick, userId, onSectionChange }: Topba
           >
             <Menu className="w-5 h-5" />
           </button>
-          <Link to="/" className="shrink-0">
+          <Link to={localize('/')} className="shrink-0">
             <img src={logo} alt="Buddha Academy" className="h-9 w-9 rounded-lg object-cover" loading="eager" decoding="async" />
           </Link>
           <div className="hidden sm:block">
@@ -102,7 +104,7 @@ export function Topbar({ userName, onMenuClick, userId, onSectionChange }: Topba
                 </button>
                 <div className="border-t border-gray-50 mt-1 pt-1">
                   <a
-                    href="/"
+                    href={localize('/')}
                     className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-gray-600 hover:bg-orange-50 transition-colors"
                   >
                     <ExternalLink className="w-4 h-4" />
@@ -123,7 +125,7 @@ export function Topbar({ userName, onMenuClick, userId, onSectionChange }: Topba
       </div>
 
       <div className="sm:hidden flex items-center gap-2 px-4 pb-3">
-        <Link to="/" className="shrink-0">
+        <Link to={localize('/')} className="shrink-0">
           <img src={logo} alt="Buddha Academy" className="h-7 w-7 rounded object-cover" loading="eager" decoding="async" />
         </Link>
         <div>

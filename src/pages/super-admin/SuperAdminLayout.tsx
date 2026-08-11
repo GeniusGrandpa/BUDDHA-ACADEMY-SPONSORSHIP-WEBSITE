@@ -5,6 +5,7 @@ import { Bell } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { RoleBadge } from '../../components/RoleBadge'
 import { ErrorBoundary } from '../../components/ErrorBoundary'
+import { useLocalizePath } from '../../hooks/useLocalizePath'
 import type { Role } from '../../types/permissions'
 
 const superAdminNavItems = [
@@ -41,6 +42,7 @@ export function SuperAdminLayout() {
   const location = useLocation()
   const navigate = useNavigate()
   const { signOut, profile } = useAuth()
+  const localize = useLocalizePath()
 
   if (profile?.role !== 'super_admin') {
     return <Navigate to="/admin" replace />
@@ -188,7 +190,7 @@ export function SuperAdminLayout() {
                         <p className="text-xs text-gray-500">{profile?.email}</p>
                       </div>
                       <div className="p-1">
-                        <Link to="/" className="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-orange-50 rounded-lg">
+                        <Link to={localize('/')} className="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-orange-50 rounded-lg">
                           View Website
                         </Link>
                         <Link to="/admin" className="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-orange-50 rounded-lg">

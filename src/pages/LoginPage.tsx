@@ -160,7 +160,7 @@ export function LoginPage() {
       if (message) {
         setError(message)
       }
-      toast.error(message || 'Something went wrong. Please try again.', { duration: 5000 })
+      toast.error(<Tr text={message || 'Something went wrong. Please try again.'} />, { duration: 5000 })
     } finally {
       setLoading(false)
     }
@@ -199,7 +199,7 @@ export function LoginPage() {
       if (msg) {
         setError(msg)
       }
-      toast.error(msg || 'Something went wrong. Please try again.', { duration: 5000 })
+      toast.error(<Tr text={msg || 'Something went wrong. Please try again.'} />, { duration: 5000 })
     } finally {
       setLoading(false)
     }
@@ -219,7 +219,7 @@ export function LoginPage() {
       if (msg) {
         setError(msg)
       }
-      toast.error(msg || 'Something went wrong. Please try again.', { duration: 5000 })
+      toast.error(<Tr text={msg || 'Something went wrong. Please try again.'} />, { duration: 5000 })
     } finally {
       setResending(false)
     }

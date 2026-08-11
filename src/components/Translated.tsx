@@ -1,9 +1,11 @@
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLanguage } from '../context/LanguageContext'
+import { sanitizeCmsText } from '../lib/sanitize-cms'
 
 export const Tr = memo(function Tr({ text }: { text: string }) {
   const { t } = useTranslation()
   const { language } = useLanguage()
-  return <>{t(text, { defaultValue: text, lng: language })}</>
+  const clean = sanitizeCmsText(text)
+  return <>{t(clean, { defaultValue: clean, lng: language })}</>
 })

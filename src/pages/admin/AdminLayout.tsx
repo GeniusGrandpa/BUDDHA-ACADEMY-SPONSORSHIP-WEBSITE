@@ -9,6 +9,7 @@ import { RoleBadge } from '../../components/RoleBadge'
 import { ErrorBoundary } from '../../components/ErrorBoundary'
 import type { Role } from '../../features/auth/types/permissions'
 import { useTheme } from '../../context/ThemeContext'
+import { useLocalizePath } from '../../hooks/useLocalizePath'
 import fallbackLogo from '../../assets/logo.jpg'
 
 export function AdminLayout() {
@@ -16,6 +17,7 @@ export function AdminLayout() {
   const { role } = useRole()
   const location = useLocation()
   const { branding } = useTheme()
+  const localize = useLocalizePath()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -79,7 +81,7 @@ export function AdminLayout() {
           <div className="fixed inset-0 bg-stone-950/20 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
           <div className="fixed inset-y-0 left-0 flex flex-col w-72 bg-[var(--color-sidebar-bg)] border-r border-[var(--color-border)]">
             <div className="flex items-center justify-between h-16 px-4 border-b border-[var(--color-border)]">
-              <Link to="/" className="flex items-center space-x-2">
+              <Link to={localize('/')} className="flex items-center space-x-2">
                 <img src={branding.logo_url || fallbackLogo} alt={branding.organization_name} className="h-8 w-8 rounded-lg object-cover shrink-0 shadow-lg" loading="eager" decoding="async" />
                 <span className="text-[var(--color-text-primary)] font-semibold text-sm">Admin Portal</span>
               </Link>
@@ -97,7 +99,7 @@ export function AdminLayout() {
       <div className="hidden lg:flex lg:fixed lg:inset-y-0 lg:flex-col lg:w-64">
         <div className="flex flex-col flex-grow overflow-y-auto bg-[var(--color-sidebar-bg)] border-r border-[var(--color-border)]">
           <div className="flex items-center h-16 px-4 border-b border-[var(--color-border)]">
-            <Link to="/" className="flex items-center space-x-2">
+            <Link to={localize('/')} className="flex items-center space-x-2">
               <img src={branding.logo_url || fallbackLogo} alt={branding.organization_name} className="h-8 w-8 rounded-lg object-cover shrink-0 shadow-lg" loading="eager" decoding="async" />
               <div>
                 <span className="font-semibold text-sm text-[var(--color-text-primary)]">{branding.organization_name}</span>
@@ -150,7 +152,7 @@ export function AdminLayout() {
                         <p className="text-xs text-[var(--color-text-muted)]">{profile?.email}</p>
                       </div>
                       <div className="p-1">
-                        <Link to="/" className="flex items-center px-3 py-2 text-sm rounded-lg transition-colors text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)]">
+                        <Link to={localize('/')} className="flex items-center px-3 py-2 text-sm rounded-lg transition-colors text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)]">
                           View Website
                         </Link>
                         <Link to="/dashboard" className="flex items-center px-3 py-2 text-sm rounded-lg transition-colors text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)]">

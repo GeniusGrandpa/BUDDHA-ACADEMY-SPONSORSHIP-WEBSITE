@@ -1,4 +1,5 @@
 import { DEFAULT_LOCALE } from '../i18n'
+import { sanitizeCmsText } from '../lib/sanitize-cms'
 
 export type ContentTranslationMap = Record<string, string>
 
@@ -8,13 +9,15 @@ export type ContentTranslationMap = Record<string, string>
  * and applies the appropriate language version based on the requested language
  */
 export function applyLanguageLocalization<T>(data: T | null, language: string): T | null {
-  if (!data || language === DEFAULT_LOCALE || language === 'en') {
+  if (!data) {
     return data
   }
 
   if (typeof data !== 'object' || data === null) {
     return data
   }
+
+  const isNepali = language !== DEFAULT_LOCALE && language !== 'en'
 
   const result = { ...data } as T
   const dataObj = data as Record<string, unknown>
@@ -57,11 +60,17 @@ export function applyLanguageLocalization<T>(data: T | null, language: string): 
 
   // Apply simple field mappings
   for (const [englishField, nepaliField] of Object.entries(fieldMappings)) {
-    if (englishField in dataObj && nepaliField in dataObj) {
+    if (!(englishField in dataObj)) continue
+    const englishValue = dataObj[englishField]
+    if (isNepali && nepaliField in dataObj) {
       const nepaliValue = dataObj[nepaliField]
       if (typeof nepaliValue === 'string' && nepaliValue.trim() !== '') {
-        ;(result as Record<string, unknown>)[englishField] = nepaliValue
+        ;(result as Record<string, unknown>)[englishField] = sanitizeCmsText(nepaliValue)
+        continue
       }
+    }
+    if (typeof englishValue === 'string') {
+      ;(result as Record<string, unknown>)[englishField] = sanitizeCmsText(englishValue)
     }
   }
 
@@ -72,11 +81,21 @@ export function applyLanguageLocalization<T>(data: T | null, language: string): 
   }
 
   for (const [englishField, nepaliField] of Object.entries(arrayFieldMappings)) {
-    if (englishField in dataObj && nepaliField in dataObj) {
+    if (!(englishField in dataObj)) continue
+    const englishValue = dataObj[englishField]
+    if (isNepali && nepaliField in dataObj) {
       const nepaliValue = dataObj[nepaliField]
       if (Array.isArray(nepaliValue) && nepaliValue.length > 0) {
-        ;(result as Record<string, unknown>)[englishField] = nepaliValue
+        ;(result as Record<string, unknown>)[englishField] = nepaliValue.map((v) =>
+          typeof v === 'string' ? sanitizeCmsText(v) : v,
+        )
+        continue
       }
+    }
+    if (Array.isArray(englishValue)) {
+      ;(result as Record<string, unknown>)[englishField] = englishValue.map((v) =>
+        typeof v === 'string' ? sanitizeCmsText(v) : v,
+      )
     }
   }
 
@@ -101,16 +120,34 @@ export function applyLanguageLocalization<T>(data: T | null, language: string): 
     content: 'content_ne',
   }
 
+  const sanitizeJsonb = (value: unknown): unknown => {
+    if (typeof value === 'string') return sanitizeCmsText(value)
+    if (Array.isArray(value)) return value.map((v) => sanitizeJsonb(v))
+    if (value && typeof value === 'object') {
+      const out: Record<string, unknown> = {}
+      for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+        out[k] = sanitizeJsonb(v)
+      }
+      return out
+    }
+    return value
+  }
+
   for (const [englishField, nepaliField] of Object.entries(jsonbFieldMappings)) {
-    if (englishField in dataObj && nepaliField in dataObj) {
+    if (!(englishField in dataObj)) continue
+    const englishValue = dataObj[englishField]
+    if (isNepali && nepaliField in dataObj) {
       const nepaliValue = dataObj[nepaliField]
-      if (nepaliValue && typeof nepaliValue === 'object' && !Array.isArray(nepaliValue)) {
-        // Check if it's a non-empty object/array
+      if (nepaliValue && typeof nepaliValue === 'object') {
         const keys = Object.keys(nepaliValue)
         if (keys.length > 0 || (Array.isArray(nepaliValue) && nepaliValue.length > 0)) {
-          ;(result as Record<string, unknown>)[englishField] = nepaliValue
+          ;(result as Record<string, unknown>)[englishField] = sanitizeJsonb(nepaliValue)
+          continue
         }
       }
+    }
+    if (englishValue && typeof englishValue === 'object') {
+      ;(result as Record<string, unknown>)[englishField] = sanitizeJsonb(englishValue)
     }
   }
 

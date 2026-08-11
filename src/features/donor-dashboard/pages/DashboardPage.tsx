@@ -72,19 +72,21 @@ export function DashboardPage() {
   const [section, setSection] = useState<Section>(initialSection)
 
   const prevDonationsRef = useRef(donations)
+
   useEffect(() => {
     const prev = prevDonationsRef.current
     for (const donation of donations) {
       const prevDonation = prev.find(d => d.id === donation.id)
       if (prevDonation && prevDonation.status !== 'completed' && donation.status === 'completed') {
+        const amount = formatCurrency(donation.amount, currency)
         toast.success(
-          `Donation of ${formatCurrency(donation.amount, currency)} verified! Thank you for your contribution.`,
+          t('donation_verified_toast', { amount, defaultValue: `Donation of ${amount} verified! Thank you for your contribution.` }),
           { duration: 5000 },
         )
       }
     }
     prevDonationsRef.current = donations
-  }, [donations, currency])
+  }, [donations, currency, t])
 
   const totalDonated = donorStats?.totalDonated ?? donations.reduce((sum, d) => sum + d.amount, 0)
   const activeSponsorships = sponsorships.filter(s => s.status === 'active')
