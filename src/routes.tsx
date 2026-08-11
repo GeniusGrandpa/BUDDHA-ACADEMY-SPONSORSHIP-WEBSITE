@@ -69,6 +69,11 @@ export const routeDefinitions: RouteObject[] = [
         errorElement: <RouteErrorPage />,
       },
       {
+        path: '/dashboard/*',
+        element: <Navigate to="/dashboard" replace />,
+        errorElement: <RouteErrorPage />,
+      },
+      {
         path: '/donations',
         element: (
           <ProtectedRoute requiredRoles={['donor', 'super_admin', 'admin']}>
@@ -199,6 +204,16 @@ export const routeDefinitions: RouteObject[] = [
             <LazyPage Component={TeacherDashboard} />
           </ProtectedRoute>
         ),
+        errorElement: <RouteErrorPage />,
+      },
+      {
+        path: '/teacher/*',
+        element: <Navigate to="/teacher" replace />,
+        errorElement: <RouteErrorPage />,
+      },
+      {
+        path: '/teacher/dashboard',
+        element: <Navigate to="/teacher" replace />,
         errorElement: <RouteErrorPage />,
       },
       {
