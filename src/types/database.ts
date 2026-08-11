@@ -26,6 +26,9 @@ export interface Database {
           role: Role
           avatar_url: string | null
           bio: string | null
+          position: string | null
+          qualification: string | null
+          photo_url: string | null
           status: ProfileStatus
           last_login_at: string | null
           login_attempts: number
@@ -45,6 +48,9 @@ export interface Database {
           role?: Role
           avatar_url?: string | null
           bio?: string | null
+          position?: string | null
+          qualification?: string | null
+          photo_url?: string | null
           status?: ProfileStatus
           last_login_at?: string | null
           login_attempts?: number
@@ -64,6 +70,9 @@ export interface Database {
           role?: Role
           avatar_url?: string | null
           bio?: string | null
+          position?: string | null
+          qualification?: string | null
+          photo_url?: string | null
           status?: ProfileStatus
           last_login_at?: string | null
           login_attempts?: number
@@ -577,6 +586,95 @@ export interface Database {
           updated_at?: string
         }
         Relationships: []
+      }
+      subjects: {
+        Row: {
+          id: string
+          name: string
+          name_ne: string | null
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          name_ne?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          name_ne?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      teacher_subjects: {
+        Row: {
+          id: string
+          teacher_id: string
+          subject_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          teacher_id: string
+          subject_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          teacher_id?: string
+          subject_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'teacher_subjects_teacher_id_fkey',
+            columns: ['teacher_id'],
+            referencedRelation: 'profiles',
+            referencedColumns: ['id'],
+          },
+          {
+            foreignKeyName: 'teacher_subjects_subject_id_fkey',
+            columns: ['subject_id'],
+            referencedRelation: 'subjects',
+            referencedColumns: ['id'],
+          },
+        ]
+      }
+      teacher_class_assignments: {
+        Row: {
+          id: string
+          teacher_id: string
+          class_section: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          teacher_id: string
+          class_section: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          teacher_id?: string
+          class_section?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'teacher_class_assignments_teacher_id_fkey',
+            columns: ['teacher_id'],
+            referencedRelation: 'profiles',
+            referencedColumns: ['id'],
+          },
+        ]
       }
       events: {
         Row: {
@@ -3092,4 +3190,3 @@ export type ContentVersion = Database['public']['Tables']['content_versions']['R
 export type LegalPage = Database['public']['Tables']['legal_pages']['Row']
 export type LegalPageSection = Database['public']['Tables']['legal_page_sections']['Row']
 export type LegalPageVersion = Database['public']['Tables']['legal_page_versions']['Row']
-

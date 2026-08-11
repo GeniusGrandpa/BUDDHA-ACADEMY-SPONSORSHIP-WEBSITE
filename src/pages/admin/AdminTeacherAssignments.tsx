@@ -1,13 +1,31 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
-import { useAuth } from '../../context/AuthContext'
 import { Card } from '../../components/ui/Card'
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner'
 import toast from 'react-hot-toast'
 import { getErrorMessage } from '../../lib/errors'
-import { useRole } from '../../hooks/useRole'
 import type { TeacherAssignment, Student, Profile } from '../../types/database'
 import { User, GraduationCap, Plus, Trash2, Save } from 'lucide-react'
+
+type AssignmentRow = TeacherAssignment & {
+  students?: { name: string; grade: string } | null
+  profiles?: { full_name: string } | null
+}
+
+type SubjectRow = { name: string | null }
+type StudentClassRow = { class_section: string | null }
+
+function isString(value: string | null | undefined): value is string {
+  return typeof value === 'string' && value.length > 0
+}
+
+function collectStrings(values: Array<string | null | undefined>): string[] {
+  const result: string[] = []
+  for (const value of values) {
+    if (isString(value)) result.push(value)
+  }
+  return result
+}
 
 interface AssignmentWithDetails extends TeacherAssignment {
   student_name: string
@@ -16,24 +34,25 @@ interface AssignmentWithDetails extends TeacherAssignment {
 }
 
 export function AdminTeacherAssignments() {
-  const { profile: currentUser } = useAuth()
-  const { isSuperAdmin, isAdmin } = useRole()
   const [assignments, setAssignments] = useState<AssignmentWithDetails[]>([])
   const [teachers, setTeachers] = useState<Profile[]>([])
   const [students, setStudents] = useState<Student[]>([])
+  const [subjects, setSubjects] = useState<string[]>([])
+  const [classSections, setClassSections] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [showAddModal, setShowAddModal] = useState(false)
   const [newAssignment, setNewAssignment] = useState({
     teacher_id: '',
     student_id: '',
     subject: '',
+    class_section: '',
   })
   const [saving, setSaving] = useState(false)
 
   const loadData = useCallback(async () => {
     setLoading(true)
     try {
-      const [assignmentsResult, teachersResult, studentsResult] = await Promise.all([
+      const [assignmentsResult, teachersResult, studentsResult, subjectsResult] = await Promise.all([
         supabase
           .from('teacher_assignments')
           .select(`
@@ -44,13 +63,14 @@ export function AdminTeacherAssignments() {
           .order('assigned_at', { ascending: false }),
         supabase.from('profiles').select('*').eq('role', 'teacher').eq('status', 'active'),
         supabase.from('students').select('*').order('name'),
+        supabase.from('subjects').select('name').eq('is_active', true).order('name'),
       ])
 
       if (assignmentsResult.error) throw assignmentsResult.error
       if (teachersResult.error) throw teachersResult.error
       if (studentsResult.error) throw studentsResult.error
 
-      const formattedAssignments = (assignmentsResult.data || []).map((a: any) => ({
+      const formattedAssignments = (assignmentsResult.data || []).map((a: AssignmentRow) => ({
         ...a,
         student_name: a.students?.name || 'Unknown',
         student_grade: a.students?.grade || 'N/A',
@@ -60,6 +80,8 @@ export function AdminTeacherAssignments() {
       setAssignments(formattedAssignments)
       setTeachers((teachersResult.data || []) as Profile[])
       setStudents((studentsResult.data || []) as Student[])
+      setSubjects(collectStrings((subjectsResult.data || []).map((row: SubjectRow) => row.name)))
+      setClassSections([...new Set(collectStrings((studentsResult.data || []).map((student: StudentClassRow) => student.class_section)))])
     } catch (err) {
       toast.error(getErrorMessage(err, 'Failed to load assignments'))
     } finally {
@@ -87,7 +109,7 @@ export function AdminTeacherAssignments() {
       if (error) throw error
       toast.success('Assignment created successfully')
       setShowAddModal(false)
-      setNewAssignment({ teacher_id: '', student_id: '', subject: '' })
+      setNewAssignment({ teacher_id: '', student_id: '', subject: '', class_section: '' })
       await loadData()
     } catch (err) {
       toast.error(getErrorMessage(err, 'Failed to create assignment'))
@@ -234,20 +256,42 @@ export function AdminTeacherAssignments() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
                 <input
+                  list="subject-options"
                   type="text"
                   required
-                  placeholder="e.g., Math, English, Science"
+                  placeholder="Choose or type a subject"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2"
                   value={newAssignment.subject}
                   onChange={(e) => setNewAssignment({ ...newAssignment, subject: e.target.value })}
                 />
+                <datalist id="subject-options">
+                  {subjects.map((subject) => (
+                    <option key={subject} value={subject} />
+                  ))}
+                </datalist>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Class Section</label>
+                <input
+                  list="class-section-options"
+                  type="text"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  value={newAssignment.class_section}
+                  onChange={(e) => setNewAssignment({ ...newAssignment, class_section: e.target.value })}
+                  placeholder="Optional class section"
+                />
+                <datalist id="class-section-options">
+                  {classSections.map((classSection) => (
+                    <option key={classSection} value={classSection} />
+                  ))}
+                </datalist>
               </div>
               <div className="flex gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => {
                     setShowAddModal(false)
-                    setNewAssignment({ teacher_id: '', student_id: '', subject: '' })
+                    setNewAssignment({ teacher_id: '', student_id: '', subject: '', class_section: '' })
                   }}
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
                 >

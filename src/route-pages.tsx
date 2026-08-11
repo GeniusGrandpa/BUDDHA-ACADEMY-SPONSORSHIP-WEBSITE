@@ -97,6 +97,8 @@ export const AdminReportsPage = lazy(() => import('./pages/admin/AdminReportsPag
 
 export const AdminUsersPage = lazy(() => import('./pages/admin/AdminUsersPage').then(m => ({ default: m.AdminUsersPage })))
 
+export const AdminTeacherManagement = lazy(() => import('./pages/admin/AdminTeacherManagement').then(m => ({ default: m.AdminTeacherManagement })))
+
 export const AdminTeacherAssignments = lazy(() => import('./pages/admin/AdminTeacherAssignments').then(m => ({ default: m.AdminTeacherAssignments })))
 
 export const SuperAdminLayout = lazy(() => import('./pages/super-admin/SuperAdminLayout').then(m => ({ default: m.SuperAdminLayout })))
@@ -196,4 +198,3 @@ export function AdminIndexRedirect() {
   }
   return <LazyPage Component={SuperAdminDashboard} />
 }
-

@@ -122,7 +122,7 @@ export function AdminLayout() {
               </button>
               <div className="hidden sm:flex items-center">
                 {role === 'teacher' && (
-                  <Link to="/teacher/dashboard" className="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors">
+                  <Link to="/teacher" className="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors">
                     Teacher Dashboard
                   </Link>
                 )}
@@ -181,7 +181,7 @@ export function AdminLayout() {
                           View Website
                         </Link>
                         {role === 'teacher' && (
-                          <Link to="/teacher/dashboard" className="flex items-center px-3 py-2 text-sm rounded-lg transition-colors text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)]">
+                          <Link to="/teacher" className="flex items-center px-3 py-2 text-sm rounded-lg transition-colors text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)]">
                             Teacher Dashboard
                           </Link>
                         )}
