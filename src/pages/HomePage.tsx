@@ -219,12 +219,11 @@ function WelcomeSection({ welcome, visible }: { welcome: SectionContent; visible
 function AboutSection({ about, visible, t }: { about: SectionContent | null; visible: boolean; t: (k: string) => string }) {
   const localize = useLocalizePath()
   if (!visible) return null
-  const aboutDefaults = createHomeDefaults(t).about
   const milestones: { year: string; event: string }[] = about
     ? ((about.content as { milestones?: { year: string; event: string }[] })?.milestones || [])
-    : aboutDefaults.milestones
-  const title = about?.title || (about?.content as { title?: string } | undefined)?.title || aboutDefaults.title
-  const description = about?.description || (about?.content as { description?: string } | undefined)?.description || aboutDefaults.description
+    : []
+  const title = about?.title || (about?.content as { title?: string } | undefined)?.title
+  const description = about?.description || (about?.content as { description?: string } | undefined)?.description
   return (
     <section className="py-12 sm:py-16 lg:py-24 bg-[var(--color-background)]">
       <div className="px-4 sm:px-6 lg:px-12">

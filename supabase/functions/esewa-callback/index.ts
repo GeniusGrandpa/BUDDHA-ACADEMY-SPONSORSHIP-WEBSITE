@@ -1,4 +1,4 @@
-import { createClient } from 'npm:@supabase/supabase-js@2'
+import { createClient } from '@supabase/supabase-js'
 import { corsHeaders, jsonOk, jsonError, handleError, logError, getCallerUserId } from '../_shared/response.ts'
 import { getEsewaConfig, formatAmount, hmacSha256 } from '../_shared/esewa.ts'
 
@@ -109,8 +109,10 @@ Deno.serve(async (req) => {
 
     if (failed === true || failed === 'true' || failed === '1') {
       console.log('[esewa-callback] Payment failed/cancelled', { sessionId })
-      const { error: failError } = await supabase.rpc('esewa_fail_payment', { p_session_id: sessionId, p_status: 'cancelled' })
-      if (failError) throw failError
+      const { error: cancelError } = await supabase.rpc('cancel_payment_session', {
+        p_session_id: sessionId,
+      })
+      if (cancelError) throw cancelError
       return jsonOk({ status: 'cancelled' }, 200)
     }
 
@@ -168,20 +170,32 @@ Deno.serve(async (req) => {
 
     const transactionCode = (payload.transaction_code || session.transaction_id) as string
 
-    console.log('[esewa-callback] Confirming payment', { sessionId, transactionCode, currency: session.currency })
-    const { error: confirmError } = await supabase.rpc('esewa_confirm_payment', {
-      p_session_id: sessionId,
-      p_transaction_id: transactionCode,
-      p_currency: session.currency || 'NPR',
-    })
-    if (confirmError) {
-      console.log('[esewa-callback] Confirmation failed', { error: confirmError.message })
-      throw confirmError
+    console.log('[esewa-callback] eSewa transaction verified', { sessionId, transactionCode })
+
+    /*
+     * IMPORTANT: Do NOT call esewa_confirm_payment().
+     * That function has been intentionally removed.
+     * Mark payment_session as payment_received with pending_verification.
+     * Finance/Admin must manually verify and approve.
+     */
+    const { error: updateError } = await supabase
+      .from('payment_sessions')
+      .update({
+        status: 'payment_received',
+        transaction_id: transactionCode,
+        verification_status: 'pending_verification',
+        verification_notes: 'eSewa transaction verified by callback. Awaiting manual Finance/Admin verification.',
+      })
+      .eq('id', sessionId)
+
+    if (updateError) {
+      console.log('[esewa-callback] Failed to update payment session', { error: updateError.message })
+      throw updateError
     }
 
-    console.log('[esewa-callback] Payment confirmed successfully', { sessionId, transactionCode })
+    console.log('[esewa-callback] Payment received and awaiting manual verification', { sessionId, transactionCode })
 
-    return jsonOk({ status: 'confirmed', transaction_id: transactionCode }, 200)
+    return jsonOk({ status: 'pending_verification', transaction_id: transactionCode }, 200)
   } catch (err) {
     console.log('[esewa-callback] Request failed', { error: err instanceof Error ? err.message : 'Unknown error' })
     return handleError('esewa-callback', err, 'ESEWA_CONFIRM_FAILED', 500)

@@ -46,6 +46,7 @@ BEGIN
     RAISE EXCEPTION 'Payment session not found';
   END IF;
   IF v_session_status = 'completed' THEN
+    RAISE LOG '[stripe_confirm_payment] Already completed: session_id=%', p_session_id;
     RETURN true;
   END IF;
   IF v_session_status NOT IN ('pending', 'processing') THEN
@@ -55,11 +56,13 @@ BEGIN
   v_receipt_number := generate_receipt_number();
   INSERT INTO donations (
     donor_id, amount, frequency, student_id, message, payment_method,
-    status, transaction_id, payment_session_id, verified_at, verified_by
+    status, verification_status, transaction_id, payment_session_id,
+    verified_by, verified_at, approved_by, approved_at
   )
   VALUES (
     v_donor_id, v_amount, COALESCE(v_frequency, 'one-time'), v_student_id, v_message,
-    v_gateway, 'completed', p_transaction_id, p_session_id, now(), NULL
+    v_gateway, 'completed', 'verified', p_transaction_id, p_session_id,
+    auth.uid(), now(), auth.uid(), now()
   )
   RETURNING id INTO v_donation_id;
 
@@ -67,9 +70,13 @@ BEGIN
   SET status = 'completed',
       donation_id = v_donation_id,
       transaction_id = p_transaction_id,
-      verified_by = NULL,
+      verification_status = 'verified',
+      verified_by = auth.uid(),
       verified_at = now(),
       verification_notes = 'Auto-verified via Stripe webhook',
+      approved_by = auth.uid(),
+      approved_at = now(),
+      approval_notes = 'Auto-approved via Stripe webhook',
       updated_at = now()
   WHERE id = p_session_id;
 
@@ -109,11 +116,11 @@ BEGIN
   END IF;
 
   INSERT INTO payment_verifications (payment_session_id, verified_by, action, notes)
-  VALUES (p_session_id, NULL, 'verified', 'Auto-verified via Stripe webhook');
+  VALUES (p_session_id, auth.uid(), 'verified', 'Auto-verified via Stripe webhook');
 
   INSERT INTO payment_audit_logs (payment_session_id, action, actor_id, actor_role, details)
   VALUES (
-    p_session_id, 'payment_verified', NULL, 'service_role',
+    p_session_id, 'payment_completed', NULL, 'service_role',
     jsonb_build_object('donation_id', v_donation_id, 'transaction_id', p_transaction_id)
   );
 

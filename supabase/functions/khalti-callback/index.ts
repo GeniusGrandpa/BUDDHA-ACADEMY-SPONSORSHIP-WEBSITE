@@ -1,4 +1,4 @@
-import { createClient } from 'npm:@supabase/supabase-js@2'
+import { createClient } from '@supabase/supabase-js'
 import { corsHeaders, jsonOk, jsonError, handleError, logError, getCallerUserId } from '../_shared/response.ts'
 import { getKhaltiConfig, paisaToNpr } from '../_shared/khalti.ts'
 
@@ -117,32 +117,41 @@ Deno.serve(async (req) => {
 
       const transactionId = (lookup.transaction_id || session.transaction_id) as string
 
-      console.log('[khalti-callback] Confirming payment', { sessionId, transactionId, currency: session.currency })
-      const { error: confirmError } = await supabase.rpc('khalti_confirm_payment', {
-        p_session_id: sessionId,
-        p_transaction_id: transactionId,
-        p_currency: session.currency || 'NPR',
-      })
-      if (confirmError) {
-        console.log('[khalti-callback] Confirmation failed', { error: confirmError.message })
-        throw confirmError
+      console.log('[khalti-callback] Khalti transaction verified', { sessionId, transactionId })
+
+      /*
+       * Do NOT call khalti_confirm_payment().
+       * Mark payment_session as payment_received with pending_verification.
+       * Finance/Admin must manually verify and approve.
+       */
+      const { error: updateError } = await supabase
+        .from('payment_sessions')
+        .update({
+          status: 'payment_received',
+          transaction_id: transactionId,
+          verification_status: 'pending_verification',
+          verification_notes: 'Khalti transaction verified by callback. Awaiting manual Finance/Admin verification.',
+        })
+        .eq('id', sessionId)
+
+      if (updateError) {
+        console.log('[khalti-callback] Failed to update payment session', { error: updateError.message })
+        throw updateError
       }
 
-      console.log('[khalti-callback] Payment confirmed successfully', { sessionId, transactionId })
+      console.log('[khalti-callback] Payment received and awaiting manual verification', { sessionId, transactionId })
 
-      return jsonOk({ status: 'confirmed', transaction_id: transactionId }, 200)
+      return jsonOk({ status: 'pending_verification', transaction_id: transactionId }, 200)
     }
 
     if (status === 'User canceled' || status === 'Expired' || status === 'Canceled') {
       console.log('[khalti-callback] Payment cancelled/expired', { status })
-      const failStatus = status === 'Expired' ? 'failed' : 'cancelled'
-      const { error: failError } = await supabase.rpc('khalti_fail_payment', {
+      const { error: cancelError } = await supabase.rpc('cancel_payment_session', {
         p_session_id: sessionId,
-        p_status: failStatus,
       })
-      if (failError) throw failError
+      if (cancelError) throw cancelError
 
-      return jsonOk({ status: failStatus === 'cancelled' ? 'cancelled' : 'failed' }, 200)
+      return jsonOk({ status: status === 'Expired' ? 'failed' : 'cancelled' }, 200)
     }
 
     // Initiated / Pending / Refunded / unknown -> hold for confirmation

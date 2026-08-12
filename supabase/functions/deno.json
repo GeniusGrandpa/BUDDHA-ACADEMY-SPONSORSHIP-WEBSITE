@@ -7,7 +7,7 @@
   "imports": {
     "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2",
     "std/http/server": "https://deno.land/std@0.168.0/http/server.ts",
-    "stripe": "https://esm.sh/stripe@17.7.0?target=deno"
+    "stripe": "https://esm.sh/stripe@18.0.0?target=deno"
   },
   "lint": {
     "include": ["."]

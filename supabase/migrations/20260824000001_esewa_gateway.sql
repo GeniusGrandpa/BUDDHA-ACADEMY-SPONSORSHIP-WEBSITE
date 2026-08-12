@@ -1,10 +1,145 @@
--- eSewa ePay v2 gateway: server-side confirmation functions.
--- Mirrors the Stripe webhook pattern: the eSewa callback Edge Function runs with
--- service_role and finalizes the payment session without manual admin review.
+-- ============================================================
+-- eSewa Manual Payment Verification Migration
+-- ============================================================
+-- IMPORTANT:
+-- This migration does NOT delete student, sponsorship, donor,
+-- or payment records.
+--
+-- eSewa payments will remain pending until an Admin/Finance
+-- user manually verifies or rejects them.
+-- ============================================================
 
-CREATE OR REPLACE FUNCTION public.esewa_confirm_payment(
-  p_session_id UUID,
-  p_transaction_id TEXT
+BEGIN;
+
+-- ============================================================
+-- 1. Remove ALL old eSewa automatic confirmation functions
+-- ============================================================
+
+DO $$
+DECLARE
+    func RECORD;
+BEGIN
+    FOR func IN
+        SELECT
+            p.oid,
+            pg_get_function_identity_arguments(p.oid) AS args
+        FROM pg_proc p
+        JOIN pg_namespace n
+            ON n.oid = p.pronamespace
+        WHERE n.nspname = 'public'
+          AND p.proname = 'esewa_confirm_payment'
+    LOOP
+        EXECUTE format(
+            'DROP FUNCTION IF EXISTS public.esewa_confirm_payment(%s);',
+            func.args
+        );
+    END LOOP;
+END $$;
+
+
+-- ============================================================
+-- 2. Add manual verification fields to payments
+-- ============================================================
+
+DO $$
+BEGIN
+
+    -- Verification status
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'payments'
+          AND column_name = 'verification_status'
+    ) THEN
+        ALTER TABLE public.payments
+        ADD COLUMN verification_status TEXT
+        DEFAULT 'pending';
+    END IF;
+
+
+    -- Who verified/rejected the payment
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'payments'
+          AND column_name = 'verified_by'
+    ) THEN
+        ALTER TABLE public.payments
+        ADD COLUMN verified_by UUID;
+    END IF;
+
+
+    -- Verification timestamp
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'payments'
+          AND column_name = 'verified_at'
+    ) THEN
+        ALTER TABLE public.payments
+        ADD COLUMN verified_at TIMESTAMPTZ;
+    END IF;
+
+
+    -- Admin/Finance notes
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'payments'
+          AND column_name = 'verification_notes'
+    ) THEN
+        ALTER TABLE public.payments
+        ADD COLUMN verification_notes TEXT;
+    END IF;
+
+END $$;
+
+
+-- ============================================================
+-- 3. Make sure verification status is valid
+-- ============================================================
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_constraint
+        WHERE conname = 'payments_verification_status_check'
+          AND conrelid = 'public.payments'::regclass
+    ) THEN
+        ALTER TABLE public.payments
+        ADD CONSTRAINT payments_verification_status_check
+        CHECK (
+            verification_status IN (
+                'pending',
+                'verified',
+                'rejected'
+            )
+        );
+    END IF;
+END $$;
+
+
+-- ============================================================
+-- 4. Existing payments become pending unless already verified
+-- ============================================================
+
+UPDATE public.payments
+SET verification_status = 'pending'
+WHERE verification_status IS NULL;
+
+
+-- ============================================================
+-- 5. Function: Admin/Finance verifies an eSewa payment
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION public.verify_esewa_payment(
+    p_payment_id UUID,
+    p_notes TEXT DEFAULT NULL
 )
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -12,153 +147,234 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
-  v_caller_role TEXT;
-  v_donation_id UUID;
-  v_receipt_number TEXT;
-  v_amount NUMERIC;
-  v_gateway TEXT;
-  v_session_status TEXT;
-  v_donor_id UUID;
-  v_frequency TEXT;
-  v_student_id UUID;
-  v_message TEXT;
+    current_user_id UUID;
 BEGIN
-  SELECT coalesce(auth.role(), '') INTO v_caller_role;
-  IF v_caller_role <> 'service_role' THEN
-    RAISE EXCEPTION 'Unauthorized: only the eSewa callback can confirm payments' USING ERRCODE = '42501';
-  END IF;
-  IF p_transaction_id IS NULL OR length(trim(p_transaction_id)) = 0 THEN
-    RAISE EXCEPTION 'Transaction id is required';
-  END IF;
-  SELECT
-    amount, gateway, status, donor_id, frequency, student_id, message
-  INTO
-    v_amount, v_gateway, v_session_status, v_donor_id, v_frequency, v_student_id, v_message
-  FROM payment_sessions
-  WHERE id = p_session_id;
-  IF v_donor_id IS NULL THEN
-    RAISE EXCEPTION 'Payment session not found';
-  END IF;
-  IF v_session_status = 'completed' THEN
-    RETURN true;
-  END IF;
-  IF v_session_status NOT IN ('pending', 'processing') THEN
-    RAISE EXCEPTION 'Payment session cannot be confirmed from state %', v_session_status;
-  END IF;
 
-  v_receipt_number := generate_receipt_number();
-  INSERT INTO donations (
-    donor_id, amount, frequency, student_id, message, payment_method,
-    status, transaction_id, payment_session_id, verified_at, verified_by
-  )
-  VALUES (
-    v_donor_id, v_amount, COALESCE(v_frequency, 'one-time'), v_student_id, v_message,
-    v_gateway, 'completed', p_transaction_id, p_session_id, now(), NULL
-  )
-  RETURNING id INTO v_donation_id;
+    current_user_id := auth.uid();
 
-  UPDATE payment_sessions
-  SET status = 'completed',
-      donation_id = v_donation_id,
-      transaction_id = p_transaction_id,
-      verified_by = NULL,
-      verified_at = now(),
-      verification_notes = 'Auto-verified via eSewa callback',
-      updated_at = now()
-  WHERE id = p_session_id;
-
-  INSERT INTO payment_receipts (payment_session_id, donation_id, receipt_number, receipt_data)
-  VALUES (p_session_id, v_donation_id, v_receipt_number, jsonb_build_object(
-    'generated_at', now(),
-    'amount', v_amount,
-    'gateway', v_gateway,
-    'transaction_id', p_transaction_id,
-    'currency', 'NPR'
-  ));
-
-  INSERT INTO donation_allocations (donation_id, category, allocation_percentage, amount)
-  VALUES
-    (v_donation_id, 'Educational Materials', 30.00, v_amount * 0.30),
-    (v_donation_id, 'Student Meals', 25.00, v_amount * 0.25),
-    (v_donation_id, 'School Supplies', 15.00, v_amount * 0.15),
-    (v_donation_id, 'Uniform Support', 15.00, v_amount * 0.15),
-    (v_donation_id, 'Events & Activities', 10.00, v_amount * 0.10),
-    (v_donation_id, 'Operations', 5.00, v_amount * 0.05);
-
-  IF v_student_id IS NOT NULL THEN
-    INSERT INTO public.sponsorships (donor_id, student_id, amount, status, start_date)
-    VALUES (v_donor_id, v_student_id, v_amount::integer, 'active', now())
-    ON CONFLICT (donor_id, student_id) DO NOTHING;
-    IF FOUND THEN
-      UPDATE public.students
-      SET
-        current_sponsorship = current_sponsorship + v_amount::integer,
-        sponsorship_status = CASE
-          WHEN current_sponsorship + v_amount::integer >= sponsorship_amount THEN 'fully_sponsored'
-          ELSE 'partially_sponsored'
-        END,
-        updated_at = now()
-      WHERE id = v_student_id;
+    IF current_user_id IS NULL THEN
+        RAISE EXCEPTION 'Authentication required';
     END IF;
-  END IF;
 
-  INSERT INTO payment_verifications (payment_session_id, verified_by, action, notes)
-  VALUES (p_session_id, NULL, 'verified', 'Auto-verified via eSewa callback');
 
-  INSERT INTO payment_audit_logs (payment_session_id, action, actor_id, actor_role, details)
-  VALUES (
-    p_session_id, 'payment_verified', NULL, 'service_role',
-    jsonb_build_object('donation_id', v_donation_id, 'transaction_id', p_transaction_id)
+    -- Make sure the payment exists
+    IF NOT EXISTS (
+        SELECT 1
+        FROM public.payments
+        WHERE id = p_payment_id
+    ) THEN
+        RAISE EXCEPTION 'Payment not found';
+    END IF;
+
+
+    -- Only eSewa payments
+    IF NOT EXISTS (
+        SELECT 1
+        FROM public.payments
+        WHERE id = p_payment_id
+          AND LOWER(COALESCE(payment_method, '')) = 'esewa'
+    ) THEN
+        RAISE EXCEPTION 'Payment is not an eSewa payment';
+    END IF;
+
+
+    UPDATE public.payments
+    SET
+        verification_status = 'verified',
+        verified_by = current_user_id,
+        verified_at = NOW(),
+        verification_notes = p_notes
+    WHERE id = p_payment_id;
+
+
+    RETURN TRUE;
+
+END;
+$$;
+
+
+-- ============================================================
+-- 6. Function: Admin/Finance rejects an eSewa payment
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION public.reject_esewa_payment(
+    p_payment_id UUID,
+    p_notes TEXT DEFAULT NULL
+)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    current_user_id UUID;
+BEGIN
+
+    current_user_id := auth.uid();
+
+    IF current_user_id IS NULL THEN
+        RAISE EXCEPTION 'Authentication required';
+    END IF;
+
+
+    -- Make sure the payment exists
+    IF NOT EXISTS (
+        SELECT 1
+        FROM public.payments
+        WHERE id = p_payment_id
+    ) THEN
+        RAISE EXCEPTION 'Payment not found';
+    END IF;
+
+
+    -- Only eSewa payments
+    IF NOT EXISTS (
+        SELECT 1
+        FROM public.payments
+        WHERE id = p_payment_id
+          AND LOWER(COALESCE(payment_method, '')) = 'esewa'
+    ) THEN
+        RAISE EXCEPTION 'Payment is not an eSewa payment';
+    END IF;
+
+
+    UPDATE public.payments
+    SET
+        verification_status = 'rejected',
+        verified_by = current_user_id,
+        verified_at = NOW(),
+        verification_notes = p_notes
+    WHERE id = p_payment_id;
+
+
+    RETURN TRUE;
+
+END;
+$$;
+
+
+-- ============================================================
+-- 7. Index for Admin/Finance pending-payment screen
+-- ============================================================
+
+CREATE INDEX IF NOT EXISTS idx_payments_esewa_verification_status
+ON public.payments (verification_status)
+WHERE LOWER(COALESCE(payment_method, '')) = 'esewa';
+
+
+-- ============================================================
+-- 8. Remove automatic eSewa confirmation trigger if one exists
+-- ============================================================
+
+DO $$
+DECLARE
+    trigger_record RECORD;
+BEGIN
+
+    FOR trigger_record IN
+        SELECT
+            tg.tgname,
+            c.relname AS table_name
+        FROM pg_trigger tg
+        JOIN pg_class c
+            ON c.oid = tg.tgrelid
+        JOIN pg_namespace n
+            ON n.oid = c.relnamespace
+        WHERE n.nspname = 'public'
+          AND NOT tg.tgisinternal
+          AND (
+              tg.tgname ILIKE '%esewa%'
+              OR tg.tgname ILIKE '%payment_confirmation%'
+          )
+    LOOP
+
+        BEGIN
+            EXECUTE format(
+                'DROP TRIGGER IF EXISTS %I ON public.%I;',
+                trigger_record.tgname,
+                trigger_record.table_name
+            );
+        EXCEPTION
+            WHEN OTHERS THEN
+                NULL;
+        END;
+
+    END LOOP;
+
+END $$;
+
+
+-- ============================================================
+-- 9. Explicitly remove the old automatic function again
+-- ============================================================
+
+DO $$
+DECLARE
+    func RECORD;
+BEGIN
+    FOR func IN
+        SELECT
+            pg_get_function_identity_arguments(p.oid) AS args
+        FROM pg_proc p
+        JOIN pg_namespace n
+            ON n.oid = p.pronamespace
+        WHERE n.nspname = 'public'
+          AND p.proname = 'esewa_confirm_payment'
+    LOOP
+        EXECUTE format(
+            'DROP FUNCTION IF EXISTS public.esewa_confirm_payment(%s);',
+            func.args
+        );
+    END LOOP;
+END $$;
+
+
+COMMIT;
+
+
+-- ============================================================
+-- 10. Verification queries
+-- ============================================================
+
+-- This should return ZERO rows:
+SELECT
+    p.oid,
+    n.nspname AS schema_name,
+    p.proname AS function_name,
+    pg_get_function_identity_arguments(p.oid) AS arguments
+FROM pg_proc p
+JOIN pg_namespace n
+    ON n.oid = p.pronamespace
+WHERE n.nspname = 'public'
+  AND p.proname = 'esewa_confirm_payment';
+
+
+-- Check the new verification functions:
+SELECT
+    p.proname AS function_name,
+    pg_get_function_identity_arguments(p.oid) AS arguments
+FROM pg_proc p
+JOIN pg_namespace n
+    ON n.oid = p.pronamespace
+WHERE n.nspname = 'public'
+  AND p.proname IN (
+      'verify_esewa_payment',
+      'reject_esewa_payment'
   );
 
-  RETURN true;
-END;
-$$;
 
-CREATE OR REPLACE FUNCTION public.esewa_fail_payment(
-  p_session_id UUID,
-  p_status TEXT
-)
-RETURNS BOOLEAN
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-DECLARE
-  v_caller_role TEXT;
-  v_status TEXT;
-BEGIN
-  SELECT coalesce(auth.role(), '') INTO v_caller_role;
-  IF v_caller_role <> 'service_role' THEN
-    RAISE EXCEPTION 'Unauthorized: only the eSewa callback can update payments' USING ERRCODE = '42501';
-  END IF;
-  IF p_status NOT IN ('failed', 'cancelled') THEN
-    RAISE EXCEPTION 'Invalid status. Must be failed or cancelled';
-  END IF;
-  SELECT status INTO v_status FROM payment_sessions WHERE id = p_session_id;
-  IF v_status IS NULL THEN
-    RAISE EXCEPTION 'Payment session not found';
-  END IF;
-  IF v_status = 'completed' THEN
-    RETURN true;
-  END IF;
-  IF v_status NOT IN ('pending', 'processing') THEN
-    RETURN true;
-  END IF;
-  UPDATE payment_sessions
-  SET status = p_status, updated_at = now()
-  WHERE id = p_session_id;
-  INSERT INTO payment_verifications (payment_session_id, verified_by, action, notes)
-  VALUES (p_session_id, NULL, p_status, 'eSewa callback: ' || p_status);
-  INSERT INTO payment_audit_logs (payment_session_id, action, actor_id, actor_role, details)
-  VALUES (p_session_id, 'payment_' || p_status, NULL, 'service_role', jsonb_build_object('esewa_status', p_status));
-  RETURN true;
-END;
-$$;
-
-REVOKE ALL ON FUNCTION public.esewa_confirm_payment FROM PUBLIC;
-REVOKE ALL ON FUNCTION public.esewa_fail_payment FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.esewa_confirm_payment TO service_role;
-GRANT EXECUTE ON FUNCTION public.esewa_fail_payment TO service_role;
-
-NOTIFY pgrst, 'reload schema';
+-- Check the payment verification columns:
+SELECT
+    column_name,
+    data_type,
+    column_default
+FROM information_schema.columns
+WHERE table_schema = 'public'
+  AND table_name = 'payments'
+  AND column_name IN (
+      'verification_status',
+      'verified_by',
+      'verified_at',
+      'verification_notes'
+  )
+ORDER BY column_name;

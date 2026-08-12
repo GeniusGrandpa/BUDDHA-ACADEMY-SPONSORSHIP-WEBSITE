@@ -1,5 +1,5 @@
-import Stripe from 'npm:stripe@18.0.0'
-import { createClient } from 'npm:@supabase/supabase-js@2'
+import Stripe from 'stripe'
+import { createClient } from '@supabase/supabase-js'
 import { corsHeaders, jsonOk, jsonError, handleError, logError } from '../_shared/response.ts'
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') ?? '', {

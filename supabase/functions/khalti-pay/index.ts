@@ -1,4 +1,4 @@
-import { createClient } from 'npm:@supabase/supabase-js@2'
+import { createClient } from '@supabase/supabase-js'
 import { corsHeaders, jsonOk, jsonError, handleError, getCallerUserId } from '../_shared/response.ts'
 import { getKhaltiConfig, toPaisa } from '../_shared/khalti.ts'
 

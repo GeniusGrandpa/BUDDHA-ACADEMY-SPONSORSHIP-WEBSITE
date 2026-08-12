@@ -28,13 +28,13 @@ BEGIN
     RAISE EXCEPTION 'Payment session not found';
   END IF;
 
-  IF v_current_status = 'payment_received' AND v_current_verification = 'verified' THEN
+  IF v_current_status = 'completed' AND v_current_verification = 'verified' THEN
     RAISE LOG '[verify_payment] Already verified: session_id=%', p_session_id;
     RETURN true;
   END IF;
 
   IF v_current_status != 'payment_received' THEN
-    RAISE EXCEPTION 'Payment session must be in payment_received status to verify, current status: %', v_current_status;
+    RAISE EXCEPTION 'Payment session must be in payment_received status to verify (automated gateways auto-verify), current status: %', v_current_status;
   END IF;
 
   IF v_current_verification != 'pending_verification' THEN
@@ -238,8 +238,8 @@ BEGIN
   IF v_donor_id IS NULL THEN
     RAISE EXCEPTION 'Payment session not found';
   END IF;
-  IF v_session_status = 'payment_received' THEN
-    RAISE LOG '[stripe_confirm_payment] Already in payment_received: session_id=%', p_session_id;
+  IF v_session_status = 'completed' THEN
+    RAISE LOG '[stripe_confirm_payment] Already completed: session_id=%', p_session_id;
     RETURN true;
   END IF;
   IF v_session_status NOT IN ('pending', 'processing') THEN
@@ -249,19 +249,27 @@ BEGIN
   v_receipt_number := generate_receipt_number();
   INSERT INTO donations (
     donor_id, amount, frequency, student_id, message, payment_method,
-    status, verification_status, transaction_id, payment_session_id
+    status, verification_status, transaction_id, payment_session_id,
+    verified_by, verified_at, approved_by, approved_at
   )
   VALUES (
     v_donor_id, v_amount, COALESCE(v_frequency, 'one-time'), v_student_id, v_message,
-    v_gateway, 'payment_received', 'pending_verification', p_transaction_id, p_session_id
+    v_gateway, 'completed', 'verified', p_transaction_id, p_session_id,
+    auth.uid(), now(), auth.uid(), now()
   )
   RETURNING id INTO v_donation_id;
 
   UPDATE payment_sessions
-  SET status = 'payment_received',
+  SET status = 'completed',
       donation_id = v_donation_id,
       transaction_id = p_transaction_id,
-      verification_status = 'pending_verification',
+      verification_status = 'verified',
+      verified_by = auth.uid(),
+      verified_at = now(),
+      verification_notes = 'Auto-verified via Stripe webhook',
+      approved_by = auth.uid(),
+      approved_at = now(),
+      approval_notes = 'Auto-approved via Stripe webhook',
       updated_at = now()
   WHERE id = p_session_id;
 
@@ -301,11 +309,11 @@ BEGIN
   END IF;
 
   INSERT INTO payment_verifications (payment_session_id, verified_by, action, notes)
-  VALUES (p_session_id, NULL, 'submitted', 'Payment received via Stripe webhook');
+  VALUES (p_session_id, auth.uid(), 'verified', 'Auto-verified via Stripe webhook');
 
   INSERT INTO payment_audit_logs (payment_session_id, action, actor_id, actor_role, details)
   VALUES (
-    p_session_id, 'payment_received', NULL, 'service_role',
+    p_session_id, 'payment_completed', NULL, 'service_role',
     jsonb_build_object('donation_id', v_donation_id, 'transaction_id', p_transaction_id)
   );
 
@@ -360,8 +368,8 @@ BEGIN
     RAISE EXCEPTION 'Payment session not found';
   END IF;
 
-  IF v_session_status = 'payment_received' THEN
-    RAISE LOG '[esewa_confirm_payment] Already in payment_received: session_id=%', p_session_id;
+  IF v_session_status = 'completed' THEN
+    RAISE LOG '[esewa_confirm_payment] Already completed: session_id=%', p_session_id;
     RETURN true;
   END IF;
 
@@ -374,21 +382,29 @@ BEGIN
   v_receipt_number := generate_receipt_number();
   INSERT INTO donations (
     donor_id, amount, frequency, student_id, message, payment_method,
-    status, verification_status, transaction_id, payment_session_id
+    status, verification_status, transaction_id, payment_session_id,
+    verified_by, verified_at, approved_by, approved_at
   )
   VALUES (
     v_donor_id, v_amount, COALESCE(v_frequency, 'one-time'), v_student_id, v_message,
-    v_gateway, 'payment_received', 'pending_verification', p_transaction_id, p_session_id
+    v_gateway, 'completed', 'verified', p_transaction_id, p_session_id,
+    auth.uid(), now(), auth.uid(), now()
   )
   RETURNING id INTO v_donation_id;
 
   RAISE LOG '[esewa_confirm_payment] Donation created: donation_id=%', v_donation_id;
 
   UPDATE payment_sessions
-  SET status = 'payment_received',
+  SET status = 'completed',
       donation_id = v_donation_id,
       transaction_id = p_transaction_id,
-      verification_status = 'pending_verification',
+      verification_status = 'verified',
+      verified_by = auth.uid(),
+      verified_at = now(),
+      verification_notes = 'Auto-verified via eSewa callback',
+      approved_by = auth.uid(),
+      approved_at = now(),
+      approval_notes = 'Auto-approved via eSewa callback',
       updated_at = now()
   WHERE id = p_session_id;
 
@@ -428,11 +444,11 @@ BEGIN
   END IF;
 
   INSERT INTO payment_verifications (payment_session_id, verified_by, action, notes)
-  VALUES (p_session_id, NULL, 'submitted', 'Payment received via eSewa callback');
+  VALUES (p_session_id, auth.uid(), 'verified', 'Auto-verified via eSewa callback');
 
   INSERT INTO payment_audit_logs (payment_session_id, action, actor_id, actor_role, details)
   VALUES (
-    p_session_id, 'payment_received', NULL, 'service_role',
+    p_session_id, 'payment_completed', NULL, 'service_role',
     jsonb_build_object('donation_id', v_donation_id, 'transaction_id', p_transaction_id)
   );
 
@@ -487,8 +503,8 @@ BEGIN
     RAISE EXCEPTION 'Payment session not found';
   END IF;
 
-  IF v_session_status = 'payment_received' THEN
-    RAISE LOG '[khalti_confirm_payment] Already in payment_received: session_id=%', p_session_id;
+  IF v_session_status = 'completed' THEN
+    RAISE LOG '[khalti_confirm_payment] Already completed: session_id=%', p_session_id;
     RETURN true;
   END IF;
 
@@ -501,21 +517,29 @@ BEGIN
   v_receipt_number := generate_receipt_number();
   INSERT INTO donations (
     donor_id, amount, frequency, student_id, message, payment_method,
-    status, verification_status, transaction_id, payment_session_id
+    status, verification_status, transaction_id, payment_session_id,
+    verified_by, verified_at, approved_by, approved_at
   )
   VALUES (
     v_donor_id, v_amount, COALESCE(v_frequency, 'one-time'), v_student_id, v_message,
-    v_gateway, 'payment_received', 'pending_verification', p_transaction_id, p_session_id
+    v_gateway, 'completed', 'verified', p_transaction_id, p_session_id,
+    auth.uid(), now(), auth.uid(), now()
   )
   RETURNING id INTO v_donation_id;
 
   RAISE LOG '[khalti_confirm_payment] Donation created: donation_id=%', v_donation_id;
 
   UPDATE payment_sessions
-  SET status = 'payment_received',
+  SET status = 'completed',
       donation_id = v_donation_id,
       transaction_id = p_transaction_id,
-      verification_status = 'pending_verification',
+      verification_status = 'verified',
+      verified_by = auth.uid(),
+      verified_at = now(),
+      verification_notes = 'Auto-verified via Khalti callback',
+      approved_by = auth.uid(),
+      approved_at = now(),
+      approval_notes = 'Auto-approved via Khalti callback',
       updated_at = now()
   WHERE id = p_session_id;
 
@@ -555,11 +579,11 @@ BEGIN
   END IF;
 
   INSERT INTO payment_verifications (payment_session_id, verified_by, action, notes)
-  VALUES (p_session_id, NULL, 'submitted', 'Payment received via Khalti callback');
+  VALUES (p_session_id, auth.uid(), 'verified', 'Auto-verified via Khalti callback');
 
   INSERT INTO payment_audit_logs (payment_session_id, action, actor_id, actor_role, details)
   VALUES (
-    p_session_id, 'payment_received', NULL, 'service_role',
+    p_session_id, 'payment_completed', NULL, 'service_role',
     jsonb_build_object('donation_id', v_donation_id, 'transaction_id', p_transaction_id)
   );
 

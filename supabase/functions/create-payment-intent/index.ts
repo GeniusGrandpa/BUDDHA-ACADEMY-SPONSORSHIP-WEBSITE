@@ -1,4 +1,4 @@
-import Stripe from 'npm:stripe@18.0.0'
+import Stripe from 'stripe'
 import { corsHeaders, jsonOk, jsonError, handleError, safeMessage, logError } from '../_shared/response.ts'
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') ?? '', {
