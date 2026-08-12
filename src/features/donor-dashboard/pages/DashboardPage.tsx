@@ -8,7 +8,6 @@ import { useDashboardData } from '../hooks/useDashboardData'
 import { useDonorTransactions } from '../hooks/useDonorTransactions'
 import { useNotifications } from '../hooks/useNotifications'
 import { useSponsorshipTimeline } from '../hooks/useSponsorshipTimeline'
-import { useTeacherReports } from '../hooks/useTeacherReports'
 
 import { DashboardLayout } from '../layouts/DashboardLayout'
 import { DashboardCard } from '../../../components/ui/DashboardCard'
@@ -18,7 +17,6 @@ import { SkeletonLoading } from '../components/SkeletonLoading'
 import { TransactionSection } from '../components/transactions/TransactionSection'
 
 import { ImpactTransparency } from '../components/ImpactTransparency'
-import { StudentProgressUpdates } from '../components/StudentProgressUpdates'
 import { SponsorshipTimeline } from '../components/SponsorshipTimeline'
 import { ReceiptDownloads } from '../components/ReceiptDownloads'
 import { NotificationCenter } from '../components/NotificationCenter'
@@ -67,7 +65,6 @@ export function DashboardPage() {
   const { notifications, unreadCount, markAsRead, markAllAsRead, loading: notifLoading } = useNotifications(userId)
 
   const { events } = useSponsorshipTimeline(userId)
-  const { latestReports } = useTeacherReports(userId)
 
   const [section, setSection] = useState<Section>(initialSection)
 
@@ -279,7 +276,6 @@ export function DashboardPage() {
           {contributedStudents.length > 0 ? (
             <>
               <SponsoredStudents contributions={contributedStudents} />
-              <StudentProgressUpdates reports={latestReports} students={sponsorships} />
             </>
           ) : (
             <DashboardCard>

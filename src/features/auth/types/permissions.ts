@@ -2,7 +2,6 @@ export type Role =
   | 'super_admin'
   | 'admin'
   | 'finance_manager'
-  | 'teacher'
   | 'donor'
   | 'volunteer'
   | 'public_user'
@@ -40,7 +39,6 @@ export const ROLE_NAMES: Record<Role, string> = {
   super_admin: 'Super Admin',
   admin: 'Admin',
   finance_manager: 'Finance Manager',
-  teacher: 'Teacher',
   donor: 'Donor',
   volunteer: 'Volunteer',
   public_user: 'Public User',
@@ -50,7 +48,6 @@ export const ROLE_LEVELS: Record<Role, number> = {
   super_admin: 100,
   admin: 90,
   finance_manager: 80,
-  teacher: 60,
   donor: 40,
   volunteer: 30,
   public_user: 10,
@@ -60,7 +57,6 @@ export const ROLE_DESCRIPTIONS: Record<Role, string> = {
   super_admin: 'Full platform access with system configuration',
   admin: 'Manage donors, students, content, and moderate system',
   finance_manager: 'Manage donations, financial reports, receipts, payments',
-  teacher: 'Manage assigned students, upload grades, attendance, progress updates',
   donor: 'Personal dashboard, sponsorship access, donations, certificates',
   volunteer: 'Volunteer dashboard, assigned tasks, events, attendance',
   public_user: 'Browse public content only',
@@ -70,7 +66,6 @@ export const ROLE_COLORS: Record<Role, string> = {
   super_admin: 'bg-orange-100 text-orange-700 border-orange-200',
   admin: 'bg-amber-100 text-amber-700 border-amber-200',
   finance_manager: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-  teacher: 'bg-indigo-100 text-indigo-700 border-indigo-200',
   donor: 'bg-green-100 text-green-700 border-green-200',
   volunteer: 'bg-cyan-100 text-cyan-700 border-cyan-200',
   public_user: 'bg-gray-100 text-gray-700 border-gray-200',
@@ -167,13 +162,6 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, PermissionCode[]> = {
     'impact.read',
     'certificates.read', 'certificates.create',
     'payments.read', 'payments.verify',
-  ],
-  teacher: [
-    'students.read', 'students.update',
-    'news.read',
-    'gallery.read',
-    'notifications.read',
-    'profile.read', 'profile.update',
   ],
   donor: [
     'students.read',

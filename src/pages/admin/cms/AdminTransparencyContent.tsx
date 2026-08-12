@@ -17,8 +17,7 @@ export function AdminTransparencyContent() {
     description: 'We are committed to complete transparency in how we use donor funds and the impact we create.',
     allocationData: [
       { name: "Children's Education & Welfare", value: 70 },
-      { name: 'Teachers & Staff', value: 20 },
-      { name: 'Facilities & Operations', value: 10 },
+      { name: 'Staff & Operations', value: 30 },
     ],
     impactStats: [
       { label: 'Students Supported', value: '250+' },

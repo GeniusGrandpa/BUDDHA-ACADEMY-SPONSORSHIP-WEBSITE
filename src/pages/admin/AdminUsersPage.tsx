@@ -8,7 +8,7 @@ import toast from 'react-hot-toast'
 import { getErrorMessage } from '../../lib/errors'
 import { useRole } from '../../hooks/useRole'
 import { ROLE_NAMES } from '../../features/auth/types/permissions'
-import type { Role } from '../../types/permissions'
+import type { Role } from '../../features/auth/types/permissions'
 import type { Profile } from '../../types/database'
 import { Mail, CheckCircle, XCircle, Loader2, Search } from 'lucide-react'
 
@@ -22,7 +22,6 @@ interface UserStats {
   total_users: number
   admins: number
   super_admins: number
-  teachers: number
   donors: number
   volunteers: number
   finance_managers: number
@@ -39,7 +38,7 @@ interface VerificationInfo {
   is_verified: boolean
 }
 
-const ADMIN_MANAGEABLE_ROLES: Role[] = ['teacher', 'finance_manager', 'donor', 'volunteer', 'public_user']
+const ADMIN_MANAGEABLE_ROLES: Role[] = ['finance_manager', 'donor', 'volunteer', 'public_user']
 
 function ConfirmModal({ open, title, message, confirmLabel, onConfirm, onCancel, loading, variant = 'danger' }: {
   open: boolean; title: string; message: string; confirmLabel: string
@@ -90,7 +89,7 @@ export function AdminUsersPage() {
 
   const getAvailableRoles = (_targetRole: string): Role[] => {
     if (isSuperAdmin) {
-      return ['super_admin', 'admin', 'finance_manager', 'teacher', 'donor', 'volunteer', 'public_user']
+      return ['super_admin', 'admin', 'finance_manager', 'donor', 'volunteer', 'public_user']
     }
     return ADMIN_MANAGEABLE_ROLES
   }
@@ -218,7 +217,6 @@ export function AdminUsersPage() {
     { value: 'super_admin', label: 'Super Admin' },
     { value: 'admin', label: 'Admin' },
     { value: 'finance_manager', label: 'Finance' },
-    { value: 'teacher', label: 'Teacher' },
     { value: 'donor', label: 'Donor' },
     { value: 'volunteer', label: 'Volunteer' },
     { value: 'public_user', label: 'User' },
@@ -294,7 +292,6 @@ export function AdminUsersPage() {
           {[
             { label: 'Total Users', value: stats.total_users, color: 'text-gray-600', bg: 'bg-gray-50' },
             { label: 'Admins', value: stats.admins + stats.super_admins, color: 'text-amber-600', bg: 'bg-amber-50' },
-            { label: 'Teachers', value: stats.teachers, color: 'text-indigo-600', bg: 'bg-indigo-50' },
             { label: 'Donors', value: stats.donors, color: 'text-green-600', bg: 'bg-green-50' },
             { label: 'Active', value: stats.active_users, color: 'text-emerald-600', bg: 'bg-emerald-50' },
             { label: 'Suspended', value: stats.suspended_users, color: 'text-red-600', bg: 'bg-red-50' },

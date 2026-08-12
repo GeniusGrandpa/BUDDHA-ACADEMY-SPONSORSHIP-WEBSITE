@@ -119,7 +119,6 @@ export const NOTIFICATION_TYPES = {
   PAYMENT_VERIFIED: 'payment_verified',
   SPONSORSHIP_ACTIVE: 'sponsorship_active',
   SPONSORSHIP_RENEWAL: 'sponsorship_renewal',
-  TEACHER_UPDATE: 'teacher_update',
   VOLUNTEER_APPROVED: 'volunteer_approved',
   VOLUNTEER_EVENT: 'volunteer_event',
   REPORT_AVAILABLE: 'report_available',

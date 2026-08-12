@@ -126,25 +126,6 @@ export interface TransactionWithDetails extends Donation {
   allocations?: DonationAllocation[]
 }
 
-export interface TeacherReport {
-  id: string
-  student_id: string
-  teacher_id: string
-  title: string
-  summary: string | null
-  subject: string | null
-  grade_achieved: string | null
-  attendance_rate: number | null
-  achievements: string[]
-  areas_for_improvement: string[]
-  teacher_notes: string | null
-  report_card_url: string | null
-  report_date: string
-  is_published: boolean
-  created_at: string
-  updated_at: string
-}
-
 export interface ActivityItem {
   id: string
   user_id: string | null

@@ -121,11 +121,6 @@ export function AdminLayout() {
                 <Menu className="w-5 h-5" />
               </button>
               <div className="hidden sm:flex items-center">
-                {role === 'teacher' && (
-                  <Link to="/teacher" className="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors">
-                    Teacher Dashboard
-                  </Link>
-                )}
                 {role === 'finance_manager' && (
                   <Link to="/admin/finance" className="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors">
                     Finance Dashboard
@@ -180,11 +175,6 @@ export function AdminLayout() {
                         <Link to={localize('/')} className="flex items-center px-3 py-2 text-sm rounded-lg transition-colors text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)]">
                           View Website
                         </Link>
-                        {role === 'teacher' && (
-                          <Link to="/teacher" className="flex items-center px-3 py-2 text-sm rounded-lg transition-colors text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)]">
-                            Teacher Dashboard
-                          </Link>
-                        )}
                         {role === 'finance_manager' && (
                           <Link to="/admin/finance" className="flex items-center px-3 py-2 text-sm rounded-lg transition-colors text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)]">
                             Finance Dashboard

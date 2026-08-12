@@ -25,7 +25,7 @@ export const navigationConfig: NavSection[] = [
       {
         label: 'Dashboard',
         href: '/dashboard',
-        roles: ['super_admin', 'admin', 'donor', 'volunteer', 'finance_manager', 'teacher'],
+        roles: ['super_admin', 'admin', 'donor', 'volunteer', 'finance_manager'],
       },
     ],
   },
@@ -245,16 +245,6 @@ export const navigationConfig: NavSection[] = [
       {
         label: 'User Management',
         href: '/admin/users',
-        roles: ['super_admin', 'admin'],
-      },
-      {
-        label: 'Teachers',
-        href: '/admin/teachers',
-        roles: ['super_admin', 'admin'],
-      },
-      {
-        label: 'Teacher Assignments',
-        href: '/admin/teacher-assignments',
         roles: ['super_admin', 'admin'],
       },
     ],

@@ -8,7 +8,6 @@ import { useConfirm } from '../../../context/ConfirmContext'
 
 const TESTIMONIAL_TYPES = [
   { value: 'donor', label: 'Donor' },
-  { value: 'teacher', label: 'Teacher' },
   { value: 'student', label: 'Student' },
   { value: 'volunteer', label: 'Volunteer' },
 ] as const
@@ -112,7 +111,7 @@ const [form, setForm] = useState<TestimonialForm>({
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-white">Testimonials</h1>
-          <p className="text-gray-400 mt-1">Manage donor, teacher, student & volunteer testimonials</p>
+          <p className="text-gray-400 mt-1">Manage donor, student & volunteer testimonials</p>
         </div>
         <button onClick={openCreate}
           className="px-4 py-2 rounded-lg text-sm bg-amber-500 hover:bg-amber-600 text-white transition-colors">
@@ -200,7 +199,7 @@ const [form, setForm] = useState<TestimonialForm>({
                   <div>
                     <label className="block text-sm font-medium text-gray-600 mb-1">Role</label>
                     <input value={form.author_role} onChange={e => setForm({ ...form, author_role: e.target.value })}
-                      placeholder="e.g. Teacher, Donor" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
+                      placeholder="e.g. Donor, Volunteer" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
                   </div>
                 </div>
                 <div>

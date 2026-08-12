@@ -194,7 +194,7 @@ export function SuperAdminRolesPage() {
     }
   }
 
-  const roles: Role[] = ['super_admin', 'admin', 'finance_manager', 'teacher', 'donor', 'volunteer', 'public_user']
+  const roles: Role[] = ['super_admin', 'admin', 'finance_manager', 'donor', 'volunteer', 'public_user']
   const hasChanges = [...rolePermissions].sort().join(',') !== [...originalPermissions].sort().join(',')
 
   return (

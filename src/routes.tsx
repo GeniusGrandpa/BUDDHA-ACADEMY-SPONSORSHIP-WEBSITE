@@ -10,7 +10,7 @@ import { AdminErrorPage } from './components/pages/AdminErrorPage'
 import { DEFAULT_LOCALE } from './i18n'
 import { ENABLE_VISUAL_BUILDER } from './config/feature-flags'
 import { Navigate } from 'react-router-dom'
-import { LazyPage, AdminIndexRedirect, HomePage, AboutPage, SponsorshipPage, StudentsPage, StudentDetailPage, GalleryPage, NewsPage, NewsDetailPage, ContactPage, DonatePage, EsewaReturnPage, TransparencyPage, FAQPage, VolunteerPage, PrivacyPage, TermsPage, LoginPage, ForgotPasswordPage, ResetPasswordPage, AuthCallbackPage, NotFoundPage, DashboardPage, CampaignsPage, SuccessStoriesPage, ActivityPage, DonationHistoryPage, AdminLayout, AdminStudentsPage, AdminDonationsPage, AdminNewsPage, AdminGalleryPage, AdminContactsPage, AdminDonorsPage, AdminPaymentVerificationPage, AdminPaymentSettingsPage, AdminEventsPage, AdminNotificationsPage, AdminReportsPage, AdminUsersPage, AdminTeacherManagement, AdminTeacherAssignments, SuperAdminLayout, SuperAdminUsersPage, SuperAdminRolesPage, SuperAdminAuditLogsPage, SuperAdminNotificationsPage, FinanceDashboard, SponsorshipDashboard, VolunteerDashboard, TeacherDashboard, WebsiteDashboard, WebsiteBuilder, MediaLibrary, BrandingEditor, SEOEditor, AboutPageEditor, ContactPageEditor, CampaignsEditor, PrivacyPageEditor, TermsPageEditor, HomePageEditor, AdminContentGallery, AdminVideoManager, AdminContentTestimonials, AdminContentNews, AdminStudentStories, AdminTransparencyContent, AdminFaqManager, AdminPageEditor, AdminVersionHistory, AdminSiteSettings, AdminNavigationManager, AdminAnnouncements, AdminPartners, AdminDonationContent, AdminSponsorshipContent, AdminVolunteerContent, AdminFooterContent, AdminSiteImages, AdminSectionVisibility, AdminDesignDashboard, AdminBrandingPage, AdminColorsPage, AdminTypographyPage, AdminLayoutPage, AdminComponentsPage, AdminConfigPage, AdminThemePresetsPage, PreviewPage, KhaltiReturnPage } from './route-pages'
+import { LazyPage, AdminIndexRedirect, HomePage, AboutPage, SponsorshipPage, StudentsPage, StudentDetailPage, GalleryPage, NewsPage, NewsDetailPage, ContactPage, DonatePage, EsewaReturnPage, TransparencyPage, FAQPage, VolunteerPage, PrivacyPage, TermsPage, LoginPage, ForgotPasswordPage, ResetPasswordPage, AuthCallbackPage, NotFoundPage, DashboardPage, CampaignsPage, SuccessStoriesPage, ActivityPage, DonationHistoryPage, AdminLayout, AdminStudentsPage, AdminDonationsPage, AdminNewsPage, AdminGalleryPage, AdminContactsPage, AdminDonorsPage, AdminPaymentVerificationPage, AdminPaymentSettingsPage, AdminEventsPage, AdminNotificationsPage, AdminReportsPage, AdminUsersPage, SuperAdminLayout, SuperAdminUsersPage, SuperAdminRolesPage, SuperAdminAuditLogsPage, SuperAdminNotificationsPage, FinanceDashboard, SponsorshipDashboard, VolunteerDashboard, WebsiteDashboard, WebsiteBuilder, MediaLibrary, BrandingEditor, SEOEditor, AboutPageEditor, ContactPageEditor, CampaignsEditor, PrivacyPageEditor, TermsPageEditor, HomePageEditor, AdminContentGallery, AdminVideoManager, AdminContentTestimonials, AdminContentNews, AdminStudentStories, AdminTransparencyContent, AdminFaqManager, AdminPageEditor, AdminVersionHistory, AdminSiteSettings, AdminNavigationManager, AdminAnnouncements, AdminPartners, AdminDonationContent, AdminSponsorshipContent, AdminVolunteerContent, AdminFooterContent, AdminSiteImages, AdminSectionVisibility, AdminDesignDashboard, AdminBrandingPage, AdminColorsPage, AdminTypographyPage, AdminLayoutPage, AdminComponentsPage, AdminConfigPage, AdminThemePresetsPage, PreviewPage, KhaltiReturnPage } from './route-pages'
 
 export const routeDefinitions: RouteObject[] = [
   {
@@ -62,7 +62,7 @@ export const routeDefinitions: RouteObject[] = [
       {
         path: '/dashboard',
         element: (
-          <ProtectedRoute requiredRoles={['super_admin', 'admin', 'donor', 'volunteer', 'teacher', 'finance_manager']}>
+          <ProtectedRoute requiredRoles={['super_admin', 'admin', 'donor', 'volunteer', 'finance_manager']}>
             <LazyPage Component={DashboardPage} />
           </ProtectedRoute>
         ),
@@ -117,8 +117,6 @@ export const routeDefinitions: RouteObject[] = [
           { path: 'notifications', element: <LazyPage Component={AdminNotificationsPage} />, errorElement: <AdminErrorPage /> },
           { path: 'reports', element: <LazyPage Component={AdminReportsPage} />, errorElement: <AdminErrorPage /> },
           { path: 'users', element: <LazyPage Component={AdminUsersPage} />, errorElement: <AdminErrorPage /> },
-          { path: 'teachers', element: <LazyPage Component={AdminTeacherManagement} />, errorElement: <AdminErrorPage /> },
-          { path: 'teacher-assignments', element: <LazyPage Component={AdminTeacherAssignments} />, errorElement: <AdminErrorPage /> },
           { path: 'website', element: <ProtectedRoute requiredRoles={['super_admin', 'admin']}><LazyPage Component={WebsiteDashboard} /></ProtectedRoute>, errorElement: <AdminErrorPage /> },
           ...(ENABLE_VISUAL_BUILDER
             ? [
@@ -196,25 +194,6 @@ export const routeDefinitions: RouteObject[] = [
           { path: 'audit', element: <LazyPage Component={SuperAdminAuditLogsPage} />, errorElement: <AdminErrorPage /> },
           { path: 'notifications', element: <LazyPage Component={SuperAdminNotificationsPage} />, errorElement: <AdminErrorPage /> },
         ],
-      },
-      {
-        path: '/teacher',
-        element: (
-          <ProtectedRoute requiredRoles={['teacher']}>
-            <LazyPage Component={TeacherDashboard} />
-          </ProtectedRoute>
-        ),
-        errorElement: <RouteErrorPage />,
-      },
-      {
-        path: '/teacher/*',
-        element: <Navigate to="/teacher" replace />,
-        errorElement: <RouteErrorPage />,
-      },
-      {
-        path: '/teacher/dashboard',
-        element: <Navigate to="/teacher" replace />,
-        errorElement: <RouteErrorPage />,
       },
       {
         path: '/preview',

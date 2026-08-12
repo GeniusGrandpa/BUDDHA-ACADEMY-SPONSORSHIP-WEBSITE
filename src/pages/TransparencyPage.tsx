@@ -11,8 +11,7 @@ const ALLOCATION_COLORS = ['#f26b1d', '#c49a4e', '#10b981', '#3b82f6', '#8b5cf6'
 function getAllocationDescription(name: string, t: (key: string) => string): string {
   const descriptions: Record<string, string> = {
     "Children's Education & Welfare": t('transparency_allocation_children_desc'),
-    'Teachers & Staff': t('transparency_allocation_teachers_desc'),
-    'Facilities & Operations': t('transparency_allocation_facilities_desc'),
+    'Staff & Operations': t('transparency_allocation_facilities_desc'),
   }
   return descriptions[name] || t('transparency_funds_allocated') + ' ' + name
 }
@@ -23,8 +22,7 @@ const DEFAULT_CONTENT: TransparencyContent = {
   description: 'We are committed to complete transparency in how we use donor funds and the impact we create together.',
   allocationData: [
     { name: "Children's Education & Welfare", value: 70 },
-    { name: 'Teachers & Staff', value: 20 },
-    { name: 'Facilities & Operations', value: 10 },
+    { name: 'Staff & Operations', value: 30 },
   ],
   impactStats: [
     { label: 'Students Supported', value: '250+' },

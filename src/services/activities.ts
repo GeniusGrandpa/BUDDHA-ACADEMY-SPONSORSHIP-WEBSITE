@@ -76,7 +76,6 @@ export const ACTIVITY_TYPES = {
   DONATION_RECEIVED: 'donation_received',
   DONATION_VERIFIED: 'donation_completed',
   SPONSORSHIP_STARTED: 'sponsorship_started',
-  TEACHER_REPORT: 'teacher_report',
   STUDENT_ACHIEVEMENT: 'student_achievement',
   SPONSORSHIP_RENEWED: 'sponsorship_renewed',
   VOLUNTEER_SIGNUP: 'volunteer_signup',

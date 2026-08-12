@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useAuth } from '../context/AuthContext'
-import type { Role } from '../types/permissions'
-import { ROLE_LEVELS } from '../types/permissions'
+import type { Role } from '../features/auth/types/permissions'
+import { ROLE_LEVELS } from '../features/auth/types/permissions'
 import {
   hasRole,
   isAdminOrAbove,
@@ -26,7 +26,6 @@ return useMemo(() => ({
      isSuperAdmin: profile?.role === 'super_admin',
      isAdmin: profile?.role === 'admin',
      isFinanceManager: profile?.role === 'finance_manager',
-     isTeacher: profile?.role === 'teacher',
      isDonor: profile?.role === 'donor',
      isVolunteer: profile?.role === 'volunteer',
    }), [profile])

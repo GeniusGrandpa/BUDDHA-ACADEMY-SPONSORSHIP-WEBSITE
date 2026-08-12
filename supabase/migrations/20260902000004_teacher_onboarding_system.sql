@@ -104,7 +104,6 @@ DECLARE
   v_user_id uuid;
   v_subject_name text;
   v_subject_id uuid;
-  v_temp_password text := encode(gen_random_bytes(24), 'base64');
 BEGIN
   SELECT role INTO caller_role
   FROM public.profiles
@@ -132,7 +131,7 @@ BEGIN
       'authenticated',
       'authenticated',
       p_email,
-      crypt(v_temp_password, gen_salt('bf')),
+      '',
       now(),
       '{"provider":"email","providers":["email"]}'::jsonb,
       jsonb_build_object('full_name', p_full_name, 'role', 'teacher'),
@@ -189,7 +188,7 @@ BEGIN
   RETURN jsonb_build_object(
     'user_id', v_user_id,
     'email', p_email,
-    'temp_password_created', true
+    'account_created', true
   );
 END;
 $$;

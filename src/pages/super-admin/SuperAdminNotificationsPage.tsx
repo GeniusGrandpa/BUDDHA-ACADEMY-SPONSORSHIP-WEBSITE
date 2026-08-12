@@ -3,7 +3,7 @@ import { Card } from '../../components/ui/Card'
 import { broadcastNotification, getAllUserIds } from '../../services/notifications'
 import { logAuditEvent } from '../../lib/audit'
 import { toast } from 'react-hot-toast'
-import { ROLE_NAMES } from '../../types/permissions'
+import { ROLE_NAMES } from '../../features/auth/types/permissions'
 
 interface SendResult {
   success: number
@@ -24,7 +24,6 @@ export function SuperAdminNotificationsPage() {
     { value: 'super_admin', label: ROLE_NAMES.super_admin },
     { value: 'admin', label: ROLE_NAMES.admin },
     { value: 'finance_manager', label: ROLE_NAMES.finance_manager },
-    { value: 'teacher', label: ROLE_NAMES.teacher },
     { value: 'donor', label: ROLE_NAMES.donor },
     { value: 'volunteer', label: ROLE_NAMES.volunteer },
   ]

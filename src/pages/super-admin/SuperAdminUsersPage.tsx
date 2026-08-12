@@ -6,7 +6,7 @@ import { RoleBadge } from '../../components/RoleBadge'
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner'
 import toast from 'react-hot-toast'
 import { getErrorMessage } from '../../lib/errors'
-import type { Role } from '../../types/permissions'
+import type { Role } from '../../features/auth/types/permissions'
 import type { Profile } from '../../types/database'
 
 type UserStatus = 'active' | 'inactive' | 'suspended' | 'banned'
@@ -21,7 +21,6 @@ interface UserStats {
   super_admins: number
   admins: number
   finance_managers: number
-  teachers: number
   donors: number
   volunteers: number
   public_users: number
@@ -83,7 +82,6 @@ function ChangeRoleModal({ open, user, onClose, onConfirm, loading }: {
     { value: 'super_admin', label: 'Super Admin' },
     { value: 'admin', label: 'Admin' },
     { value: 'finance_manager', label: 'Finance Manager' },
-    { value: 'teacher', label: 'Teacher' },
     { value: 'volunteer', label: 'Volunteer' },
     { value: 'donor', label: 'Donor' },
     { value: 'public_user', label: 'Public User' },
@@ -322,7 +320,6 @@ export function SuperAdminUsersPage() {
     { value: 'super_admin', label: 'Super Admin' },
     { value: 'admin', label: 'Admin' },
     { value: 'finance_manager', label: 'Finance Manager' },
-    { value: 'teacher', label: 'Teacher' },
     { value: 'volunteer', label: 'Volunteer' },
     { value: 'donor', label: 'Donor' },
   ]
@@ -403,7 +400,6 @@ export function SuperAdminUsersPage() {
             { label: 'Total Users', value: stats.total_users, color: 'text-gray-600', bg: 'bg-gray-50' },
             { label: 'Admins', value: stats.admins + stats.super_admins, color: 'text-amber-600', bg: 'bg-amber-50' },
             { label: 'Finance', value: stats.finance_managers, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-            { label: 'Teachers', value: stats.teachers, color: 'text-indigo-600', bg: 'bg-indigo-50' },
             { label: 'Donors', value: stats.donors, color: 'text-green-600', bg: 'bg-green-50' },
             { label: 'Suspended', value: stats.suspended_users, color: 'text-red-600', bg: 'bg-red-50' },
           ].map((stat) => (

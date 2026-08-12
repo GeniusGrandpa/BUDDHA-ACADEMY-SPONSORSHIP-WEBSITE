@@ -4,7 +4,6 @@ export const ROLE_REDIRECTS: Record<Role, string> = {
   super_admin: '/admin',
   admin: '/admin',
   finance_manager: '/admin/finance',
-  teacher: '/teacher',
   donor: '/dashboard',
   volunteer: '/dashboard',
   public_user: '/',

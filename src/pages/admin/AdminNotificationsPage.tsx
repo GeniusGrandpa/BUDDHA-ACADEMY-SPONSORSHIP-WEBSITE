@@ -17,7 +17,6 @@ const NOTIFICATION_TYPE_OPTIONS = [
   { value: NOTIFICATION_TYPES.PAYMENT_VERIFIED, label: 'Payment Verified' },
   { value: NOTIFICATION_TYPES.SPONSORSHIP_ACTIVE, label: 'Sponsorship Active' },
   { value: NOTIFICATION_TYPES.SPONSORSHIP_RENEWAL, label: 'Sponsorship Renewal' },
-  { value: NOTIFICATION_TYPES.TEACHER_UPDATE, label: 'Teacher Update' },
   { value: NOTIFICATION_TYPES.VOLUNTEER_APPROVED, label: 'Volunteer Approved' },
   { value: NOTIFICATION_TYPES.VOLUNTEER_EVENT, label: 'Volunteer Event' },
   { value: NOTIFICATION_TYPES.REPORT_AVAILABLE, label: 'Report Available' },
@@ -29,7 +28,6 @@ const ROLE_OPTIONS: { value: Role | 'all'; label: string }[] = [
   { value: 'super_admin', label: 'Super Admins' },
   { value: 'admin', label: 'Admins' },
   { value: 'finance_manager', label: 'Finance Managers' },
-  { value: 'teacher', label: 'Teachers' },
   { value: 'donor', label: 'Donors' },
   { value: 'volunteer', label: 'Volunteers' },
 ]
