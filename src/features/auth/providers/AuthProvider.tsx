@@ -94,6 +94,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return null
     }
 
+    if (!session.user.email_confirmed_at) {
+      await supabase.auth.signOut()
+      setUser(null)
+      setProfile(null)
+      setPermissions([])
+      return null
+    }
+
     setUser(session.user)
 
     const [currentProfile, currentPermissions] = await Promise.all([
@@ -206,6 +214,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (data.user) {
+        if (!data.user.email_confirmed_at) {
+          await supabase.auth.signOut()
+          return {
+            error: { message: 'Please verify your email address before signing in', category: 'verification' },
+            needsVerification: true,
+          }
+        }
+
         await logLoginHistory(data.user.id, 'success')
         resetRateLimit(rateKey)
 

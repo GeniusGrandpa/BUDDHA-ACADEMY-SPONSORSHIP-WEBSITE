@@ -1,14 +1,3 @@
--- ============================================================
--- esewa_confirm_payment and khalti_confirm_payment REMOVED
---
--- Both Edge Functions (esewa-callback, khalti-callback) now
--- do direct table updates to mark payment_sessions as
--- payment_received with verification_status = 'pending_verification'.
--- Finance/Admin manually verifies via verify_payment() then
--- approves via approve_payment().
--- ============================================================
-
--- Verification queries:
 SELECT
     n.nspname AS schema_name,
     p.proname AS function_name,
@@ -24,7 +13,6 @@ WHERE n.nspname = 'public'
       'khalti_fail_payment'
   );
 
--- Existing manual verification functions should remain:
 SELECT
     n.nspname AS schema_name,
     p.proname AS function_name,

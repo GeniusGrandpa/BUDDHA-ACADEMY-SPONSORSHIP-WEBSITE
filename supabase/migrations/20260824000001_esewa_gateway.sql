@@ -1,26 +1,4 @@
--- ============================================================
--- eSewa Manual Payment Verification Migration
--- ============================================================
--- IMPORTANT:
--- This migration does NOT delete student, sponsorship, donor,
--- or payment records.
---
--- eSewa payments will remain pending until an Admin/Finance
--- user manually verifies or rejects them.
---
--- The Edge Function (esewa-callback) now:
---   1. Verifies eSewa signature + amount + transaction status
---   2. Marks payment_session as payment_received
---   3. Sets verification_status = 'pending_verification'
---   4. Finance/Admin manually verifies via verify_payment()
---   5. Admin approves via approve_payment()
--- ============================================================
-
 BEGIN;
-
--- ============================================================
--- 1. Remove ALL old eSewa automatic confirmation functions
--- ============================================================
 
 DO $$
 DECLARE
@@ -43,11 +21,6 @@ BEGIN
     END LOOP;
 END $$;
 
-
--- ============================================================
--- 2. Remove old eSewa-specific failure function if present
--- ============================================================
-
 DO $$
 DECLARE
     func RECORD;
@@ -68,19 +41,9 @@ BEGIN
     END LOOP;
 END $$;
 
-
--- ============================================================
--- 3. Index for Admin/Finance pending-payment screen
--- ============================================================
-
 CREATE INDEX IF NOT EXISTS idx_payment_sessions_esewa_verification
 ON public.payment_sessions (verification_status)
 WHERE gateway = 'esewa';
-
-
--- ============================================================
--- 4. Remove automatic eSewa confirmation trigger if one exists
--- ============================================================
 
 DO $$
 DECLARE
@@ -115,15 +78,8 @@ BEGIN
     END LOOP;
 END $$;
 
-
 COMMIT;
 
-
--- ============================================================
--- VERIFICATION
--- ============================================================
-
--- esewa_confirm_payment and esewa_fail_payment should be GONE:
 SELECT
     n.nspname AS schema_name,
     p.proname AS function_name,
@@ -137,7 +93,6 @@ WHERE n.nspname = 'public'
       'esewa_fail_payment'
   );
 
--- Existing manual verification functions should remain:
 SELECT
     n.nspname AS schema_name,
     p.proname AS function_name,

@@ -41,9 +41,11 @@ All Supabase tables have RLS policies enabled:
 
 ## Payment Security
 
-- **No direct donation creation** frontend `createDonation()` throws; only the gateway-confirmation RPCs
-  (`stripe_confirm_payment`, `esewa_confirm_payment`, `khalti_confirm_payment`) can create donation records,
-  and only after a server-verified gateway confirmation
+- **No direct donation creation** frontend `createDonation()` throws; only the gateway-confirmation RPC
+  (`stripe_confirm_payment`) can create donation records, and only after a server-verified gateway confirmation
+- **Manual verification for eSewa/Khalti** the eSewa and Khalti callbacks mark `payment_sessions` as
+  `payment_received` + `pending_verification`; Finance/Admin must manually verify via `verify_payment()`
+  then approve via `approve_payment()` before a donation record is created
 - **No client-trusted status** payments are never confirmed from the browser, URL/query params, or
   client-supplied status/amount/IDs. Confirmation requires a verified Stripe webhook signature, an eSewa
   HMAC-SHA256 signature + transaction status lookup, or a Khalti lookup API `Completed` status

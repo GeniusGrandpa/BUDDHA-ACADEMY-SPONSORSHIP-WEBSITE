@@ -183,7 +183,7 @@ The service layer keeps Supabase access organized by domain:
 | Localization | react-i18next with static JSON dictionaries and localized routes |
 | Server | Node.js HTTP server (`server/index.mjs`) with gzip, request IDs, structured JSON logs |
 | Backend Services | Supabase |
-| Edge Functions | Deno (`create-payment-intent`, `stripe-webhook`) |
+| Edge Functions | Deno (`create-payment-intent`, `stripe-webhook`, `esewa-pay`, `esewa-callback`, `khalti-pay`, `khalti-callback`) |
 | Payments | Stripe (PaymentIntents, Payment Element, webhooks) |
 | Database | Supabase PostgreSQL |
 | Authentication | Supabase Auth with PKCE, email verification, password reset |
@@ -241,9 +241,8 @@ The service layer keeps Supabase access organized by domain:
 
 ### Payment Verification
 
-- Automatic gateway verification only: Stripe webhook, eSewa signed callback + status lookup, and Khalti lookup API are the only paths that mark a payment as paid.
-- Server-verified payments create donation records through controlled, service_role-only RPC logic (`stripe_confirm_payment`, `esewa_confirm_payment`, `khalti_confirm_payment`).
-- Donors are redirected to hosted gateways; the app auto-confirms via server-side lookup/callback Edge Functions.
+- Stripe: automatic webhook verification only — the Stripe webhook confirms card payments server-side.
+- eSewa/Khalti: hosted redirect flow with signed callback + status lookup. The Edge Function verifies the transaction and marks the session as `payment_received` + `pending_verification`. Finance/Admin manually verifies via `verify_payment()` then approves via `approve_payment()`.
 - Every payment action is audit-logged; card failures surface sanitized, user-friendly error messages.
 - **Stripe is geo-restricted and does not support Nepal** — Nepal IPs are blocked from Stripe's domains (Dashboard and the browser-based Payment Element). Nepal-based donors should use Khalti/eSewa (hosted redirect); use a VPN in a supported region for Stripe testing. See [`docs/PAYMENTS.md`](docs/PAYMENTS.md).
 
@@ -296,8 +295,8 @@ The service layer keeps Supabase access organized by domain:
 
 1. **Donation creation** A donor selects a donation amount, sponsorship context, or general donation pathway.
 2. **Payment** The donor pays through a hosted gateway (Stripe card, eSewa, or Khalti).
-3. **Server verification** A gateway webhook/callback (Stripe signature, eSewa signature + status lookup, Khalti lookup API) confirms the payment server-side.
-4. **Financial review** Finance staff view real transaction status; no manual payment is ever "marked paid".
+3. **Server verification** A gateway webhook/callback (Stripe signature, eSewa signature + status lookup, Khalti lookup API) confirms the payment server-side. For eSewa/Khalti, the session is marked as `payment_received` + `pending_verification`.
+4. **Manual verification** For eSewa/Khalti, Finance staff verify the payment via `verify_payment()`, then Admin approves via `approve_payment()`. Stripe payments are auto-confirmed.
 5. **Receipt generation** Confirmed payments generate receipts for donor communication and reporting.
 6. **Audit logging** Sensitive payment and verification actions are logged for accountability.
 
@@ -417,7 +416,7 @@ The platform includes a database-driven design management system.
 - **Protected Routes** through route-level guards.
 - **Row Level Security** on Supabase tables.
 - **Audit Logging** for sensitive administrative actions.
-- **Secure Payment Verification** through server-verified gateway confirmations (Stripe webhook, eSewa/Khalti callback lookups) — no client-trusted status and no manual review path.
+- **Secure Payment Verification** through server-verified gateway confirmations (Stripe webhook) and manual Finance/Admin verification for eSewa/Khalti — no client-trusted status.
 - **Sanitized Error Handling** sensitive details (SQL, paths, keys, traces) are never shown to users; errors surface as friendly messages via a centralized error library (`src/lib/errors.ts`).
 - **Structured Logging** the SSR server writes JSON logs with per-request IDs (`X-Request-Id`) and crash handlers for uncaught exceptions and unhandled rejections.
 - **File Upload Validation** for media assets.
@@ -577,33 +576,56 @@ npm run preview
 
 1. Create or open a Supabase project.
 2. Apply migrations from `supabase/migrations/` in timestamp order.
-3. Configure Supabase Auth email provider and SMTP.
-4. Enable email confirmations for account verification.
-5. Add local and production redirect URLs.
-6. Configure storage buckets and RLS policies.
-7. Confirm required RPC functions are available.
-8. Deploy the Edge Functions (`supabase/functions/`):
+3. Configure Supabase Auth (see **Auth Configuration** below).
+4. Configure storage buckets and RLS policies.
+5. Confirm required RPC functions are available.
+6. Deploy the Edge Functions (`supabase/functions/`):
 
 ```bash
 supabase functions deploy create-payment-intent
 supabase functions deploy stripe-webhook
+supabase functions deploy esewa-pay
+supabase functions deploy esewa-callback
+supabase functions deploy khalti-pay
+supabase functions deploy khalti-callback
 ```
 
-9. Set Edge Function secrets:
+7. Set Edge Function secrets:
 
 ```bash
 supabase secrets set STRIPE_SECRET_KEY=sk_...
 supabase secrets set STRIPE_WEBHOOK_SECRET=whsec_...
 supabase secrets set SUPABASE_SERVICE_ROLE_KEY=...
+supabase secrets set ESEWA_ENVIRONMENT=uat
+supabase secrets set ESEWA_MERCHANT_CODE=EPAYTEST
+supabase secrets set ESEWA_SECRET_KEY=...
+supabase secrets set ESEWA_RETURN_URL=https://buddha-academy.vercel.app
+supabase secrets set KHALTI_ENVIRONMENT=test
+supabase secrets set KHALTI_SECRET_KEY=...
+supabase secrets set KHALTI_WEBSITE_URL=https://buddha-academy.vercel.app
+supabase secrets set KHALTI_RETURN_URL=https://buddha-academy.vercel.app
 ```
 
-Recommended local redirect URL:
+### Auth Configuration
 
-```text
-http://localhost:5174/auth/callback
-```
+In the Supabase Dashboard → **Authentication** → **URL Configuration**:
 
-For deployed environments, replace the domain with the production URL.
+1. Set **Site URL** to your production domain:
+   ```
+   https://buddha-academy.vercel.app
+   ```
+
+2. Add **Redirect URLs**:
+   ```
+   https://buddha-academy.vercel.app/auth/callback
+   https://buddha-academy.vercel.app/reset-password
+   http://localhost:5174/auth/callback
+   http://localhost:5174/reset-password
+   ```
+
+3. Go to **Authentication** → **Providers** → **Email** and ensure **Confirm email** is enabled.
+
+4. Verify the email confirmation template contains `{{ .ConfirmationURL }}`.
 
 ## Deployment
 

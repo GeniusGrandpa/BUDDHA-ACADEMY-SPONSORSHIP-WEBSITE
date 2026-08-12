@@ -95,9 +95,7 @@ Practical implications:
 
 ## eSewa ePay v2 Flow
 
-eSewa uses a hosted redirect flow: the donor is sent to eSewa's login page, then returned
-to the app's `success_url`/`failure_url`, where a signed callback is verified server-side
-before the payment session is finalized (no manual admin review).
+eSewa uses a hosted redirect flow with manual Finance/Admin verification:
 
 ```
 Donor picks eSewa in the PaymentModal
@@ -118,20 +116,23 @@ Donor picks eSewa in the PaymentModal
         │     decodes & verifies the signed callback,
         │     cross-checks total_amount vs the payment session,
         │     calls eSewa's transaction/status endpoint (requires COMPLETE),
-        │     then calls esewa_confirm_payment RPC (session → completed + donation/receipt)
-        │  failed → esewa_fail_payment (session → cancelled)
+        │     marks payment_session as payment_received + pending_verification
+        │  failed → cancel_payment_session (session → cancelled)
         │
-7. Donor sees a success/failure page, then navigates to their donations
+7. Finance/Admin manually verifies via verify_payment()
+        │
+8. Admin approves via approve_payment()
+        │
+9. Donor sees a success page, then navigates to their donations
 ```
 
 #### Apps
 
 - `supabase/functions/esewa-pay/index.ts` — signs the request and returns the eSewa form.
-- `supabase/functions/esewa-callback/index.ts` — verifies the callback + status, confirms.
+- `supabase/functions/esewa-callback/index.ts` — verifies the callback + status, marks for manual verification.
 - `src/services/esewaPay.ts` — client wrapper (`initiateEsewaPayment`, `confirmEsewaPayment`).
 - `src/components/payments/esewa/EsewaPayment.tsx` — payment modal gateway UI.
 - `src/pages/EsewaReturnPage.tsx` — return/confirmation page (`/donate/esewa/return`).
-- DB: `esewa_confirm_payment` / `esewa_fail_payment` (migration `20260824000001_esewa_gateway.sql`)
 
 #### Configure the eSewa gateway
 
@@ -162,7 +163,7 @@ supabase secrets set \
 
 ## Khalti ePayment Flow
 
-Khalti uses a server-to-server initiate + hosted redirect + lookup-verify flow (KPG-2):
+Khalti uses a server-to-server initiate + hosted redirect + lookup-verify flow with manual Finance/Admin verification:
 
 ```
 Donor picks Khalti in the PaymentModal
@@ -182,11 +183,15 @@ Donor picks Khalti in the PaymentModal
         │     POSTs pidx to Khalti /epayment/lookup/
         │     requires lookup status = Completed
         │     cross-checks total_amount (paisa→NPR) vs the payment session
-        │     then calls khalti_confirm_payment RPC (session → completed + donation/receipt)
-        │  canceled/expired → khalti_fail_payment (session → cancelled/failed)
+        │     marks payment_session as payment_received + pending_verification
+        │  canceled/expired → cancel_payment_session (session → cancelled/failed)
         │  pending/initiated → session held for later confirmation
         │
-7. Donor sees a success/failure page, then navigates to their donations
+7. Finance/Admin manually verifies via verify_payment()
+        │
+8. Admin approves via approve_payment()
+        │
+9. Donor sees a success page, then navigates to their donations
 ```
 
 Only `status == Completed` from the lookup API is treated as success. `User canceled`,
@@ -195,11 +200,10 @@ Only `status == Completed` from the lookup API is treated as success. `User canc
 #### Apps
 
 - `supabase/functions/khalti-pay/index.ts` — initiates the payment with Khalti and returns `payment_url`.
-- `supabase/functions/khalti-callback/index.ts` — verifies via the lookup API, confirms/fails.
+- `supabase/functions/khalti-callback/index.ts` — verifies via the lookup API, marks for manual verification.
 - `src/services/khaltiPay.ts` — client wrapper (`initiateKhaltiPayment`, `confirmKhaltiPayment`).
 - `src/components/payments/khalti/KhaltiPayment.tsx` — payment modal gateway UI (auto-redirect).
 - `src/pages/KhaltiReturnPage.tsx` — return/confirmation page (`/donate/khalti/return`).
-- DB: `khalti_confirm_payment` / `khalti_fail_payment` (migration `20260825000001_khalti_gateway.sql`)
 
 #### Configure the Khalti gateway
 
@@ -235,9 +239,8 @@ payment option; its `payment_settings` row is deactivated (`is_active = false`) 
 ## Key Design Decisions
 
 - `initiate_payment_checkout()` creates `payment_sessions` independently no pre-existing donation required
-- `stripe_confirm_payment()` / `esewa_confirm_payment()` / `khalti_confirm_payment()` create the `donations`
-  row **only** after a server-verified gateway confirmation (signature verified, amount/currency matched,
-  idempotent, service_role only)
+- Stripe: `stripe_confirm_payment()` creates the `donations` row after server-verified webhook confirmation
+- eSewa/Khalti: callbacks mark `payment_sessions` as `payment_received` + `pending_verification`; Finance/Admin manually verifies via `verify_payment()` then approves via `approve_payment()`
 - `payment_sessions.idempotency_key` with unique partial index prevents duplicate session creation
 - Direct `donations` table inserts are disabled frontend `createDonation()` throws
 - Failed/cancelled/expired/abandoned sessions never create donation records

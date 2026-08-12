@@ -106,10 +106,9 @@ All schema changes in `supabase/migrations/` (80 files), applied in timestamp or
 | `initiate_payment_checkout` | Create payment session (Khalti/eSewa/Stripe only) |
 | `stripe_confirm_payment` | Stripe webhook: confirm card payment + create donation record |
 | `stripe_fail_payment` | Stripe webhook: mark payment failed/cancelled |
-| `esewa_confirm_payment` | eSewa callback: confirm payment + create donation record |
-| `esewa_fail_payment` | eSewa callback: mark payment failed/cancelled |
-| `khalti_confirm_payment` | Khalti lookup: confirm payment + create donation record |
-| `khalti_fail_payment` | Khalti lookup: mark payment failed/cancelled |
+| `verify_payment` | Finance verifies a payment_session (manual eSewa/Khalti verification) |
+| `approve_payment` | Admin approves a verified payment_session + creates donation record |
+| `reject_payment` | Admin rejects a payment_session |
 | `cancel_payment_session` | Cancel an abandoned payment session |
 | `get_user_permissions` | Fetch custom permissions for a user |
 | `reset_design_settings` | Reset design to defaults |
