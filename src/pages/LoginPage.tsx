@@ -83,10 +83,18 @@ export function LoginPage() {
   )
 
   useEffect(() => {
-    if (user && profile && !authLoading) {
-      redirectByRole(profile.role as Role)
+    if (user && !authLoading) {
+      // Check if email is verified
+      if (!user.email_confirmed_at) {
+        navigate(localize('/verify-email'), { replace: true })
+        return
+      }
+      // If verified and has profile, redirect by role
+      if (profile) {
+        redirectByRole(profile.role as Role)
+      }
     }
-  }, [user, profile, authLoading, redirectByRole])
+  }, [user, profile, authLoading, redirectByRole, navigate, localize])
 
   const switchMode = (newMode: AuthMode) => {
     setMode(newMode)

@@ -25,6 +25,7 @@ export interface AuthContextType {
   profile: Profile | null
   permissions: PermissionCode[]
   loading: boolean
+  isEmailVerified: boolean
   signIn: (email: string, password: string) => Promise<SignInResult>
   signUp: (email: string, password: string, fullName: string, country: string) => Promise<SignUpResult>
   resendVerificationEmail: (email: string) => Promise<ResendResult>

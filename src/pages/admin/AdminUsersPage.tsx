@@ -11,6 +11,7 @@ import { ROLE_NAMES } from '../../features/auth/types/permissions'
 import type { Role } from '../../features/auth/types/permissions'
 import type { Profile } from '../../types/database'
 import { Mail, CheckCircle, XCircle, Loader2, Search } from 'lucide-react'
+import { getAuthRedirectUrl } from '../../features/auth/utils/redirectUrl'
 
 type UserStatus = 'active' | 'inactive' | 'suspended' | 'banned'
 
@@ -174,7 +175,7 @@ export function AdminUsersPage() {
       const { error } = await supabase.auth.resend({
         type: 'signup',
         email,
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+        options: { emailRedirectTo: getAuthRedirectUrl('/auth/callback') },
       })
       if (error) throw error
       toast.success('Verification email sent successfully')

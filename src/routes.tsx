@@ -10,7 +10,7 @@ import { AdminErrorPage } from './components/pages/AdminErrorPage'
 import { DEFAULT_LOCALE } from './i18n'
 import { ENABLE_VISUAL_BUILDER } from './config/feature-flags'
 import { Navigate } from 'react-router-dom'
-import { LazyPage, AdminIndexRedirect, HomePage, AboutPage, SponsorshipPage, StudentsPage, StudentDetailPage, GalleryPage, NewsPage, NewsDetailPage, ContactPage, DonatePage, EsewaReturnPage, TransparencyPage, FAQPage, VolunteerPage, PrivacyPage, TermsPage, LoginPage, ForgotPasswordPage, ResetPasswordPage, AuthCallbackPage, NotFoundPage, DashboardPage, CampaignsPage, SuccessStoriesPage, ActivityPage, DonationHistoryPage, AdminLayout, AdminStudentsPage, AdminDonationsPage, AdminNewsPage, AdminGalleryPage, AdminContactsPage, AdminDonorsPage, AdminPaymentVerificationPage, AdminPaymentSettingsPage, AdminEventsPage, AdminNotificationsPage, AdminReportsPage, AdminUsersPage, SuperAdminLayout, SuperAdminUsersPage, SuperAdminRolesPage, SuperAdminAuditLogsPage, SuperAdminNotificationsPage, FinanceDashboard, SponsorshipDashboard, VolunteerDashboard, WebsiteDashboard, WebsiteBuilder, MediaLibrary, BrandingEditor, SEOEditor, AboutPageEditor, ContactPageEditor, CampaignsEditor, PrivacyPageEditor, TermsPageEditor, HomePageEditor, AdminContentGallery, AdminVideoManager, AdminContentTestimonials, AdminContentNews, AdminStudentStories, AdminTransparencyContent, AdminFaqManager, AdminPageEditor, AdminVersionHistory, AdminSiteSettings, AdminNavigationManager, AdminAnnouncements, AdminPartners, AdminDonationContent, AdminSponsorshipContent, AdminVolunteerContent, AdminFooterContent, AdminSiteImages, AdminSectionVisibility, AdminDesignDashboard, AdminBrandingPage, AdminColorsPage, AdminTypographyPage, AdminLayoutPage, AdminComponentsPage, AdminConfigPage, AdminThemePresetsPage, PreviewPage, KhaltiReturnPage } from './route-pages'
+import { LazyPage, AdminIndexRedirect, HomePage, AboutPage, SponsorshipPage, StudentsPage, StudentDetailPage, GalleryPage, NewsPage, NewsDetailPage, ContactPage, DonatePage, EsewaReturnPage, TransparencyPage, FAQPage, VolunteerPage, PrivacyPage, TermsPage, LoginPage, ForgotPasswordPage, ResetPasswordPage, AuthCallbackPage, EmailVerificationRequiredPage, NotFoundPage, DashboardPage, CampaignsPage, SuccessStoriesPage, ActivityPage, DonationHistoryPage, AdminLayout, AdminStudentsPage, AdminDonationsPage, AdminNewsPage, AdminGalleryPage, AdminContactsPage, AdminDonorsPage, AdminPaymentVerificationPage, AdminPaymentSettingsPage, AdminEventsPage, AdminNotificationsPage, AdminReportsPage, AdminUsersPage, SuperAdminLayout, SuperAdminUsersPage, SuperAdminRolesPage, SuperAdminAuditLogsPage, SuperAdminNotificationsPage, FinanceDashboard, SponsorshipDashboard, VolunteerDashboard, WebsiteDashboard, WebsiteBuilder, MediaLibrary, BrandingEditor, SEOEditor, AboutPageEditor, ContactPageEditor, CampaignsEditor, PrivacyPageEditor, TermsPageEditor, HomePageEditor, AdminContentGallery, AdminVideoManager, AdminContentTestimonials, AdminContentNews, AdminStudentStories, AdminTransparencyContent, AdminFaqManager, AdminPageEditor, AdminVersionHistory, AdminSiteSettings, AdminNavigationManager, AdminAnnouncements, AdminPartners, AdminDonationContent, AdminSponsorshipContent, AdminVolunteerContent, AdminFooterContent, AdminSiteImages, AdminSectionVisibility, AdminDesignDashboard, AdminBrandingPage, AdminColorsPage, AdminTypographyPage, AdminLayoutPage, AdminComponentsPage, AdminConfigPage, AdminThemePresetsPage, PreviewPage, KhaltiReturnPage } from './route-pages'
 
 export const routeDefinitions: RouteObject[] = [
   {
@@ -55,9 +55,13 @@ export const routeDefinitions: RouteObject[] = [
           { path: 'register', loader: () => redirect('/login'), element: null },
           { path: 'forgot-password', element: <LazyPage Component={ForgotPasswordPage} />, errorElement: <RouteErrorPage /> },
           { path: 'reset-password', element: <LazyPage Component={ResetPasswordPage} />, errorElement: <RouteErrorPage /> },
-          { path: 'auth/callback', element: <LazyPage Component={AuthCallbackPage} />, errorElement: <RouteErrorPage /> },
           { path: '*', element: <LazyPage Component={NotFoundPage} />, errorElement: <RouteErrorPage /> },
         ],
+      },
+      {
+        path: '/verify-email',
+        element: <LazyPage Component={EmailVerificationRequiredPage} />,
+        errorElement: <RouteErrorPage />,
       },
       {
         path: '/dashboard',

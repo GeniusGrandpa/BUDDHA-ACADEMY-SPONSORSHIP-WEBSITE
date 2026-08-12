@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useEffect, useRef, type FormEvent } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 
 import { supabase } from '../../../lib/supabase'
@@ -36,6 +36,7 @@ import { useSiteCurrency } from '../hooks/useSiteCurrency'
 import { Tr } from '../../../components/Translated'
 import { useTranslation } from 'react-i18next'
 import { COUNTRY_CODES } from '../../../data/countryCodes'
+import { useLocalizePath } from '../../../hooks/useLocalizePath'
 
 function getGreeting() {
   const hour = new Date().getHours()
@@ -46,11 +47,20 @@ function getGreeting() {
 
 export function DashboardPage() {
   const { t } = useTranslation()
-  const { user, profile, refreshProfile } = useAuth()
+  const { user, profile, refreshProfile, isEmailVerified } = useAuth()
+  const navigate = useNavigate()
+  const localize = useLocalizePath()
   const userId = user?.id
   const currency = useSiteCurrency()
   const [searchParams] = useSearchParams()
   const initialSection = (searchParams.get('tab') === 'notifications' ? 'updates' : 'overview') as Section
+
+  // Redirect unverified users to verification page
+  useEffect(() => {
+    if (user && !isEmailVerified) {
+      navigate(localize('/verify-email'), { replace: true })
+    }
+  }, [user, isEmailVerified, navigate, localize])
 
   const {
     donations,

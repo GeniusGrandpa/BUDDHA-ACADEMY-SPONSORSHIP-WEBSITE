@@ -43,14 +43,14 @@ const FREQUENCY_LABELS: Record<string, string> = {
 export function DonationHistoryPage() {
   const { t } = useCmsStrings()
   const currency = useSiteCurrency()
-  const { user, profile } = useAuth()
+  const { user, profile, isEmailVerified } = useAuth()
   const [donations, setDonations] = useState<DonationWithPayment[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
 
   const loadDonations = useCallback(async () => {
-    if (!user) return
+    if (!user || !isEmailVerified) return
     setLoading(true)
     try {
       const data = await getDonorDonationsWithPayment(user.id)
@@ -59,7 +59,7 @@ export function DonationHistoryPage() {
     } finally {
       setLoading(false)
     }
-  }, [user])
+  }, [user, isEmailVerified])
 
   useEffect(() => {
     loadDonations()

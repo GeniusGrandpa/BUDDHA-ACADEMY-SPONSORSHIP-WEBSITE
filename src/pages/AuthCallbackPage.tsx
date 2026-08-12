@@ -44,6 +44,12 @@ async function getRedirectPathForCurrentUser(): Promise<string> {
   try {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return '/'
+    
+    // Check if email is verified
+    if (!user.email_confirmed_at) {
+      return '/verify-email'
+    }
+    
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')

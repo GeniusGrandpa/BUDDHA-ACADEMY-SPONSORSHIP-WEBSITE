@@ -59,6 +59,8 @@ export const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage').
 
 export const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage').then(m => ({ default: m.AuthCallbackPage })))
 
+export const EmailVerificationRequiredPage = lazy(() => import('./pages/EmailVerificationRequiredPage').then(m => ({ default: m.EmailVerificationRequiredPage })))
+
 export const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })))
 
 export const DashboardPage = lazy(() => import('./features/donor-dashboard/pages/DashboardPage').then(m => ({ default: m.DashboardPage })))
@@ -177,13 +179,14 @@ export const AdminThemePresetsPage = lazy(() => import('./pages/admin/design/Adm
 export const PreviewPage = lazy(() => import('./pages/preview/PreviewPage').then(m => ({ default: m.PreviewPage })))
 
 export function AdminIndexRedirect() {
-  const { profile, loading, user } = useAuth()
+  const { profile, loading, user, isEmailVerified } = useAuth()
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen p-8">
       <DashboardSkeleton />
     </div>
   )
   if (!user) return <Navigate to="/login" replace />
+  if (!isEmailVerified) return <Navigate to="/verify-email" replace />
   if (!profile) return <Navigate to="/login" replace />
 
   const redirectPath = getRedirectPath(profile.role as Role)

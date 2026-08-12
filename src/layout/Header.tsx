@@ -15,7 +15,7 @@ import fallbackLogo from '../assets/logo.jpg'
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const { user, profile, signOut } = useAuth()
+  const { user, profile, signOut, isEmailVerified } = useAuth()
   const { t } = useCmsStrings()
   const { branding } = useTheme()
   const { language } = useLanguage()
@@ -108,7 +108,7 @@ export function Header() {
           <div className="hidden lg:flex items-center gap-5">
             <LanguageSwitcher />
 
-            {user ? (
+            {user && isEmailVerified ? (
               <div className="flex items-center gap-4">
                 {(profile?.role === 'admin' || profile?.role === 'super_admin') && (
                   <Link to={localize(profile?.role === 'super_admin' ? '/super-admin' : '/admin')}
@@ -128,6 +128,17 @@ export function Header() {
                     {t('header_dashboard')}
                   </Link>
                 )}
+                <button onClick={handleSignOut}
+                  className="text-sm font-medium transition-colors hover:opacity-80 text-[var(--color-navbar-text)]">
+                  {t('header_sign_out')}
+                </button>
+              </div>
+            ) : user && !isEmailVerified ? (
+              <div className="flex items-center gap-4">
+                <Link to={localize('/verify-email')}
+                  className="text-sm font-medium transition-colors hover:opacity-80 text-orange-600">
+                  {t('Verify Email')}
+                </Link>
                 <button onClick={handleSignOut}
                   className="text-sm font-medium transition-colors hover:opacity-80 text-[var(--color-navbar-text)]">
                   {t('header_sign_out')}
@@ -173,7 +184,7 @@ export function Header() {
               <div className="pt-2 pb-1">
                 <LanguageSwitcher mobile />
               </div>
-              {user ? (
+              {user && isEmailVerified ? (
                 <div className="space-y-1 pt-2 border-t border-[var(--color-border)]">
                   {(profile?.role === 'admin' || profile?.role === 'super_admin') && (
                     <Link to={localize(profile?.role === 'super_admin' ? '/super-admin' : '/admin')}
@@ -194,6 +205,17 @@ export function Header() {
                       {t('header_dashboard')}
                     </Link>
                   )}
+                  <button onClick={() => { handleSignOut(); setIsMenuOpen(false) }}
+                    className="block w-full text-left px-4 py-3 rounded-lg text-sm font-medium text-[var(--color-navbar-text)]">
+                    {t('header_sign_out')}
+                  </button>
+                </div>
+              ) : user && !isEmailVerified ? (
+                <div className="space-y-1 pt-2 border-t border-[var(--color-border)]">
+                  <Link to={localize('/verify-email')} onClick={() => setIsMenuOpen(false)}
+                    className="block px-4 py-3 rounded-lg text-sm font-medium text-orange-600">
+                    {t('Verify Email')}
+                  </Link>
                   <button onClick={() => { handleSignOut(); setIsMenuOpen(false) }}
                     className="block w-full text-left px-4 py-3 rounded-lg text-sm font-medium text-[var(--color-navbar-text)]">
                     {t('header_sign_out')}

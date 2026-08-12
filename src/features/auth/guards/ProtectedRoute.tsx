@@ -42,7 +42,7 @@ export function ProtectedRoute({
   requiredPermission,
   requiredAnyPermission,
 }: ProtectedRouteProps) {
-  const { user, profile, loading, signOut } = useAuth()
+  const { user, profile, loading, signOut, isEmailVerified } = useAuth()
   const location = useLocation()
   const signedOut = useRef(false)
   const localize = useLocalizePath()
@@ -67,6 +67,11 @@ export function ProtectedRoute({
 
   if (!user) {
     return <Navigate to={localize('/login')} state={{ from: location }} replace />
+  }
+
+  // Check email verification
+  if (!isEmailVerified) {
+    return <Navigate to={localize('/verify-email')} state={{ from: location }} replace />
   }
 
   if (profile?.status === 'suspended' || profile?.status === 'banned') {

@@ -22,7 +22,7 @@ export function DonatePage() {
   const { t } = useCmsStrings()
   const { language } = useLanguage()
   const [searchParams] = useSearchParams()
-  const { user } = useAuth()
+  const { user, isEmailVerified } = useAuth()
   const [students, setStudents] = useState<Student[]>([])
   const [showPaymentModal, setShowPaymentModal] = useState(false)
   const [content, setContent] = useState<DonationContent | null>(null)
@@ -113,7 +113,7 @@ export function DonatePage() {
   }
 
   const handleDonate = () => {
-    if (!user) return
+    if (!user || !isEmailVerified) return
     setShowPaymentModal(true)
   }
 

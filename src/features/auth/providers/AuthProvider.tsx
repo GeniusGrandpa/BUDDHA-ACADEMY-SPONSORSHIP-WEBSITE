@@ -85,35 +85,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [permissions, setPermissions] = useState<PermissionCode[]>([])
   const [loading, setLoading] = useState(true)
+  const [isEmailVerified, setIsEmailVerified] = useState(false)
 
   const applySession = useCallback(async (session: Session | null): Promise<Profile | null> => {
     if (!session?.user) {
       setUser(null)
       setProfile(null)
       setPermissions([])
-      return null
-    }
-
-    if (!session.user.email_confirmed_at) {
-      await supabase.auth.signOut()
-      setUser(null)
-      setProfile(null)
-      setPermissions([])
+      setIsEmailVerified(false)
       return null
     }
 
     setUser(session.user)
+    setIsEmailVerified(!!session.user.email_confirmed_at)
 
-    const [currentProfile, currentPermissions] = await Promise.all([
-      safeFetchOrCreateProfile(session.user),
-      safeFetchPermissions(session.user.id),
-    ])
+    // Only fetch profile and permissions if email is verified
+    if (session.user.email_confirmed_at) {
+      const [currentProfile, currentPermissions] = await Promise.all([
+        safeFetchOrCreateProfile(session.user),
+        safeFetchPermissions(session.user.id),
+      ])
 
-    setProfile(currentProfile)
-    if (currentProfile) {
-      setPermissions(currentPermissions)
+      setProfile(currentProfile)
+      if (currentProfile) {
+        setPermissions(currentPermissions)
+      }
+      return currentProfile
+    } else {
+      // For unverified users, don't create profile or fetch permissions
+      setProfile(null)
+      setPermissions([])
+      return null
     }
-    return currentProfile
   }, [])
 
   const refreshProfile = useCallback(async () => {
@@ -173,6 +176,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(null)
           setProfile(null)
           setPermissions([])
+          setIsEmailVerified(false)
         }
       } catch {
       } finally {
@@ -215,7 +219,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (data.user) {
         if (!data.user.email_confirmed_at) {
-          await supabase.auth.signOut()
+          // Keep the user authenticated but mark as unverified
+          setUser(data.user)
+          setIsEmailVerified(false)
+          setProfile(null)
+          setPermissions([])
+          setLoading(false)
           return {
             error: { message: 'Please verify your email address before signing in', category: 'verification' },
             needsVerification: true,
@@ -229,6 +238,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const currentPermissions = currentProfile ? await safeFetchPermissions(data.user.id) : []
 
         setUser(data.user)
+        setIsEmailVerified(true)
         setProfile(currentProfile)
         setPermissions(currentPermissions)
         setLoading(false)
@@ -238,6 +248,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(null)
           setProfile(null)
           setPermissions([])
+          setIsEmailVerified(false)
           return {
             error: {
               message: 'Your account has been suspended. Please contact support',
@@ -343,6 +354,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null)
     setProfile(null)
     setPermissions([])
+    setIsEmailVerified(false)
   }
 
   const value: AuthContextType = {
@@ -350,6 +362,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     profile,
     permissions,
     loading,
+    isEmailVerified,
     signIn,
     signUp,
     resendVerificationEmail,
