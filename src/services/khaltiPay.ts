@@ -20,8 +20,7 @@ export interface KhaltiConfirmResult {
 export function getKhaltiReturnBaseUrl(): string {
   const configured = import.meta.env.VITE_PUBLIC_BASE_URL as string | undefined
   if (configured) return configured
-  if (typeof window !== 'undefined') return window.location.origin
-  return ''
+  return 'https://buddha-academy.vercel.app'
 }
 
 export async function initiateKhaltiPayment(

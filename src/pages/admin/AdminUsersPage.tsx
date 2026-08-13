@@ -72,6 +72,7 @@ export function AdminUsersPage() {
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [verificationFilter, setVerificationFilter] = useState<string>('all')
   const [updating, setUpdating] = useState<string | null>(null)
   const [stats, setStats] = useState<UserStats | null>(null)
   const [roleDropdown, setRoleDropdown] = useState<Record<string, string>>({})
@@ -113,6 +114,12 @@ export function AdminUsersPage() {
   }, [])
 
   useEffect(() => { loadData() }, [loadData])
+
+  useEffect(() => {
+    if (users.length > 0) {
+      users.forEach(u => fetchVerificationStatus(u.id))
+    }
+  }, [users])
 
   const fetchVerificationStatus = async (userId: string) => {
     if (verificationStatus[userId]) return
@@ -202,6 +209,12 @@ export function AdminUsersPage() {
     if (search && !u.full_name.toLowerCase().includes(search.toLowerCase()) && !u.email.toLowerCase().includes(search.toLowerCase())) return false
     if (roleFilter !== 'all' && u.role !== roleFilter) return false
     if (statusFilter !== 'all' && u.status !== statusFilter) return false
+    if (verificationFilter !== 'all') {
+      const vStatus = verificationStatus[u.id]
+      if (!vStatus) return false
+      if (verificationFilter === 'verified' && !vStatus.is_verified) return false
+      if (verificationFilter === 'unverified' && vStatus.is_verified) return false
+    }
     return true
   })
 
@@ -327,6 +340,12 @@ export function AdminUsersPage() {
               <option value="inactive">Inactive</option>
               <option value="suspended">Suspended</option>
               <option value="banned">Banned</option>
+            </select>
+            <select value={verificationFilter} onChange={(e) => setVerificationFilter(e.target.value)}
+              className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-amber-500/50">
+              <option value="all">All Verification</option>
+              <option value="verified">Verified Only</option>
+              <option value="unverified">Unverified Only</option>
             </select>
           </div>
         </div>

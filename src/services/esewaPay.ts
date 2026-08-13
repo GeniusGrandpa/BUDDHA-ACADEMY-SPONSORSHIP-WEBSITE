@@ -18,8 +18,7 @@ export interface EsewaConfirmResult {
 export function getEsewaReturnBaseUrl(): string {
   const configured = import.meta.env.VITE_PUBLIC_BASE_URL as string | undefined
   if (configured) return configured
-  if (typeof window !== 'undefined') return window.location.origin
-  return ''
+  return 'https://buddha-academy.vercel.app'
 }
 
 export async function initiateEsewaPayment(
