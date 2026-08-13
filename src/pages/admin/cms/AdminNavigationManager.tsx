@@ -203,11 +203,11 @@ export function AdminNavigationManager() {
                   </select>
                 </div>
               )}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Input label="Route (e.g., /about)" value={form.route} onChange={e => setForm(prev => ({ ...prev, route: e.target.value }))} />
                 <Input label="External URL" value={form.url} onChange={e => setForm(prev => ({ ...prev, url: e.target.value }))} placeholder="https://..." />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Open in</label>
                   <select value={form.target} onChange={e => setForm(prev => ({ ...prev, target: e.target.value as '_self' | '_blank' }))} title="Link target" className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:border-transparent">

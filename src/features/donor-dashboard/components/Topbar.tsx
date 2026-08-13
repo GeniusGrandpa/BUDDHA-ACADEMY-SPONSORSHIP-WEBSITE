@@ -36,34 +36,34 @@ export function Topbar({ userName, onMenuClick, userId, onSectionChange }: Topba
 
   return (
     <header className="sticky top-0 z-30 bg-white/70 backdrop-blur-xl border-b border-gray-100/80">
-      <div className="flex items-center justify-between h-16 px-4 lg:px-6 gap-4">
-        <div className="flex items-center gap-3 min-w-0">
+      <div className="flex items-center justify-between h-14 sm:h-16 px-3 sm:px-4 lg:px-6 gap-2 sm:gap-4">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
             onClick={onMenuClick}
-            className="lg:hidden p-2 -ml-2 rounded-xl hover:bg-orange-100 text-gray-500 transition-colors"
+            className="lg:hidden p-2 -ml-1 sm:-ml-2 rounded-xl hover:bg-orange-100 text-gray-500 transition-colors"
             aria-label="Open menu"
           >
             <Menu className="w-5 h-5" />
           </button>
           <Link to={localize('/')} className="shrink-0">
-            <img src={logo} alt="Buddha Academy" className="h-9 w-9 rounded-lg object-cover" loading="eager" decoding="async" />
+            <img src={logo} alt="Buddha Academy" className="h-8 sm:h-9 w-8 sm:w-9 rounded-lg object-cover" loading="eager" decoding="async" />
           </Link>
-          <div className="hidden sm:block">
-<h1 className="text-sm font-medium text-gray-900 truncate">
-                {t('dashboard_welcome_back', { defaultValue: 'Welcome back,' })} {userName}
-              </h1>
-              <p className="text-xs text-gray-500">{t('dashboard_impact_overview', { defaultValue: "Here's your impact overview" })}</p>
+          <div className="hidden sm:block min-w-0">
+            <h1 className="text-sm font-medium text-gray-900 truncate">
+              {t('dashboard_welcome_back', { defaultValue: 'Welcome back,' })} {userName}
+            </h1>
+            <p className="text-xs text-gray-500 truncate">{t('dashboard_impact_overview', { defaultValue: "Here's your impact overview" })}</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 shrink-0">
           <div className={`relative hidden md:block transition-all duration-200 ${searchFocused ? 'md:w-72' : 'md:w-56'}`}>
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
-<input
-                type="text"
-                placeholder={t('Search...', { defaultValue: 'Search...' })}
-                onFocus={() => setSearchFocused(true)}
-                onBlur={() => setSearchFocused(false)}
+            <input
+              type="text"
+              placeholder={t('Search...', { defaultValue: 'Search...' })}
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => setSearchFocused(false)}
               className="w-full h-9 pl-9 pr-3 text-sm bg-orange-50/50 border border-orange-100 rounded-xl text-gray-600 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-200/50 focus:border-orange-300 transition-all"
             />
           </div>
@@ -74,12 +74,12 @@ export function Topbar({ userName, onMenuClick, userId, onSectionChange }: Topba
           <div ref={avatarRef} className="relative">
             <button
               onClick={() => setAvatarOpen(!avatarOpen)}
-              className="flex items-center gap-1.5 p-0.5 pr-1.5 rounded-xl hover:bg-orange-50 transition-colors"
+              className="flex items-center gap-1.5 p-0.5 pr-1 sm:pr-1.5 rounded-xl hover:bg-orange-50 transition-colors"
             >
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center text-white text-sm font-medium ring-2 ring-white">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center text-white text-xs sm:text-sm font-medium ring-2 ring-white">
                 {userName.charAt(0).toUpperCase()}
               </div>
-              <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-200 ${avatarOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-200 hidden sm:block ${avatarOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {avatarOpen && (
@@ -121,16 +121,6 @@ export function Topbar({ userName, onMenuClick, userId, onSectionChange }: Topba
               </div>
             )}
           </div>
-        </div>
-      </div>
-
-      <div className="sm:hidden flex items-center gap-2 px-4 pb-3">
-        <Link to={localize('/')} className="shrink-0">
-          <img src={logo} alt="Buddha Academy" className="h-7 w-7 rounded object-cover" loading="eager" decoding="async" />
-        </Link>
-        <div>
-          <h1 className="text-sm font-medium text-gray-900">{t('dashboard_welcome_back', { defaultValue: 'Welcome back,' })} {userName}</h1>
-          <p className="text-xs text-gray-500">{t('dashboard_impact_overview', { defaultValue: "Here's your impact overview" })}</p>
         </div>
       </div>
     </header>

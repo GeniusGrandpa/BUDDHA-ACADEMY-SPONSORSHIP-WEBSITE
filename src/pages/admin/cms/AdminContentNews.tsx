@@ -165,7 +165,7 @@ export function AdminContentNews() {
                   <input id="news-title" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })}
                     className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:border-amber-500/50" />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="news-category" className="block text-sm font-medium text-gray-700 mb-1">Category</label>
                     <select id="news-category" value={form.category} onChange={e => setForm({ ...form, category: e.target.value as NewsCategory })}

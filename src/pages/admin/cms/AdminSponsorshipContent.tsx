@@ -169,7 +169,7 @@ export function AdminSponsorshipContent() {
               <textarea value={ctaDescription} onChange={e => setCtaDescription(e.target.value)} rows={2}
                 placeholder="Call to action description" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50 resize-none" />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-600 mb-1">Button Text</label>
                 <input value={ctaButtonText} onChange={e => setCtaButtonText(e.target.value)}

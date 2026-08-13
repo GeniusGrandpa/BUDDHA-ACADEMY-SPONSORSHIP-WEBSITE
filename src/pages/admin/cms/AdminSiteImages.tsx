@@ -175,7 +175,7 @@ export function AdminSiteImages() {
                     placeholder="https://..."
                     className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-600 mb-1">Title</label>
                     <input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })}
@@ -190,7 +190,7 @@ export function AdminSiteImages() {
                     </select>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-600 mb-1">Position</label>
                     <select value={form.position} onChange={e => setForm({ ...form, position: e.target.value })}

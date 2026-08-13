@@ -14,7 +14,7 @@ export function Layout() {
     <div className="min-h-screen flex flex-col bg-[var(--color-background)] text-[var(--color-text-primary)] overflow-x-hidden">
       <SeoMetadata routeSlug={isAdminRoute ? '' : pageSlug} />
       <Header />
-      <main className="flex-grow w-full max-w-[100vw]">
+      <main className="flex-grow w-full min-w-0">
         <div key={location.pathname} className="page-fade">
           <ErrorBoundary context={pageSlug}>
             <Outlet />

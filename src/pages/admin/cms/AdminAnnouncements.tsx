@@ -180,7 +180,7 @@ export function AdminAnnouncements() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Content</label>
                 <textarea value={form.content} onChange={e => setForm(prev => ({ ...prev, content: e.target.value }))} rows={3} placeholder="Enter announcement content" className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:border-transparent" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
                   <select value={form.type} onChange={e => setForm(prev => ({ ...prev, type: e.target.value as AnnouncementType }))} title="Announcement type" className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:border-transparent">
@@ -196,7 +196,7 @@ export function AdminAnnouncements() {
                 </div>
               </div>
               <Input label="Link Text" value={form.link_text} onChange={e => setForm(prev => ({ ...prev, link_text: e.target.value }))} />
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Input label="Start Date" type="datetime-local" value={form.starts_at} onChange={e => setForm(prev => ({ ...prev, starts_at: e.target.value }))} />
                 <Input label="End Date" type="datetime-local" value={form.ends_at} onChange={e => setForm(prev => ({ ...prev, ends_at: e.target.value }))} />
               </div>

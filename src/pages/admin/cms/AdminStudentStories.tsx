@@ -174,7 +174,7 @@ export function AdminStudentStories() {
                 <button onClick={() => setShowModal(false)} className="px-3 py-1 rounded-lg hover:bg-gray-100 text-sm text-gray-500">Close</button>
               </div>
               <div className="p-4 space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Story Title *</label>
                     <input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })}
@@ -192,7 +192,7 @@ export function AdminStudentStories() {
                     rows={6} placeholder="Write the student's story..."
                     className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:border-amber-500/50 resize-vertical" />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
                     <input value={form.image_url} onChange={e => setForm({ ...form, image_url: e.target.value })}

@@ -86,7 +86,7 @@ export function PreviewPage() {
       <div className="min-h-screen flex flex-col bg-[var(--color-background)] text-[var(--color-text-primary)] overflow-x-hidden">
         <PreviewBanner />
         <Header />
-        <main className="flex-grow w-full max-w-[100vw]">
+        <main className="flex-grow w-full min-w-0">
           {PageComponent ? (
             <Suspense fallback={<Fallback />}>
               <PageComponent />

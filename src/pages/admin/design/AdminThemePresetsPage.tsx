@@ -95,7 +95,7 @@ export function AdminThemePresetsPage() {
 
       {showSaveDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowSaveDialog(false)}>
-          <div className="w-full max-w-md rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] p-6 shadow-xl" onClick={e => e.stopPropagation()}>
+          <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] p-6 shadow-xl" onClick={e => e.stopPropagation()}>
             <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">Save Theme Preset</h3>
             <p className="text-sm text-[var(--color-text-secondary)] mt-1">Save the current design configuration as a reusable preset.</p>
             <div className="mt-4 space-y-3">

@@ -190,7 +190,7 @@ const [form, setForm] = useState<TestimonialForm>({
                 <button onClick={() => setShowModal(false)} className="px-3 py-1 rounded-lg hover:bg-gray-100 text-sm text-gray-500">Close</button>
               </div>
               <div className="p-4 space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-600 mb-1">Name *</label>
                     <input value={form.author_name} onChange={e => setForm({ ...form, author_name: e.target.value })}
@@ -208,7 +208,7 @@ const [form, setForm] = useState<TestimonialForm>({
                     rows={4} placeholder="Enter testimonial content"
                     className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50 resize-none" />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-600 mb-1">Type</label>
                     <select value={form.testimonial_type} onChange={e => setForm({ ...form, testimonial_type: e.target.value as TestimonialType })}

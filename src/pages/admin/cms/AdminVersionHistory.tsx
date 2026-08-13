@@ -142,7 +142,7 @@ export function AdminVersionHistory() {
               initial={{ scale: 0.95 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.95 }}
-              className="bg-white border border-gray-200 rounded-xl w-full max-w-md"
+              className="bg-white border border-gray-200 rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto"
             >
               <div className="p-4 border-b border-gray-100">
                 <h2 className="text-lg font-semibold text-gray-900">Restore Version</h2>

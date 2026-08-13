@@ -291,7 +291,7 @@ export function AdminContentGallery() {
                     className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:border-amber-500/50" />
                   <p className="text-xs text-gray-400 mt-1">Recommended for videos. Leave as is to keep an existing thumbnail.</p>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-600 mb-1">Type</label>
                     <select value={form.type} onChange={e => setForm({ ...form, type: e.target.value as 'photo' | 'video' | 'testimonial' })}
