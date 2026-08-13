@@ -45,7 +45,7 @@ export function Topbar({ userName, onMenuClick, userId, onSectionChange }: Topba
           >
             <Menu className="w-5 h-5" />
           </button>
-          <Link to={localize('/')} className="shrink-0">
+          <Link to={localize('/')} className="shrink-0 lg:hidden">
             <img src={logo} alt="Buddha Academy" className="h-8 sm:h-9 w-8 sm:w-9 rounded-lg object-cover" loading="eager" decoding="async" />
           </Link>
           <div className="hidden sm:block min-w-0">
