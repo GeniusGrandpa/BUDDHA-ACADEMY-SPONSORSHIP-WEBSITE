@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Download, Search, Filter } from 'lucide-react'
+import { Download, Search, Filter, ArrowLeft } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { getDonorDonationsWithPayment } from '../services/payments'
 import { generateReceiptPDF, generateDonationHistoryPDF, exportToCSV } from '../features/donor-dashboard/utils/pdfGenerator'
@@ -8,6 +9,7 @@ import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { Tr } from '../components/Translated'
 import { useCmsStrings } from '../context/CmsStringsContext'
+import { useLocalizePath } from '../hooks/useLocalizePath'
 import { TableSkeleton } from '../components/ui/LoadingSkeleton'
 import { formatCurrency } from '../utils/currency'
 import { useSiteCurrency } from '../features/donor-dashboard/hooks/useSiteCurrency'
@@ -42,6 +44,7 @@ const FREQUENCY_LABELS: Record<string, string> = {
 
 export function DonationHistoryPage() {
   const { t } = useCmsStrings()
+  const localize = useLocalizePath()
   const currency = useSiteCurrency()
   const { user, profile, isEmailVerified } = useAuth()
   const [donations, setDonations] = useState<DonationWithPayment[]>([])
@@ -128,6 +131,10 @@ export function DonationHistoryPage() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
+            <Link to={localize('/')} className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-3">
+              <ArrowLeft className="w-4 h-4" />
+              <Tr text={t('notfound_home_button') || 'Back to Home'} />
+            </Link>
             <h1 className="text-2xl font-bold text-gray-900"><Tr text={t('donation_history_title')} /></h1>
             <p className="text-sm text-gray-500 mt-1"><Tr text={t('donation_history_subtitle')} /></p>
           </div>
@@ -231,7 +238,7 @@ export function DonationHistoryPage() {
         {donations.length > 0 && (
           <div className="mt-6 bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
             <p className="font-medium mb-1"><Tr text="Total Donations" /></p>
-            <p className="text-2xl font-bold">{formatCurrency(donations.reduce((s, d) => s + d.amount, 0), currency)}</p>
+            <p className="text-2xl font-bold">{formatCurrency(donations.filter(d => d.status === 'completed' || d.status === 'verified').reduce((s, d) => s + d.amount, 0), currency)}</p>
           </div>
         )}
       </div>

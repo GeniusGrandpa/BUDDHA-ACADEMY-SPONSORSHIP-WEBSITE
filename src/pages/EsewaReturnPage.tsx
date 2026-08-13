@@ -76,9 +76,12 @@ export function EsewaReturnPage() {
                 {t('payment_transaction_id')}: <span className="font-mono font-medium text-gray-900">{result.transactionId}</span>
               </p>
             )}
-            <div className="mt-6">
+            <div className="mt-6 space-y-2">
               <Link to="/donations">
                 <Button className="w-full" size="lg">{t('payment_esewa_go_dashboard')}</Button>
+              </Link>
+              <Link to={localize('/')} className="block text-sm text-gray-500 hover:text-gray-700 py-1">
+                {t('notfound_home_button')}
               </Link>
             </div>
           </div>

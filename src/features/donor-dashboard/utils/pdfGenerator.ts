@@ -254,7 +254,7 @@ export function generateDonationHistoryPDF(
   doc.setTextColor(TEXT_MUTED)
   doc.text(`Donor: ${donor.name}`, 20, 68)
 
-  const totalDonated = donations.reduce((sum, d) => sum + d.amount, 0)
+  const totalDonated = donations.filter(d => d.status === 'completed' || d.status === 'verified').reduce((sum, d) => sum + d.amount, 0)
   doc.text(`Total Donations: ${donations.length}`, 20, 75)
   doc.text(`Total Amount: ${formatCurrency(totalDonated, currency)}`, pageWidth - 20, 75, { align: 'right' })
   doc.text(`Generated: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`, pageWidth - 20, 82, { align: 'right' })

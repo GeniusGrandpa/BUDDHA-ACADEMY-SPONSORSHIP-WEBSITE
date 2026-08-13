@@ -95,7 +95,7 @@ export function DashboardPage() {
     prevDonationsRef.current = donations
   }, [donations, currency, t])
 
-  const totalDonated = donorStats?.totalDonated ?? donations.reduce((sum, d) => sum + d.amount, 0)
+  const totalDonated = donorStats?.totalDonated ?? donations.filter(d => d.status === 'completed' || d.status === 'verified').reduce((sum, d) => sum + d.amount, 0)
   const activeSponsorships = sponsorships.filter(s => s.status === 'active')
   const totalSponsored = sponsorships.length
   const lastDonationDate = donorStats?.lastDonationDate ?? ''

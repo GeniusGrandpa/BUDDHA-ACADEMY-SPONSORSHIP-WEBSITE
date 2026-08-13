@@ -84,7 +84,7 @@ export function TransactionSection({
         <div className="bg-white rounded-xl border border-gray-100 p-4">
           <span className="text-xs font-medium uppercase tracking-wider text-gray-500 mb-1 block"><Tr text="Total Given" /></span>
           <p className="text-2xl font-bold text-gray-900">
-            {formatCurrency(stats.totalAmount, currency)}
+            {formatCurrency(stats.completedAmount, currency)}
           </p>
         </div>
       </div>
