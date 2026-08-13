@@ -49,7 +49,7 @@ BEGIN
   SELECT COUNT(*) INTO donation_count FROM donations WHERE donor_id = target_user_id;
   SELECT COUNT(*) INTO sponsorship_count FROM sponsorships WHERE donor_id = target_user_id;
   SELECT COUNT(*) INTO notification_count FROM notifications WHERE user_id = target_user_id;
-  SELECT COUNT(*) INTO audit_count FROM audit_logs WHERE user_id = target_user_id OR entity_id = target_user_id;
+  SELECT COUNT(*) INTO audit_count FROM audit_logs WHERE user_id = target_user_id OR entity_id = target_user_id::text;
   
   RETURN jsonb_build_object(
     'donations', donation_count,
