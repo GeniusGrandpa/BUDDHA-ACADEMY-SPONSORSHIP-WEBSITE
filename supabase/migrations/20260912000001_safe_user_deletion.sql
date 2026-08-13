@@ -3,19 +3,32 @@
 -- while preserving all historical student, sponsorship, and payment data.
 
 -- Add 'deleted' status to profiles if not already supported
-DO $$ BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_constraint 
-    WHERE conname = 'profiles_status_check' 
-    AND conrelid = (SELECT oid FROM pg_class WHERE relname = 'profiles')
-  ) THEN
-    ALTER TABLE profiles 
-    DROP CONSTRAINT IF EXISTS profiles_status_check;
-    
-    ALTER TABLE profiles 
-    ADD CONSTRAINT profiles_status_check 
-    CHECK (status IN ('active', 'inactive', 'suspended', 'banned', 'deleted'));
+-- Drop any existing CHECK constraint on the status column (regardless of its name)
+DO $$
+DECLARE
+  constraint_name TEXT;
+BEGIN
+  SELECT c.conname INTO constraint_name
+  FROM pg_constraint c
+  JOIN pg_class r ON c.conrelid = r.oid
+  WHERE r.relname = 'profiles'
+    AND c.contype = 'c'
+    AND c.conkey IS NOT NULL
+    AND EXISTS (
+      SELECT 1 FROM pg_attribute a
+      WHERE a.attrelid = r.oid
+        AND a.attnum = ANY(c.conkey)
+        AND a.attname = 'status'
+    )
+  LIMIT 1;
+
+  IF constraint_name IS NOT NULL THEN
+    EXECUTE format('ALTER TABLE profiles DROP CONSTRAINT %I', constraint_name);
   END IF;
+
+  ALTER TABLE profiles
+  ADD CONSTRAINT profiles_status_check
+  CHECK (status IN ('active', 'inactive', 'suspended', 'banned', 'deleted'));
 END $$;
 
 -- Create function to check user's related records
@@ -36,7 +49,7 @@ BEGIN
   SELECT COUNT(*) INTO donation_count FROM donations WHERE donor_id = target_user_id;
   SELECT COUNT(*) INTO sponsorship_count FROM sponsorships WHERE donor_id = target_user_id;
   SELECT COUNT(*) INTO notification_count FROM notifications WHERE user_id = target_user_id;
-  SELECT COUNT(*) INTO audit_count FROM audit_logs WHERE actor_id = target_user_id OR entity_id = target_user_id;
+  SELECT COUNT(*) INTO audit_count FROM audit_logs WHERE user_id = target_user_id OR entity_id = target_user_id;
   
   RETURN jsonb_build_object(
     'donations', donation_count,
@@ -102,12 +115,12 @@ BEGIN
   WHERE id = target_user_id;
   
   -- Log the deletion action
-  INSERT INTO audit_logs (actor_id, action, entity_type, entity_id, metadata, created_at)
+  INSERT INTO audit_logs (user_id, action, entity_type, entity_id, metadata, created_at)
   VALUES (
     auth.uid(),
     'user.deleted',
     'profile',
-    target_user_id,
+    target_user_id::text,
     jsonb_build_object(
       'previous_status', current_status,
       'previous_role', current_role,
@@ -172,12 +185,12 @@ BEGIN
   WHERE id = target_user_id;
   
   -- Log the restoration
-  INSERT INTO audit_logs (actor_id, action, entity_type, entity_id, metadata, created_at)
+  INSERT INTO audit_logs (user_id, action, entity_type, entity_id, metadata, created_at)
   VALUES (
     auth.uid(),
     'user.restored',
     'profile',
-    target_user_id,
+    target_user_id::text,
     jsonb_build_object(
       'previous_status', current_status,
       'changed_by', auth.uid()

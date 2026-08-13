@@ -9,3 +9,6 @@ dist/
 
 *.tsbuildinfo
 vite.config.d.ts
+
+.vercel
+.env*
