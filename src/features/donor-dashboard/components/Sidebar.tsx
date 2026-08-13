@@ -63,15 +63,17 @@ function SidebarContent({ collapsed, onToggleCollapse, onSignOut, userName, acti
   return (
     <div className="flex flex-col h-full bg-warm-50">
       <div className={`relative flex items-center h-16 border-b border-gray-100 ${collapsed ? 'justify-center' : 'px-4 justify-between'}`}>
-        <div className={`flex items-center gap-2.5 min-w-0 ${collapsed ? 'justify-center' : ''}`}>
-          {!collapsed && <img src={logo} alt="Buddha Academy" className="h-8 w-8 rounded-lg object-cover shrink-0" loading="eager" decoding="async" />}
-          {!collapsed && <span className="font-semibold text-gray-900 text-sm truncate">Buddha Academy</span>}
-        </div>
+        {!collapsed && (
+          <div className="flex items-center gap-2.5 min-w-0">
+            <img src={logo} alt="Buddha Academy" className="h-8 w-8 rounded-lg object-cover shrink-0" loading="eager" decoding="async" />
+            <span className="font-semibold text-gray-900 text-sm truncate">Buddha Academy</span>
+          </div>
+        )}
         {!inOverlay && (
           <button
             onClick={onToggleCollapse}
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            className="absolute right-2 z-10 flex items-center justify-center w-6 h-6 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-orange-600 hover:border-orange-300 shadow-sm transition-all"
+            className={`absolute z-10 flex items-center justify-center w-6 h-6 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-orange-600 hover:border-orange-300 shadow-sm transition-all ${collapsed ? 'left-1/2 -translate-x-1/2' : 'right-2'}`}
           >
             {collapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
           </button>
