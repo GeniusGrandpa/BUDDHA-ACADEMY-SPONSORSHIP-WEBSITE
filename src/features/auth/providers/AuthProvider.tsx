@@ -106,6 +106,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         safeFetchPermissions(session.user.id),
       ])
 
+      // Check if user is deleted
+      if (currentProfile && currentProfile.status === 'deleted') {
+        // Sign out deleted users
+        await supabase.auth.signOut()
+        setUser(null)
+        setProfile(null)
+        setPermissions([])
+        setIsEmailVerified(false)
+        return null
+      }
+
       setProfile(currentProfile)
       if (currentProfile) {
         setPermissions(currentPermissions)
@@ -123,6 +134,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data } = await supabase.auth.getSession()
     if (data.session?.user) {
       const currentProfile = await safeFetchOrCreateProfile(data.session.user)
+      
+      // Check if user is deleted
+      if (currentProfile && currentProfile.status === 'deleted') {
+        await supabase.auth.signOut()
+        setUser(null)
+        setProfile(null)
+        setPermissions([])
+        setIsEmailVerified(false)
+        return null
+      }
+      
       setProfile(currentProfile)
       return currentProfile
     }

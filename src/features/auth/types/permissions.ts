@@ -81,7 +81,7 @@ export interface UserProfile {
   role: Role
   avatar_url: string | null
   bio: string | null
-  status: 'active' | 'inactive' | 'suspended' | 'banned'
+  status: 'active' | 'inactive' | 'suspended' | 'banned' | 'deleted'
   last_login_at: string | null
   login_attempts: number
   last_activity_at: string | null

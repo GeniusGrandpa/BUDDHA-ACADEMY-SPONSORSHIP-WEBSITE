@@ -8,8 +8,9 @@ import toast from 'react-hot-toast'
 import { getErrorMessage } from '../../lib/errors'
 import type { Role } from '../../features/auth/types/permissions'
 import type { Profile } from '../../types/database'
+import { Trash2, ShieldCheck, AlertTriangle, Loader2 } from 'lucide-react'
 
-type UserStatus = 'active' | 'inactive' | 'suspended' | 'banned'
+type UserStatus = 'active' | 'inactive' | 'suspended' | 'banned' | 'deleted'
 
 interface ExtendedProfile extends Profile {
   status: UserStatus
@@ -206,13 +207,15 @@ export function SuperAdminUsersPage() {
   const [stats, setStats] = useState<UserStats | null>(null)
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set())
   const [confirmAction, setConfirmAction] = useState<{
-    type: 'super_admin' | 'suspend' | 'restore' | 'bulk_suspend' | 'bulk_restore'
+    type: 'super_admin' | 'suspend' | 'restore' | 'bulk_suspend' | 'bulk_restore' | 'delete_user'
     userId?: string; userName?: string; newRole?: string; currentRole?: string
   } | null>(null)
   const [roleModal, setRoleModal] = useState<{ user: ExtendedProfile } | null>(null)
   const [historyModal, setHistoryModal] = useState<{ userId: string; userName: string } | null>(null)
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const [relatedRecords, setRelatedRecords] = useState<{ donations: number; sponsorships: number; notifications: number; audit_logs: number } | null>(null)
+  const [checkingRecords, setCheckingRecords] = useState<string | null>(null)
   const { profile: currentUser } = useAuth()
 
   useEffect(() => {
@@ -290,6 +293,52 @@ export function SuperAdminUsersPage() {
     }
   }
 
+  const checkRelatedRecords = async (userId: string) => {
+    try {
+      const result = await supabase.rpc('get_user_related_record_counts' as never, { target_user_id: userId } as never)
+      const typed = result as unknown as { data: { donations: number; sponsorships: number; notifications: number; audit_logs: number }; error: unknown }
+      if (!typed.error && typed.data) {
+        return typed.data
+      }
+      return { donations: 0, sponsorships: 0, notifications: 0, audit_logs: 0 }
+    } catch {
+      return { donations: 0, sponsorships: 0, notifications: 0, audit_logs: 0 }
+    }
+  }
+
+  const deleteUser = async (userId: string, reason: string) => {
+    setUpdating(userId)
+    try {
+      const result = await supabase.rpc('admin_delete_user' as never, { target_user_id: userId, delete_reason: reason } as never)
+      const typed = result as unknown as { data: { success: boolean; message: string; related_records: { donations: number; sponsorships: number; notifications: number; audit_logs: number }; user_email: string; user_name: string }; error: unknown }
+      if (typed.error) throw typed.error
+      if (typed.data?.success) {
+        toast.success('User deleted successfully. All historical data has been preserved.')
+        await loadData()
+      }
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Failed to delete user'))
+    } finally {
+      setUpdating(null)
+      setConfirmAction(null)
+    }
+  }
+
+  const restoreUser = async (userId: string) => {
+    setUpdating(userId)
+    try {
+      const { error } = await supabase.rpc('admin_restore_user' as never, { target_user_id: userId } as never)
+      if (error) throw error
+      toast.success('User restored successfully')
+      await loadData()
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Failed to restore user'))
+    } finally {
+      setUpdating(null)
+      setConfirmAction(null)
+    }
+  }
+
   const filteredUsers = users.filter(u => {
     if (search && !u.full_name.toLowerCase().includes(search.toLowerCase()) && !u.email.toLowerCase().includes(search.toLowerCase())) return false
     if (roleFilter !== 'all' && u.role !== roleFilter) return false
@@ -301,7 +350,7 @@ export function SuperAdminUsersPage() {
 
   const statusColors: Record<UserStatus, string> = {
     active: 'bg-emerald-100 text-emerald-700', inactive: 'bg-gray-100 text-gray-600',
-    suspended: 'bg-amber-100 text-amber-700', banned: 'bg-red-100 text-red-700',
+    suspended: 'bg-amber-100 text-amber-700', banned: 'bg-red-100 text-red-700', deleted: 'bg-purple-100 text-purple-700',
   }
 
   const getConfirmMessage = () => {
@@ -312,6 +361,12 @@ export function SuperAdminUsersPage() {
       case 'restore': return `Restore "${confirmAction.userName}" account access?`
       case 'bulk_suspend': return `Suspend ${selectedUsers.size} selected users? They will lose all platform access.`
       case 'bulk_restore': return `Restore ${selectedUsers.size} selected users?`
+      case 'delete_user': {
+        if (relatedRecords) {
+          return `Delete "${confirmAction.userName}"? This will deactivate their account but preserve all historical data: ${relatedRecords.donations} donations, ${relatedRecords.sponsorships} sponsorships, ${relatedRecords.notifications} notifications, ${relatedRecords.audit_logs} audit logs. This action cannot be undone.`
+        }
+        return `Delete "${confirmAction.userName}"? This will deactivate their account but preserve all historical data. This action cannot be undone.`
+      }
       default: return ''
     }
   }
@@ -341,21 +396,25 @@ export function SuperAdminUsersPage() {
     <div className="space-y-6">
       <ConfirmModal
         open={confirmAction !== null}
-        title={confirmAction?.type === 'super_admin' ? 'Promote to Super Admin?' : confirmAction?.type === 'suspend' ? 'Suspend User?' : confirmAction?.type === 'restore' ? 'Restore User?' : confirmAction?.type === 'bulk_suspend' ? 'Bulk Suspend?' : confirmAction?.type === 'bulk_restore' ? 'Bulk Restore?' : 'Confirm'}
+        title={confirmAction?.type === 'super_admin' ? 'Promote to Super Admin?' : confirmAction?.type === 'suspend' ? 'Suspend User?' : confirmAction?.type === 'restore' ? 'Restore User?' : confirmAction?.type === 'bulk_suspend' ? 'Bulk Suspend?' : confirmAction?.type === 'bulk_restore' ? 'Bulk Restore?' : confirmAction?.type === 'delete_user' ? 'Delete User?' : 'Confirm'}
         message={getConfirmMessage()}
-        confirmLabel={confirmAction?.type === 'super_admin' ? 'Promote to Super Admin' : confirmAction?.type === 'suspend' ? 'Suspend User' : confirmAction?.type === 'restore' ? 'Restore User' : confirmAction?.type === 'bulk_suspend' ? 'Suspend All' : confirmAction?.type === 'bulk_restore' ? 'Restore All' : 'Confirm'}
+        confirmLabel={confirmAction?.type === 'super_admin' ? 'Promote to Super Admin' : confirmAction?.type === 'suspend' ? 'Suspend User' : confirmAction?.type === 'restore' ? 'Restore User' : confirmAction?.type === 'bulk_suspend' ? 'Suspend All' : confirmAction?.type === 'bulk_restore' ? 'Restore All' : confirmAction?.type === 'delete_user' ? 'Delete User' : 'Confirm'}
         onConfirm={() => {
           if (!confirmAction) return
           switch (confirmAction.type) {
             case 'super_admin': executeRoleUpdate(confirmAction.userId!, confirmAction.newRole!); break
             case 'suspend': updateStatus(confirmAction.userId!, 'suspended'); break
-            case 'restore': updateStatus(confirmAction.userId!, 'active'); break
+            case 'restore': restoreUser(confirmAction.userId!); break
             case 'bulk_suspend': handleBulkAction('suspend'); break
             case 'bulk_restore': handleBulkAction('restore'); break
+            case 'delete_user': deleteUser(confirmAction.userId!, ''); break
           }
         }}
-        onCancel={() => setConfirmAction(null)}
-        loading={updating !== null}
+        onCancel={() => {
+          setConfirmAction(null)
+          setRelatedRecords(null)
+        }}
+        loading={updating !== null || checkingRecords !== null}
         variant={confirmAction?.type === 'restore' || confirmAction?.type === 'bulk_restore' ? 'info' : confirmAction?.type === 'super_admin' ? 'warning' : 'danger'}
       />
       <ChangeRoleModal
@@ -433,6 +492,7 @@ export function SuperAdminUsersPage() {
               <option value="inactive">Inactive</option>
               <option value="suspended">Suspended</option>
               <option value="banned">Banned</option>
+              <option value="deleted">Deleted</option>
             </select>
           </div>
           {selectedUsers.size > 0 && (
@@ -528,16 +588,48 @@ export function SuperAdminUsersPage() {
                                   View History
                                 </button>
                                 <div className="border-t border-gray-100 my-1" />
-                                {user.status === 'active' ? (
-                                  <button onClick={() => { setConfirmAction({ type: 'suspend', userId: user.id, userName: user.full_name }); setDropdownOpen(null) }}
-                                    className="w-full px-4 py-2 text-sm text-left text-red-600 hover:bg-red-50">
-                                    Suspend
+                                {user.status !== 'deleted' ? (
+                                  <button
+                                    onClick={async () => {
+                                      setCheckingRecords(user.id)
+                                      const records = await checkRelatedRecords(user.id)
+                                      setRelatedRecords(records)
+                                      setCheckingRecords(null)
+                                      setConfirmAction({ type: 'delete_user', userId: user.id, userName: user.full_name })
+                                      setDropdownOpen(null)
+                                    }}
+                                    disabled={checkingRecords === user.id}
+                                    className="w-full px-4 py-2 text-sm text-left text-red-600 hover:bg-red-50 flex items-center gap-2"
+                                  >
+                                    {checkingRecords === user.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+                                    Delete User
                                   </button>
                                 ) : (
-                                  <button onClick={() => { setConfirmAction({ type: 'restore', userId: user.id, userName: user.full_name }); setDropdownOpen(null) }}
-                                    className="w-full px-4 py-2 text-sm text-left text-emerald-600 hover:bg-emerald-50">
-                                    Restore
+                                  <button
+                                    onClick={() => { setConfirmAction({ type: 'restore', userId: user.id, userName: user.full_name }); setDropdownOpen(null) }}
+                                    className="w-full px-4 py-2 text-sm text-left text-emerald-600 hover:bg-emerald-50 flex items-center gap-2"
+                                  >
+                                    <ShieldCheck className="w-3 h-3" />
+                                    Restore User
                                   </button>
+                                )}
+                                {user.status === 'active' && (
+                                  <>
+                                    <div className="border-t border-gray-100 my-1" />
+                                    <button onClick={() => { setConfirmAction({ type: 'suspend', userId: user.id, userName: user.full_name }); setDropdownOpen(null) }}
+                                      className="w-full px-4 py-2 text-sm text-left text-amber-600 hover:bg-amber-50">
+                                      Suspend
+                                    </button>
+                                  </>
+                                )}
+                                {user.status === 'suspended' && (
+                                  <>
+                                    <div className="border-t border-gray-100 my-1" />
+                                    <button onClick={() => { setConfirmAction({ type: 'restore', userId: user.id, userName: user.full_name }); setDropdownOpen(null) }}
+                                      className="w-full px-4 py-2 text-sm text-left text-emerald-600 hover:bg-emerald-50">
+                                      Restore Access
+                                    </button>
+                                  </>
                                 )}
                               </div>
                             )}

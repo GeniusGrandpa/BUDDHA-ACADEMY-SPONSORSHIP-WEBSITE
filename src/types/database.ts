@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Role = 'super_admin' | 'admin' | 'finance_manager' | 'teacher' | 'donor' | 'volunteer' | 'public_user'
-export type ProfileStatus = 'active' | 'inactive' | 'suspended' | 'banned'
+export type ProfileStatus = 'active' | 'inactive' | 'suspended' | 'banned' | 'deleted'
 export type DonationStatus = 'pending' | 'processing' | 'payment_received' | 'verified' | 'completed' | 'failed' | 'rejected' | 'cancelled' | 'received' | 'pledged'
 export type VerificationStatus = 'pending_verification' | 'verified' | 'rejected'
 export type AllocationCategory = 'Educational Materials' | 'Student Meals' | 'School Supplies' | 'Uniform Support' | 'Events & Activities' | 'Operations'
