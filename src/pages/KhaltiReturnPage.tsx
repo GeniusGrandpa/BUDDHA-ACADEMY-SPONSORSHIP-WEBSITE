@@ -35,7 +35,7 @@ export function KhaltiReturnPage() {
       try {
         const res = await confirmKhaltiPayment(sessionId, pidx || undefined, status || undefined)
         if (cancelled) return
-        if (res.status === 'confirmed') {
+        if (res.status === 'confirmed' || res.status === 'pending_verification') {
           setResult({ kind: 'confirmed', transactionId: res.transaction_id })
         } else if (res.status === 'cancelled') {
           setResult({ kind: 'cancelled' })

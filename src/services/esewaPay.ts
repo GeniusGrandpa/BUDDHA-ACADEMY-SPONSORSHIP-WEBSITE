@@ -11,7 +11,7 @@ export interface EsewaPaymentInit {
 }
 
 export interface EsewaConfirmResult {
-  status: 'confirmed' | 'cancelled' | 'processing'
+  status: 'confirmed' | 'cancelled' | 'processing' | 'pending_verification'
   transaction_id?: string
 }
 

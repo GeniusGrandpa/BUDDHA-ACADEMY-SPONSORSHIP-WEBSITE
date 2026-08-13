@@ -13,7 +13,7 @@ export interface KhaltiPaymentInit {
 }
 
 export interface KhaltiConfirmResult {
-  status: 'confirmed' | 'cancelled' | 'failed' | 'processing'
+  status: 'confirmed' | 'cancelled' | 'failed' | 'processing' | 'pending_verification'
   transaction_id?: string
 }
 

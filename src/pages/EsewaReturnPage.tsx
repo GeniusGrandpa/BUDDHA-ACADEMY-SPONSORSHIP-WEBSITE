@@ -35,7 +35,7 @@ export function EsewaReturnPage() {
       try {
         const res = await confirmEsewaPayment(sessionId, data || undefined, !!failed)
         if (cancelled) return
-        if (res.status === 'confirmed') {
+        if (res.status === 'confirmed' || res.status === 'pending_verification') {
           setResult({ kind: 'confirmed', transactionId: res.transaction_id })
         } else if (res.status === 'cancelled') {
           setResult({ kind: 'cancelled' })
