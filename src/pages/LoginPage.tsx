@@ -642,6 +642,12 @@ export function LoginPage() {
                         setPassword(e.target.value)
                         setFieldErrors((prev) => ({ ...prev, password: undefined }))
                       }}
+                      onBlur={() => {
+                        if (password) {
+                          const result = validatePassword(password)
+                          if (!result.valid) setFieldErrors((prev) => ({ ...prev, password: result.error ?? undefined }))
+                        }
+                      }}
                       required
                       autoComplete="new-password"
                       error={fieldErrors.password}
@@ -666,6 +672,12 @@ export function LoginPage() {
                       onChange={(e) => {
                         setConfirmPassword(e.target.value)
                         setFieldErrors((prev) => ({ ...prev, confirmPassword: undefined }))
+                      }}
+                      onBlur={() => {
+                        if (confirmPassword) {
+                          const result = validateConfirmPassword(password, confirmPassword)
+                          if (!result.valid) setFieldErrors((prev) => ({ ...prev, confirmPassword: result.error ?? undefined }))
+                        }
                       }}
                       required
                       autoComplete="new-password"
