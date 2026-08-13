@@ -83,7 +83,28 @@ Set on both the Vite dev server (`vite.config.ts`) and the production SSR server
 | `Referrer-Policy` | `strict-origin-when-cross-origin` | Controls referrer header |
 | `X-Request-Id` | `randomUUID()` (server) | Request correlation ID in logs and responses |
 
-## SPA Routing Security
+### Content Security Policy (CSP)
+
+A strict CSP is configured via `<meta http-equiv="Content-Security-Policy">` in `index.html`:
+
+| Directive | Allowed Sources | Purpose |
+|-----------|----------------|---------|
+| `default-src` | `'self'` | Baseline: same-origin only |
+| `script-src` | `'self'`, `'unsafe-inline'`, `https://*.supabase.co`, `https://js.stripe.com` | App bundles, Supabase client, Stripe.js |
+| `worker-src` | `'self'`, `blob:` | Service workers, Stripe Web Workers |
+| `style-src` | `'self'`, `'unsafe-inline'`, `https://fonts.googleapis.com` | Tailwind utility classes, Google Fonts CSS |
+| `img-src` | `'self'`, `data:`, `blob:`, `https:` | Inline data URIs, Supabase Storage images, any HTTPS image |
+| `font-src` | `'self'`, `https://fonts.gstatic.com` | Google Fonts woff2 files |
+| `connect-src` | `'self'`, `data:`, `https://*.supabase.co`, `wss://*.supabase.co`, `https://api.stripe.com`, `https://m.stripe.com`, `https://m.stripe.network`, `https://js.stripe.com`, `https://hooks.stripe.com` | Supabase REST/Realtime, Stripe API, telemetry |
+| `frame-src` | `'self'`, `https://js.stripe.com`, `https://hooks.stripe.com` | Stripe checkout frames |
+| `object-src` | `'none'` | Blocks Flash/Java plugins |
+| `base-uri` | `'self'` | Prevents `<base>` tag injection |
+| `form-action` | `'self'`, `https://rc-epay.esewa.com.np`, `https://epay.esewa.com.np` | eSewa payment redirects |
+| `manifest-src` | `'self'`, `blob:` | PWA manifest |
+
+**`data:` in `connect-src`** is required for Supabase Realtime SSE fallback and react-hot-toast internal requests. Without it, the notifications page and Realtime channels fail silently.
+
+### Restricting remote database access
 
 - In development, Vite serves the app (with SSR middleware); in production, the Node SSR server (`server/index.mjs`) serves static assets and streamed HTML with proper 404 responses for unknown paths no blind SPA fallback that returns HTTP 200 for missing routes
 - Auth callback URLs validated server-side by Supabase against configured redirect URL whitelist

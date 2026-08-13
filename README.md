@@ -421,6 +421,7 @@ The platform includes a database-driven design management system.
 - **Structured Logging** the SSR server writes JSON logs with per-request IDs (`X-Request-Id`) and crash handlers for uncaught exceptions and unhandled rejections.
 - **File Upload Validation** for media assets.
 - **HTTP Security Headers** configured on both the Vite dev server and the production SSR server.
+- **Content Security Policy (CSP)** restricts script, style, connect, image, and frame sources to whitelisted origins only (Supabase, Stripe, Google Fonts). See [`docs/SECURITY.md`](docs/SECURITY.md) for the full directive table.
 - **Database hardening** through restricted table/function access and safer function search paths.
 
 ## Database Overview
