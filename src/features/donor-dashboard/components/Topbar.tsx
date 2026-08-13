@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react'
-import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Search, Menu, ChevronDown, User, Settings, LogOut, ExternalLink } from 'lucide-react'
 import { useAuth } from '../../../context/AuthContext'
@@ -7,7 +6,6 @@ import { NotificationBell } from '../../../components/notifications/Notification
 import { LanguageSwitcher } from '../../../components/LanguageSwitcher'
 import { useLocalizePath } from '../../../hooks/useLocalizePath'
 import type { Section } from './Sidebar'
-import logo from '../../../assets/logo.jpg'
 
 interface TopbarProps {
   userName: string
@@ -45,9 +43,6 @@ export function Topbar({ userName, onMenuClick, userId, onSectionChange }: Topba
           >
             <Menu className="w-5 h-5" />
           </button>
-          <Link to={localize('/')} className="shrink-0 lg:hidden">
-            <img src={logo} alt="Buddha Academy" className="h-8 sm:h-9 w-8 sm:w-9 rounded-lg object-cover" loading="eager" decoding="async" />
-          </Link>
           <div className="hidden sm:block min-w-0">
             <h1 className="text-sm font-medium text-gray-900 truncate">
               {t('dashboard_welcome_back', { defaultValue: 'Welcome back,' })} {userName}
