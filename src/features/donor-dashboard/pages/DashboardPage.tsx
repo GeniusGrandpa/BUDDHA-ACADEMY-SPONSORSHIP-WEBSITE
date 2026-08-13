@@ -55,12 +55,13 @@ export function DashboardPage() {
   const [searchParams] = useSearchParams()
   const initialSection = (searchParams.get('tab') === 'notifications' ? 'updates' : 'overview') as Section
 
-  // Redirect unverified users to verification page
+  const localizeRef = useRef(localize)
+  localizeRef.current = localize
   useEffect(() => {
     if (user && !isEmailVerified) {
-      navigate(localize('/verify-email'), { replace: true })
+      navigate(localizeRef.current('/verify-email'), { replace: true })
     }
-  }, [user, isEmailVerified, navigate, localize])
+  }, [user, isEmailVerified, navigate])
 
   const {
     donations,

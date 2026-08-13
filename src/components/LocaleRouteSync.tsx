@@ -10,30 +10,20 @@ export function LocaleRouteSync() {
   const routeLocale = pathname.split('/')[1]
 
   useEffect(() => {
-    let targetLocale: string
-
     if (isSupportedLocale(routeLocale)) {
-      targetLocale = routeLocale
-    } else {
-      const persistedLocale = typeof window !== 'undefined' 
-        ? window.localStorage.getItem(LANGUAGE_STORAGE_KEY) 
-        : null
-      
-      if (isSupportedLocale(persistedLocale ?? '')) {
-        targetLocale = persistedLocale as string
-      } else {
-        targetLocale = getBrowserLanguage()
-      }
+      startTransition(() => {
+        if (language !== routeLocale) {
+          setLanguage(routeLocale)
+        }
+        if (i18n.resolvedLanguage !== routeLocale) {
+          void i18n.changeLanguage(routeLocale)
+        }
+      })
+    } else if (i18n.resolvedLanguage !== language) {
+      startTransition(() => {
+        void i18n.changeLanguage(language)
+      })
     }
-
-    startTransition(() => {
-      if (language !== targetLocale) {
-        setLanguage(targetLocale)
-      }
-      if (i18n.resolvedLanguage !== targetLocale) {
-        void i18n.changeLanguage(targetLocale)
-      }
-    })
   }, [language, pathname, routeLocale, setLanguage])
 
   return null
