@@ -1,9 +1,6 @@
 import { type ReactNode } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-  LogOut, PanelLeftClose, PanelLeftOpen, ExternalLink,
-  LayoutDashboard, Users, Heart, Bell, User, Settings,
-} from 'lucide-react'
+import { ChevronLeft, ChevronRight, LogOut, ExternalLink, LayoutDashboard, Users, Heart, Bell, User, Settings } from 'lucide-react'
 import { sidebarItem } from '../animations'
 import logo from '../../../assets/logo.jpg'
 import { useAuth } from '../../../context/AuthContext'
@@ -36,12 +33,12 @@ const navItems: { label: string; section: Section; icon: typeof LayoutDashboard 
 const SIDEBAR_EXPANDED = 280
 const SIDEBAR_COLLAPSED = 72
 
-function TooltipWrapper({ collapsed, children, label }: { collapsed: boolean; children: ReactNode; label: string }) {
+function Tooltip({ collapsed, children, label }: { collapsed: boolean; children: ReactNode; label: string }) {
   if (!collapsed) return <>{children}</>
   return (
-    <div className="relative group/tooltip">
+    <div className="relative group/tip">
       {children}
-      <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1.5 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all pointer-events-none z-[100]">
+      <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3 px-2.5 py-1.5 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap opacity-0 invisible group-hover/tip:opacity-100 group-hover/tip:visible transition-all pointer-events-none z-[100] shadow-lg">
         {label}
         <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900" />
       </div>
@@ -64,24 +61,28 @@ function SidebarContent({ collapsed, onToggleCollapse, onSignOut, userName, acti
   const displayRole = profile?.role ? (ROLE_NAMES[profile.role as keyof typeof ROLE_NAMES] || profile.role) : 'Donor'
 
   return (
-    <div className="flex flex-col h-full bg-warm-50 border-r border-amber-200">
-      <div className={`relative flex items-center h-16 border-b border-gray-100 ${collapsed ? 'justify-center px-0' : 'px-4 justify-between'}`}>
-        <div className={`flex items-center gap-2.5 ${collapsed ? 'justify-center' : ''}`}>
+    <div className="flex flex-col h-full bg-warm-50">
+      <div className={`relative flex items-center h-16 border-b border-gray-100 ${collapsed ? 'justify-center' : 'px-4 justify-between'}`}>
+        <div className={`flex items-center gap-2.5 min-w-0 ${collapsed ? 'justify-center' : ''}`}>
           <img src={logo} alt="Buddha Academy" className="h-8 w-8 rounded-lg object-cover shrink-0" loading="eager" decoding="async" />
-          {!collapsed && <span className="font-semibold text-gray-900 text-sm">Buddha Academy</span>}
+          {!collapsed && <span className="font-semibold text-gray-900 text-sm truncate">Buddha Academy</span>}
         </div>
         {!inOverlay && (
-          <button onClick={onToggleCollapse} className={`p-1.5 rounded-lg hover:bg-orange-100 text-gray-400 hover:text-orange-600 transition-colors ${collapsed ? 'absolute right-2 top-1/2 -translate-y-1/2' : ''}`}>
-            {collapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
+          <button
+            onClick={onToggleCollapse}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            className="absolute right-2 z-10 flex items-center justify-center w-6 h-6 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-orange-600 hover:border-orange-300 shadow-sm transition-all"
+          >
+            {collapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
           </button>
         )}
       </div>
 
-      <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto overflow-x-hidden">
+      <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto overflow-x-hidden" role="navigation" aria-label="Dashboard navigation">
         {navItems.map((item, i) => {
           const active = activeSection === item.section
           const Icon = item.icon
-          const translatedLabel = t(item.label, { defaultValue: item.label.replace('dashboard_', '').replace('_', ' ') })
+          const label = t(item.label, { defaultValue: item.label.replace('dashboard_', '').replace('_', ' ') })
 
           return (
             <motion.button
@@ -90,7 +91,8 @@ function SidebarContent({ collapsed, onToggleCollapse, onSignOut, userName, acti
               initial={inOverlay ? undefined : 'initial'}
               animate={inOverlay ? undefined : 'animate'}
               transition={{ delay: i * 0.03 }}
-              onClick={() => { onSectionChange(item.section) }}
+              onClick={() => onSectionChange(item.section)}
+              aria-label={label}
               className={`
                 relative group w-full flex items-center rounded-xl text-sm font-medium transition-all
                 ${collapsed ? 'justify-center px-0 py-3' : 'px-3 py-2.5 gap-3'}
@@ -101,19 +103,18 @@ function SidebarContent({ collapsed, onToggleCollapse, onSignOut, userName, acti
               `}
             >
               <Icon className="w-5 h-5 shrink-0" />
-              {!collapsed && <span className="truncate">{translatedLabel}</span>}
-
-              <TooltipWrapper collapsed={collapsed} label={translatedLabel}>
+              {!collapsed && <span className="truncate">{label}</span>}
+              <Tooltip collapsed={collapsed} label={label}>
                 <div className="absolute inset-0" />
-              </TooltipWrapper>
+              </Tooltip>
             </motion.button>
           )
         })}
       </nav>
 
       <div className="p-2 border-t border-gray-100">
-        <TooltipWrapper collapsed={collapsed} label={userName}>
-          <div className={`flex items-center gap-3 mb-2 w-full rounded-xl transition-colors ${collapsed ? 'justify-center px-0 py-2' : 'px-2 py-2'}`}>
+        <Tooltip collapsed={collapsed} label={userName}>
+          <div className={`flex items-center gap-3 w-full rounded-xl transition-colors ${collapsed ? 'justify-center px-0 py-2.5' : 'px-2 py-2.5'}`}>
             <div className="w-7 h-7 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center text-white text-xs font-medium shrink-0">
               {userName.charAt(0).toUpperCase()}
             </div>
@@ -124,35 +125,35 @@ function SidebarContent({ collapsed, onToggleCollapse, onSignOut, userName, acti
               </div>
             )}
           </div>
-        </TooltipWrapper>
+        </Tooltip>
 
-        <TooltipWrapper collapsed={collapsed} label={t('dashboard_back_to_website', { defaultValue: 'Back to Website' })}>
+        <Tooltip collapsed={collapsed} label={t('dashboard_back_to_website', { defaultValue: 'Back to Website' })}>
           <a
             href={localize('/')}
             className={`
-              w-full flex items-center gap-3 rounded-xl text-sm font-medium transition-colors mb-0.5
-              ${collapsed ? 'justify-center px-0 py-3' : 'px-3 py-2.5'}
+              w-full flex items-center gap-3 rounded-xl text-sm font-medium transition-colors mt-1
+              ${collapsed ? 'justify-center px-0 py-2.5' : 'px-3 py-2.5'}
               text-gray-500 hover:bg-orange-50 hover:text-orange-600
             `}
           >
             <ExternalLink className="w-5 h-5 shrink-0" />
             {!collapsed && <span>{t('dashboard_back_to_website', { defaultValue: 'Back to Website' })}</span>}
           </a>
-        </TooltipWrapper>
+        </Tooltip>
 
-        <TooltipWrapper collapsed={collapsed} label={t('dashboard_sign_out', { defaultValue: 'Sign Out' })}>
+        <Tooltip collapsed={collapsed} label={t('dashboard_sign_out', { defaultValue: 'Sign Out' })}>
           <button
             onClick={onSignOut}
             className={`
-              w-full flex items-center gap-3 rounded-xl text-sm font-medium transition-colors
-              ${collapsed ? 'justify-center px-0 py-3' : 'px-3 py-2.5'}
+              w-full flex items-center gap-3 rounded-xl text-sm font-medium transition-colors mt-0.5
+              ${collapsed ? 'justify-center px-0 py-2.5' : 'px-3 py-2.5'}
               text-gray-500 hover:bg-red-50 hover:text-red-500
             `}
           >
             <LogOut className="w-5 h-5 shrink-0" />
             {!collapsed && <span>{t('dashboard_sign_out', { defaultValue: 'Sign Out' })}</span>}
           </button>
-        </TooltipWrapper>
+        </Tooltip>
       </div>
     </div>
   )
@@ -165,8 +166,8 @@ export function Sidebar(props: SidebarProps) {
     <>
       <motion.div
         animate={{ width: collapsed ? SIDEBAR_COLLAPSED : SIDEBAR_EXPANDED }}
-        transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-        className="hidden lg:flex lg:flex-col lg:shrink-0 h-full border-r border-gray-100 bg-white overflow-hidden"
+        transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+        className="hidden lg:flex lg:flex-col lg:shrink-0 h-full bg-white overflow-visible"
       >
         <SidebarContent {...props} />
       </motion.div>
@@ -188,7 +189,7 @@ export function Sidebar(props: SidebarProps) {
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               className="fixed inset-y-0 left-0 z-50 w-[280px] lg:hidden shadow-2xl"
             >
-              <SidebarContent {...props} inOverlay onToggleCollapse={() => {}} />
+              <SidebarContent {...props} inOverlay onToggleCollapse={onMobileClose} />
             </motion.div>
           </>
         )}
