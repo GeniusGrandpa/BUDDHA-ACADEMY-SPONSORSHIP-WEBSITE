@@ -65,13 +65,13 @@ function SidebarContent({ collapsed, onToggleCollapse, onSignOut, userName, acti
 
   return (
     <div className="flex flex-col h-full bg-warm-50 border-r border-amber-200">
-      <div className={`flex items-center h-16 border-b border-gray-100 ${collapsed ? 'justify-center px-0' : 'px-4 justify-between'}`}>
+      <div className={`relative flex items-center h-16 border-b border-gray-100 ${collapsed ? 'justify-center px-0' : 'px-4 justify-between'}`}>
         <div className={`flex items-center gap-2.5 ${collapsed ? 'justify-center' : ''}`}>
           <img src={logo} alt="Buddha Academy" className="h-8 w-8 rounded-lg object-cover shrink-0" loading="eager" decoding="async" />
           {!collapsed && <span className="font-semibold text-gray-900 text-sm">Buddha Academy</span>}
         </div>
         {!inOverlay && (
-          <button onClick={onToggleCollapse} className={`p-1.5 rounded-lg hover:bg-orange-100 text-gray-400 hover:text-orange-600 transition-colors ${collapsed ? 'absolute right-2' : ''}`}>
+          <button onClick={onToggleCollapse} className={`p-1.5 rounded-lg hover:bg-orange-100 text-gray-400 hover:text-orange-600 transition-colors ${collapsed ? 'absolute right-2 top-1/2 -translate-y-1/2' : ''}`}>
             {collapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
           </button>
         )}
