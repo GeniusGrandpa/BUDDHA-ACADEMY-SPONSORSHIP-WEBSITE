@@ -64,7 +64,7 @@ function SidebarContent({ collapsed, onToggleCollapse, onSignOut, userName, acti
     <div className="flex flex-col h-full bg-warm-50">
       <div className={`relative flex items-center h-16 border-b border-gray-100 ${collapsed ? 'justify-center' : 'px-4 justify-between'}`}>
         <div className={`flex items-center gap-2.5 min-w-0 ${collapsed ? 'justify-center' : ''}`}>
-          <img src={logo} alt="Buddha Academy" className="h-8 w-8 rounded-lg object-cover shrink-0" loading="eager" decoding="async" />
+          {!collapsed && <img src={logo} alt="Buddha Academy" className="h-8 w-8 rounded-lg object-cover shrink-0" loading="eager" decoding="async" />}
           {!collapsed && <span className="font-semibold text-gray-900 text-sm truncate">Buddha Academy</span>}
         </div>
         {!inOverlay && (
