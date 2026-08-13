@@ -8,7 +8,7 @@ import toast from 'react-hot-toast'
 import { getErrorMessage } from '../../lib/errors'
 import type { Role } from '../../features/auth/types/permissions'
 import type { Profile } from '../../types/database'
-import { Trash2, ShieldCheck, AlertTriangle, Loader2 } from 'lucide-react'
+import { Trash2, ShieldCheck } from 'lucide-react'
 
 type UserStatus = 'active' | 'inactive' | 'suspended' | 'banned' | 'deleted'
 
@@ -215,7 +215,7 @@ export function SuperAdminUsersPage() {
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const [relatedRecords, setRelatedRecords] = useState<{ donations: number; sponsorships: number; notifications: number; audit_logs: number } | null>(null)
-  const [checkingRecords, setCheckingRecords] = useState<string | null>(null)
+  const [checkingRecords] = useState<string | null>(null)
   const { profile: currentUser } = useAuth()
 
   useEffect(() => {
@@ -295,7 +295,11 @@ export function SuperAdminUsersPage() {
 
   const checkRelatedRecords = async (userId: string) => {
     try {
-      const result = await supabase.rpc('get_user_related_record_counts' as never, { target_user_id: userId } as never)
+      const timeout = new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000))
+      const result = await Promise.race([
+        supabase.rpc('get_user_related_record_counts' as never, { target_user_id: userId } as never),
+        timeout
+      ])
       const typed = result as unknown as { data: { donations: number; sponsorships: number; notifications: number; audit_logs: number }; error: unknown }
       if (!typed.error && typed.data) {
         return typed.data
@@ -590,18 +594,15 @@ export function SuperAdminUsersPage() {
                                 <div className="border-t border-gray-100 my-1" />
                                 {user.status !== 'deleted' ? (
                                   <button
-                                    onClick={async () => {
-                                      setCheckingRecords(user.id)
-                                      const records = await checkRelatedRecords(user.id)
-                                      setRelatedRecords(records)
-                                      setCheckingRecords(null)
+                                    onClick={() => {
                                       setConfirmAction({ type: 'delete_user', userId: user.id, userName: user.full_name })
                                       setDropdownOpen(null)
+                                      checkRelatedRecords(user.id).then(setRelatedRecords)
                                     }}
                                     disabled={checkingRecords === user.id}
                                     className="w-full px-4 py-2 text-sm text-left text-red-600 hover:bg-red-50 flex items-center gap-2"
                                   >
-                                    {checkingRecords === user.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+                                    <Trash2 className="w-3 h-3" />
                                     Delete User
                                   </button>
                                 ) : (

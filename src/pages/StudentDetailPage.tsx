@@ -145,7 +145,7 @@ export function StudentDetailPage() {
                   </div>
                   <div className="text-xs sm:text-sm text-gray-500 text-right">
                     {t('student_raised_of', {
-                      current: formatNPR(student.current_sponsorship),
+                      raised: formatNPR(student.current_sponsorship),
                       goal: formatNPR(student.sponsorship_amount),
                     })}
                   </div>
